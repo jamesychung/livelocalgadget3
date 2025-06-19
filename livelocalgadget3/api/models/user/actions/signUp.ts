@@ -6,6 +6,19 @@ export const run: ActionRun = async ({ params, record, logger, api, session }) =
   // Applies new 'email' and 'password' to the user record and saves to database
   applyParams(params, record);
   record.lastSignedIn = new Date();
+  
+  // Assign roles based on primaryRole
+  const baseRoles = ["signed-in"];
+  
+  if (record.primaryRole === "musician") {
+    record.roles = [...baseRoles, "musician"];
+  } else if (record.primaryRole === "venue") {
+    record.roles = [...baseRoles, "venueOwner"];
+  } else {
+    // Default to "user" role
+    record.roles = baseRoles;
+  }
+  
   await save(record);
   
   // Only set session if email is verified (for immediate sign-in)
@@ -24,6 +37,9 @@ export const onSuccess: ActionOnSuccess = async ({ params, record, logger, api, 
     // Sends verification email by calling api/models/users/actions/sendVerifyEmail.ts
     await api.user.sendVerifyEmail({ email: record.email });
   }
+  
+  // Log the role assignment
+  logger.info(`User ${record.email} signed up with primary role: ${record.primaryRole}`);
 };
 
 export const options: ActionOptions = {

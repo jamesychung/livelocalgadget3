@@ -46,6 +46,12 @@ export const schema: GadgetModel = {
       validations: { strongPassword: true },
       storageKey: "CAFK1LkLo96L",
     },
+    primaryRole: {
+      type: "enum",
+      options: ["user", "musician", "venue"],
+      default: "user",
+      storageKey: "primary_role",
+    },
     profilePicture: {
       type: "file",
       allowPublicAccess: true,

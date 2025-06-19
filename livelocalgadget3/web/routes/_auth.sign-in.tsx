@@ -2,7 +2,6 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useActionForm, useSignOut, useUser } from "@gadgetinc/react";
 import { Link, useLocation, useNavigate, useOutletContext } from "react-router";
@@ -131,17 +130,6 @@ export default function () {
           <form onSubmit={submit}>
             <div className="space-y-6">
               <h1 className="text-3xl font-bold tracking-tight">Welcome back</h1>
-              <Button variant="outline" size="lg" className="w-full" asChild>
-                <a href={`/auth/google/start${search}`}>
-                  <img
-                    className="mr-2 h-4 w-4"
-                    src="https://assets.gadget.dev/assets/default-app-assets/google.svg"
-                    alt="Google logo"
-                  />
-                  Continue with Google
-                </a>
-              </Button>
-              <Separator />
               <div className="space-y-4">
                 <div className="space-y-2">
                   <div className="space-y-1">

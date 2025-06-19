@@ -3,6 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useActionForm } from "@gadgetinc/react";
 import { useState } from "react";
 import { useOutletContext, useRevalidator } from "react-router";
@@ -15,6 +17,7 @@ export default function () {
   const revalidator = useRevalidator();
   const [isEditing, setIsEditing] = useState(false);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
+  const [isManagingRoles, setIsManagingRoles] = useState(false);
 
   const hasName = user.firstName || user.lastName;
   const title = hasName ? `${user.firstName} ${user.lastName}` : user.email;
@@ -29,6 +32,13 @@ export default function () {
             <div>
               <h2 className="text-lg font-semibold">{title}</h2>
               {hasName && <p className="text-gray-600">{user.email}</p>}
+              <div className="flex gap-2 mt-2">
+                {user.roles?.map((role) => (
+                  <Badge key={role} variant="secondary">
+                    {role}
+                  </Badge>
+                ))}
+              </div>
             </div>
           </div>
           <div className="flex gap-2">
@@ -37,6 +47,9 @@ export default function () {
                 Change password
               </Button>
             )}
+            <Button variant="ghost" onClick={() => setIsManagingRoles(true)}>
+              Manage Roles
+            </Button>
             <Button variant="ghost" onClick={() => setIsEditing(true)}>
               Edit
             </Button>
@@ -54,6 +67,13 @@ export default function () {
         open={isChangingPassword}
         onClose={() => {
           setIsChangingPassword(false);
+          revalidator.revalidate();
+        }}
+      />
+      <ManageRolesModal
+        open={isManagingRoles}
+        onClose={() => {
+          setIsManagingRoles(false);
           revalidator.revalidate();
         }}
       />
@@ -146,6 +166,57 @@ const ChangePasswordModal = (props: { open: boolean; onClose: () => void }) => {
           </div>
           <div className="flex justify-end gap-2 pt-4">
             <Button variant="outline" onClick={onClose} type="button">
+              Cancel
+            </Button>
+            <Button type="submit" disabled={isSubmitting}>
+              Save
+            </Button>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+const ManageRolesModal = (props: { open: boolean; onClose: () => void }) => {
+  const { user } = useOutletContext<AuthOutletContext>();
+
+  const {
+    register,
+    submit,
+    formState: { isSubmitting },
+  } = useActionForm(api.user.update, {
+    defaultValues: user,
+    onSuccess: props.onClose,
+    send: ["roles"],
+  });
+
+  return (
+    <Dialog open={props.open} onOpenChange={props.onClose}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Manage Roles</DialogTitle>
+        </DialogHeader>
+        <form onSubmit={submit}>
+          <div className="space-y-4">
+            <div>
+              <Label>Roles</Label>
+              <Select
+                value={user.roles || []}
+                onValueChange={(value) => register("roles")(value)}
+                multiple
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select roles" />
+                </SelectTrigger>
+                <SelectContent>
+                  {/* Add role options here */}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <div className="flex justify-end gap-2 pt-4">
+            <Button variant="outline" onClick={props.onClose} type="button">
               Cancel
             </Button>
             <Button type="submit" disabled={isSubmitting}>

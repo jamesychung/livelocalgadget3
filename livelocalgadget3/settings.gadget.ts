@@ -13,13 +13,6 @@ export const settings: GadgetSettings = {
       },
       methods: {
         emailPassword: true,
-        googleOAuth: {
-          scopes: ["email", "profile"],
-          offlineAccess: false,
-          // These will be set via environment variables
-          // clientId: process.env.GOOGLE_CLIENT_ID,
-          // clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-        },
       },
     },
   },

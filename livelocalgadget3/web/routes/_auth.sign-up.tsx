@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useActionForm } from "@gadgetinc/react";
 import { Link, useLocation, useNavigate, useOutletContext } from "react-router";
 import { useState, useEffect } from "react";
@@ -12,6 +12,7 @@ import type { RootOutletContext } from "../root";
 export default function () {
   const { gadgetConfig } = useOutletContext<RootOutletContext>();
   const [isClient, setIsClient] = useState(false);
+  const [selectedRole, setSelectedRole] = useState("user");
 
   const { search } = useLocation();
   const navigate = useNavigate();
@@ -54,6 +55,9 @@ export default function () {
                 <div className="h-4 bg-gray-200 rounded mb-6"></div>
                 <div className="h-10 bg-gray-200 rounded mb-4"></div>
                 <div className="h-10 bg-gray-200 rounded mb-4"></div>
+                <div className="h-10 bg-gray-200 rounded mb-4"></div>
+                <div className="h-10 bg-gray-200 rounded mb-4"></div>
+                <div className="h-10 bg-gray-200 rounded mb-4"></div>
                 <div className="h-10 bg-gray-200 rounded"></div>
               </div>
             </div>
@@ -63,6 +67,12 @@ export default function () {
     );
   }
 
+  const roles = [
+    { value: "user", label: "User (Fan/Consumer)", description: "Browse events, follow artists and venues" },
+    { value: "musician", label: "Musician", description: "Get booked, manage profile, promote yourself" },
+    { value: "venue", label: "Venue Owner", description: "Find musicians, manage events, promote venue" }
+  ];
+
   return (
     <div className="w-[420px]">
       <div className="space-y-8">
@@ -70,18 +80,44 @@ export default function () {
           <form onSubmit={submit}>
             <div className="space-y-6">
               <h1 className="text-3xl font-bold tracking-tight">Create your account</h1>
-              <Button variant="outline" size="lg" className="w-full" asChild>
-                <a href={`/auth/google/start${search}`}>
-                  <img
-                    className="mr-2 h-4 w-4"
-                    src="https://assets.gadget.dev/assets/default-app-assets/google.svg"
-                    alt="Google logo"
-                  />
-                  Sign up with Google
-                </a>
-              </Button>
-              <Separator />
               <div className="space-y-4">
+                {/* First Name */}
+                <div className="space-y-2">
+                  <div className="space-y-1">
+                    <Label htmlFor="firstName">First Name</Label>
+                    <Input
+                      id="firstName"
+                      type="text"
+                      placeholder="Enter your first name"
+                      autoComplete="given-name"
+                      {...register("firstName")}
+                      className={errors?.user?.firstName?.message ? "border-destructive" : ""}
+                    />
+                    {errors?.user?.firstName?.message && (
+                      <p className="text-sm text-destructive">{errors.user.firstName.message}</p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Last Name */}
+                <div className="space-y-2">
+                  <div className="space-y-1">
+                    <Label htmlFor="lastName">Last Name</Label>
+                    <Input
+                      id="lastName"
+                      type="text"
+                      placeholder="Enter your last name"
+                      autoComplete="family-name"
+                      {...register("lastName")}
+                      className={errors?.user?.lastName?.message ? "border-destructive" : ""}
+                    />
+                    {errors?.user?.lastName?.message && (
+                      <p className="text-sm text-destructive">{errors.user.lastName.message}</p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Email */}
                 <div className="space-y-2">
                   <div className="space-y-1">
                     <Label htmlFor="email">Email</Label>
@@ -98,6 +134,8 @@ export default function () {
                     )}
                   </div>
                 </div>
+
+                {/* Password */}
                 <div className="space-y-2">
                   <div className="space-y-1">
                     <Label htmlFor="password">Password</Label>
@@ -114,6 +152,42 @@ export default function () {
                     )}
                   </div>
                 </div>
+
+                {/* Role Selection */}
+                <div className="space-y-2">
+                  <div className="space-y-1">
+                    <Label htmlFor="role">I am a...</Label>
+                    <Select 
+                      value={selectedRole} 
+                      onValueChange={(value) => {
+                        setSelectedRole(value);
+                        // Update the form value for primaryRole
+                        const event = {
+                          target: { name: "primaryRole", value }
+                        } as React.ChangeEvent<HTMLInputElement>;
+                        register("primaryRole").onChange(event);
+                      }}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select your role" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {roles.map((role) => (
+                          <SelectItem key={role.value} value={role.value}>
+                            <div className="flex flex-col">
+                              <span className="font-medium">{role.label}</span>
+                              <span className="text-xs text-muted-foreground">{role.description}</span>
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {errors?.user?.primaryRole?.message && (
+                      <p className="text-sm text-destructive">{errors.user.primaryRole.message}</p>
+                    )}
+                  </div>
+                </div>
+
                 {isSubmitSuccessful && (
                   <div className="p-4 bg-green-50 border border-green-200 rounded-md">
                     <p className="text-sm text-green-700">
@@ -121,9 +195,11 @@ export default function () {
                     </p>
                   </div>
                 )}
+                
                 <Button className="w-full" size="lg" disabled={isSubmitting} type="submit">
-                  {isSubmitting ? "Creating account..." : "Sign up with email"}
+                  {isSubmitting ? "Creating account..." : "Create account"}
                 </Button>
+                
                 {errors?.root?.message && (
                   <div className="p-4 bg-red-50 border border-red-200 rounded-md">
                     <p className="text-sm text-destructive">{errors.root.message}</p>

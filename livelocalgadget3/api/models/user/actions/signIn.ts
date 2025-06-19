@@ -5,6 +5,12 @@ import { applyParams, save, ActionOptions } from "gadget-server";
 export const run: ActionRun = async ({ params, record, logger, api, session }) => {
   applyParams(params, record);
   record.lastSignedIn = new Date();
+  
+  // Ensure user has the "signed-in" role
+  if (!record.roles?.includes("signed-in")) {
+    record.roles = [...(record.roles || []), "signed-in"];
+  }
+  
   await save(record);
   // Assigns the signed-in user to the active session
   session?.set("user", { _link: record.id });
