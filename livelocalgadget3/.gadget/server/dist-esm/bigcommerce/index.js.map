@@ -1,0 +1,1 @@
+{"version":3,"sources":["/var/gadget/codegen/framework-1750313340857-XpaeKO/src/bigcommerce/index.ts"],"sourcesContent":["export * from \"./effects.js\";\n"],"names":[],"mappings":"AAAA,cAAc,eAAe"}

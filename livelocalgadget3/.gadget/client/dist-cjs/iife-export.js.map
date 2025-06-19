@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../src/iife-export.ts"],
+  "sourcesContent": ["import { Livelocalgadget3Client } from \".\";\n\ndeclare global {\n  interface Window {\n    /**\n     * The Gadget client constructor\n     *\n     * @example\n     * ```ts\n     * const api = new Livelocalgadget3Client();\n     * ```\n     */\n    Livelocalgadget3Client: typeof Livelocalgadget3Client;\n\n    /**\n     * The Gadget client for Livelocalgadget3Client\n     * @deprecated Use window.Livelocalgadget3Client instead\n     */\n    Gadget: typeof Livelocalgadget3Client;\n  }\n}\n\n// add the client to the window\nwindow.Livelocalgadget3Client = Livelocalgadget3Client;\n\nconst previousValue: any = window.Gadget;\n\n// add the client to the window at the old .Gadget property for backwards compatibility -- the Livelocalgadget3Client property should be preferred instead\nwindow.Gadget = Livelocalgadget3Client;\n(window.Gadget as any).previousValue = previousValue;\n"],
+  "mappings": ";AAAA,eAAuC;AAuBvC,OAAO,yBAAyB;AAEhC,MAAM,gBAAqB,OAAO;AAGlC,OAAO,SAAS;AACf,OAAO,OAAe,gBAAgB;",
+  "names": []
+}

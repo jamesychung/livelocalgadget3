@@ -1,0 +1,1 @@
+{"version":3,"sources":["/var/gadget/codegen/framework-1750313340857-XpaeKO/src/remix/constants.ts"],"sourcesContent":["export const BuildDirectory = \".gadget/remix-dist/build\";\nexport const AppDirectory = \"web\";\n"],"names":["BuildDirectory","AppDirectory"],"mappings":"AAAA,OAAO,MAAMA,iBAAiB,2BAA2B;AACzD,OAAO,MAAMC,eAAe,MAAM"}
