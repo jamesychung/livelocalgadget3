@@ -25,6 +25,7 @@ import {
   UserFilter,
   Scalars,
   UpdateUserInput,
+  UpdateRoleUserInput,
   UpsertUserInput
 } from "../types.js";
 
@@ -84,6 +85,7 @@ export const DefaultUserSelection = {
      googleProfileId: true,
      lastName: true,
      lastSignedIn: true,
+     primaryRole: true,
      profilePicture: { url: true, mimeType: true, fileName: true },
      resetPasswordToken: true,
      resetPasswordTokenExpiration: true,
@@ -188,6 +190,10 @@ export interface ChangePasswordUserOptions {
   /** Select fields other than the defaults of the record to return */
   select?: AvailableUserSelection;
 };
+export interface UpdateRoleUserOptions {
+  /** Select fields other than the defaults of the record to return */
+  select?: AvailableUserSelection;
+};
 export interface UpsertUserOptions {
   /** Select fields other than the defaults of the record to return */
   select?: AvailableUserSelection;
@@ -251,11 +257,9 @@ export type FullyQualifiedUpdateUserVariables = {
 export type UpdateUserVariables = UpdateUserInput;
 /**
  * The return value from executing update on user
- * Is a GadgetRecord of the model's type.
+ *
  **/
-export type UpdateUserResult<Options extends UpdateUserOptions> = SelectedUserOrDefault<Options> extends void ?
-      void :
-      GadgetRecord<SelectedUserOrDefault<Options>>;
+export type UpdateUserResult<Options extends UpdateUserOptions> = any;
 /**
  * The return value from executing delete on user
  * Is void because this action deletes the record
@@ -350,6 +354,23 @@ export type ChangePasswordUserVariables = FullyQualifiedChangePasswordUserVariab
 export type ChangePasswordUserResult<Options extends ChangePasswordUserOptions> = SelectedUserOrDefault<Options> extends void ?
       void :
       GadgetRecord<SelectedUserOrDefault<Options>>;
+/**
+ * The fully-qualified, expanded form of the inputs for executing the updateRole action.
+ * The flattened style should be preferred over this style, but for models with ambiguous API identifiers, this style can be used to remove any ambiguity.
+ **/
+export type FullyQualifiedUpdateRoleUserVariables = {
+  user?: UpdateRoleUserInput;
+}
+/**
+ * The inputs for executing updateRole on user.
+ * This is the flattened style of inputs, suitable for general use, and should be preferred.
+ **/
+export type UpdateRoleUserVariables = UpdateRoleUserInput;
+/**
+ * The return value from executing updateRole on user
+ *
+ **/
+export type UpdateRoleUserResult<Options extends UpdateRoleUserOptions> = any;
 /**
  * The fully-qualified, expanded form of the inputs for executing the upsert action.
  * The flattened style should be preferred over this style, but for models with ambiguous API identifiers, this style can be used to remove any ambiguity.
@@ -766,14 +787,12 @@ export type UserManager = {
       * This is the flat style, all-params-together overload that most use cases should use.
       *
       * @example
-      * * const userRecord = await api.user.update("1", {
+      * * const result = await api.user.update("1", {
         *   email: "example@email.com",
         *   emailVerified: true,
         *   firstName: "example value for firstName",
-        *   lastName: "example value for lastName",
-        *   profilePicture: {
-        *     copyURL: "https://assets.gadget.dev/assets/icon.svg",
-        *   },
+        *   lastSignedIn: "2025-06-01T00:00:00.000+00:00",
+        *   password: "nohacking123%",
         * });
       **/
       <Options extends UpdateUserOptions>(
@@ -787,15 +806,13 @@ export type UserManager = {
       * This is the fully qualified, nested api identifier style overload that should be used when there's an ambiguity between an action param and a model field.
       *
       * @example
-      * * const userRecord = await api.user.update("1", {
+      * * const result = await api.user.update("1", {
         *   user: {
         *     email: "example@email.com",
         *     emailVerified: true,
         *     firstName: "example value for firstName",
-        *     lastName: "example value for lastName",
-        *     profilePicture: {
-        *       copyURL: "https://assets.gadget.dev/assets/icon.svg",
-        *     },
+        *     lastSignedIn: "2025-06-01T00:00:00.000+00:00",
+        *     password: "nohacking123%",
         *   },
         * });
       **/
@@ -823,7 +840,7 @@ export type UserManager = {
             );
       hasAmbiguousIdentifier: false;
       paramOnlyVariables: [];
-      hasReturnType: false;
+      hasReturnType: true;
       acceptsModelInput: true;
       hasCreateOrUpdateEffect: true;
       imports: [ 'UpdateUserInput' ];
@@ -839,12 +856,12 @@ export type UserManager = {
        <Options extends UpdateUserOptions>(
           inputs: (FullyQualifiedUpdateUserVariables | UpdateUserVariables & { id: string })[],
           options?: LimitToKnownKeys<Options, UpdateUserOptions>
-       ): Promise<UpdateUserResult<Options>[]>
+       ): Promise<any[]>
       type: 'action';
       operationName: 'bulkUpdateUsers';
       isBulk: true;
       isDeleter: false;
-      hasReturnType: false;
+      hasReturnType: true;
       acceptsModelInput: true;
       operatesWithRecordIdentity: true;
       singleActionFunctionName: 'update';
@@ -1355,6 +1372,102 @@ export type UserManager = {
       schemaType: Query["user"];
       defaultSelection: typeof DefaultUserSelection;
     }
+  updateRole: {
+      /**
+       * Executes the updateRole actionon one record specified by `id`.Runs the action and returns a Promise for the updated record.
+      *
+      * This is the flat style, all-params-together overload that most use cases should use.
+      *
+      * @example
+      * * const result = await api.user.updateRole("1", {
+        *   email: "example@email.com",
+        *   emailVerified: true,
+        *   firstName: "example value for firstName",
+        *   lastSignedIn: "2025-06-01T00:00:00.000+00:00",
+        *   password: "nohacking123%",
+        * });
+      **/
+      <Options extends UpdateRoleUserOptions>(
+        id: string,
+        variables: UpdateRoleUserVariables,
+        options?: LimitToKnownKeys<Options, UpdateRoleUserOptions>
+      ): Promise<UpdateRoleUserResult<Options>>;
+      /**
+       * Executes the updateRole actionon one record specified by `id`.Runs the action and returns a Promise for the updated record.
+      *
+      * This is the fully qualified, nested api identifier style overload that should be used when there's an ambiguity between an action param and a model field.
+      *
+      * @example
+      * * const result = await api.user.updateRole("1", {
+        *   user: {
+        *     email: "example@email.com",
+        *     emailVerified: true,
+        *     firstName: "example value for firstName",
+        *     lastSignedIn: "2025-06-01T00:00:00.000+00:00",
+        *     password: "nohacking123%",
+        *   },
+        * });
+      **/
+      <Options extends UpdateRoleUserOptions>(
+        id: string,
+        variables: FullyQualifiedUpdateRoleUserVariables,
+        options?: LimitToKnownKeys<Options, UpdateRoleUserOptions>
+      ): Promise<UpdateRoleUserResult<Options>>;
+      type: 'action';
+      operationName: 'updateRoleUser';
+      operationReturnType: 'UpdateRoleUser';
+      namespace: null;
+      modelApiIdentifier: typeof modelApiIdentifier;
+      operatesWithRecordIdentity: true;
+      modelSelectionField: typeof modelApiIdentifier;
+      isBulk: false;
+      isDeleter: false;
+      variables: {
+          id: { required: true, type: 'GadgetID' },
+          user: { required: false, type: 'UpdateRoleUserInput' }
+        };
+      variablesType: (
+              { id: string }
+              & (FullyQualifiedUpdateRoleUserVariables | UpdateRoleUserVariables)
+            );
+      hasAmbiguousIdentifier: false;
+      paramOnlyVariables: [];
+      hasReturnType: true;
+      acceptsModelInput: true;
+      hasCreateOrUpdateEffect: true;
+      imports: [ 'UpdateRoleUserInput' ];
+      optionsType: UpdateRoleUserOptions;
+      selectionType: AvailableUserSelection;
+      schemaType: Query["user"];
+      defaultSelection: typeof DefaultUserSelection;
+    }
+  bulkUpdateRole: {
+      /**
+        * Executes the bulkUpdateRole action with the given inputs.
+        */
+       <Options extends UpdateRoleUserOptions>(
+          inputs: (FullyQualifiedUpdateRoleUserVariables | UpdateRoleUserVariables & { id: string })[],
+          options?: LimitToKnownKeys<Options, UpdateRoleUserOptions>
+       ): Promise<any[]>
+      type: 'action';
+      operationName: 'bulkUpdateRoleUsers';
+      isBulk: true;
+      isDeleter: false;
+      hasReturnType: true;
+      acceptsModelInput: true;
+      operatesWithRecordIdentity: true;
+      singleActionFunctionName: 'updateRole';
+      modelApiIdentifier: typeof modelApiIdentifier;
+      modelSelectionField: typeof pluralModelApiIdentifier;
+      optionsType: UpdateRoleUserOptions;
+      namespace: null;
+      variables: { inputs: { required: true, type: '[BulkUpdateRoleUsersInput!]' } };
+      variablesType: (FullyQualifiedUpdateRoleUserVariables | UpdateRoleUserVariables & { id: string })[];
+      paramOnlyVariables: [];
+      selectionType: AvailableUserSelection;
+      schemaType: Query["user"];
+      defaultSelection: typeof DefaultUserSelection;
+    }
   upsert: {
       /**
        * Executes the upsert action.Accepts the parameters for the action via the `variables` argument.Runs the action and returns a Promise for the updated record.
@@ -1365,9 +1478,8 @@ export type UserManager = {
       * * const result = await api.user.upsert({
         *   email: "example@email.com",
         *   emailVerified: true,
-        *   firstName: "example value for firstName",
         *   id: "1",
-        *   lastName: "example value for lastName",
+        *   lastSignedIn: "2025-06-01T00:00:00.000+00:00",
         *   on: ["email"],
         *   password: "nohacking123%",
         * });
@@ -1390,9 +1502,9 @@ export type UserManager = {
         *   user: {
         *     email: "example@email.com",
         *     emailVerified: true,
-        *     firstName: "example value for firstName",
         *     id: "1",
-        *     lastName: "example value for lastName",
+        *     lastSignedIn: "2025-06-01T00:00:00.000+00:00",
+        *     password: "nohacking123%",
         *   },
         * });
       **/
@@ -1424,7 +1536,7 @@ export type UserManager = {
       paramOnlyVariables: [ 'on' ];
       hasReturnType: {
           '... on SignUpUserResult': { hasReturnType: true },
-          '... on UpdateUserResult': { hasReturnType: false }
+          '... on UpdateUserResult': { hasReturnType: true }
         };
       acceptsModelInput: true;
       hasCreateOrUpdateEffect: true;
@@ -1446,14 +1558,7 @@ export type UserManager = {
       operationName: 'bulkUpsertUsers';
       isBulk: true;
       isDeleter: false;
-      hasReturnType: {
-          users: {
-            hasReturnType: {
-              '... on User': { select: true },
-              '... on UpsertUserReturnType': { hasReturnType: true }
-            }
-          }
-        };
+      hasReturnType: true;
       acceptsModelInput: true;
       operatesWithRecordIdentity: false;
       singleActionFunctionName: 'upsert';
@@ -1700,7 +1805,7 @@ export const UserManager = buildModelManager(
       },
       hasAmbiguousIdentifier: false,
       paramOnlyVariables: [],
-      hasReturnType: false,
+      hasReturnType: true,
       acceptsModelInput: true,
       hasCreateOrUpdateEffect: true,
       defaultSelection: DefaultUserSelection
@@ -1711,7 +1816,7 @@ export const UserManager = buildModelManager(
       functionName: 'bulkUpdate',
       isBulk: true,
       isDeleter: false,
-      hasReturnType: false,
+      hasReturnType: true,
       acceptsModelInput: true,
       operatesWithRecordIdentity: true,
       singleActionFunctionName: 'update',
@@ -1957,6 +2062,45 @@ export const UserManager = buildModelManager(
     },
     {
       type: 'action',
+      operationName: 'updateRoleUser',
+      operationReturnType: 'UpdateRoleUser',
+      functionName: 'updateRole',
+      namespace: null,
+      modelApiIdentifier: modelApiIdentifier,
+      operatesWithRecordIdentity: true,
+      modelSelectionField: modelApiIdentifier,
+      isBulk: false,
+      isDeleter: false,
+      variables: {
+        id: { required: true, type: 'GadgetID' },
+        user: { required: false, type: 'UpdateRoleUserInput' }
+      },
+      hasAmbiguousIdentifier: false,
+      paramOnlyVariables: [],
+      hasReturnType: true,
+      acceptsModelInput: true,
+      hasCreateOrUpdateEffect: true,
+      defaultSelection: DefaultUserSelection
+    },
+    {
+      type: 'action',
+      operationName: 'bulkUpdateRoleUsers',
+      functionName: 'bulkUpdateRole',
+      isBulk: true,
+      isDeleter: false,
+      hasReturnType: true,
+      acceptsModelInput: true,
+      operatesWithRecordIdentity: true,
+      singleActionFunctionName: 'updateRole',
+      modelApiIdentifier: modelApiIdentifier,
+      modelSelectionField: pluralModelApiIdentifier,
+      namespace: null,
+      variables: { inputs: { required: true, type: '[BulkUpdateRoleUsersInput!]' } },
+      paramOnlyVariables: [],
+      defaultSelection: DefaultUserSelection
+    },
+    {
+      type: 'action',
       operationName: 'upsertUser',
       operationReturnType: 'UpsertUser',
       functionName: 'upsert',
@@ -1976,7 +2120,7 @@ export const UserManager = buildModelManager(
       paramOnlyVariables: [ 'on' ],
       hasReturnType: {
         '... on SignUpUserResult': { hasReturnType: true },
-        '... on UpdateUserResult': { hasReturnType: false }
+        '... on UpdateUserResult': { hasReturnType: true }
       },
       acceptsModelInput: true,
       hasCreateOrUpdateEffect: true,
@@ -1988,14 +2132,7 @@ export const UserManager = buildModelManager(
       functionName: 'bulkUpsert',
       isBulk: true,
       isDeleter: false,
-      hasReturnType: {
-        users: {
-          hasReturnType: {
-            '... on User': { select: true },
-            '... on UpsertUserReturnType': { hasReturnType: true }
-          }
-        }
-      },
+      hasReturnType: true,
       acceptsModelInput: true,
       operatesWithRecordIdentity: false,
       singleActionFunctionName: 'upsert',

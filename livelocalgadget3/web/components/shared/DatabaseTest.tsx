@@ -169,30 +169,28 @@ export default function DatabaseTest() {
 
           {results && (
             <div className="space-y-4">
-              <h3 className="font-semibold text-lg">Test Results:</h3>
+              <h3 className="font-semibold">Test Results:</h3>
               
-              {Object.entries(results).map(([model, result]: [string, any]) => (
-                <div key={model} className="border rounded p-3">
-                  <h4 className="font-medium capitalize">{model.replace(/([A-Z])/g, ' $1').trim()}</h4>
-                  {result.success ? (
-                    <div className="text-green-600">
-                      ✅ Success - {result.count} records found
-                      {result.data && result.data.length > 0 && (
-                        <details className="mt-2">
-                          <summary className="cursor-pointer text-sm">View sample data</summary>
-                          <pre className="text-xs mt-2 bg-gray-100 p-2 rounded overflow-auto">
-                            {JSON.stringify(result.data[0], null, 2)}
-                          </pre>
-                        </details>
-                      )}
-                    </div>
-                  ) : (
-                    <div className="text-red-600">
-                      ❌ Error: {result.error}
-                    </div>
-                  )}
-                </div>
-              ))}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {Object.entries(results).map(([key, result]: [string, any]) => (
+                  <div key={key} className="p-3 border rounded">
+                    <h4 className="font-medium capitalize">{key}</h4>
+                    {result.success ? (
+                      <div className="text-green-600">
+                        ✅ Success - {result.count || 'Connected'} items
+                      </div>
+                    ) : result.error ? (
+                      <div className="text-red-600">
+                        ❌ Error: {result.error}
+                      </div>
+                    ) : (
+                      <div className="text-blue-600">
+                        ℹ️ {result}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
           )}
         </CardContent>

@@ -6,12 +6,43 @@ import type { ClientOptions as ApiClientOptions, AnyClient, EnqueueBackgroundAct
 import type { DocumentNode } from 'graphql';
 
 import { buildInlineComputedView } from "./builder.js";
-
+import { DefaultSessionSelection, SessionManager } from "./models/Session.js";
+import { CurrentSessionManager } from "./models/CurrentSession.js";
+import { DefaultBookingSelection, BookingManager } from "./models/Booking.js";
+import { DefaultEventSelection, EventManager } from "./models/Event.js";
+import { DefaultMusicianSelection, MusicianManager } from "./models/Musician.js";
+import { DefaultReviewSelection, ReviewManager } from "./models/Review.js";
+import { DefaultVenueSelection, VenueManager } from "./models/Venue.js";
+import { DefaultUserSelection, UserManager } from "./models/User.js";
+import { SeedNamespace } from "./namespaces/seed.js";
+export { DefaultSessionSelection, type SessionRecord } from "./models/Session.js";
+export { DefaultBookingSelection, type BookingRecord } from "./models/Booking.js";
+export { DefaultEventSelection, type EventRecord } from "./models/Event.js";
+export { DefaultMusicianSelection, type MusicianRecord } from "./models/Musician.js";
+export { DefaultReviewSelection, type ReviewRecord } from "./models/Review.js";
+export { DefaultVenueSelection, type VenueRecord } from "./models/Venue.js";
+export { DefaultUserSelection, type UserRecord } from "./models/User.js";
 
 type ClientOptions = Omit<ApiClientOptions, "environment"> & { environment?: string };
 type AllOptionalVariables<T> = Partial<T> extends T ? object : never;
 export type InternalModelManagers = {
-
+   /** The internal API model manager for the session model */
+   session: InternalModelManager;
+   /** The internal API model manager for the booking model */
+   booking: InternalModelManager;
+   /** The internal API model manager for the event model */
+   event: InternalModelManager;
+   /** The internal API model manager for the musician model */
+   musician: InternalModelManager;
+   /** The internal API model manager for the review model */
+   review: InternalModelManager;
+   /** The internal API model manager for the venue model */
+   venue: InternalModelManager;
+   /** The internal API model manager for the user model */
+   user: InternalModelManager;
+   seed: {
+   
+   };
  };
 
 const productionEnv = "production";
@@ -55,6 +86,15 @@ export class Livelocalgadget3Client implements AnyClient {
                                args: { type: 'JSONObject' }
                              }
                            } as const);
+  session!: SessionManager;
+  currentSession!: CurrentSessionManager;
+  booking!: BookingManager;
+  event!: EventManager;
+  musician!: MusicianManager;
+  review!: ReviewManager;
+  venue!: VenueManager;
+  user!: UserManager;
+  seed!: SeedNamespace;
 
   /**
   * Namespaced object for accessing models via the Gadget internal APIs, which provide lower level and higher privileged operations directly against the database. Useful for maintenance operations like migrations or correcting broken data, and for implementing the high level actions.
@@ -157,10 +197,27 @@ export class Livelocalgadget3Client implements AnyClient {
 
 
 
-
+    this.session = new SessionManager(this.connection);
+    this.currentSession = new CurrentSessionManager(this.connection);
+    this.booking = new BookingManager(this.connection);
+    this.event = new EventManager(this.connection);
+    this.musician = new MusicianManager(this.connection);
+    this.review = new ReviewManager(this.connection);
+    this.venue = new VenueManager(this.connection);
+    this.user = new UserManager(this.connection);
+    this.seed = new SeedNamespace(this);
 
     this.internal = {
-                    
+                      session: new InternalModelManager("session", this.connection, {"pluralApiIdentifier":"sessions","hasAmbiguousIdentifiers":false,"namespace":[]}),
+                      booking: new InternalModelManager("booking", this.connection, {"pluralApiIdentifier":"bookings","hasAmbiguousIdentifiers":false,"namespace":[]}),
+                      event: new InternalModelManager("event", this.connection, {"pluralApiIdentifier":"events","hasAmbiguousIdentifiers":false,"namespace":[]}),
+                      musician: new InternalModelManager("musician", this.connection, {"pluralApiIdentifier":"musicians","hasAmbiguousIdentifiers":false,"namespace":[]}),
+                      review: new InternalModelManager("review", this.connection, {"pluralApiIdentifier":"reviews","hasAmbiguousIdentifiers":false,"namespace":[]}),
+                      venue: new InternalModelManager("venue", this.connection, {"pluralApiIdentifier":"venues","hasAmbiguousIdentifiers":false,"namespace":[]}),
+                      user: new InternalModelManager("user", this.connection, {"pluralApiIdentifier":"users","hasAmbiguousIdentifiers":false,"namespace":[]}),
+                      seed: {
+                      
+                      },
                     };
   }
 
@@ -419,7 +476,7 @@ export class Livelocalgadget3Client implements AnyClient {
   }
 }
 
-(Livelocalgadget3Client.prototype as any)[Symbol.for("gadget/modelRelationships")] = {};
+(Livelocalgadget3Client.prototype as any)[Symbol.for("gadget/modelRelationships")] = {"session":{"user":{"type":"BelongsTo","model":"user"}},"booking":{"bookedBy":{"type":"BelongsTo","model":"user"},"musician":{"type":"BelongsTo","model":"musician"},"venue":{"type":"BelongsTo","model":"venue"}},"event":{"createdBy":{"type":"BelongsTo","model":"user"},"musician":{"type":"BelongsTo","model":"musician"},"venue":{"type":"BelongsTo","model":"venue"}},"musician":{"reviews":{"type":"HasMany","model":"review"},"bookings":{"type":"HasMany","model":"booking"},"events":{"type":"HasMany","model":"event"},"user":{"type":"BelongsTo","model":"user"}},"review":{"event":{"type":"BelongsTo","model":"venue"},"musician":{"type":"BelongsTo","model":"musician"},"reviewer":{"type":"BelongsTo","model":"user"},"venue":{"type":"BelongsTo","model":"venue"}},"venue":{"events":{"type":"HasMany","model":"event"},"bookings":{"type":"HasMany","model":"booking"},"owner":{"type":"BelongsTo","model":"user"},"reviews":{"type":"HasMany","model":"review"}},"user":{}};
 
 /** Legacy export under the `Client` name for backwards compatibility. */
 export const Client: typeof Livelocalgadget3Client = Livelocalgadget3Client;

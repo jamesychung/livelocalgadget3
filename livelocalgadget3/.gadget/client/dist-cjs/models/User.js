@@ -36,6 +36,7 @@ const DefaultUserSelection = {
   googleProfileId: true,
   lastName: true,
   lastSignedIn: true,
+  primaryRole: true,
   profilePicture: { url: true, mimeType: true, fileName: true },
   resetPasswordToken: true,
   resetPasswordTokenExpiration: true,
@@ -44,6 +45,7 @@ const DefaultUserSelection = {
 };
 const modelApiIdentifier = "user";
 const pluralModelApiIdentifier = "users";
+;
 ;
 ;
 ;
@@ -273,7 +275,7 @@ const UserManager = (0, import_builder.buildModelManager)(
       },
       hasAmbiguousIdentifier: false,
       paramOnlyVariables: [],
-      hasReturnType: false,
+      hasReturnType: true,
       acceptsModelInput: true,
       hasCreateOrUpdateEffect: true,
       defaultSelection: DefaultUserSelection
@@ -284,7 +286,7 @@ const UserManager = (0, import_builder.buildModelManager)(
       functionName: "bulkUpdate",
       isBulk: true,
       isDeleter: false,
-      hasReturnType: false,
+      hasReturnType: true,
       acceptsModelInput: true,
       operatesWithRecordIdentity: true,
       singleActionFunctionName: "update",
@@ -530,6 +532,45 @@ const UserManager = (0, import_builder.buildModelManager)(
     },
     {
       type: "action",
+      operationName: "updateRoleUser",
+      operationReturnType: "UpdateRoleUser",
+      functionName: "updateRole",
+      namespace: null,
+      modelApiIdentifier,
+      operatesWithRecordIdentity: true,
+      modelSelectionField: modelApiIdentifier,
+      isBulk: false,
+      isDeleter: false,
+      variables: {
+        id: { required: true, type: "GadgetID" },
+        user: { required: false, type: "UpdateRoleUserInput" }
+      },
+      hasAmbiguousIdentifier: false,
+      paramOnlyVariables: [],
+      hasReturnType: true,
+      acceptsModelInput: true,
+      hasCreateOrUpdateEffect: true,
+      defaultSelection: DefaultUserSelection
+    },
+    {
+      type: "action",
+      operationName: "bulkUpdateRoleUsers",
+      functionName: "bulkUpdateRole",
+      isBulk: true,
+      isDeleter: false,
+      hasReturnType: true,
+      acceptsModelInput: true,
+      operatesWithRecordIdentity: true,
+      singleActionFunctionName: "updateRole",
+      modelApiIdentifier,
+      modelSelectionField: pluralModelApiIdentifier,
+      namespace: null,
+      variables: { inputs: { required: true, type: "[BulkUpdateRoleUsersInput!]" } },
+      paramOnlyVariables: [],
+      defaultSelection: DefaultUserSelection
+    },
+    {
+      type: "action",
       operationName: "upsertUser",
       operationReturnType: "UpsertUser",
       functionName: "upsert",
@@ -549,7 +590,7 @@ const UserManager = (0, import_builder.buildModelManager)(
       paramOnlyVariables: ["on"],
       hasReturnType: {
         "... on SignUpUserResult": { hasReturnType: true },
-        "... on UpdateUserResult": { hasReturnType: false }
+        "... on UpdateUserResult": { hasReturnType: true }
       },
       acceptsModelInput: true,
       hasCreateOrUpdateEffect: true,
@@ -561,14 +602,7 @@ const UserManager = (0, import_builder.buildModelManager)(
       functionName: "bulkUpsert",
       isBulk: true,
       isDeleter: false,
-      hasReturnType: {
-        users: {
-          hasReturnType: {
-            "... on User": { select: true },
-            "... on UpsertUserReturnType": { hasReturnType: true }
-          }
-        }
-      },
+      hasReturnType: true,
       acceptsModelInput: true,
       operatesWithRecordIdentity: false,
       singleActionFunctionName: "upsert",

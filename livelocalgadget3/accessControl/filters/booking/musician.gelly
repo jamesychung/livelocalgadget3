@@ -1,0 +1,9 @@
+{% assign currentUser = context.currentUser %}
+{% assign musician = currentUser.musician %}
+{% if musician %}
+  {% assign musicianId = musician.id %}
+  {% assign result = record.musician.id == musicianId %}
+{% else %}
+  {% assign result = false %}
+{% endif %}
+{{ result }} 

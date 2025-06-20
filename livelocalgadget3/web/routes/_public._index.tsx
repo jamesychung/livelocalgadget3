@@ -362,18 +362,27 @@ export default function HomePage() {
               to="/sign-up"
               style={{
                 padding: '1rem 2rem',
-                background: '#ffdf00',
-                color: '#1a202c',
+                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                color: 'white',
                 border: 'none',
-                borderRadius: '0.5rem',
-                fontSize: '1.1rem',
+                borderRadius: '0.75rem',
                 fontWeight: '600',
                 cursor: 'pointer',
                 textDecoration: 'none',
-                display: 'inline-block'
+                display: 'inline-block',
+                fontSize: '1.1rem',
+                transition: 'all 0.2s ease'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translateY(-2px)';
+                e.currentTarget.style.boxShadow = '0 10px 25px rgba(102, 126, 234, 0.3)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = 'none';
               }}
             >
-              Sign Up Free
+              Get Started
             </Link>
             <button style={{
               padding: '1rem 2rem',

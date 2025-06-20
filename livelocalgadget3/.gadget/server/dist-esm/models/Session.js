@@ -1,2 +1,2 @@
-// All the generated types for the "Session" model preconditions, actions, params, etc
+// All the generated types for the "session" model preconditions, actions, params, etc
 export { };

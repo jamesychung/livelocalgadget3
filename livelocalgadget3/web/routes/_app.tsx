@@ -61,13 +61,14 @@ export default function ({ loaderData }: Route.ComponentProps) {
 
   return (
     <div className="h-screen flex overflow-hidden">
-      <DesktopNav />
+      <DesktopNav user={user} />
 
       <div className="flex-1 flex flex-col md:pl-64 min-w-0">
         <header className="h-16 flex items-center justify-between px-6 border-b bg-background z-10 w-full">
-          <MobileNav />
+          <MobileNav user={user} />
           <div className="ml-auto">
             <SecondaryNavigation
+              user={user}
               icon={
                 <>
                   <UserIcon user={user} />

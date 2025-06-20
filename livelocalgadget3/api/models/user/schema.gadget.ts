@@ -26,16 +26,10 @@ export const schema: GadgetModel = {
       default: false,
       storageKey: "D75SjSfqmF94",
     },
-    firstName: { 
-      type: "string", 
-      storageKey: "JWeQ4gUpBOTF"
-    },
+    firstName: { type: "string", storageKey: "JWeQ4gUpBOTF" },
     googleImageUrl: { type: "url", storageKey: "fx3a6keRJRYu" },
     googleProfileId: { type: "string", storageKey: "xr9MpoALyAQ_" },
-    lastName: { 
-      type: "string", 
-      storageKey: "w2TbVlRQ9wZh"
-    },
+    lastName: { type: "string", storageKey: "w2TbVlRQ9wZh" },
     lastSignedIn: {
       type: "dateTime",
       includeTime: true,
@@ -48,8 +42,10 @@ export const schema: GadgetModel = {
     },
     primaryRole: {
       type: "enum",
-      options: ["user", "musician", "venue"],
       default: "user",
+      acceptMultipleSelections: false,
+      acceptUnlistedOptions: false,
+      options: ["user", "musician", "venue"],
       storageKey: "primary_role",
     },
     profilePicture: {
@@ -57,10 +53,7 @@ export const schema: GadgetModel = {
       allowPublicAccess: true,
       storageKey: "qlFA-JK8Ag_Y",
     },
-    resetPasswordToken: {
-      type: "string",
-      storageKey: "s0iVP9EfFp0",
-    },
+    resetPasswordToken: { type: "string", storageKey: "s0iVP9EfFp0" },
     resetPasswordTokenExpiration: {
       type: "dateTime",
       includeTime: true,

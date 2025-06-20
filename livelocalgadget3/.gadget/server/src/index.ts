@@ -8,7 +8,7 @@
 *  |_|_| \_/ \___|_|\___/ \___\__,_|_|\__, |\__,_|\__,_|\__, |\___|\__|____/ 
 *                                     |___/             |___/                
 *
-* Built for environment `Development` at version 8
+* Built for environment `Development` at version 151
 * Framework version: ^1.4.0
 * Edit this app here: https://livelocalgadget3.gadget.dev/edit
 */
@@ -53,6 +53,13 @@ export {
  * @internal
  */
 import { Globals, actionContextLocalStorage } from "./globals";
+export * from "./models/Session";
+export * from "./models/Booking";
+export * from "./models/Event";
+export * from "./models/Musician";
+export * from "./models/Review";
+export * from "./models/Venue";
+export * from "./models/User";
 
 /**
 * A map of connection name to instantiated connection objects for the app.
@@ -128,3 +135,6 @@ export {
 (globalThis as any).GadgetGlobals = Globals;
 
 
+declare module "react-router" {
+  export interface AppLoadContext extends RouteContext {}
+}

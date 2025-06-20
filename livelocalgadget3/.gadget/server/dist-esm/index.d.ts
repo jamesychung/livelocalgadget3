@@ -9,7 +9,7 @@
 *  |_|_| \_/ \___|_|\___/ \___\__,_|_|\__, |\__,_|\__,_|\__, |\___|\__|____/ 
 *                                     |___/             |___/                
 *
-* Built for environment `Development` at version 8
+* Built for environment `Development` at version 151
 * Framework version: ^1.4.0
 * Edit this app here: https://livelocalgadget3.gadget.dev/edit
 */
@@ -33,11 +33,19 @@ export * from "./types.js";
 export * from "./ActionOptions.js";
 export * from "./effects.js";
 export * from "./utils.js";
+import type { RouteContext } from "./routes.js";
 export { preventCrossShopDataAccess, ShopifyBulkOperationState, ShopifySellingPlanGroupProductState, ShopifySellingPlanGroupProductVariantState, ShopifyShopState, ShopifySyncState, abortSync, finishBulkOperation, globalShopifySync, shopifySync } from "./shopify/index.js";
 /**
 * @internal
 */
 import { Globals, actionContextLocalStorage } from "./globals.js";
+export * from "./models/Session.js";
+export * from "./models/Booking.js";
+export * from "./models/Event.js";
+export * from "./models/Musician.js";
+export * from "./models/Review.js";
+export * from "./models/Venue.js";
+export * from "./models/User.js";
 /**
 * A map of connection name to instantiated connection objects for the app.
 */
@@ -70,3 +78,6 @@ export { api, logger, connections };
 * @internal
 */
 export { Globals, actionContextLocalStorage };
+declare module "react-router" {
+	interface AppLoadContext extends RouteContext {}
+}

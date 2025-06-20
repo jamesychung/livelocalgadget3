@@ -160,14 +160,14 @@ export const permissions: GadgetPermissions = {
           read: true,
           actions: {
             create: {
-              filter: "accessControl/filters/musician/owner.gelly",
+              filter: "accessControl/filters/musician/owner.gelly"
             },
             update: {
-              filter: "accessControl/filters/musician/owner.gelly",
+              filter: "accessControl/filters/musician/owner.gelly"
             },
             delete: {
-              filter: "accessControl/filters/musician/owner.gelly",
-            },
+              filter: "accessControl/filters/musician/owner.gelly"
+            }
           },
         },
         event: {
@@ -363,12 +363,12 @@ export const permissions: GadgetPermissions = {
       storageKey: "signed-in",
       default: {
         read: true,
-        action: true,
+        action: false
       },
       models: {
         user: {
           read: {
-            filter: "accessControl/filters/user/tenant.gelly",
+            filter: "accessControl/filters/user/tenant.gelly"
           },
           actions: {
             changePassword: {
@@ -380,48 +380,31 @@ export const permissions: GadgetPermissions = {
             update: {
               filter: "accessControl/filters/user/tenant.gelly",
             },
-            updateRole: {
-              filter: "accessControl/filters/user/tenant.gelly",
-            },
-          },
-        },
-        event: {
-          read: true,
+          }
         },
         musician: {
           read: true,
+          actions: {
+            create: {
+              filter: "accessControl/filters/musician/owner.gelly"
+            },
+            update: {
+              filter: "accessControl/filters/musician/owner.gelly"
+            }
+          }
         },
         venue: {
           read: true,
         },
         booking: {
           read: {
-            filter: "accessControl/filters/booking/user.gelly",
-          },
-          actions: {
-            create: {
-              filter: "accessControl/filters/booking/user.gelly",
-            },
-            update: {
-              filter: "accessControl/filters/booking/user.gelly",
-            },
+            filter: "accessControl/filters/booking/musician.gelly",
           },
         },
-        review: {
+        event: {
           read: true,
-          actions: {
-            create: {
-              filter: "accessControl/filters/review/author.gelly",
-            },
-            update: {
-              filter: "accessControl/filters/review/author.gelly",
-            },
-            delete: {
-              filter: "accessControl/filters/review/author.gelly",
-            },
-          },
         },
-      },
+      }
     },
     unauthenticated: {
       storageKey: "unauthenticated",

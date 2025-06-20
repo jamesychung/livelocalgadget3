@@ -1,12 +1,44 @@
 import type { OperationContext } from "@urql/core";
-import { GadgetConnection, GadgetTransaction, ActionFunctionMetadata, GlobalActionFunction, BackgroundActionHandle } from "@gadgetinc/api-client-core";
+import { GadgetConnection, GadgetTransaction, InternalModelManager, ActionFunctionMetadata, GlobalActionFunction, BackgroundActionHandle } from "@gadgetinc/api-client-core";
 import type { ClientOptions as ApiClientOptions, AnyClient, EnqueueBackgroundActionOptions, AnyActionFunction } from '@gadgetinc/api-client-core';
 import type { DocumentNode } from 'graphql';
+import { SessionManager } from "./models/Session.js";
+import { CurrentSessionManager } from "./models/CurrentSession.js";
+import { BookingManager } from "./models/Booking.js";
+import { EventManager } from "./models/Event.js";
+import { MusicianManager } from "./models/Musician.js";
+import { ReviewManager } from "./models/Review.js";
+import { VenueManager } from "./models/Venue.js";
+import { UserManager } from "./models/User.js";
+import { SeedNamespace } from "./namespaces/seed.js";
+export { DefaultSessionSelection, type SessionRecord } from "./models/Session.js";
+export { DefaultBookingSelection, type BookingRecord } from "./models/Booking.js";
+export { DefaultEventSelection, type EventRecord } from "./models/Event.js";
+export { DefaultMusicianSelection, type MusicianRecord } from "./models/Musician.js";
+export { DefaultReviewSelection, type ReviewRecord } from "./models/Review.js";
+export { DefaultVenueSelection, type VenueRecord } from "./models/Venue.js";
+export { DefaultUserSelection, type UserRecord } from "./models/User.js";
 type ClientOptions = Omit<ApiClientOptions, "environment"> & {
     environment?: string;
 };
 type AllOptionalVariables<T> = Partial<T> extends T ? object : never;
-export type InternalModelManagers = {};
+export type InternalModelManagers = {
+    /** The internal API model manager for the session model */
+    session: InternalModelManager;
+    /** The internal API model manager for the booking model */
+    booking: InternalModelManager;
+    /** The internal API model manager for the event model */
+    event: InternalModelManager;
+    /** The internal API model manager for the musician model */
+    musician: InternalModelManager;
+    /** The internal API model manager for the review model */
+    review: InternalModelManager;
+    /** The internal API model manager for the venue model */
+    venue: InternalModelManager;
+    /** The internal API model manager for the user model */
+    user: InternalModelManager;
+    seed: {};
+};
 /**
  * Function type for the inline view execution function.
  * Includes overloads for all known instances collected from call sites.
@@ -22,6 +54,15 @@ export declare class Livelocalgadget3Client implements AnyClient {
     connection: GadgetConnection;
     /** Executes an inline computed view. */
     view: InlineViewFunction;
+    session: SessionManager;
+    currentSession: CurrentSessionManager;
+    booking: BookingManager;
+    event: EventManager;
+    musician: MusicianManager;
+    review: ReviewManager;
+    venue: VenueManager;
+    user: UserManager;
+    seed: SeedNamespace;
     /**
     * Namespaced object for accessing models via the Gadget internal APIs, which provide lower level and higher privileged operations directly against the database. Useful for maintenance operations like migrations or correcting broken data, and for implementing the high level actions.
     *
@@ -220,4 +261,3 @@ export declare class Livelocalgadget3Client implements AnyClient {
 /** Legacy export under the `Client` name for backwards compatibility. */
 export declare const Client: typeof Livelocalgadget3Client;
 export type Client = InstanceType<typeof Livelocalgadget3Client>;
-export {};

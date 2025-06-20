@@ -581,7 +581,7 @@ export default function EventDetails() {
                         {event.title}
                       </h4>
                       <p style={{ color: '#4a5568', fontSize: '0.875rem', marginBottom: '0.25rem' }}>
-                        {event.venue}
+                        {event.venue && typeof event.venue === 'object' ? (event.venue as any)?.name || 'Unknown Venue' : String(event.venue || 'Unknown Venue')}
                       </p>
                       <p style={{ color: '#4a5568', fontSize: '0.875rem', marginBottom: '0.5rem' }}>
                         📅 {event.date} • 🕐 {event.time}

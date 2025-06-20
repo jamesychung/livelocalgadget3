@@ -27,7 +27,7 @@ _export(exports, {
 *  |_|_| \_/ \___|_|\___/ \___\__,_|_|\__, |\__,_|\__,_|\__, |\___|\__|____/ 
 *                                     |___/             |___/                
 *
-* Built for environment `Development` at version 8
+* Built for environment `Development` at version 151
 * Framework version: ^1.4.0
 * Edit this app here: https://livelocalgadget3.gadget.dev/edit
 */ /// <reference path="./ActionContextTypes.d.ts" />
@@ -110,6 +110,13 @@ const _index1 = require("./shopify/index");
 const _globals = require(/**
  * @internal
  */ "./globals");
+_export_star(require("./models/Session"), exports);
+_export_star(require("./models/Booking"), exports);
+_export_star(require("./models/Event"), exports);
+_export_star(require("./models/Musician"), exports);
+_export_star(require("./models/Review"), exports);
+_export_star(require("./models/Venue"), exports);
+_export_star(require("./models/User"), exports);
 function _export_star(from, to) {
     Object.keys(from).forEach(function(k) {
         if (k !== "default" && !Object.prototype.hasOwnProperty.call(to, k)) {

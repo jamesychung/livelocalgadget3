@@ -1,0 +1,5 @@
+// Filter for musician actions - allows users to only access their own musician profile
+// This filter ensures users can only create, update, and delete their own musician profile
+
+// Check if the musician record belongs to the current user
+record.user == context.currentUser.id 

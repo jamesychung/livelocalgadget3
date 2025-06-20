@@ -5,8 +5,1926 @@
 /**
  * Internal variable to store model blobs with GraphQL typename as the key, and use them in the action code functions.
  * @internal
- */ export const modelsMap = {};
+ */ export const modelsMap = {
+    "Session": {
+        "key": "2K_glKfSWcXY",
+        "name": "session",
+        "apiIdentifier": "session",
+        "namespace": [],
+        "fields": {
+            "2K_glKfSWcXY-system-id": {
+                "fieldType": "ID",
+                "key": "2K_glKfSWcXY-system-id",
+                "name": "ID",
+                "apiIdentifier": "id",
+                "configuration": {
+                    "type": "IDConfig",
+                    "key": "Ir9pAGrodmNL",
+                    "createdDate": "2025-06-19T06:15:20.109Z"
+                },
+                "internalWritable": true
+            },
+            "2K_glKfSWcXY-system-createdAt": {
+                "fieldType": "DateTime",
+                "key": "2K_glKfSWcXY-system-createdAt",
+                "name": "Created At",
+                "apiIdentifier": "createdAt",
+                "configuration": {
+                    "type": "DateTimeConfig",
+                    "key": "ZE0NaKUP00qM",
+                    "createdDate": "2025-06-19T06:15:20.109Z",
+                    "includeTime": true,
+                    "default": null
+                },
+                "internalWritable": true
+            },
+            "2K_glKfSWcXY-system-updatedAt": {
+                "fieldType": "DateTime",
+                "key": "2K_glKfSWcXY-system-updatedAt",
+                "name": "Updated At",
+                "apiIdentifier": "updatedAt",
+                "configuration": {
+                    "type": "DateTimeConfig",
+                    "key": "ez_Yqtrjurkx",
+                    "createdDate": "2025-06-19T06:15:20.110Z",
+                    "includeTime": true,
+                    "default": null
+                },
+                "internalWritable": true
+            },
+            "1VtW5oAk21z6": {
+                "fieldType": "BelongsTo",
+                "key": "1VtW5oAk21z6",
+                "name": "user",
+                "apiIdentifier": "user",
+                "configuration": {
+                    "type": "BelongsToConfig",
+                    "key": "M-5PZ08fAnL3",
+                    "createdDate": "2025-06-19T06:15:20.111Z",
+                    "relatedModelKey": "DataModel-AppAuth-User",
+                    "relatedModelApiIdentifier": "user"
+                },
+                "internalWritable": true
+            }
+        },
+        "graphqlTypeName": "Session",
+        "stateChart": {
+            "type": "StateChart",
+            "key": "geJpSrzZo52C",
+            "createdDate": 1750313720108,
+            "actions": {},
+            "transitions": {},
+            "stateInActionCode": false,
+            "childStates": []
+        }
+    },
+    "Booking": {
+        "key": "booking",
+        "name": "booking",
+        "apiIdentifier": "booking",
+        "namespace": [],
+        "fields": {
+            "booking-system-id": {
+                "fieldType": "ID",
+                "key": "booking-system-id",
+                "name": "ID",
+                "apiIdentifier": "id",
+                "configuration": {
+                    "type": "IDConfig",
+                    "key": "PdSHW1cSsCsq",
+                    "createdDate": "2025-06-19T06:15:20.053Z"
+                },
+                "internalWritable": true
+            },
+            "booking-system-createdAt": {
+                "fieldType": "DateTime",
+                "key": "booking-system-createdAt",
+                "name": "Created At",
+                "apiIdentifier": "createdAt",
+                "configuration": {
+                    "type": "DateTimeConfig",
+                    "key": "bkTIHzM0OW1V",
+                    "createdDate": "2025-06-19T06:15:20.054Z",
+                    "includeTime": true,
+                    "default": null
+                },
+                "internalWritable": true
+            },
+            "booking-system-updatedAt": {
+                "fieldType": "DateTime",
+                "key": "booking-system-updatedAt",
+                "name": "Updated At",
+                "apiIdentifier": "updatedAt",
+                "configuration": {
+                    "type": "DateTimeConfig",
+                    "key": "jZ5r5hhbq5M1",
+                    "createdDate": "2025-06-19T06:15:20.055Z",
+                    "includeTime": true,
+                    "default": null
+                },
+                "internalWritable": true
+            },
+            "booking_booked_by": {
+                "fieldType": "BelongsTo",
+                "key": "booking_booked_by",
+                "name": "bookedBy",
+                "apiIdentifier": "bookedBy",
+                "configuration": {
+                    "type": "BelongsToConfig",
+                    "key": "zM_To10IEVok",
+                    "createdDate": "2025-06-19T06:15:20.055Z",
+                    "relatedModelKey": "DataModel-AppAuth-User",
+                    "relatedModelApiIdentifier": "user"
+                },
+                "internalWritable": true
+            },
+            "booking_date": {
+                "fieldType": "DateTime",
+                "key": "booking_date",
+                "name": "date",
+                "apiIdentifier": "date",
+                "configuration": {
+                    "type": "DateTimeConfig",
+                    "key": "bIj3kLbvOcxQ",
+                    "createdDate": "2025-06-19T06:15:20.056Z",
+                    "includeTime": true,
+                    "default": null
+                },
+                "internalWritable": true
+            },
+            "booking_deposit_amount": {
+                "fieldType": "Number",
+                "key": "booking_deposit_amount",
+                "name": "depositAmount",
+                "apiIdentifier": "depositAmount",
+                "configuration": {
+                    "type": "NumberConfig",
+                    "key": "BfX1g9v3q7dd",
+                    "createdDate": "2025-06-19T06:15:20.057Z",
+                    "decimals": null,
+                    "default": null
+                },
+                "internalWritable": true
+            },
+            "booking_deposit_paid": {
+                "fieldType": "Boolean",
+                "key": "booking_deposit_paid",
+                "name": "depositPaid",
+                "apiIdentifier": "depositPaid",
+                "configuration": {
+                    "type": "BooleanConfig",
+                    "key": "Um2jTMYYbAet",
+                    "createdDate": "2025-06-19T06:15:20.057Z",
+                    "default": null
+                },
+                "internalWritable": true
+            },
+            "booking_end_time": {
+                "fieldType": "String",
+                "key": "booking_end_time",
+                "name": "endTime",
+                "apiIdentifier": "endTime",
+                "configuration": {
+                    "type": "StringConfig",
+                    "key": "NM1OXBOdY-DS",
+                    "createdDate": "2025-06-19T06:15:20.058Z",
+                    "default": null
+                },
+                "internalWritable": true
+            },
+            "booking_full_payment_paid": {
+                "fieldType": "Boolean",
+                "key": "booking_full_payment_paid",
+                "name": "fullPaymentPaid",
+                "apiIdentifier": "fullPaymentPaid",
+                "configuration": {
+                    "type": "BooleanConfig",
+                    "key": "Ww093dwnSQ3d",
+                    "createdDate": "2025-06-19T06:15:20.059Z",
+                    "default": null
+                },
+                "internalWritable": true
+            },
+            "booking_is_active": {
+                "fieldType": "Boolean",
+                "key": "booking_is_active",
+                "name": "isActive",
+                "apiIdentifier": "isActive",
+                "configuration": {
+                    "type": "BooleanConfig",
+                    "key": "CGjO1ycM9eoD",
+                    "createdDate": "2025-06-19T06:15:20.059Z",
+                    "default": null
+                },
+                "internalWritable": true
+            },
+            "booking_musician": {
+                "fieldType": "BelongsTo",
+                "key": "booking_musician",
+                "name": "musician",
+                "apiIdentifier": "musician",
+                "configuration": {
+                    "type": "BelongsToConfig",
+                    "key": "1l97fMDTlB4s",
+                    "createdDate": "2025-06-19T06:15:20.060Z",
+                    "relatedModelKey": "musician",
+                    "relatedModelApiIdentifier": "musician"
+                },
+                "internalWritable": true
+            },
+            "booking_notes": {
+                "fieldType": "String",
+                "key": "booking_notes",
+                "name": "notes",
+                "apiIdentifier": "notes",
+                "configuration": {
+                    "type": "StringConfig",
+                    "key": "W10US6VZb4Kk",
+                    "createdDate": "2025-06-19T06:15:20.060Z",
+                    "default": null
+                },
+                "internalWritable": true
+            },
+            "booking_special_requirements": {
+                "fieldType": "String",
+                "key": "booking_special_requirements",
+                "name": "specialRequirements",
+                "apiIdentifier": "specialRequirements",
+                "configuration": {
+                    "type": "StringConfig",
+                    "key": "1WHJS_Zd9T8J",
+                    "createdDate": "2025-06-19T06:15:20.061Z",
+                    "default": null
+                },
+                "internalWritable": true
+            },
+            "booking_start_time": {
+                "fieldType": "String",
+                "key": "booking_start_time",
+                "name": "startTime",
+                "apiIdentifier": "startTime",
+                "configuration": {
+                    "type": "StringConfig",
+                    "key": "Um6JAbo5HVz7",
+                    "createdDate": "2025-06-19T06:15:20.061Z",
+                    "default": null
+                },
+                "internalWritable": true
+            },
+            "booking_status": {
+                "fieldType": "String",
+                "key": "booking_status",
+                "name": "status",
+                "apiIdentifier": "status",
+                "configuration": {
+                    "type": "StringConfig",
+                    "key": "E6uL78o7vlwa",
+                    "createdDate": "2025-06-19T06:15:20.062Z",
+                    "default": null
+                },
+                "internalWritable": true
+            },
+            "booking_total_amount": {
+                "fieldType": "Number",
+                "key": "booking_total_amount",
+                "name": "totalAmount",
+                "apiIdentifier": "totalAmount",
+                "configuration": {
+                    "type": "NumberConfig",
+                    "key": "C0-nSbAPWe5G",
+                    "createdDate": "2025-06-19T06:15:20.063Z",
+                    "decimals": null,
+                    "default": null
+                },
+                "internalWritable": true
+            },
+            "booking_venue": {
+                "fieldType": "BelongsTo",
+                "key": "booking_venue",
+                "name": "venue",
+                "apiIdentifier": "venue",
+                "configuration": {
+                    "type": "BelongsToConfig",
+                    "key": "R2OSsNRtgFZc",
+                    "createdDate": "2025-06-19T06:15:20.063Z",
+                    "relatedModelKey": "venue",
+                    "relatedModelApiIdentifier": "venue"
+                },
+                "internalWritable": true
+            }
+        },
+        "graphqlTypeName": "Booking",
+        "stateChart": {
+            "type": "StateChart",
+            "key": "1G-sQr3KOW1y",
+            "createdDate": 1750313720050,
+            "actions": {},
+            "transitions": {},
+            "stateInActionCode": false,
+            "childStates": []
+        }
+    },
+    "Event": {
+        "key": "event",
+        "name": "event",
+        "apiIdentifier": "event",
+        "namespace": [],
+        "fields": {
+            "event-system-id": {
+                "fieldType": "ID",
+                "key": "event-system-id",
+                "name": "ID",
+                "apiIdentifier": "id",
+                "configuration": {
+                    "type": "IDConfig",
+                    "key": "YeBiZL51HAzG",
+                    "createdDate": "2025-06-19T06:15:20.065Z"
+                },
+                "internalWritable": true
+            },
+            "event-system-createdAt": {
+                "fieldType": "DateTime",
+                "key": "event-system-createdAt",
+                "name": "Created At",
+                "apiIdentifier": "createdAt",
+                "configuration": {
+                    "type": "DateTimeConfig",
+                    "key": "tNuHuBLuF9Rd",
+                    "createdDate": "2025-06-19T06:15:20.066Z",
+                    "includeTime": true,
+                    "default": null
+                },
+                "internalWritable": true
+            },
+            "event-system-updatedAt": {
+                "fieldType": "DateTime",
+                "key": "event-system-updatedAt",
+                "name": "Updated At",
+                "apiIdentifier": "updatedAt",
+                "configuration": {
+                    "type": "DateTimeConfig",
+                    "key": "r8V_1ZZi_-Bk",
+                    "createdDate": "2025-06-19T06:15:20.066Z",
+                    "includeTime": true,
+                    "default": null
+                },
+                "internalWritable": true
+            },
+            "event_available_tickets": {
+                "fieldType": "Number",
+                "key": "event_available_tickets",
+                "name": "availableTickets",
+                "apiIdentifier": "availableTickets",
+                "configuration": {
+                    "type": "NumberConfig",
+                    "key": "lInB_GEi9BWa",
+                    "createdDate": "2025-06-19T06:15:20.067Z",
+                    "decimals": null,
+                    "default": null
+                },
+                "internalWritable": true
+            },
+            "event_category": {
+                "fieldType": "String",
+                "key": "event_category",
+                "name": "category",
+                "apiIdentifier": "category",
+                "configuration": {
+                    "type": "StringConfig",
+                    "key": "lhwh9IE7N8_u",
+                    "createdDate": "2025-06-19T06:15:20.067Z",
+                    "default": null
+                },
+                "internalWritable": true
+            },
+            "event_created_by": {
+                "fieldType": "BelongsTo",
+                "key": "event_created_by",
+                "name": "createdBy",
+                "apiIdentifier": "createdBy",
+                "configuration": {
+                    "type": "BelongsToConfig",
+                    "key": "siHHm-T3APJW",
+                    "createdDate": "2025-06-19T06:15:20.068Z",
+                    "relatedModelKey": "DataModel-AppAuth-User",
+                    "relatedModelApiIdentifier": "user"
+                },
+                "internalWritable": true
+            },
+            "event_date": {
+                "fieldType": "DateTime",
+                "key": "event_date",
+                "name": "date",
+                "apiIdentifier": "date",
+                "configuration": {
+                    "type": "DateTimeConfig",
+                    "key": "2KT67BeY1FP7",
+                    "createdDate": "2025-06-19T06:15:20.069Z",
+                    "includeTime": true,
+                    "default": null
+                },
+                "internalWritable": true
+            },
+            "event_description": {
+                "fieldType": "String",
+                "key": "event_description",
+                "name": "description",
+                "apiIdentifier": "description",
+                "configuration": {
+                    "type": "StringConfig",
+                    "key": "fX6vtN7RWsn7",
+                    "createdDate": "2025-06-19T06:15:20.069Z",
+                    "default": null
+                },
+                "internalWritable": true
+            },
+            "event_end_time": {
+                "fieldType": "String",
+                "key": "event_end_time",
+                "name": "endTime",
+                "apiIdentifier": "endTime",
+                "configuration": {
+                    "type": "StringConfig",
+                    "key": "BMpX_iCfd_qP",
+                    "createdDate": "2025-06-19T06:15:20.070Z",
+                    "default": null
+                },
+                "internalWritable": true
+            },
+            "event_image": {
+                "fieldType": "URL",
+                "key": "event_image",
+                "name": "image",
+                "apiIdentifier": "image",
+                "configuration": {
+                    "type": "URLConfig",
+                    "key": "UxuWLmuVTOdZ",
+                    "createdDate": "2025-06-19T06:15:20.070Z",
+                    "default": null
+                },
+                "internalWritable": true
+            },
+            "event_is_active": {
+                "fieldType": "Boolean",
+                "key": "event_is_active",
+                "name": "isActive",
+                "apiIdentifier": "isActive",
+                "configuration": {
+                    "type": "BooleanConfig",
+                    "key": "e2yzPmOQXIhT",
+                    "createdDate": "2025-06-19T06:15:20.071Z",
+                    "default": null
+                },
+                "internalWritable": true
+            },
+            "event_is_public": {
+                "fieldType": "Boolean",
+                "key": "event_is_public",
+                "name": "isPublic",
+                "apiIdentifier": "isPublic",
+                "configuration": {
+                    "type": "BooleanConfig",
+                    "key": "8QOLA_2tTZst",
+                    "createdDate": "2025-06-19T06:15:20.071Z",
+                    "default": null
+                },
+                "internalWritable": true
+            },
+            "event_musician": {
+                "fieldType": "BelongsTo",
+                "key": "event_musician",
+                "name": "musician",
+                "apiIdentifier": "musician",
+                "configuration": {
+                    "type": "BelongsToConfig",
+                    "key": "Td8xqdbcNjSL",
+                    "createdDate": "2025-06-19T06:15:20.072Z",
+                    "relatedModelKey": "musician",
+                    "relatedModelApiIdentifier": "musician"
+                },
+                "internalWritable": true
+            },
+            "event_setlist": {
+                "fieldType": "JSON",
+                "key": "event_setlist",
+                "name": "setlist",
+                "apiIdentifier": "setlist",
+                "configuration": {
+                    "type": "JSONConfig",
+                    "key": "b6Zn0MejB7vO",
+                    "createdDate": "2025-06-19T06:15:20.072Z",
+                    "default": null
+                },
+                "internalWritable": true
+            },
+            "event_start_time": {
+                "fieldType": "String",
+                "key": "event_start_time",
+                "name": "startTime",
+                "apiIdentifier": "startTime",
+                "configuration": {
+                    "type": "StringConfig",
+                    "key": "K9PUiBOGrOUK",
+                    "createdDate": "2025-06-19T06:15:20.073Z",
+                    "default": null
+                },
+                "internalWritable": true
+            },
+            "event_status": {
+                "fieldType": "String",
+                "key": "event_status",
+                "name": "status",
+                "apiIdentifier": "status",
+                "configuration": {
+                    "type": "StringConfig",
+                    "key": "0gwj-BhsyGZh",
+                    "createdDate": "2025-06-19T06:15:20.074Z",
+                    "default": null
+                },
+                "internalWritable": true
+            },
+            "event_ticket_price": {
+                "fieldType": "Number",
+                "key": "event_ticket_price",
+                "name": "ticketPrice",
+                "apiIdentifier": "ticketPrice",
+                "configuration": {
+                    "type": "NumberConfig",
+                    "key": "k1rfkuzYErdl",
+                    "createdDate": "2025-06-19T06:15:20.074Z",
+                    "decimals": null,
+                    "default": null
+                },
+                "internalWritable": true
+            },
+            "event_ticket_type": {
+                "fieldType": "String",
+                "key": "event_ticket_type",
+                "name": "ticketType",
+                "apiIdentifier": "ticketType",
+                "configuration": {
+                    "type": "StringConfig",
+                    "key": "Frx6RcFmhP0Y",
+                    "createdDate": "2025-06-19T06:15:20.075Z",
+                    "default": null
+                },
+                "internalWritable": true
+            },
+            "event_title": {
+                "fieldType": "String",
+                "key": "event_title",
+                "name": "title",
+                "apiIdentifier": "title",
+                "configuration": {
+                    "type": "StringConfig",
+                    "key": "qCAYV2NOXeGd",
+                    "createdDate": "2025-06-19T06:15:20.075Z",
+                    "default": null
+                },
+                "internalWritable": true
+            },
+            "event_total_capacity": {
+                "fieldType": "Number",
+                "key": "event_total_capacity",
+                "name": "totalCapacity",
+                "apiIdentifier": "totalCapacity",
+                "configuration": {
+                    "type": "NumberConfig",
+                    "key": "GghWsHTlplLY",
+                    "createdDate": "2025-06-19T06:15:20.076Z",
+                    "decimals": null,
+                    "default": null
+                },
+                "internalWritable": true
+            },
+            "event_venue": {
+                "fieldType": "BelongsTo",
+                "key": "event_venue",
+                "name": "venue",
+                "apiIdentifier": "venue",
+                "configuration": {
+                    "type": "BelongsToConfig",
+                    "key": "C0NLdeava9aE",
+                    "createdDate": "2025-06-19T06:15:20.076Z",
+                    "relatedModelKey": "venue",
+                    "relatedModelApiIdentifier": "venue"
+                },
+                "internalWritable": true
+            }
+        },
+        "graphqlTypeName": "Event",
+        "stateChart": {
+            "type": "StateChart",
+            "key": "IfECeoUE1O-n",
+            "createdDate": 1750313720064,
+            "actions": {},
+            "transitions": {},
+            "stateInActionCode": false,
+            "childStates": []
+        }
+    },
+    "Musician": {
+        "key": "musician",
+        "name": "musician",
+        "apiIdentifier": "musician",
+        "namespace": [],
+        "fields": {
+            "musician-system-id": {
+                "fieldType": "ID",
+                "key": "musician-system-id",
+                "name": "ID",
+                "apiIdentifier": "id",
+                "configuration": {
+                    "type": "IDConfig",
+                    "key": "U8u9JgEvuX40",
+                    "createdDate": "2025-06-19T06:15:20.078Z"
+                },
+                "internalWritable": true
+            },
+            "musician-system-createdAt": {
+                "fieldType": "DateTime",
+                "key": "musician-system-createdAt",
+                "name": "Created At",
+                "apiIdentifier": "createdAt",
+                "configuration": {
+                    "type": "DateTimeConfig",
+                    "key": "RwxEU0w5IP2r",
+                    "createdDate": "2025-06-19T06:15:20.079Z",
+                    "includeTime": true,
+                    "default": null
+                },
+                "internalWritable": true
+            },
+            "musician-system-updatedAt": {
+                "fieldType": "DateTime",
+                "key": "musician-system-updatedAt",
+                "name": "Updated At",
+                "apiIdentifier": "updatedAt",
+                "configuration": {
+                    "type": "DateTimeConfig",
+                    "key": "L-yqhYTN9AWC",
+                    "createdDate": "2025-06-19T06:15:20.080Z",
+                    "includeTime": true,
+                    "default": null
+                },
+                "internalWritable": true
+            },
+            "musician_state": {
+                "fieldType": "String",
+                "key": "musician_state",
+                "name": "state",
+                "apiIdentifier": "state",
+                "configuration": {
+                    "type": "StringConfig",
+                    "key": "EQB1itvuGOp6",
+                    "createdDate": "2025-06-19T06:15:20.095Z",
+                    "default": ""
+                },
+                "internalWritable": true
+            },
+            "6uB2lE7KF-aQ": {
+                "fieldType": "HasMany",
+                "key": "6uB2lE7KF-aQ",
+                "name": "reviews",
+                "apiIdentifier": "reviews",
+                "configuration": {
+                    "type": "HasManyConfig",
+                    "key": "WoXPlQa79tMb",
+                    "createdDate": "2025-06-19T06:15:20.093Z",
+                    "relatedModelKey": "review",
+                    "inverseFieldKey": "review_musician",
+                    "relatedModelApiIdentifier": "review",
+                    "inverseFieldApiIdentifier": "musician",
+                    "dependent": "ignore",
+                    "isJoinModelHasManyField": false
+                },
+                "internalWritable": true
+            },
+            "Y3jBwjULMzuB": {
+                "fieldType": "HasMany",
+                "key": "Y3jBwjULMzuB",
+                "name": "bookings",
+                "apiIdentifier": "bookings",
+                "configuration": {
+                    "type": "HasManyConfig",
+                    "key": "aS4g1xkjnY3J",
+                    "createdDate": "2025-06-19T06:15:20.082Z",
+                    "relatedModelKey": "booking",
+                    "inverseFieldKey": "booking_musician",
+                    "relatedModelApiIdentifier": "booking",
+                    "inverseFieldApiIdentifier": "musician",
+                    "dependent": "ignore",
+                    "isJoinModelHasManyField": false
+                },
+                "internalWritable": true
+            },
+            "jawn9_r4eFvs": {
+                "fieldType": "HasMany",
+                "key": "jawn9_r4eFvs",
+                "name": "events",
+                "apiIdentifier": "events",
+                "configuration": {
+                    "type": "HasManyConfig",
+                    "key": "fA5kA81m_hvd",
+                    "createdDate": "2025-06-19T06:15:20.084Z",
+                    "relatedModelKey": "event",
+                    "inverseFieldKey": "event_musician",
+                    "relatedModelApiIdentifier": "event",
+                    "inverseFieldApiIdentifier": "musician",
+                    "dependent": "ignore",
+                    "isJoinModelHasManyField": false
+                },
+                "internalWritable": true
+            },
+            "musician_availability": {
+                "fieldType": "JSON",
+                "key": "musician_availability",
+                "name": "availability",
+                "apiIdentifier": "availability",
+                "configuration": {
+                    "type": "JSONConfig",
+                    "key": "g0wv7f8HDWJF",
+                    "createdDate": "2025-06-19T06:15:20.080Z",
+                    "default": "{}"
+                },
+                "internalWritable": true
+            },
+            "musician_bio": {
+                "fieldType": "String",
+                "key": "musician_bio",
+                "name": "bio",
+                "apiIdentifier": "bio",
+                "configuration": {
+                    "type": "StringConfig",
+                    "key": "qBlS0BiKv-J5",
+                    "createdDate": "2025-06-19T06:15:20.081Z",
+                    "default": ""
+                },
+                "internalWritable": true
+            },
+            "musician_city": {
+                "fieldType": "String",
+                "key": "musician_city",
+                "name": "city",
+                "apiIdentifier": "city",
+                "configuration": {
+                    "type": "StringConfig",
+                    "key": "oW7OXQVWMGpc",
+                    "createdDate": "2025-06-19T06:15:20.082Z",
+                    "default": ""
+                },
+                "internalWritable": true
+            },
+            "musician_country": {
+                "fieldType": "String",
+                "key": "musician_country",
+                "name": "country",
+                "apiIdentifier": "country",
+                "configuration": {
+                    "type": "StringConfig",
+                    "key": "wEZ4ld6jchQ7",
+                    "createdDate": "2025-06-19T06:15:20.083Z",
+                    "default": ""
+                },
+                "internalWritable": true
+            },
+            "musician_email": {
+                "fieldType": "Email",
+                "key": "musician_email",
+                "name": "email",
+                "apiIdentifier": "email",
+                "configuration": {
+                    "type": "EmailConfig",
+                    "key": "LgGZmV6Y4AO4",
+                    "createdDate": "2025-06-19T06:15:20.084Z",
+                    "default": null
+                },
+                "internalWritable": true
+            },
+            "musician_experience": {
+                "fieldType": "String",
+                "key": "musician_experience",
+                "name": "experience",
+                "apiIdentifier": "experience",
+                "configuration": {
+                    "type": "StringConfig",
+                    "key": "Y3r1lJbYIiKl",
+                    "createdDate": "2025-06-19T06:15:20.085Z",
+                    "default": ""
+                },
+                "internalWritable": true
+            },
+            "musician_genre": {
+                "fieldType": "String",
+                "key": "musician_genre",
+                "name": "genre",
+                "apiIdentifier": "genre",
+                "configuration": {
+                    "type": "StringConfig",
+                    "key": "CACVZ9Q8J9g6",
+                    "createdDate": "2025-06-19T06:15:20.086Z",
+                    "default": ""
+                },
+                "internalWritable": true
+            },
+            "musician_genres": {
+                "fieldType": "JSON",
+                "key": "musician_genres",
+                "name": "genres",
+                "apiIdentifier": "genres",
+                "configuration": {
+                    "type": "JSONConfig",
+                    "key": "WzFv7lF8e7Y0",
+                    "createdDate": "2025-06-19T06:15:20.086Z",
+                    "default": "[]"
+                },
+                "internalWritable": true
+            },
+            "musician_hourly_rate": {
+                "fieldType": "Number",
+                "key": "musician_hourly_rate",
+                "name": "hourlyRate",
+                "apiIdentifier": "hourlyRate",
+                "configuration": {
+                    "type": "NumberConfig",
+                    "key": "C2Yz8NbJ3TK-",
+                    "createdDate": "2025-06-19T06:15:20.087Z",
+                    "decimals": null,
+                    "default": 0
+                },
+                "internalWritable": true
+            },
+            "musician_instruments": {
+                "fieldType": "JSON",
+                "key": "musician_instruments",
+                "name": "instruments",
+                "apiIdentifier": "instruments",
+                "configuration": {
+                    "type": "JSONConfig",
+                    "key": "rfUqG9GcMmiB",
+                    "createdDate": "2025-06-19T06:15:20.087Z",
+                    "default": "[]"
+                },
+                "internalWritable": true
+            },
+            "musician_is_active": {
+                "fieldType": "Boolean",
+                "key": "musician_is_active",
+                "name": "isActive",
+                "apiIdentifier": "isActive",
+                "configuration": {
+                    "type": "BooleanConfig",
+                    "key": "sN4CDW7ufcKG",
+                    "createdDate": "2025-06-19T06:15:20.088Z",
+                    "default": true
+                },
+                "internalWritable": true
+            },
+            "musician_is_verified": {
+                "fieldType": "Boolean",
+                "key": "musician_is_verified",
+                "name": "isVerified",
+                "apiIdentifier": "isVerified",
+                "configuration": {
+                    "type": "BooleanConfig",
+                    "key": "BaCHauPt-R-e",
+                    "createdDate": "2025-06-19T06:15:20.089Z",
+                    "default": false
+                },
+                "internalWritable": true
+            },
+            "musician_location": {
+                "fieldType": "String",
+                "key": "musician_location",
+                "name": "location",
+                "apiIdentifier": "location",
+                "configuration": {
+                    "type": "StringConfig",
+                    "key": "g_buMrkr3OFy",
+                    "createdDate": "2025-06-19T06:15:20.089Z",
+                    "default": ""
+                },
+                "internalWritable": true
+            },
+            "musician_name": {
+                "fieldType": "String",
+                "key": "musician_name",
+                "name": "name",
+                "apiIdentifier": "name",
+                "configuration": {
+                    "type": "StringConfig",
+                    "key": "QltNcETNhWnk",
+                    "createdDate": "2025-06-19T06:15:20.090Z",
+                    "default": null
+                },
+                "internalWritable": true
+            },
+            "musician_phone": {
+                "fieldType": "String",
+                "key": "musician_phone",
+                "name": "phone",
+                "apiIdentifier": "phone",
+                "configuration": {
+                    "type": "StringConfig",
+                    "key": "E42mtsSvcFuc",
+                    "createdDate": "2025-06-19T06:15:20.091Z",
+                    "default": ""
+                },
+                "internalWritable": true
+            },
+            "musician_profile_picture": {
+                "fieldType": "URL",
+                "key": "musician_profile_picture",
+                "name": "profilePicture",
+                "apiIdentifier": "profilePicture",
+                "configuration": {
+                    "type": "URLConfig",
+                    "key": "UlmzsHl3Tns2",
+                    "createdDate": "2025-06-19T06:15:20.092Z",
+                    "default": null
+                },
+                "internalWritable": true
+            },
+            "musician_rating": {
+                "fieldType": "Number",
+                "key": "musician_rating",
+                "name": "rating",
+                "apiIdentifier": "rating",
+                "configuration": {
+                    "type": "NumberConfig",
+                    "key": "LjyqikqMUMEK",
+                    "createdDate": "2025-06-19T06:15:20.092Z",
+                    "decimals": null,
+                    "default": 0
+                },
+                "internalWritable": true
+            },
+            "musician_social_links": {
+                "fieldType": "JSON",
+                "key": "musician_social_links",
+                "name": "socialLinks",
+                "apiIdentifier": "socialLinks",
+                "configuration": {
+                    "type": "JSONConfig",
+                    "key": "CsAZ94r5elmB",
+                    "createdDate": "2025-06-19T06:15:20.094Z",
+                    "default": "[]"
+                },
+                "internalWritable": true
+            },
+            "musician_stage_name": {
+                "fieldType": "String",
+                "key": "musician_stage_name",
+                "name": "stageName",
+                "apiIdentifier": "stageName",
+                "configuration": {
+                    "type": "StringConfig",
+                    "key": "CyRFQZ-AwlTA",
+                    "createdDate": "2025-06-19T06:15:20.095Z",
+                    "default": ""
+                },
+                "internalWritable": true
+            },
+            "musician_total_gigs": {
+                "fieldType": "Number",
+                "key": "musician_total_gigs",
+                "name": "totalGigs",
+                "apiIdentifier": "totalGigs",
+                "configuration": {
+                    "type": "NumberConfig",
+                    "key": "jObdstceD_ST",
+                    "createdDate": "2025-06-19T06:15:20.096Z",
+                    "decimals": null,
+                    "default": 0
+                },
+                "internalWritable": true
+            },
+            "musician_user": {
+                "fieldType": "BelongsTo",
+                "key": "musician_user",
+                "name": "user",
+                "apiIdentifier": "user",
+                "configuration": {
+                    "type": "BelongsToConfig",
+                    "key": "JD8GkuS3YHKv",
+                    "createdDate": "2025-06-19T06:15:20.097Z",
+                    "relatedModelKey": "DataModel-AppAuth-User",
+                    "relatedModelApiIdentifier": "user"
+                },
+                "internalWritable": true
+            },
+            "musician_website": {
+                "fieldType": "URL",
+                "key": "musician_website",
+                "name": "website",
+                "apiIdentifier": "website",
+                "configuration": {
+                    "type": "URLConfig",
+                    "key": "NRSqmahyNveK",
+                    "createdDate": "2025-06-19T06:15:20.097Z",
+                    "default": null
+                },
+                "internalWritable": true
+            },
+            "musician_years_experience": {
+                "fieldType": "Number",
+                "key": "musician_years_experience",
+                "name": "yearsExperience",
+                "apiIdentifier": "yearsExperience",
+                "configuration": {
+                    "type": "NumberConfig",
+                    "key": "EX0_X2IgoJg3",
+                    "createdDate": "2025-06-19T06:15:20.098Z",
+                    "decimals": null,
+                    "default": 0
+                },
+                "internalWritable": true
+            }
+        },
+        "graphqlTypeName": "Musician",
+        "stateChart": {
+            "type": "StateChart",
+            "key": "7UKKU-HPV1n-",
+            "createdDate": 1750313720077,
+            "actions": {},
+            "transitions": {},
+            "stateInActionCode": false,
+            "childStates": []
+        }
+    },
+    "Review": {
+        "key": "review",
+        "name": "review",
+        "apiIdentifier": "review",
+        "namespace": [],
+        "fields": {
+            "review-system-id": {
+                "fieldType": "ID",
+                "key": "review-system-id",
+                "name": "ID",
+                "apiIdentifier": "id",
+                "configuration": {
+                    "type": "IDConfig",
+                    "key": "OL1h6CF2X-GI",
+                    "createdDate": "2025-06-19T06:15:20.099Z"
+                },
+                "internalWritable": true
+            },
+            "review-system-createdAt": {
+                "fieldType": "DateTime",
+                "key": "review-system-createdAt",
+                "name": "Created At",
+                "apiIdentifier": "createdAt",
+                "configuration": {
+                    "type": "DateTimeConfig",
+                    "key": "bEfvVVoJgexs",
+                    "createdDate": "2025-06-19T06:15:20.100Z",
+                    "includeTime": true,
+                    "default": null
+                },
+                "internalWritable": true
+            },
+            "review-system-updatedAt": {
+                "fieldType": "DateTime",
+                "key": "review-system-updatedAt",
+                "name": "Updated At",
+                "apiIdentifier": "updatedAt",
+                "configuration": {
+                    "type": "DateTimeConfig",
+                    "key": "YlfN1wZvc0gI",
+                    "createdDate": "2025-06-19T06:15:20.101Z",
+                    "includeTime": true,
+                    "default": null
+                },
+                "internalWritable": true
+            },
+            "review_comment": {
+                "fieldType": "String",
+                "key": "review_comment",
+                "name": "comment",
+                "apiIdentifier": "comment",
+                "configuration": {
+                    "type": "StringConfig",
+                    "key": "z3uFTAZuTg25",
+                    "createdDate": "2025-06-19T06:15:20.101Z",
+                    "default": null
+                },
+                "internalWritable": true
+            },
+            "review_event": {
+                "fieldType": "BelongsTo",
+                "key": "review_event",
+                "name": "event",
+                "apiIdentifier": "event",
+                "configuration": {
+                    "type": "BelongsToConfig",
+                    "key": "XTytSxR9jbjH",
+                    "createdDate": "2025-06-19T06:15:20.102Z",
+                    "relatedModelKey": "venue",
+                    "relatedModelApiIdentifier": "venue"
+                },
+                "internalWritable": true
+            },
+            "review_is_active": {
+                "fieldType": "Boolean",
+                "key": "review_is_active",
+                "name": "isActive",
+                "apiIdentifier": "isActive",
+                "configuration": {
+                    "type": "BooleanConfig",
+                    "key": "qvdUBbpMZir1",
+                    "createdDate": "2025-06-19T06:15:20.103Z",
+                    "default": null
+                },
+                "internalWritable": true
+            },
+            "review_is_verified": {
+                "fieldType": "Boolean",
+                "key": "review_is_verified",
+                "name": "isVerified",
+                "apiIdentifier": "isVerified",
+                "configuration": {
+                    "type": "BooleanConfig",
+                    "key": "XwfV-eeplaaY",
+                    "createdDate": "2025-06-19T06:15:20.104Z",
+                    "default": null
+                },
+                "internalWritable": true
+            },
+            "review_musician": {
+                "fieldType": "BelongsTo",
+                "key": "review_musician",
+                "name": "musician",
+                "apiIdentifier": "musician",
+                "configuration": {
+                    "type": "BelongsToConfig",
+                    "key": "6uMxYIWD6Ign",
+                    "createdDate": "2025-06-19T06:15:20.104Z",
+                    "relatedModelKey": "musician",
+                    "relatedModelApiIdentifier": "musician"
+                },
+                "internalWritable": true
+            },
+            "review_rating": {
+                "fieldType": "Number",
+                "key": "review_rating",
+                "name": "rating",
+                "apiIdentifier": "rating",
+                "configuration": {
+                    "type": "NumberConfig",
+                    "key": "FCMvPRnStspR",
+                    "createdDate": "2025-06-19T06:15:20.105Z",
+                    "decimals": null,
+                    "default": null
+                },
+                "internalWritable": true
+            },
+            "review_reviewer": {
+                "fieldType": "BelongsTo",
+                "key": "review_reviewer",
+                "name": "reviewer",
+                "apiIdentifier": "reviewer",
+                "configuration": {
+                    "type": "BelongsToConfig",
+                    "key": "f6i9EmUm2R8x",
+                    "createdDate": "2025-06-19T06:15:20.106Z",
+                    "relatedModelKey": "DataModel-AppAuth-User",
+                    "relatedModelApiIdentifier": "user"
+                },
+                "internalWritable": true
+            },
+            "review_type": {
+                "fieldType": "String",
+                "key": "review_type",
+                "name": "reviewType",
+                "apiIdentifier": "reviewType",
+                "configuration": {
+                    "type": "StringConfig",
+                    "key": "AyPqOMYV6pll",
+                    "createdDate": "2025-06-19T06:15:20.105Z",
+                    "default": null
+                },
+                "internalWritable": true
+            },
+            "review_venue": {
+                "fieldType": "BelongsTo",
+                "key": "review_venue",
+                "name": "venue",
+                "apiIdentifier": "venue",
+                "configuration": {
+                    "type": "BelongsToConfig",
+                    "key": "w8Sc12YyepuL",
+                    "createdDate": "2025-06-19T06:15:20.107Z",
+                    "relatedModelKey": "venue",
+                    "relatedModelApiIdentifier": "venue"
+                },
+                "internalWritable": true
+            }
+        },
+        "graphqlTypeName": "Review",
+        "stateChart": {
+            "type": "StateChart",
+            "key": "XXZZkq4A7SYm",
+            "createdDate": 1750313720099,
+            "actions": {},
+            "transitions": {},
+            "stateInActionCode": false,
+            "childStates": []
+        }
+    },
+    "Venue": {
+        "key": "venue",
+        "name": "venue",
+        "apiIdentifier": "venue",
+        "namespace": [],
+        "fields": {
+            "venue-system-id": {
+                "fieldType": "ID",
+                "key": "venue-system-id",
+                "name": "ID",
+                "apiIdentifier": "id",
+                "configuration": {
+                    "type": "IDConfig",
+                    "key": "6yH4gPiG1koq",
+                    "createdDate": "2025-06-19T06:15:20.128Z"
+                },
+                "internalWritable": true
+            },
+            "venue-system-createdAt": {
+                "fieldType": "DateTime",
+                "key": "venue-system-createdAt",
+                "name": "Created At",
+                "apiIdentifier": "createdAt",
+                "configuration": {
+                    "type": "DateTimeConfig",
+                    "key": "Q6bFMUiUoFXK",
+                    "createdDate": "2025-06-19T06:15:20.129Z",
+                    "includeTime": true,
+                    "default": null
+                },
+                "internalWritable": true
+            },
+            "venue-system-updatedAt": {
+                "fieldType": "DateTime",
+                "key": "venue-system-updatedAt",
+                "name": "Updated At",
+                "apiIdentifier": "updatedAt",
+                "configuration": {
+                    "type": "DateTimeConfig",
+                    "key": "u5_Vv1bnmAD8",
+                    "createdDate": "2025-06-19T06:15:20.130Z",
+                    "includeTime": true,
+                    "default": null
+                },
+                "internalWritable": true
+            },
+            "venue_state": {
+                "fieldType": "String",
+                "key": "venue_state",
+                "name": "state",
+                "apiIdentifier": "state",
+                "configuration": {
+                    "type": "StringConfig",
+                    "key": "ObNZhrdIZcO4",
+                    "createdDate": "2025-06-19T06:15:20.155Z",
+                    "default": null
+                },
+                "internalWritable": true
+            },
+            "96QMhngDjRWZ": {
+                "fieldType": "HasMany",
+                "key": "96QMhngDjRWZ",
+                "name": "events",
+                "apiIdentifier": "events",
+                "configuration": {
+                    "type": "HasManyConfig",
+                    "key": "RAhD7lUBsPiC",
+                    "createdDate": "2025-06-19T06:15:20.148Z",
+                    "relatedModelKey": "event",
+                    "inverseFieldKey": "event_venue",
+                    "relatedModelApiIdentifier": "event",
+                    "inverseFieldApiIdentifier": "venue",
+                    "dependent": "ignore",
+                    "isJoinModelHasManyField": false
+                },
+                "internalWritable": true
+            },
+            "CPUtVsuDAxMs": {
+                "fieldType": "HasMany",
+                "key": "CPUtVsuDAxMs",
+                "name": "bookings",
+                "apiIdentifier": "bookings",
+                "configuration": {
+                    "type": "HasManyConfig",
+                    "key": "sYDBJ6_l14Rx",
+                    "createdDate": "2025-06-19T06:15:20.132Z",
+                    "relatedModelKey": "booking",
+                    "inverseFieldKey": "booking_venue",
+                    "relatedModelApiIdentifier": "booking",
+                    "inverseFieldApiIdentifier": "venue",
+                    "dependent": "ignore",
+                    "isJoinModelHasManyField": false
+                },
+                "internalWritable": true
+            },
+            "venue_address": {
+                "fieldType": "String",
+                "key": "venue_address",
+                "name": "address",
+                "apiIdentifier": "address",
+                "configuration": {
+                    "type": "StringConfig",
+                    "key": "-InZA0TWCA6v",
+                    "createdDate": "2025-06-19T06:15:20.130Z",
+                    "default": null
+                },
+                "internalWritable": true
+            },
+            "venue_amenities": {
+                "fieldType": "JSON",
+                "key": "venue_amenities",
+                "name": "amenities",
+                "apiIdentifier": "amenities",
+                "configuration": {
+                    "type": "JSONConfig",
+                    "key": "hYNSVcUp8_9F",
+                    "createdDate": "2025-06-19T06:15:20.131Z",
+                    "default": null
+                },
+                "internalWritable": true
+            },
+            "venue_capacity": {
+                "fieldType": "Number",
+                "key": "venue_capacity",
+                "name": "capacity",
+                "apiIdentifier": "capacity",
+                "configuration": {
+                    "type": "NumberConfig",
+                    "key": "d5ed3aHo2yM-",
+                    "createdDate": "2025-06-19T06:15:20.132Z",
+                    "decimals": null,
+                    "default": null
+                },
+                "internalWritable": true
+            },
+            "venue_city": {
+                "fieldType": "String",
+                "key": "venue_city",
+                "name": "city",
+                "apiIdentifier": "city",
+                "configuration": {
+                    "type": "StringConfig",
+                    "key": "YEXeGW8BtfiS",
+                    "createdDate": "2025-06-19T06:15:20.133Z",
+                    "default": null
+                },
+                "internalWritable": true
+            },
+            "venue_country": {
+                "fieldType": "String",
+                "key": "venue_country",
+                "name": "country",
+                "apiIdentifier": "country",
+                "configuration": {
+                    "type": "StringConfig",
+                    "key": "aL6WmyrAv3MH",
+                    "createdDate": "2025-06-19T06:15:20.133Z",
+                    "default": null
+                },
+                "internalWritable": true
+            },
+            "venue_description": {
+                "fieldType": "String",
+                "key": "venue_description",
+                "name": "description",
+                "apiIdentifier": "description",
+                "configuration": {
+                    "type": "StringConfig",
+                    "key": "3yH-mmYEwfk6",
+                    "createdDate": "2025-06-19T06:15:20.134Z",
+                    "default": null
+                },
+                "internalWritable": true
+            },
+            "venue_email": {
+                "fieldType": "Email",
+                "key": "venue_email",
+                "name": "email",
+                "apiIdentifier": "email",
+                "configuration": {
+                    "type": "EmailConfig",
+                    "key": "CnyYKTArYlV2",
+                    "createdDate": "2025-06-19T06:15:20.147Z",
+                    "default": null
+                },
+                "internalWritable": true
+            },
+            "venue_genres": {
+                "fieldType": "JSON",
+                "key": "venue_genres",
+                "name": "genres",
+                "apiIdentifier": "genres",
+                "configuration": {
+                    "type": "JSONConfig",
+                    "key": "nN66ixtzqNYF",
+                    "createdDate": "2025-06-19T06:15:20.148Z",
+                    "default": null
+                },
+                "internalWritable": true
+            },
+            "venue_hours": {
+                "fieldType": "JSON",
+                "key": "venue_hours",
+                "name": "hours",
+                "apiIdentifier": "hours",
+                "configuration": {
+                    "type": "JSONConfig",
+                    "key": "9NXy0rv9foy3",
+                    "createdDate": "2025-06-19T06:15:20.149Z",
+                    "default": null
+                },
+                "internalWritable": true
+            },
+            "venue_is_active": {
+                "fieldType": "Boolean",
+                "key": "venue_is_active",
+                "name": "isActive",
+                "apiIdentifier": "isActive",
+                "configuration": {
+                    "type": "BooleanConfig",
+                    "key": "0a3hEk52lsmq",
+                    "createdDate": "2025-06-19T06:15:20.149Z",
+                    "default": null
+                },
+                "internalWritable": true
+            },
+            "venue_is_verified": {
+                "fieldType": "Boolean",
+                "key": "venue_is_verified",
+                "name": "isVerified",
+                "apiIdentifier": "isVerified",
+                "configuration": {
+                    "type": "BooleanConfig",
+                    "key": "Vf_34k1EGQi2",
+                    "createdDate": "2025-06-19T06:15:20.150Z",
+                    "default": null
+                },
+                "internalWritable": true
+            },
+            "venue_name": {
+                "fieldType": "String",
+                "key": "venue_name",
+                "name": "name",
+                "apiIdentifier": "name",
+                "configuration": {
+                    "type": "StringConfig",
+                    "key": "Kjtj2dscLlpE",
+                    "createdDate": "2025-06-19T06:15:20.151Z",
+                    "default": null
+                },
+                "internalWritable": true
+            },
+            "venue_owner": {
+                "fieldType": "BelongsTo",
+                "key": "venue_owner",
+                "name": "owner",
+                "apiIdentifier": "owner",
+                "configuration": {
+                    "type": "BelongsToConfig",
+                    "key": "8pCXmZA-o1NW",
+                    "createdDate": "2025-06-19T06:15:20.151Z",
+                    "relatedModelKey": "DataModel-AppAuth-User",
+                    "relatedModelApiIdentifier": "user"
+                },
+                "internalWritable": true
+            },
+            "venue_phone": {
+                "fieldType": "String",
+                "key": "venue_phone",
+                "name": "phone",
+                "apiIdentifier": "phone",
+                "configuration": {
+                    "type": "StringConfig",
+                    "key": "nQvwYGOIfWmK",
+                    "createdDate": "2025-06-19T06:15:20.152Z",
+                    "default": null
+                },
+                "internalWritable": true
+            },
+            "venue_price_range": {
+                "fieldType": "String",
+                "key": "venue_price_range",
+                "name": "priceRange",
+                "apiIdentifier": "priceRange",
+                "configuration": {
+                    "type": "StringConfig",
+                    "key": "WYJ6728SvZpu",
+                    "createdDate": "2025-06-19T06:15:20.152Z",
+                    "default": null
+                },
+                "internalWritable": true
+            },
+            "venue_profile_picture": {
+                "fieldType": "URL",
+                "key": "venue_profile_picture",
+                "name": "profilePicture",
+                "apiIdentifier": "profilePicture",
+                "configuration": {
+                    "type": "URLConfig",
+                    "key": "CinWzkPWwYHv",
+                    "createdDate": "2025-06-19T06:15:20.153Z",
+                    "default": null
+                },
+                "internalWritable": true
+            },
+            "venue_rating": {
+                "fieldType": "Number",
+                "key": "venue_rating",
+                "name": "rating",
+                "apiIdentifier": "rating",
+                "configuration": {
+                    "type": "NumberConfig",
+                    "key": "PHfCdcMUI43O",
+                    "createdDate": "2025-06-19T06:15:20.154Z",
+                    "decimals": null,
+                    "default": null
+                },
+                "internalWritable": true
+            },
+            "venue_social_links": {
+                "fieldType": "JSON",
+                "key": "venue_social_links",
+                "name": "socialLinks",
+                "apiIdentifier": "socialLinks",
+                "configuration": {
+                    "type": "JSONConfig",
+                    "key": "NgrhWEwgnGIR",
+                    "createdDate": "2025-06-19T06:15:20.155Z",
+                    "default": null
+                },
+                "internalWritable": true
+            },
+            "venue_type": {
+                "fieldType": "String",
+                "key": "venue_type",
+                "name": "type",
+                "apiIdentifier": "type",
+                "configuration": {
+                    "type": "StringConfig",
+                    "key": "wofzM2Ble_2b",
+                    "createdDate": "2025-06-19T06:15:20.156Z",
+                    "default": null
+                },
+                "internalWritable": true
+            },
+            "venue_website": {
+                "fieldType": "URL",
+                "key": "venue_website",
+                "name": "website",
+                "apiIdentifier": "website",
+                "configuration": {
+                    "type": "URLConfig",
+                    "key": "e-coNfAY48yL",
+                    "createdDate": "2025-06-19T06:15:20.156Z",
+                    "default": null
+                },
+                "internalWritable": true
+            },
+            "venue_zip_code": {
+                "fieldType": "String",
+                "key": "venue_zip_code",
+                "name": "zipCode",
+                "apiIdentifier": "zipCode",
+                "configuration": {
+                    "type": "StringConfig",
+                    "key": "W5u7u2Ddc6W7",
+                    "createdDate": "2025-06-19T06:15:20.157Z",
+                    "default": null
+                },
+                "internalWritable": true
+            },
+            "yvkkZs3qTqKx": {
+                "fieldType": "HasMany",
+                "key": "yvkkZs3qTqKx",
+                "name": "reviews",
+                "apiIdentifier": "reviews",
+                "configuration": {
+                    "type": "HasManyConfig",
+                    "key": "OidYjeUFFiLQ",
+                    "createdDate": "2025-06-19T06:15:20.154Z",
+                    "relatedModelKey": "review",
+                    "inverseFieldKey": "review_event",
+                    "relatedModelApiIdentifier": "review",
+                    "inverseFieldApiIdentifier": "event",
+                    "dependent": "ignore",
+                    "isJoinModelHasManyField": false
+                },
+                "internalWritable": true
+            }
+        },
+        "graphqlTypeName": "Venue",
+        "stateChart": {
+            "type": "StateChart",
+            "key": "GQCN7MOdaEWn",
+            "createdDate": 1750313720128,
+            "actions": {},
+            "transitions": {},
+            "stateInActionCode": false,
+            "childStates": []
+        }
+    },
+    "User": {
+        "key": "DataModel-AppAuth-User",
+        "name": "user",
+        "apiIdentifier": "user",
+        "namespace": [],
+        "fields": {
+            "DataModel-AppAuth-User-system-id": {
+                "fieldType": "ID",
+                "key": "DataModel-AppAuth-User-system-id",
+                "name": "ID",
+                "apiIdentifier": "id",
+                "configuration": {
+                    "type": "IDConfig",
+                    "key": "Zux53U3g2uMZ",
+                    "createdDate": "2025-06-19T20:22:03.564Z"
+                },
+                "internalWritable": true
+            },
+            "DataModel-AppAuth-User-system-createdAt": {
+                "fieldType": "DateTime",
+                "key": "DataModel-AppAuth-User-system-createdAt",
+                "name": "Created At",
+                "apiIdentifier": "createdAt",
+                "configuration": {
+                    "type": "DateTimeConfig",
+                    "key": "j64FQItFz-F0",
+                    "createdDate": "2025-06-19T20:22:03.565Z",
+                    "includeTime": true,
+                    "default": null
+                },
+                "internalWritable": true
+            },
+            "DataModel-AppAuth-User-system-updatedAt": {
+                "fieldType": "DateTime",
+                "key": "DataModel-AppAuth-User-system-updatedAt",
+                "name": "Updated At",
+                "apiIdentifier": "updatedAt",
+                "configuration": {
+                    "type": "DateTimeConfig",
+                    "key": "yr99KXwWIurQ",
+                    "createdDate": "2025-06-19T20:22:03.566Z",
+                    "includeTime": true,
+                    "default": null
+                },
+                "internalWritable": true
+            },
+            "CAFK1LkLo96L": {
+                "fieldType": "Password",
+                "key": "CAFK1LkLo96L",
+                "name": "password",
+                "apiIdentifier": "password",
+                "configuration": {
+                    "type": "PasswordConfig",
+                    "key": "AxJ3GJpyu3EG",
+                    "createdDate": "2025-06-19T20:22:03.572Z"
+                },
+                "internalWritable": true
+            },
+            "D75SjSfqmF94": {
+                "fieldType": "Boolean",
+                "key": "D75SjSfqmF94",
+                "name": "emailVerified",
+                "apiIdentifier": "emailVerified",
+                "configuration": {
+                    "type": "BooleanConfig",
+                    "key": "Fi-YnqHOjBUk",
+                    "createdDate": "2025-06-19T20:22:03.569Z",
+                    "default": false
+                },
+                "internalWritable": true
+            },
+            "DhYcbbdlexJj": {
+                "fieldType": "Email",
+                "key": "DhYcbbdlexJj",
+                "name": "email",
+                "apiIdentifier": "email",
+                "configuration": {
+                    "type": "EmailConfig",
+                    "key": "Xi25ObhoI4xY",
+                    "createdDate": "2025-06-19T20:22:03.566Z",
+                    "default": null
+                },
+                "internalWritable": true
+            },
+            "H3z_0o7Ns7Yz": {
+                "fieldType": "DateTime",
+                "key": "H3z_0o7Ns7Yz",
+                "name": "lastSignedIn",
+                "apiIdentifier": "lastSignedIn",
+                "configuration": {
+                    "type": "DateTimeConfig",
+                    "key": "HICLGEDbRCK7",
+                    "createdDate": "2025-06-19T20:22:03.572Z",
+                    "includeTime": true,
+                    "default": null
+                },
+                "internalWritable": true
+            },
+            "JWeQ4gUpBOTF": {
+                "fieldType": "String",
+                "key": "JWeQ4gUpBOTF",
+                "name": "firstName",
+                "apiIdentifier": "firstName",
+                "configuration": {
+                    "type": "StringConfig",
+                    "key": "CGkckEuxhRe-",
+                    "createdDate": "2025-06-19T20:22:03.569Z",
+                    "default": null
+                },
+                "internalWritable": true
+            },
+            "YZoQg8wSA07s": {
+                "fieldType": "RoleAssignments",
+                "key": "YZoQg8wSA07s",
+                "name": "roles",
+                "apiIdentifier": "roles",
+                "configuration": {
+                    "type": "RoleAssignmentsConfig",
+                    "key": "8E8XQG8v31SV",
+                    "createdDate": "2025-06-19T20:22:03.575Z",
+                    "default": [
+                        "unauthenticated"
+                    ]
+                },
+                "internalWritable": true
+            },
+            "fx3a6keRJRYu": {
+                "fieldType": "URL",
+                "key": "fx3a6keRJRYu",
+                "name": "googleImageUrl",
+                "apiIdentifier": "googleImageUrl",
+                "configuration": {
+                    "type": "URLConfig",
+                    "key": "CJaNYC_aX2r5",
+                    "createdDate": "2025-06-19T20:22:03.570Z",
+                    "default": null
+                },
+                "internalWritable": true
+            },
+            "pFI7enn1TLXO": {
+                "fieldType": "String",
+                "key": "pFI7enn1TLXO",
+                "name": "emailVerificationToken",
+                "apiIdentifier": "emailVerificationToken",
+                "configuration": {
+                    "type": "StringConfig",
+                    "key": "zrrmFK6_Iu-X",
+                    "createdDate": "2025-06-19T20:22:03.567Z",
+                    "default": null
+                },
+                "internalWritable": true
+            },
+            "primary_role": {
+                "fieldType": "Enum",
+                "key": "primary_role",
+                "name": "primaryRole",
+                "apiIdentifier": "primaryRole",
+                "configuration": {
+                    "type": "EnumConfig",
+                    "key": "XsXyNj7FbXVU",
+                    "createdDate": "2025-06-19T20:22:03.573Z",
+                    "allowMultiple": false,
+                    "allowOther": false,
+                    "options": [
+                        {
+                            "type": "EnumOption",
+                            "key": "cYyV4pPepPAE",
+                            "createdDate": 1750394576254,
+                            "name": "user",
+                            "color": "#FCFCFC"
+                        },
+                        {
+                            "type": "EnumOption",
+                            "key": "lKWz7jZa2eOt",
+                            "createdDate": 1750394576254,
+                            "name": "musician",
+                            "color": "#FCFCFC"
+                        },
+                        {
+                            "type": "EnumOption",
+                            "key": "VFaYphIJtGmD",
+                            "createdDate": 1750394576254,
+                            "name": "venue",
+                            "color": "#FCFCFC"
+                        }
+                    ],
+                    "default": "user"
+                },
+                "internalWritable": true
+            },
+            "qaEpz10ulfbF": {
+                "fieldType": "DateTime",
+                "key": "qaEpz10ulfbF",
+                "name": "emailVerificationTokenExpiration",
+                "apiIdentifier": "emailVerificationTokenExpiration",
+                "configuration": {
+                    "type": "DateTimeConfig",
+                    "key": "NUP1IfG8dnO0",
+                    "createdDate": "2025-06-19T20:22:03.568Z",
+                    "includeTime": true,
+                    "default": null
+                },
+                "internalWritable": true
+            },
+            "qlFA-JK8Ag_Y": {
+                "fieldType": "File",
+                "key": "qlFA-JK8Ag_Y",
+                "name": "profilePicture",
+                "apiIdentifier": "profilePicture",
+                "configuration": {
+                    "type": "FileConfig",
+                    "key": "2_CDcLtB9cN5",
+                    "createdDate": "2025-06-19T20:22:03.574Z",
+                    "private": false
+                },
+                "internalWritable": true
+            },
+            "qlgBpfZ1B8sk": {
+                "fieldType": "DateTime",
+                "key": "qlgBpfZ1B8sk",
+                "name": "resetPasswordTokenExpiration",
+                "apiIdentifier": "resetPasswordTokenExpiration",
+                "configuration": {
+                    "type": "DateTimeConfig",
+                    "key": "EvQuJvh4p9We",
+                    "createdDate": "2025-06-19T20:22:03.575Z",
+                    "includeTime": true,
+                    "default": null
+                },
+                "internalWritable": true
+            },
+            "s0iVP9EfFp0": {
+                "fieldType": "String",
+                "key": "s0iVP9EfFp0",
+                "name": "resetPasswordToken",
+                "apiIdentifier": "resetPasswordToken",
+                "configuration": {
+                    "type": "StringConfig",
+                    "key": "rZqn6LUb6yjL",
+                    "createdDate": "2025-06-19T20:22:03.574Z",
+                    "default": null
+                },
+                "internalWritable": true
+            },
+            "w2TbVlRQ9wZh": {
+                "fieldType": "String",
+                "key": "w2TbVlRQ9wZh",
+                "name": "lastName",
+                "apiIdentifier": "lastName",
+                "configuration": {
+                    "type": "StringConfig",
+                    "key": "VP--SmeYPXXm",
+                    "createdDate": "2025-06-19T20:22:03.571Z",
+                    "default": null
+                },
+                "internalWritable": true
+            },
+            "xr9MpoALyAQ_": {
+                "fieldType": "String",
+                "key": "xr9MpoALyAQ_",
+                "name": "googleProfileId",
+                "apiIdentifier": "googleProfileId",
+                "configuration": {
+                    "type": "StringConfig",
+                    "key": "sDVTuiLPyYGf",
+                    "createdDate": "2025-06-19T20:22:03.571Z",
+                    "default": null
+                },
+                "internalWritable": true
+            }
+        },
+        "graphqlTypeName": "User",
+        "stateChart": {
+            "type": "StateChart",
+            "key": "-G9GYFZVvXrT",
+            "createdDate": 1750364523563,
+            "actions": {},
+            "transitions": {},
+            "stateInActionCode": false,
+            "childStates": []
+        }
+    }
+};
 /**
  * Internal variable to map model apiIdentifier to GraphQL typename in modelsMap.
  * @internal
- */ export const modelListIndex = {};
+ */ export const modelListIndex = {
+    "api:session": "Session",
+    "api:booking": "Booking",
+    "api:event": "Event",
+    "api:musician": "Musician",
+    "api:review": "Review",
+    "api:venue": "Venue",
+    "api:user": "User"
+};

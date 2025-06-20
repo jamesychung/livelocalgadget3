@@ -2,7 +2,7 @@
   "dependencies": {
     "@fastify/request-context": "^5.0.0",
     "@gadget-client/livelocalgadget3": "link:../client",
-    "@gadgetinc/api-client-core": "0.15.42",
+    "@gadgetinc/api-client-core": "0.15.43",
     "@types/node": "^20.17.7",
     "fastify": "^4.24.2"
   },
@@ -50,7 +50,7 @@
   "gadget": {
     "applicationName": "livelocalgadget3",
     "environmentName": "Development",
-    "environmentVersion": "8"
+    "environmentVersion": "151"
   },
   "main": "./dist-cjs/index.js",
   "module": "./dist-esm/index.js",
@@ -86,5 +86,5 @@
       ]
     }
   },
-  "version": "1.2.0-development.8"
+  "version": "1.2.0-development.151"
 }

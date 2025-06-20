@@ -10,42 +10,95 @@ export const schema: GadgetModel = {
     availability: {
       type: "json",
       storageKey: "musician_availability",
+      default: {},
     },
-    bio: { type: "string", storageKey: "musician_bio" },
+    bio: { 
+      type: "string", 
+      storageKey: "musician_bio",
+      default: "",
+    },
     bookings: {
       type: "hasMany",
       children: { model: "booking", belongsToField: "musician" },
       storageKey: "Y3jBwjULMzuB",
     },
-    city: { type: "string", storageKey: "musician_city" },
-    country: { type: "string", storageKey: "musician_country" },
-    email: { type: "email", storageKey: "musician_email" },
+    city: { 
+      type: "string", 
+      storageKey: "musician_city",
+      default: "",
+    },
+    country: { 
+      type: "string", 
+      storageKey: "musician_country",
+      default: "",
+    },
+    email: { 
+      type: "email", 
+      storageKey: "musician_email",
+    },
     events: {
       type: "hasMany",
       children: { model: "event", belongsToField: "musician" },
       storageKey: "jawn9_r4eFvs",
     },
-    experience: { type: "string", storageKey: "musician_experience" },
-    genre: { type: "string", storageKey: "musician_genre" },
-    genres: { type: "json", storageKey: "musician_genres" },
+    experience: { 
+      type: "string", 
+      storageKey: "musician_experience",
+      default: "",
+    },
+    genre: { 
+      type: "string", 
+      storageKey: "musician_genre",
+      default: "",
+    },
+    genres: { 
+      type: "json", 
+      storageKey: "musician_genres",
+      default: [],
+    },
     hourlyRate: {
       type: "number",
       storageKey: "musician_hourly_rate",
+      default: 0,
     },
-    instruments: { type: "json", storageKey: "musician_instruments" },
-    isActive: { type: "boolean", storageKey: "musician_is_active" },
+    instruments: { 
+      type: "json", 
+      storageKey: "musician_instruments",
+      default: [],
+    },
+    isActive: { 
+      type: "boolean", 
+      storageKey: "musician_is_active",
+      default: true,
+    },
     isVerified: {
       type: "boolean",
       storageKey: "musician_is_verified",
+      default: false,
     },
-    location: { type: "string", storageKey: "musician_location" },
-    name: { type: "string", storageKey: "musician_name" },
-    phone: { type: "string", storageKey: "musician_phone" },
+    location: { 
+      type: "string", 
+      storageKey: "musician_location",
+      default: "",
+    },
+    name: { 
+      type: "string", 
+      storageKey: "musician_name",
+    },
+    phone: { 
+      type: "string", 
+      storageKey: "musician_phone",
+      default: "",
+    },
     profilePicture: {
       type: "url",
       storageKey: "musician_profile_picture",
     },
-    rating: { type: "number", storageKey: "musician_rating" },
+    rating: { 
+      type: "number", 
+      storageKey: "musician_rating",
+      default: 0,
+    },
     reviews: {
       type: "hasMany",
       children: { model: "review", belongsToField: "musician" },
@@ -54,19 +107,36 @@ export const schema: GadgetModel = {
     socialLinks: {
       type: "json",
       storageKey: "musician_social_links",
+      default: [],
     },
-    stageName: { type: "string", storageKey: "musician_stage_name" },
-    state: { type: "string", storageKey: "musician_state" },
-    totalGigs: { type: "number", storageKey: "musician_total_gigs" },
+    stageName: { 
+      type: "string", 
+      storageKey: "musician_stage_name",
+      default: "",
+    },
+    state: { 
+      type: "string", 
+      storageKey: "musician_state",
+      default: "",
+    },
+    totalGigs: { 
+      type: "number", 
+      storageKey: "musician_total_gigs",
+      default: 0,
+    },
     user: {
       type: "belongsTo",
       parent: { model: "user" },
       storageKey: "musician_user",
     },
-    website: { type: "url", storageKey: "musician_website" },
+    website: { 
+      type: "url", 
+      storageKey: "musician_website",
+    },
     yearsExperience: {
       type: "number",
       storageKey: "musician_years_experience",
+      default: 0,
     },
   },
 };
