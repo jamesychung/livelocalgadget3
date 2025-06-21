@@ -5,7 +5,6 @@ import { api } from "./api";
 import "./app.css";
 import { ProductionErrorBoundary, DevelopmentErrorBoundary } from "gadget-server/react-router";
 import type { GadgetConfig } from "gadget-server";
-import type { Route } from "./+types/root";
 
 export const links = () => [{ rel: "stylesheet", href: "https://assets.gadget.dev/assets/reset.min.css" }];
 
@@ -20,20 +19,7 @@ export type RootOutletContext = {
   csrfToken?: string;
 };
 
-export const loader = async ({ context }: Route.LoaderArgs) => {
-  const { gadgetConfig } = context;
-
-  // Don't access session during SSR to avoid permission errors
-  // CSRF token will be handled client-side if needed
-  return {
-    gadgetConfig,
-    csrfToken: undefined, // Will be set client-side if needed
-  };
-};
-
-export default function App({ loaderData }: Route.ComponentProps) {
-  const { gadgetConfig, csrfToken } = loaderData;
-
+export default function App() {
   return (
     <html lang="en" className="light">
       <head>
@@ -43,7 +29,7 @@ export default function App({ loaderData }: Route.ComponentProps) {
       <body>
         <Suspense>
           <GadgetProvider api={api}>
-            <Outlet context={{ gadgetConfig, csrfToken }} />
+            <Outlet context={{ gadgetConfig: {} as GadgetConfig, csrfToken: undefined }} />
           </GadgetProvider>
         </Suspense>
         <ScrollRestoration />

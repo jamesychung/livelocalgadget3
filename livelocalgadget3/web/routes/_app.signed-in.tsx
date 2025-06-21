@@ -1,11 +1,46 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Pencil } from "lucide-react";
-import { useOutletContext } from "react-router";
+import { useOutletContext, useNavigate } from "react-router";
+import { useEffect } from "react";
 import type { AuthOutletContext } from "./_app";
 
 export default function () {
   const { gadgetConfig, user } = useOutletContext<AuthOutletContext>();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (user) {
+      // Get user's primary role
+      const userRoles = Array.isArray(user.roles) 
+        ? user.roles.map((role: unknown) => typeof role === 'string' ? role : 
+            (role as any)?.name || (role as any)?.key || String(role))
+        : [];
+      
+      let primaryRole = userRoles.find((role: string) => role !== 'signed-in') || 'user';
+      
+      // If primaryRole field is set and not 'user', use that instead
+      if (user.primaryRole && user.primaryRole !== 'user') {
+        primaryRole = user.primaryRole;
+      }
+
+      console.log("User roles:", userRoles);
+      console.log("Primary role:", primaryRole);
+
+      // Redirect based on role
+      switch (primaryRole) {
+        case 'musician':
+          navigate('/musician-dashboard');
+          break;
+        case 'venue':
+          navigate('/venue-dashboard');
+          break;
+        default:
+          // Stay on this page for users without specific roles
+          break;
+      }
+    }
+  }, [user, navigate]);
 
   return (
     <div className="container mx-auto p-6">
@@ -57,6 +92,19 @@ export default function () {
               <div>
                 <dt className="text-sm font-medium text-muted-foreground">Created</dt>
                 <dd className="text-base">{user.createdAt.toLocaleString("en-US", { timeZone: "UTC" })} (in UTC)</dd>
+              </div>
+              <div>
+                <dt className="text-sm font-medium text-muted-foreground">Roles</dt>
+                <dd className="text-base">
+                  {Array.isArray(user.roles) 
+                    ? user.roles.map((role: unknown) => typeof role === 'string' ? role : 
+                        (role as any)?.name || (role as any)?.key || String(role)).join(', ')
+                    : 'No roles'}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-sm font-medium text-muted-foreground">Primary Role</dt>
+                <dd className="text-base">{user.primaryRole || 'Not set'}</dd>
               </div>
             </dl>
             <div className="space-y-4">

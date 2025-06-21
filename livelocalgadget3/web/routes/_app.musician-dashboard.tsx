@@ -4,9 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Link, useOutletContext, useNavigate } from "react-router";
-import { Edit, Clock, MapPin, CalendarDays, Star, DollarSign, AlertCircle } from "lucide-react";
+import { Edit, Clock, MapPin, CalendarDays, Star, DollarSign, AlertCircle, Music, Calendar } from "lucide-react";
 import { useFindMany } from "@gadgetinc/react";
-import { Client } from "@gadget-client/livelocalgadget3";
+import { api } from "../api";
 import type { AuthOutletContext } from "./_app";
 
 // Helper function to render status badges
@@ -37,36 +37,52 @@ export default function MusicianDashboard() {
     const { user } = useOutletContext<AuthOutletContext>();
     const navigate = useNavigate();
 
-    // Create a fresh API client instance for this component
-    const freshApi = new Client({
-        environment: "development",
-        authenticationMode: { browserSession: true },
-    });
-
-    const [{ data: musicianData, fetching: musicianFetching, error: musicianError }] = useFindMany(freshApi.musician, {
+    const [{ data: musicianData, fetching: musicianFetching, error: musicianError }] = useFindMany(api.musician, {
         filter: { user: { id: { equals: user?.id } } },
         select: {
-            id: true, name: true, stageName: true, bio: true, genres: true, city: true,
+            id: true, name: true, stageName: true, bio: true, genre: true, genres: true, city: true,
             state: true, country: true, website: true, profilePicture: true, totalGigs: true,
             rating: true, hourlyRate: true, yearsExperience: true, experience: true, instruments: true,
-            phone: true, email: true
+            phone: true, email: true, availability: true
         },
         first: 1,
         pause: !user?.id,
     });
 
-    const [{ data: bookingsData, fetching: bookingsFetching, error: bookingsError }] = useFindMany(freshApi.booking, {
-        filter: { musician: { equals: musicianData?.[0]?.id } },
+    const musician: any = musicianData?.[0];
+
+    const [{ data: bookingsData, fetching: bookingsFetching, error: bookingsError }] = useFindMany(api.booking, {
+        filter: { musician: { id: { equals: musician?.id } } },
         select: {
-            id: true, status: true, event: { id: true, title: true, dateTime: true, description: true, venue: { id: true, name: true, location: true } }
+            id: true, 
+            status: true, 
+            date: true,
+            startTime: true,
+            endTime: true,
+            totalAmount: true,
+            notes: true,
+            venue: { 
+                id: true, 
+                name: true, 
+                address: true,
+                city: true,
+                state: true
+            }
         },
-        pause: !musicianData?.[0]?.id,
+        pause: !musician?.id,
     });
+
+    const bookings: any[] = bookingsData || [];
 
     useEffect(() => {
         if (musicianError) console.error("Error loading musician data:", musicianError);
         if (bookingsError) console.error("Error loading bookings data:", bookingsError);
-    }, [musicianError, bookingsError]);
+        if (musician) {
+            console.log("Musician data received:", musician);
+            console.log("Genres field:", musician.genres);
+            console.log("Genre field:", musician.genre);
+        }
+    }, [musicianError, bookingsError, musician]);
 
     // Show loading state while fetching
     if (musicianFetching) {
@@ -83,7 +99,7 @@ export default function MusicianDashboard() {
     }
 
     // If no musician profile found after loading, show a message with option to create one
-    if (!musicianData || musicianData.length === 0) {
+    if (!musician) {
         return (
             <div className="container mx-auto p-6">
                 <div className="flex items-center justify-center min-h-[400px]">
@@ -93,7 +109,7 @@ export default function MusicianDashboard() {
                             It looks like you haven't created your musician profile yet. Create your profile to start managing your bookings, events, and availability.
                         </p>
                         <Button asChild>
-                            <Link to="/musician-profile/create">
+                            <Link to="/musician-profile-create">
                                 Create Musician Profile
                             </Link>
                         </Button>
@@ -103,8 +119,7 @@ export default function MusicianDashboard() {
         );
     }
     
-    const musician = musicianData[0];
-    const upcomingEvents = bookingsData?.filter((b: any) => b.event && new Date(b.event.dateTime) > new Date()) ?? [];
+    const upcomingEvents = bookings.filter((b: any) => b.date && new Date(b.date) > new Date()) ?? [];
 
     return (
         <div className="container mx-auto p-6 space-y-6">
@@ -115,12 +130,20 @@ export default function MusicianDashboard() {
                         Welcome back, {musician.stageName || user?.firstName}!
                     </p>
                 </div>
-                <Button asChild variant="outline">
-                    <Link to={`/musician-profile/edit`}>
-                        <Edit className="mr-2 h-4 w-4" />
-                        Edit Profile
-                    </Link>
-                </Button>
+                <div className="flex gap-2">
+                    <Button asChild variant="outline">
+                        <Link to="/availability">
+                            <Calendar className="mr-2 h-4 w-4" />
+                            Manage Availability
+                        </Link>
+                    </Button>
+                    <Button asChild variant="outline">
+                        <Link to={`/musician-profile/edit`}>
+                            <Edit className="mr-2 h-4 w-4" />
+                            Edit Profile
+                        </Link>
+                    </Button>
+                </div>
             </div>
 
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -150,7 +173,7 @@ export default function MusicianDashboard() {
                         <CardTitle className="text-sm font--medium">Pending Bookings</CardTitle>
                         <AlertCircle className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
-                    <CardContent><div className="text-2xl font-bold">{bookingsData?.filter(b => b.status === 'pending').length ?? 0}</div></CardContent>
+                    <CardContent><div className="text-2xl font-bold">{bookings.filter(b => b.status === 'pending').length ?? 0}</div></CardContent>
                 </Card>
             </div>
 
@@ -170,8 +193,13 @@ export default function MusicianDashboard() {
                                     {upcomingEvents.map((booking) => (
                                         <div key={booking.id} className="flex items-center justify-between p-3 border rounded-lg">
                                             <div>
-                                                <p className="font-medium">{booking.event?.title}</p>
-                                                <p className="text-sm text-muted-foreground">{formatDateTime(booking.event?.dateTime)}</p>
+                                                <p className="font-medium">{booking.venue?.name || 'Venue TBD'}</p>
+                                                <p className="text-sm text-muted-foreground">{formatDateTime(booking.date)}</p>
+                                                {booking.startTime && (
+                                                    <p className="text-sm text-muted-foreground">
+                                                        {booking.startTime}{booking.endTime ? ` - ${booking.endTime}` : ''}
+                                                    </p>
+                                                )}
                                             </div>
                                             {getStatusBadge(booking.status)}
                                         </div>
@@ -186,18 +214,47 @@ export default function MusicianDashboard() {
                     <Card>
                         <CardHeader><CardTitle>All Bookings</CardTitle></CardHeader>
                         <CardContent>
-                            {bookingsData && bookingsData.length > 0 ? (
+                            {bookings && bookings.length > 0 ? (
                                 <div className="space-y-4">
-                                    {bookingsData.map((booking) => (
+                                    {bookings.map((booking) => (
                                         <div key={booking.id} className="border rounded-lg p-4">
                                             <div className="flex items-center justify-between mb-2">
-                                                <h3 className="font-medium">{booking.event?.venue?.name}</h3>
+                                                <h3 className="font-medium">{booking.venue?.name || 'Venue TBD'}</h3>
                                                 {getStatusBadge(booking.status)}
                                             </div>
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-muted-foreground">
-                                                <div className="flex items-center gap-2"><Clock className="h-4 w-4" />{formatDateTime(booking.event?.dateTime)}</div>
-                                                <div className="flex items-center gap-2"><MapPin className="h-4 w-4" />{booking.event?.venue?.location}</div>
+                                                <div className="flex items-center gap-2">
+                                                    <Clock className="h-4 w-4" />
+                                                    {formatDateTime(booking.date)}
+                                                    {booking.startTime && (
+                                                        <span> • {booking.startTime}{booking.endTime ? ` - ${booking.endTime}` : ''}</span>
+                                                    )}
+                                                </div>
+                                                <div className="flex items-center gap-2">
+                                                    <MapPin className="h-4 w-4" />
+                                                    {(() => {
+                                                        const venue = booking.venue;
+                                                        if (venue?.address) {
+                                                            return `${venue.address}${venue.city ? `, ${venue.city}` : ''}${venue.state ? `, ${venue.state}` : ''}`;
+                                                        } else if (venue?.city) {
+                                                            return `${venue.city}${venue.state ? `, ${venue.state}` : ''}`;
+                                                        } else {
+                                                            return 'Location TBD';
+                                                        }
+                                                    })()}
+                                                </div>
+                                                {booking.totalAmount && (
+                                                    <div className="flex items-center gap-2">
+                                                        <DollarSign className="h-4 w-4" />
+                                                        ${booking.totalAmount}
+                                                    </div>
+                                                )}
                                             </div>
+                                            {booking.notes && (
+                                                <div className="mt-2 text-sm text-muted-foreground">
+                                                    <strong>Notes:</strong> {booking.notes}
+                                                </div>
+                                            )}
                                         </div>
                                     ))}
                                 </div>
@@ -207,21 +264,68 @@ export default function MusicianDashboard() {
                 </TabsContent>
 
                 <TabsContent value="profile">
-                     <Card>
+                    <Card>
                         <CardHeader>
                             <CardTitle>Profile Information</CardTitle>
-                            <CardDescription>Your musician profile details. Click "Edit Profile" to make changes.</CardDescription>
+                            <CardDescription>
+                                Your musician profile details. Click "Edit Profile" to make changes.
+                            </CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
-                           <p><strong>Stage Name:</strong> {musician.stageName}</p>
-                           <p><strong>Contact Email:</strong> {musician.email}</p>
-                           <p><strong>Genres:</strong> {musician.genres?.join(', ')}</p>
-                           <p><strong>Location:</strong> {`${musician.city}, ${musician.state}`}</p>
-                           <p><strong>Website:</strong> <a href={musician.website ?? '#'} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">{musician.website || "Not set"}</a></p>
-                           <div>
-                                <p><strong>Bio:</strong></p>
-                                <p className="text-muted-foreground pl-4 border-l-2">{musician.bio || "No bio provided."}</p>
-                           </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="font-semibold">Stage Name:</div>
+                                <div>{musician.stageName || 'Not set'}</div>
+
+                                <div className="font-semibold">Contact Email:</div>
+                                <div>{musician.email || 'Not set'}</div>
+
+                                <div className="font-semibold">Phone:</div>
+                                <div>{musician.phone || 'Not set'}</div>
+                                
+                                <div className="font-semibold">Genre (single):</div>
+                                <div>{musician.genre || 'Not set'}</div>
+
+                                <div className="font-semibold">Genres (array):</div>
+                                <div className="flex flex-wrap gap-1">
+                                    {musician.genres && musician.genres.length > 0 ? (
+                                        musician.genres.map((g: string, i: number) => <Badge key={i} variant="secondary">{g}</Badge>)
+                                    ) : 'Not set'}
+                                </div>
+                                
+                                <div className="font-semibold">Genres Debug:</div>
+                                <div>{JSON.stringify(musician.genres)}</div>
+
+                                <div className="font-semibold">Instruments:</div>
+                                <div className="flex flex-wrap gap-1">
+                                    {musician.instruments && musician.instruments.length > 0 ? (
+                                        musician.instruments.flat().map((inst: string, i: number) => inst && <Badge key={i} variant="outline">{inst}</Badge>)
+                                    ) : 'Not set'}
+                                </div>
+
+                                <div className="font-semibold">Location:</div>
+                                <div>
+                                    {[musician.city, musician.state, musician.country].filter(Boolean).join(', ') || 'Not set'}
+                                </div>
+
+                                <div className="font-semibold">Years of Experience:</div>
+                                <div>{musician.yearsExperience ?? 'Not provided'}</div>
+
+                                <div className="font-semibold">Experience Level:</div>
+                                <div>{musician.experience || 'Not set'}</div>
+                                
+                                <div className="font-semibold">Website:</div>
+                                <div>
+                                    {musician.website ? (
+                                        <a href={musician.website} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">
+                                            {musician.website}
+                                        </a>
+                                    ) : 'Not set'}
+                                </div>
+                            </div>
+                            <div className="pt-4">
+                                <h4 className="font-semibold mb-2">Bio:</h4>
+                                <p className="text-sm text-muted-foreground">{musician.bio || 'No bio provided.'}</p>
+                            </div>
                         </CardContent>
                     </Card>
                 </TabsContent>

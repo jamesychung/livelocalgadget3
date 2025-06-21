@@ -100,6 +100,12 @@ export const UserProfileForm: React.FC<UserProfileFormProps> = ({ role, profile,
       return;
     }
     
+    // Validate website URL if provided
+    if (form.website.trim() && !isValidUrl(form.website.trim())) {
+      alert("Please enter a valid website URL (e.g., https://example.com) or leave it empty.");
+      return;
+    }
+    
     // Prepare the data for submission
     const submitData = {
       ...form,
@@ -109,13 +115,25 @@ export const UserProfileForm: React.FC<UserProfileFormProps> = ({ role, profile,
       genres: form.genres,
       // Ensure numeric fields are properly formatted
       yearsExperience: form.yearsExperience ? parseInt(form.yearsExperience) : 0,
-      hourlyRate: form.hourlyRate ? parseFloat(form.hourlyRate) : 0
+      hourlyRate: form.hourlyRate ? parseFloat(form.hourlyRate) : 0,
+      // Ensure website is either a valid URL or null
+      website: form.website.trim() || null
     };
     
     console.log("Submitting data:", submitData);
     console.log("Calling onSave function...");
     onSave(submitData);
     console.log("=== FORM SUBMISSION COMPLETED ===");
+  };
+
+  // Helper function to validate URLs
+  const isValidUrl = (string: string): boolean => {
+    try {
+      const url = new URL(string);
+      return url.protocol === 'http:' || url.protocol === 'https:';
+    } catch (_) {
+      return false;
+    }
   };
 
   // Check if form is valid - simplified for testing
@@ -279,10 +297,14 @@ export const UserProfileForm: React.FC<UserProfileFormProps> = ({ role, profile,
             <Input
               id="musician-website"
               name="website"
+              type="url"
               value={form.website}
               onChange={handleChange}
               placeholder="https://yourwebsite.com"
             />
+            <p className="text-xs text-muted-foreground mt-1">
+              Enter a valid website URL (e.g., https://example.com) or leave empty
+            </p>
           </div>
           <div>
             <Label htmlFor="experience">Experience</Label>

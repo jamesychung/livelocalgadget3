@@ -27,7 +27,7 @@ _export(exports, {
 *  |_|_| \_/ \___|_|\___/ \___\__,_|_|\__, |\__,_|\__,_|\__, |\___|\__|____/ 
 *                                     |___/             |___/                
 *
-* Built for environment `Development` at version 151
+* Built for environment `Development` at version 155
 * Framework version: ^1.4.0
 * Edit this app here: https://livelocalgadget3.gadget.dev/edit
 */ /// <reference path="./ActionContextTypes.d.ts" />

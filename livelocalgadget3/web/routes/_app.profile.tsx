@@ -12,7 +12,6 @@ import { useOutletContext, useRevalidator, useNavigate } from "react-router";
 import { api } from "../api";
 import type { AuthOutletContext } from "./_app";
 import { Music, MapPin, Phone, Globe, Star, Calendar, DollarSign, Building } from "lucide-react";
-import { Client } from "@gadget-client/livelocalgadget3";
 
 // Safe string conversion function
 const safeString = (value: any): string => {
@@ -38,12 +37,6 @@ export default function () {
   const [venueProfile, setVenueProfile] = useState<any>(null);
   const [loadingVenue, setLoadingVenue] = useState(false);
 
-  // Create a fresh API client instance for this component
-  const freshApi = new Client({
-    environment: "development",
-    authenticationMode: { browserSession: true },
-  });
-
   // Get user's primary role from the primaryRole field
   const primaryRole = user.primaryRole || 'user';
 
@@ -61,7 +54,7 @@ export default function () {
       setLoadingMusician(true);
       
       // Use the correct filter syntax for the user relationship
-      const profileResult = await freshApi.musician.findMany({
+      const profileResult = await api.musician.findMany({
         filter: { user: { id: { equals: user.id } } },
         select: {
           id: true,
@@ -221,11 +214,35 @@ export default function () {
                   </div>
                   
                   <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <Music className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm">
-                        <strong>Genre:</strong> {safeString(musicianProfile.genre) || "Not specified"}
-                      </span>
+                    <div className="flex items-start gap-2">
+                      <Music className="h-4 w-4 text-muted-foreground mt-1" />
+                      <div>
+                        <strong className="text-sm">Genres:</strong>
+                        <div className="flex flex-wrap gap-1 mt-1">
+                          {musicianProfile.genres && musicianProfile.genres.length > 0 ? (
+                            musicianProfile.genres.map((genre: string, index: number) => (
+                              <Badge key={index} variant="secondary">{genre}</Badge>
+                            ))
+                          ) : (
+                            <span className="text-sm text-muted-foreground">Not specified</span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <Music className="h-4 w-4 text-muted-foreground mt-1" />
+                      <div>
+                        <strong className="text-sm">Instruments:</strong>
+                        <div className="flex flex-wrap gap-1 mt-1">
+                          {musicianProfile.instruments && musicianProfile.instruments.length > 0 ? (
+                            musicianProfile.instruments.flat().map((instrument: string, index: number) => (
+                              instrument && <Badge key={index} variant="outline">{instrument}</Badge>
+                            ))
+                          ) : (
+                            <span className="text-sm text-muted-foreground">Not specified</span>
+                          )}
+                        </div>
+                      </div>
                     </div>
                     <div className="flex items-center gap-2">
                       <MapPin className="h-4 w-4 text-muted-foreground" />
@@ -248,25 +265,28 @@ export default function () {
 
                 {/* Stats and Contact */}
                 <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="text-center p-3 bg-muted rounded-lg">
-                      <div className="text-2xl font-bold text-primary">
-                        {safeString(musicianProfile.totalGigs) || 0}
-                      </div>
-                      <div className="text-xs text-muted-foreground">Total Gigs</div>
+                  <div className="grid grid-cols-2 gap-4 text-center">
+                    <div>
+                      <p className="font-bold text-xl">{safeString(musicianProfile.totalGigs) || 0}</p>
+                      <p className="text-sm text-muted-foreground">Total Gigs</p>
                     </div>
-                    <div className="text-center p-3 bg-muted rounded-lg">
-                      <div className="text-2xl font-bold text-primary flex items-center justify-center gap-1">
-                        <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                        {safeString(musicianProfile.rating) || "N/A"}
-                      </div>
-                      <div className="text-xs text-muted-foreground">Rating</div>
+                    <div className="flex items-center justify-center gap-1">
+                      <Star className="h-5 w-5 text-yellow-400" />
+                      <p className="font-bold text-xl">{safeString(musicianProfile.rating) || 0}</p>
                     </div>
                   </div>
 
-                  <div className="space-y-2">
-                    {musicianProfile.phone && (
+                  <div className="space-y-2 pt-4 border-t">
+                    {musicianProfile.email && (
                       <div className="flex items-center gap-2">
+                        <Globe className="h-4 w-4 text-muted-foreground" />
+                        <a href={`mailto:${musicianProfile.email}`} className="text-sm hover:underline">
+                          {musicianProfile.email}
+                        </a>
+                      </div>
+                    )}
+                    {musicianProfile.phone && (
+                       <div className="flex items-center gap-2">
                         <Phone className="h-4 w-4 text-muted-foreground" />
                         <span className="text-sm">{safeString(musicianProfile.phone)}</span>
                       </div>
@@ -274,76 +294,22 @@ export default function () {
                     {musicianProfile.website && (
                       <div className="flex items-center gap-2">
                         <Globe className="h-4 w-4 text-muted-foreground" />
-                        <a 
-                          href={safeString(musicianProfile.website)} 
-                          className="text-sm text-primary hover:underline"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          {safeString(musicianProfile.website)}
+                        <a href={safeString(musicianProfile.website)} target="_blank" rel="noopener noreferrer" className="text-sm hover:underline">
+                          Website
                         </a>
                       </div>
                     )}
                   </div>
+                </div>
 
-                  <div className="flex gap-2">
-                    <Badge variant={musicianProfile.isActive ? "default" : "secondary"}>
-                      {musicianProfile.isActive ? "Active" : "Inactive"}
-                    </Badge>
-                    <Badge variant={musicianProfile.isVerified ? "default" : "secondary"}>
-                      {musicianProfile.isVerified ? "Verified" : "Not Verified"}
-                    </Badge>
-                  </div>
-
-                  <div className="flex gap-2 mt-4">
-                    <Button 
-                      variant="outline" 
-                      onClick={() => navigate("/musician-profile/edit")}
-                    >
-                      Edit Profile
-                    </Button>
-                    <Button 
-                      variant="default" 
-                      onClick={() => navigate("/musician-dashboard")}
-                    >
-                      Go to Dashboard
-                    </Button>
-                  </div>
+                 {/* Action Buttons */}
+                 <div className="md:col-span-2 flex justify-end gap-2 mt-4">
+                  <Button variant="outline" onClick={() => navigate('/musician-profile/edit')}>Edit Profile</Button>
+                  <Button onClick={() => navigate('/musician-dashboard')}>Go to Dashboard</Button>
                 </div>
               </div>
             ) : (
-              <div className="text-center py-8">
-                <p className="text-muted-foreground mb-4">
-                  No musician profile found. Create one to showcase your music career.
-                </p>
-                <div className="flex gap-2 justify-center">
-                  <Button onClick={() => navigate("/musician-profile/create")}>
-                    Create Musician Profile
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    onClick={async () => {
-                      try {
-                        await freshApi.musician.create({
-                          user: user.id,
-                          name: `${user.firstName} ${user.lastName}`,
-                          isActive: true,
-                          isVerified: false,
-                          rating: 0,
-                          totalGigs: 0,
-                        });
-                        // Reload the profile
-                        loadMusicianProfile();
-                      } catch (error) {
-                        console.error("Error creating musician profile:", error);
-                        alert("Failed to create musician profile. Please try again.");
-                      }
-                    }}
-                  >
-                    Auto-Create Profile
-                  </Button>
-                </div>
-              </div>
+              <p>No musician profile found. <a href="/musician-profile-create" className="text-blue-500 hover:underline">Create one now</a>.</p>
             )}
           </CardContent>
         </Card>

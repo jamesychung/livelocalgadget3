@@ -136,16 +136,40 @@ export default function MusicianProfileEdit() {
         stageName: formData.stageName || "",
         bio: formData.bio || "",
         genre: formData.genre || "",
+        genres: formData.genres || [],
+        instruments: formData.instruments ? 
+          (typeof formData.instruments === 'string' ? 
+            (formData.instruments === '[]' || formData.instruments.includes('[]') ? [] :
+             formData.instruments.startsWith('[') && formData.instruments.endsWith(']') ?
+             (() => {
+               try {
+                 const parsed = JSON.parse(formData.instruments);
+                 return Array.isArray(parsed) ? parsed : [];
+               } catch {
+                 return formData.instruments.split(',').map((i: string) => i.trim()).filter((i: string) => i.length > 0);
+               }
+             })() :
+             formData.instruments.split(',').map((i: string) => i.trim()).filter((i: string) => i.length > 0)) : 
+            formData.instruments) : 
+          [],
         city: formData.city || "",
         state: formData.state || "",
         country: formData.country || "",
         phone: formData.phone || "",
-        website: formData.website || "",
+        website: formData.website && formData.website.trim() ? formData.website.trim() : null,
         experience: formData.experience || "",
         yearsExperience: parseInt(formData.yearsExperience) || 0,
         hourlyRate: parseFloat(formData.hourlyRate) || 0,
         email: formData.email || user.email,
       };
+
+      console.log("Website field value:", formData.website);
+      console.log("Website field type:", typeof formData.website);
+      console.log("Website field after processing:", updateData.website);
+      console.log("Genres field value:", formData.genres);
+      console.log("Genres field type:", typeof formData.genres);
+      console.log("Instruments field value:", formData.instruments);
+      console.log("Instruments field type:", typeof formData.instruments);
 
       console.log("Update data being sent:", updateData);
       console.log("Musician profile ID:", musicianProfile.id);

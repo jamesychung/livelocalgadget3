@@ -1,0 +1,1 @@
+record.venue == context.currentUser.venue 

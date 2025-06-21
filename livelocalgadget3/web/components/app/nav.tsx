@@ -119,17 +119,17 @@ const getNavigationItems = (user: any): NavItem[] => {
         },
         {
           title: "Events",
-          path: "/musician-dashboard?tab=events",
+          path: "/events",
           icon: Music,
         },
         {
           title: "Availability",
-          path: "/musician-dashboard?tab=availability",
+          path: "/availability",
           icon: Calendar,
         },
         {
           title: "Reviews",
-          path: "/musician-dashboard?tab=reviews",
+          path: "/musician-reviews",
           icon: Star,
         },
         {
@@ -162,14 +162,14 @@ const getNavigationItems = (user: any): NavItem[] => {
           icon: Building,
         },
         {
-          title: "Bookings",
-          path: "/venue-dashboard?tab=bookings",
+          title: "Events",
+          path: "/venue-events",
           icon: Calendar,
         },
         {
-          title: "Events",
-          path: "/venue-dashboard?tab=events",
-          icon: Music,
+          title: "Bookings",
+          path: "/venue-dashboard?tab=bookings",
+          icon: Calendar,
         },
         {
           title: "Find Musicians",

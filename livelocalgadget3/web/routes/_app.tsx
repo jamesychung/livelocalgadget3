@@ -17,21 +17,12 @@ import { Outlet, useOutletContext, useNavigate } from "react-router";
 import { useState, useEffect } from "react";
 import { useUser } from "@gadgetinc/react";
 import type { RootOutletContext } from "../root";
-import type { Route } from "./+types/_app";
-
-export const loader = async ({ context }: Route.LoaderArgs) => {
-  // Don't check session during SSR to avoid permission errors
-  // Authentication will be handled client-side
-  return {
-    user: null, // Will be set client-side
-  };
-};
 
 export type AuthOutletContext = RootOutletContext & {
   user: any;
 };
 
-export default function ({ loaderData }: Route.ComponentProps) {
+export default function () {
   const rootOutletContext = useOutletContext<RootOutletContext>();
   const user = useUser();
   const navigate = useNavigate();
@@ -71,8 +62,8 @@ export default function ({ loaderData }: Route.ComponentProps) {
               user={user}
               icon={
                 <>
-                  <UserIcon user={user} />
-                  <span className="text-sm font-medium">{user.firstName ?? user.email}</span>
+                  <UserIcon user={user as any} />
+                  <span className="text-sm font-medium">{(user as any).firstName ?? (user as any).email}</span>
                 </>
               }
             />
