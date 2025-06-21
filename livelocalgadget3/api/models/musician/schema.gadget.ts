@@ -108,6 +108,11 @@ export const schema: GadgetModel = {
       type: "url",
       storageKey: "musician_audio",
     },
+    audioFiles: {
+      type: "json",
+      storageKey: "musician_audio_files",
+      default: [],
+    },
     additionalPictures: {
       type: "json",
       storageKey: "musician_additional_pictures",

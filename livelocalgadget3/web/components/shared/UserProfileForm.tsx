@@ -6,6 +6,7 @@ import { Checkbox } from "../ui/checkbox";
 import { FileUpload } from "./FileUpload";
 import { SocialMediaForm } from "./SocialMediaForm";
 import { MultipleImageUpload } from "./MultipleImageUpload";
+import { MultipleAudioUpload } from "./MultipleAudioUpload";
 
 export type UserProfileFormProps = {
   role: "user" | "musician" | "venue";
@@ -78,6 +79,7 @@ export const UserProfileForm: React.FC<UserProfileFormProps> = ({ role, profile,
     hourlyRate: safeString(profile?.hourlyRate) || "",
     profilePicture: safeString(profile?.profilePicture) || "",
     audio: safeString(profile?.audio) || "",
+    audioFiles: safeArray(profile?.audioFiles) || [],
     socialLinks: safeSocialLinks(profile?.socialLinks) || [],
     additionalPictures: safeArray(profile?.additionalPictures) || [],
     // Venue fields
@@ -115,6 +117,10 @@ export const UserProfileForm: React.FC<UserProfileFormProps> = ({ role, profile,
 
   const handleAudioRemove = () => {
     setForm({ ...form, audio: "" });
+  };
+
+  const handleAudioFilesChange = (audioFiles: string[]) => {
+    setForm({ ...form, audioFiles });
   };
 
   const handleSocialLinksChange = (links: Array<{platform: string, url: string}>) => {
@@ -166,6 +172,7 @@ export const UserProfileForm: React.FC<UserProfileFormProps> = ({ role, profile,
       // Ensure profile picture and audio are either valid URLs or null
       profilePicture: form.profilePicture.trim() || null,
       audio: form.audio.trim() || null,
+      audioFiles: form.audioFiles,
       // Keep social links as JSON
       socialLinks: form.socialLinks,
       // Keep additional pictures as array
@@ -292,6 +299,15 @@ export const UserProfileForm: React.FC<UserProfileFormProps> = ({ role, profile,
             accept="audio/*"
             maxSize={20}
           />
+
+          {/* Audio Files Upload */}
+          <div>
+            <Label>Audio Samples (multiple)</Label>
+            <MultipleAudioUpload
+              audioFiles={form.audioFiles}
+              onChange={handleAudioFilesChange}
+            />
+          </div>
 
           {/* Additional Pictures */}
           <MultipleImageUpload

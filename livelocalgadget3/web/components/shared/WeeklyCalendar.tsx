@@ -30,25 +30,73 @@ export default function WeeklyCalendar({
     showNavigation = true,
     className = ""
 }: WeeklyCalendarProps) {
-    const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
-    const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+    const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+    const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
     
     // State for current week offset
     const [weekOffset, setWeekOffset] = useState(0);
     
-    // Get current week's dates
+    // Get current week's dates - start from Sunday
     const today = new Date();
     const currentDay = today.getDay(); // 0 = Sunday, 1 = Monday, etc.
-    const mondayOffset = currentDay === 0 ? -6 : 1 - currentDay; // Adjust for Monday start
-    const monday = new Date(today);
-    monday.setDate(today.getDate() + mondayOffset + (weekOffset * 7));
+    const sundayOffset = -currentDay; // Adjust for Sunday start
+    const sunday = new Date(today);
+    sunday.setDate(today.getDate() + sundayOffset + (weekOffset * 7));
     
     const weekDates: Date[] = [];
     for (let i = 0; i < 7; i++) {
-        const date = new Date(monday);
-        date.setDate(monday.getDate() + i);
+        const date = new Date(sunday);
+        date.setDate(sunday.getDate() + i);
         weekDates.push(date);
     }
+    
+    // Process data to handle both recurring and specific date availability
+    const processDataForWeek = () => {
+        const processedData: Record<string, TimeSlot[]> = {};
+        
+        // Initialize empty arrays for each day
+        days.forEach(day => {
+            processedData[day] = [];
+        });
+        
+        // Process the data
+        Object.entries(data).forEach(([key, slots]) => {
+            if (days.includes(key)) {
+                // This is recurring availability (sunday, monday, etc.)
+                processedData[key] = [...slots];
+            } else {
+                // This is specific date availability (2025-06-22, etc.)
+                try {
+                    // Fix date parsing to avoid timezone issues
+                    const [year, month, day] = key.split('-').map(Number);
+                    const date = new Date(year, month - 1, day); // month is 0-indexed
+                    const dayName = days[date.getDay()];
+                    
+                    // Check if this date falls within the current week
+                    const weekStart = new Date(weekDates[0]);
+                    const weekEnd = new Date(weekDates[6]);
+                    weekStart.setHours(0, 0, 0, 0);
+                    weekEnd.setHours(23, 59, 59, 999);
+                    
+                    if (date >= weekStart && date <= weekEnd) {
+                        // Add slots for this specific date
+                        slots.forEach(slot => {
+                            processedData[dayName].push({
+                                ...slot,
+                                date: key // Preserve the original date
+                            });
+                        });
+                    }
+                } catch (error) {
+                    console.warn('Invalid date format:', key);
+                }
+            }
+        });
+        
+        return processedData;
+    };
+    
+    const processedData = processDataForWeek();
     
     const isToday = (date: Date) => {
         const today = new Date();
@@ -61,31 +109,46 @@ export default function WeeklyCalendar({
         return date < today;
     };
     
-    const defaultRenderSlot = (slot: TimeSlot, day: string, index: number) => (
-        <div key={index} className="flex items-center justify-between p-2 bg-blue-50 rounded text-xs">
-            <div>
-                <div className="font-medium">
-                    {slot.startTime} - {slot.endTime}
-                </div>
-                {slot.date && (
-                    <div className="text-muted-foreground">
-                        {new Date(slot.date).toLocaleDateString()}
+    const defaultRenderSlot = (slot: TimeSlot, day: string, index: number) => {
+        // Determine the actual key for removal (day name for recurring, date for specific)
+        const removeKey = slot.date || day;
+        const removeIndex = slot.date ? 
+            // For specific dates, find the index in the original data
+            data[slot.date]?.findIndex(s => 
+                s.startTime === slot.startTime && 
+                s.endTime === slot.endTime
+            ) ?? 0 : 
+            index;
+        
+        // Fix date display to avoid timezone issues
+        const formatDate = (dateString: string) => {
+            const [year, month, day] = dateString.split('-').map(Number);
+            const date = new Date(year, month - 1, day); // month is 0-indexed
+            return date.toLocaleDateString();
+        };
+        
+        return (
+            <div key={index} className="flex items-center justify-between p-2 bg-blue-50 rounded text-xs">
+                <div>
+                    <div className="font-medium">
+                        {slot.startTime} - {slot.endTime}
                     </div>
+                    {/* Removed date display for cleaner weekly view */}
+                </div>
+                {onRemoveSlot && (
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => onRemoveSlot(removeKey, removeIndex)}
+                        className="h-6 px-2 text-xs"
+                        disabled={isPast(weekDates[days.indexOf(day)])}
+                    >
+                        ×
+                    </Button>
                 )}
             </div>
-            {onRemoveSlot && (
-                <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => onRemoveSlot(day, index)}
-                    className="h-6 px-2 text-xs"
-                    disabled={isPast(weekDates[days.indexOf(day)])}
-                >
-                    ×
-                </Button>
-            )}
-        </div>
-    );
+        );
+    };
     
     return (
         <div className={`space-y-4 ${className}`}>
@@ -119,7 +182,7 @@ export default function WeeklyCalendar({
                     const date = weekDates[index];
                     const isCurrentDay = isToday(date);
                     const isPastDay = isPast(date);
-                    const dayData = data[day] || [];
+                    const dayData = processedData[day] || [];
                     
                     return (
                         <Card 

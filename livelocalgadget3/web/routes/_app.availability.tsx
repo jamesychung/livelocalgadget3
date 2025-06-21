@@ -12,7 +12,7 @@ export default function AvailabilityPage() {
     const { user } = useOutletContext<AuthOutletContext>();
     const navigate = useNavigate();
 
-    const [{ data: musicianData, fetching: musicianFetching, error: musicianError }] = useFindMany(api.musician, {
+    const [{ data: musicianData, fetching: musicianFetching, error: musicianError }, refetch] = useFindMany(api.musician, {
         filter: { user: { id: { equals: user?.id } } },
         select: {
             id: true, 
@@ -104,6 +104,10 @@ export default function AvailabilityPage() {
             }
             
             console.log("Availability updated successfully");
+            
+            // Refetch the data to ensure UI is in sync with database
+            refetch();
+            
         } catch (error) {
             console.error("Error updating availability:", error);
         }

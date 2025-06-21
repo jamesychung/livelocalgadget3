@@ -27,6 +27,59 @@ const safeString = (value: any): string => {
   return String(value);
 };
 
+const ChangePasswordModal = (props: { open: boolean; onClose: () => void }) => {
+  const { user } = useOutletContext<AuthOutletContext>();
+
+  const {
+    register,
+    submit,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useActionForm(api.user.changePassword, {
+    defaultValues: user,
+    onSuccess: props.onClose,
+  });
+
+  const onClose = () => {
+    reset();
+    props.onClose();
+  };
+
+  return (
+    <Dialog open={props.open} onOpenChange={onClose}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Change password</DialogTitle>
+        </DialogHeader>
+        <form onSubmit={submit}>
+          <div className="space-y-4">
+            <div>
+              <Label>Current Password</Label>
+              <Input type="password" autoComplete="off" {...register("currentPassword")} />
+              {errors?.root?.message && <p className="text-red-500 text-sm mt-1">{errors.root.message}</p>}
+            </div>
+            <div>
+              <Label>New Password</Label>
+              <Input type="password" autoComplete="off" {...register("newPassword")} />
+              {errors?.user?.password?.message && (
+                <p className="text-red-500 text-sm mt-1">New password {errors.user.password.message}</p>
+              )}
+            </div>
+          </div>
+          <div className="flex justify-end gap-2 pt-4">
+            <Button variant="outline" onClick={onClose} type="button">
+              Cancel
+            </Button>
+            <Button type="submit" disabled={isSubmitting}>
+              Save
+            </Button>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
 export default function ProfilePage() {
   const { user } = useOutletContext<AuthOutletContext>();
   const navigate = useNavigate();
@@ -63,6 +116,8 @@ export default function ProfilePage() {
       console.log("Audio URL type:", typeof musicianProfile.audio);
       console.log("Audio starts with blob:", musicianProfile.audio?.startsWith('blob:'));
       console.log("Social links:", musicianProfile.socialLinks);
+      console.log("Social links type:", typeof musicianProfile.socialLinks);
+      console.log("Social links length:", musicianProfile.socialLinks?.length);
       console.log("Additional pictures:", musicianProfile.additionalPictures);
     }
   }, [musicianProfile]);
@@ -97,6 +152,7 @@ export default function ProfilePage() {
           isVerified: true,
           rating: true,
           totalGigs: true,
+          audioFiles: true,
         },
         first: 1
       });
@@ -191,535 +247,569 @@ export default function ProfilePage() {
   };
 
   return (
-    <div className="container mx-auto p-6 max-w-4xl">
-      {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Your Profile</h1>
-        <p className="text-gray-600">Manage your account settings and profile information</p>
-      </div>
-      
-      {/* Basic Profile Card */}
-      <Card className="mb-8">
-        <CardContent className="p-8">
-          <div className="flex items-start justify-between">
-            <div className="flex gap-6">
-              <div className="relative">
-                {(() => {
-                  console.log("Profile picture display logic:");
-                  console.log("- primaryRole:", primaryRole);
-                  console.log("- musicianProfile?.profilePicture:", musicianProfile?.profilePicture);
-                  console.log("- starts with blob:", musicianProfile?.profilePicture?.startsWith('blob:'));
-                  console.log("- condition result:", primaryRole === 'musician' && musicianProfile?.profilePicture && !musicianProfile.profilePicture.startsWith('blob:'));
-                  
-                  if (primaryRole === 'musician' && musicianProfile?.profilePicture && !musicianProfile.profilePicture.startsWith('blob:')) {
-                    return (
-                      <img 
-                        src={musicianProfile.profilePicture} 
-                        alt="Profile" 
-                        className="h-20 w-20 rounded-full object-cover border-2 border-gray-200 cursor-pointer hover:scale-105 transition-transform"
-                        onClick={openProfilePictureLightbox}
-                      />
-                    );
-                  } else {
-                    return <UserIcon user={user} className="h-20 w-20" />;
-                  }
-                })()}
-                {primaryRole === 'musician' && musicianProfile?.profilePicture?.startsWith('blob:') && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-gray-100 rounded-full">
-                    <span className="text-xs text-gray-500">Image expired</span>
-                  </div>
-                )}
-                {primaryRole === 'musician' && musicianProfile?.isVerified && (
-                  <div className="absolute -bottom-1 -right-1 bg-blue-500 rounded-full p-1">
-                    <Shield className="h-3 w-3 text-white" />
-                  </div>
-                )}
-                {primaryRole === 'venue' && venueProfile?.isVerified && (
-                  <div className="absolute -bottom-1 -right-1 bg-blue-500 rounded-full p-1">
-                    <Shield className="h-3 w-3 text-white" />
-                  </div>
-                )}
-              </div>
-              <div className="flex-1">
-                <h2 className="text-2xl font-semibold text-gray-900 mb-1">{title}</h2>
-                {hasName && <p className="text-gray-600 mb-3">{user.email}</p>}
-                <div className="flex items-center gap-3">
-                  <Badge variant="secondary" className="text-sm">
-                    {primaryRole === 'musician' ? 'Musician' : primaryRole === 'venue' ? 'Venue Owner' : 'User'}
-                  </Badge>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+      <div className="container mx-auto p-6 max-w-6xl">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-4xl font-bold text-gray-900 mb-2">Your Profile</h1>
+          <p className="text-gray-600 text-lg">Manage your account settings and profile information</p>
+        </div>
+        
+        {/* Basic Profile Card */}
+        <Card className="mb-8 shadow-lg border-0 bg-white/80 backdrop-blur-sm">
+          <CardContent className="p-8">
+            <div className="flex items-start justify-between">
+              <div className="flex gap-8">
+                <div className="relative">
+                  {(() => {
+                    console.log("Profile picture display logic:");
+                    console.log("- primaryRole:", primaryRole);
+                    console.log("- musicianProfile?.profilePicture:", musicianProfile?.profilePicture);
+                    console.log("- starts with blob:", musicianProfile?.profilePicture?.startsWith('blob:'));
+                    console.log("- condition result:", primaryRole === 'musician' && musicianProfile?.profilePicture && !musicianProfile.profilePicture.startsWith('blob:'));
+                    
+                    if (primaryRole === 'musician' && musicianProfile?.profilePicture && !musicianProfile.profilePicture.startsWith('blob:')) {
+                      return (
+                        <img 
+                          src={musicianProfile.profilePicture} 
+                          alt="Profile" 
+                          className="h-24 w-24 rounded-2xl object-cover border-4 border-white shadow-lg cursor-pointer hover:scale-105 transition-all duration-300"
+                          onClick={openProfilePictureLightbox}
+                        />
+                      );
+                    } else {
+                      return <UserIcon user={user} className="h-24 w-24 rounded-2xl border-4 border-white shadow-lg" />;
+                    }
+                  })()}
+                  {primaryRole === 'musician' && musicianProfile?.profilePicture?.startsWith('blob:') && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-gray-100 rounded-2xl">
+                      <span className="text-xs text-gray-500">Image expired</span>
+                    </div>
+                  )}
                   {primaryRole === 'musician' && musicianProfile?.isVerified && (
-                    <Badge variant="default" className="bg-blue-100 text-blue-800">
-                      <Shield className="h-3 w-3 mr-1" />
-                      Verified
-                    </Badge>
+                    <div className="absolute -bottom-2 -right-2 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full p-2 shadow-lg">
+                      <Shield className="h-4 w-4 text-white" />
+                    </div>
                   )}
                   {primaryRole === 'venue' && venueProfile?.isVerified && (
-                    <Badge variant="default" className="bg-blue-100 text-blue-800">
-                      <Shield className="h-3 w-3 mr-1" />
-                      Verified
+                    <div className="absolute -bottom-2 -right-2 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full p-2 shadow-lg">
+                      <Shield className="h-4 w-4 text-white" />
+                    </div>
+                  )}
+                </div>
+                <div className="flex-1">
+                  <h2 className="text-3xl font-bold text-gray-900 mb-2">{title}</h2>
+                  {hasName && <p className="text-gray-600 mb-4 text-lg">{user.email}</p>}
+                  <div className="flex items-center gap-3 mb-4">
+                    <Badge variant="secondary" className="text-sm px-4 py-2 bg-gradient-to-r from-blue-100 to-purple-100 text-blue-800 border-0">
+                      {primaryRole === 'musician' ? 'Musician' : primaryRole === 'venue' ? 'Venue Owner' : 'User'}
                     </Badge>
+                    {primaryRole === 'musician' && musicianProfile?.isVerified && (
+                      <Badge variant="default" className="bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 px-4 py-2">
+                        <Shield className="h-3 w-3 mr-1" />
+                        Verified
+                      </Badge>
+                    )}
+                    {primaryRole === 'venue' && venueProfile?.isVerified && (
+                      <Badge variant="default" className="bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 px-4 py-2">
+                        <Shield className="h-3 w-3 mr-1" />
+                        Verified
+                      </Badge>
+                    )}
+                  </div>
+                  {primaryRole === 'user' && (
+                    <p className="text-sm text-gray-600 max-w-md leading-relaxed">
+                      Welcome to Live Local Gadget! As a user, you can browse events, follow musicians and venues, and discover great live music in your area.
+                    </p>
                   )}
                 </div>
-                {primaryRole === 'user' && (
-                  <p className="text-sm text-gray-600 mt-3 max-w-md">
-                    Welcome to Live Local Gadget! As a user, you can browse events, follow musicians and venues, and discover great live music in your area.
-                  </p>
-                )}
               </div>
-            </div>
-            <div className="flex gap-2">
-              {!user.googleProfileId && (
-                <Button variant="outline" onClick={() => setIsChangingPassword(true)}>
-                  <Settings className="mr-2 h-4 w-4" />
-                  Change Password
-                </Button>
-              )}
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Musician Profile Section */}
-      {primaryRole === 'musician' && (
-        <Card className="mb-8">
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle className="flex items-center gap-2">
-                  <Music className="h-5 w-5" />
-                  Musician Profile
-                </CardTitle>
-                <CardDescription>
-                  Your professional musician information and performance details
-                </CardDescription>
-              </div>
-              <Button asChild>
-                <Link to="/musician-profile/edit">
-                  <Edit className="mr-2 h-4 w-4" />
-                  Edit Profile
-                </Link>
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent>
-            {loadingMusician ? (
-              <div className="animate-pulse space-y-4">
-                <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-                <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-                <div className="h-4 bg-gray-200 rounded w-2/3"></div>
-              </div>
-            ) : musicianProfile ? (
-              <div className="space-y-6">
-                {/* Profile Stats */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {musicianProfile.hourlyRate && (
-                    <div className="text-center p-4 bg-gray-50 rounded-lg">
-                      <DollarSign className="h-8 w-8 text-green-600 mx-auto mb-2" />
-                      <div className="text-2xl font-bold">${musicianProfile.hourlyRate}</div>
-                      <div className="text-sm text-gray-600">Hourly Rate</div>
-                    </div>
-                  )}
-                  {musicianProfile.rating && (
-                    <div className="text-center p-4 bg-gray-50 rounded-lg">
-                      <Star className="h-8 w-8 text-yellow-500 mx-auto mb-2" />
-                      <div className="text-2xl font-bold">{musicianProfile.rating}</div>
-                      <div className="text-sm text-gray-600">Rating</div>
-                    </div>
-                  )}
-                  {musicianProfile.totalGigs && (
-                    <div className="text-center p-4 bg-gray-50 rounded-lg">
-                      <Calendar className="h-8 w-8 text-blue-600 mx-auto mb-2" />
-                      <div className="text-2xl font-bold">{musicianProfile.totalGigs}</div>
-                      <div className="text-sm text-gray-600">Total Gigs</div>
-                    </div>
-                  )}
-                </div>
-
-                {/* Profile Details */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <h3 className="text-lg font-semibold mb-3">Basic Information</h3>
-                    <div className="space-y-3">
-                      {musicianProfile.stageName && (
-                        <div>
-                          <span className="text-sm text-gray-600">Stage Name:</span>
-                          <p className="font-medium">{musicianProfile.stageName}</p>
-                        </div>
-                      )}
-                      {musicianProfile.genre && (
-                        <div>
-                          <span className="text-sm text-gray-600">Primary Genre:</span>
-                          <p className="font-medium">{musicianProfile.genre}</p>
-                        </div>
-                      )}
-                      {musicianProfile.yearsExperience && (
-                        <div>
-                          <span className="text-sm text-gray-600">Experience:</span>
-                          <p className="font-medium">{musicianProfile.yearsExperience} years</p>
-                        </div>
-                      )}
-                      {musicianProfile.city && (
-                        <div>
-                          <span className="text-sm text-gray-600">Location:</span>
-                          <p className="font-medium flex items-center gap-1">
-                            <MapPin className="h-4 w-4" />
-                            {[musicianProfile.city, musicianProfile.state, musicianProfile.country].filter(Boolean).join(", ")}
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-semibold mb-3">Contact & Links</h3>
-                    <div className="space-y-3">
-                      {musicianProfile.phone && (
-                        <div>
-                          <span className="text-sm text-gray-600">Phone:</span>
-                          <p className="font-medium flex items-center gap-1">
-                            <Phone className="h-4 w-4" />
-                            {musicianProfile.phone}
-                          </p>
-                        </div>
-                      )}
-                      {musicianProfile.website && (
-                        <div>
-                          <span className="text-sm text-gray-600">Website:</span>
-                          <p className="font-medium flex items-center gap-1">
-                            <Globe className="h-4 w-4" />
-                            <a href={musicianProfile.website} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
-                              {musicianProfile.website}
-                            </a>
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Audio Sample */}
-                {musicianProfile.audio && !musicianProfile.audio.startsWith('blob:') && (
-                  <div className="border-t pt-6">
-                    <h3 className="text-lg font-semibold mb-3">Audio Sample</h3>
-                    <div className="bg-gray-50 rounded-lg p-4">
-                      <audio controls className="w-full">
-                        <source src={musicianProfile.audio} type="audio/mpeg" />
-                        <source src={musicianProfile.audio} type="audio/mp3" />
-                        <source src={musicianProfile.audio} type="audio/wav" />
-                        <source src={musicianProfile.audio} type="audio/ogg" />
-                        Your browser does not support the audio element.
-                      </audio>
-                      <p className="text-xs text-gray-500 mt-2">
-                        Audio URL: {musicianProfile.audio.substring(0, 50)}...
-                      </p>
-                    </div>
-                  </div>
-                )}
-                {musicianProfile.audio && musicianProfile.audio.startsWith('blob:') && (
-                  <div className="border-t pt-6">
-                    <h3 className="text-lg font-semibold mb-3">Audio Sample</h3>
-                    <div className="bg-gray-50 rounded-lg p-4 text-center">
-                      <p className="text-gray-500">Audio file expired. Please re-upload.</p>
-                    </div>
-                  </div>
-                )}
-
-                {/* Additional Pictures */}
-                {musicianProfile.additionalPictures && musicianProfile.additionalPictures.length > 0 && (
-                  <div className="border-t pt-6">
-                    <h3 className="text-lg font-semibold mb-3">Additional Photos</h3>
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                      {musicianProfile.additionalPictures.map((image: string, index: number) => (
-                        <div key={index} className="relative group">
-                          <img 
-                            src={image} 
-                            alt={`Additional photo ${index + 1}`}
-                            className="w-full h-32 object-cover rounded-lg border hover:scale-105 transition-transform cursor-pointer"
-                            onClick={() => openLightbox(index)}
-                          />
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Social Media Links */}
-                {musicianProfile.socialLinks && musicianProfile.socialLinks.length > 0 && (
-                  <div className="border-t pt-6">
-                    <h3 className="text-lg font-semibold mb-3">Social Media</h3>
-                    <div className="flex flex-wrap gap-3">
-                      {musicianProfile.socialLinks.map((link: any, index: number) => (
-                        <a
-                          key={index}
-                          href={link.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-2 px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm font-medium transition-colors"
-                        >
-                          {link.platform === 'spotify' && <Music className="h-4 w-4 text-green-600" />}
-                          {link.platform === 'youtube' && <Youtube className="h-4 w-4 text-red-600" />}
-                          {link.platform === 'instagram' && <Instagram className="h-4 w-4 text-pink-600" />}
-                          {link.platform === 'twitter' && <Twitter className="h-4 w-4 text-blue-600" />}
-                          {link.platform}
-                        </a>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Quick Actions */}
-                <div className="flex flex-wrap gap-3 pt-4 border-t">
-                  <Button asChild variant="outline">
-                    <Link to="/availability">
-                      <Calendar className="mr-2 h-4 w-4" />
-                      Manage Availability
-                    </Link>
+              <div className="flex gap-3">
+                {!user.googleProfileId && (
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setIsChangingPassword(true)}
+                    className="bg-white/50 backdrop-blur-sm border-gray-200 hover:bg-white hover:shadow-md transition-all duration-300"
+                  >
+                    <Settings className="mr-2 h-4 w-4" />
+                    Change Password
                   </Button>
-                  <Button asChild variant="outline">
-                    <Link to="/musician-dashboard">
-                      <User className="mr-2 h-4 w-4" />
-                      View Dashboard
-                    </Link>
-                  </Button>
-                </div>
+                )}
               </div>
-            ) : (
-              <div className="text-center py-8">
-                <Music className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold mb-2">No Musician Profile Found</h3>
-                <p className="text-gray-600 mb-4">
-                  Create your musician profile to start booking gigs and connecting with venues.
-                </p>
-                <Button asChild>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Musician Profile Section */}
+        {primaryRole === 'musician' && (
+          <Card className="mb-8 shadow-lg border-0 bg-white/80 backdrop-blur-sm">
+            <CardHeader className="pb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="flex items-center gap-3 text-2xl font-bold text-gray-900">
+                    <div className="p-2 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg">
+                      <Music className="h-6 w-6 text-white" />
+                    </div>
+                    Musician Profile
+                  </CardTitle>
+                  <CardDescription className="text-gray-600 mt-2">
+                    Your professional musician information and performance details
+                  </CardDescription>
+                </div>
+                <Button asChild className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300">
                   <Link to="/musician-profile/edit">
-                    Create Musician Profile
+                    <Edit className="mr-2 h-4 w-4" />
+                    Edit Profile
                   </Link>
                 </Button>
               </div>
-            )}
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Venue Profile Section */}
-      {primaryRole === 'venue' && (
-        <Card className="mb-8">
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle className="flex items-center gap-2">
-                  <Building className="h-5 w-5" />
-                  Venue Profile
-                </CardTitle>
-                <CardDescription>
-                  Your venue information and booking details
-                </CardDescription>
-              </div>
-              <Button asChild>
-                <Link to="/venue-profile/edit">
-                  <Edit className="mr-2 h-4 w-4" />
-                  Edit Profile
-                </Link>
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent>
-            {loadingVenue ? (
-              <div className="animate-pulse space-y-4">
-                <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-                <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-                <div className="h-4 bg-gray-200 rounded w-2/3"></div>
-              </div>
-            ) : venueProfile ? (
-              <div className="space-y-6">
-                {/* Venue Stats */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {venueProfile.capacity && (
-                    <div className="text-center p-4 bg-gray-50 rounded-lg">
-                      <User className="h-8 w-8 text-blue-600 mx-auto mb-2" />
-                      <div className="text-2xl font-bold">{venueProfile.capacity}</div>
-                      <div className="text-sm text-gray-600">Capacity</div>
-                    </div>
-                  )}
-                  {venueProfile.rating && (
-                    <div className="text-center p-4 bg-gray-50 rounded-lg">
-                      <Star className="h-8 w-8 text-yellow-500 mx-auto mb-2" />
-                      <div className="text-2xl font-bold">{venueProfile.rating}</div>
-                      <div className="text-sm text-gray-600">Rating</div>
-                    </div>
-                  )}
-                  {venueProfile.totalEvents && (
-                    <div className="text-center p-4 bg-gray-50 rounded-lg">
-                      <Calendar className="h-8 w-8 text-green-600 mx-auto mb-2" />
-                      <div className="text-2xl font-bold">{venueProfile.totalEvents}</div>
-                      <div className="text-sm text-gray-600">Total Events</div>
-                    </div>
-                  )}
+            </CardHeader>
+            <CardContent className="space-y-8">
+              {loadingMusician ? (
+                <div className="animate-pulse space-y-6">
+                  <div className="h-6 bg-gray-200 rounded w-3/4"></div>
+                  <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                  <div className="h-4 bg-gray-200 rounded w-2/3"></div>
                 </div>
+              ) : musicianProfile ? (
+                <div className="space-y-8">
+                  {/* Profile Stats - Redesigned */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    {musicianProfile.rating && (
+                      <div className="text-center p-6 bg-gradient-to-br from-yellow-50 to-orange-50 rounded-2xl border border-yellow-200">
+                        <div className="p-3 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                          <Star className="h-8 w-8 text-white" />
+                        </div>
+                        <div className="text-3xl font-bold text-gray-900">{musicianProfile.rating}</div>
+                        <div className="text-sm text-gray-600 font-medium">Rating</div>
+                      </div>
+                    )}
+                    {musicianProfile.totalGigs && (
+                      <div className="text-center p-6 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl border border-blue-200">
+                        <div className="p-3 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                          <Calendar className="h-8 w-8 text-white" />
+                        </div>
+                        <div className="text-3xl font-bold text-gray-900">{musicianProfile.totalGigs}</div>
+                        <div className="text-sm text-gray-600 font-medium">Total Gigs</div>
+                      </div>
+                    )}
+                    {musicianProfile.hourlyRate && (
+                      <div className="text-center p-6 bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl border border-green-200">
+                        <div className="p-3 bg-gradient-to-r from-green-500 to-emerald-600 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                          <DollarSign className="h-8 w-8 text-white" />
+                        </div>
+                        <div className="text-3xl font-bold text-gray-900">${musicianProfile.hourlyRate}</div>
+                        <div className="text-sm text-gray-600 font-medium">Per Hour</div>
+                      </div>
+                    )}
+                  </div>
 
-                {/* Venue Details */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <h3 className="text-lg font-semibold mb-3">Venue Information</h3>
-                    <div className="space-y-3">
-                      {venueProfile.name && (
-                        <div>
-                          <span className="text-sm text-gray-600">Venue Name:</span>
-                          <p className="font-medium">{venueProfile.name}</p>
-                        </div>
-                      )}
-                      {venueProfile.type && (
-                        <div>
-                          <span className="text-sm text-gray-600">Type:</span>
-                          <p className="font-medium">{venueProfile.type}</p>
-                        </div>
-                      )}
-                      {venueProfile.city && (
-                        <div>
-                          <span className="text-sm text-gray-600">Location:</span>
-                          <p className="font-medium flex items-center gap-1">
-                            <MapPin className="h-4 w-4" />
-                            {[venueProfile.city, venueProfile.state, venueProfile.country].filter(Boolean).join(", ")}
-                          </p>
-                        </div>
-                      )}
+                  {/* Profile Details - Redesigned */}
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div className="space-y-6">
+                      <h3 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                        <div className="w-1 h-6 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full"></div>
+                        Basic Information
+                      </h3>
+                      <div className="space-y-4">
+                        {musicianProfile.stageName && (
+                          <div className="p-4 bg-gray-50 rounded-xl">
+                            <span className="text-sm text-gray-600 font-medium">Stage Name</span>
+                            <p className="font-semibold text-gray-900 mt-1">{musicianProfile.stageName}</p>
+                          </div>
+                        )}
+                        {musicianProfile.genre && (
+                          <div className="p-4 bg-gray-50 rounded-xl">
+                            <span className="text-sm text-gray-600 font-medium">Primary Genre</span>
+                            <p className="font-semibold text-gray-900 mt-1">{musicianProfile.genre}</p>
+                          </div>
+                        )}
+                        {musicianProfile.genres && musicianProfile.genres.length > 0 && (
+                          <div className="p-4 bg-gray-50 rounded-xl">
+                            <span className="text-sm text-gray-600 font-medium">Genres</span>
+                            <div className="flex flex-wrap gap-2 mt-1">
+                              {musicianProfile.genres.map((g: string, i: number) => (
+                                <Badge key={i} variant="secondary">{g}</Badge>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        {musicianProfile.yearsExperience && (
+                          <div className="p-4 bg-gray-50 rounded-xl">
+                            <span className="text-sm text-gray-600 font-medium">Experience</span>
+                            <p className="font-semibold text-gray-900 mt-1">{musicianProfile.yearsExperience} years</p>
+                          </div>
+                        )}
+                        {musicianProfile.city && (
+                          <div className="p-4 bg-gray-50 rounded-xl">
+                            <span className="text-sm text-gray-600 font-medium">Location</span>
+                            <p className="font-semibold text-gray-900 mt-1 flex items-center gap-2">
+                              <MapPin className="h-4 w-4 text-blue-500" />
+                              {[musicianProfile.city, musicianProfile.state, musicianProfile.country].filter(Boolean).join(", ")}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    <div className="space-y-6">
+                      <h3 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                        <div className="w-1 h-6 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full"></div>
+                        Contact & Links
+                      </h3>
+                      <div className="space-y-4">
+                        {musicianProfile.phone && (
+                          <div className="p-4 bg-gray-50 rounded-xl">
+                            <span className="text-sm text-gray-600 font-medium">Phone</span>
+                            <p className="font-semibold text-gray-900 mt-1 flex items-center gap-2">
+                              <Phone className="h-4 w-4 text-blue-500" />
+                              {musicianProfile.phone}
+                            </p>
+                          </div>
+                        )}
+                        {musicianProfile.website && (
+                          <div className="p-4 bg-gray-50 rounded-xl">
+                            <span className="text-sm text-gray-600 font-medium">Website</span>
+                            <p className="font-semibold text-gray-900 mt-1 flex items-center gap-2">
+                              <Globe className="h-4 w-4 text-blue-500" />
+                              <a href={musicianProfile.website} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                                {musicianProfile.website}
+                              </a>
+                            </p>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
-                  <div>
-                    <h3 className="text-lg font-semibold mb-3">Contact & Links</h3>
-                    <div className="space-y-3">
-                      {venueProfile.phone && (
-                        <div>
-                          <span className="text-sm text-gray-600">Phone:</span>
-                          <p className="font-medium flex items-center gap-1">
-                            <Phone className="h-4 w-4" />
-                            {venueProfile.phone}
-                          </p>
-                        </div>
-                      )}
-                      {venueProfile.website && (
-                        <div>
-                          <span className="text-sm text-gray-600">Website:</span>
-                          <p className="font-medium flex items-center gap-1">
-                            <Globe className="h-4 w-4" />
-                            <a href={venueProfile.website} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
-                              {venueProfile.website}
-                            </a>
-                          </p>
-                        </div>
-                      )}
+
+                  {/* Audio Sample - Redesigned */}
+                  {musicianProfile.audioFiles && musicianProfile.audioFiles.length > 0 ? (
+                    <div className="border-t border-gray-200 pt-8">
+                      <h3 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                        <div className="w-1 h-6 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full"></div>
+                        Audio Samples
+                      </h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {musicianProfile.audioFiles.map((audio: string, idx: number) => (
+                          <div key={idx} className="bg-gradient-to-r from-gray-50 to-blue-50 rounded-2xl p-6 border border-gray-200 flex flex-col items-center">
+                            <audio controls className="w-full">
+                              <source src={audio} type="audio/mpeg" />
+                              <source src={audio} type="audio/mp3" />
+                              <source src={audio} type="audio/wav" />
+                              <source src={audio} type="audio/ogg" />
+                              Your browser does not support the audio element.
+                            </audio>
+                          </div>
+                        ))}
+                      </div>
                     </div>
+                  ) : (
+                    <>
+                      {musicianProfile.audio && !musicianProfile.audio.startsWith('blob:') && (
+                        <div className="border-t border-gray-200 pt-8">
+                          <h3 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                            <div className="w-1 h-6 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full"></div>
+                            Audio Sample
+                          </h3>
+                          <div className="bg-gradient-to-r from-gray-50 to-blue-50 rounded-2xl p-6 border border-gray-200">
+                            <audio controls className="w-full">
+                              <source src={musicianProfile.audio} type="audio/mpeg" />
+                              <source src={musicianProfile.audio} type="audio/mp3" />
+                              <source src={musicianProfile.audio} type="audio/wav" />
+                              <source src={musicianProfile.audio} type="audio/ogg" />
+                              Your browser does not support the audio element.
+                            </audio>
+                          </div>
+                        </div>
+                      )}
+                      {musicianProfile.audio && musicianProfile.audio.startsWith('blob:') && (
+                        <div className="border-t border-gray-200 pt-8">
+                          <h3 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                            <div className="w-1 h-6 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full"></div>
+                            Audio Sample
+                          </h3>
+                          <div className="bg-gradient-to-r from-gray-50 to-blue-50 rounded-2xl p-6 border border-gray-200 text-center">
+                            <p className="text-gray-500">Audio file expired. Please re-upload.</p>
+                          </div>
+                        </div>
+                      )}
+                    </>
+                  )}
+
+                  {/* Additional Pictures - Redesigned */}
+                  {musicianProfile.additionalPictures && musicianProfile.additionalPictures.length > 0 && (
+                    <div className="border-t border-gray-200 pt-8">
+                      <h3 className="text-xl font-semibold text-gray-900 mb-6 flex items-center gap-2">
+                        <div className="w-1 h-6 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full"></div>
+                        Additional Photos
+                      </h3>
+                      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                        {musicianProfile.additionalPictures.map((image: string, index: number) => (
+                          <div key={index} className="relative group">
+                            <img 
+                              src={image} 
+                              alt={`Additional photo ${index + 1}`}
+                              className="w-full h-40 object-cover rounded-2xl border-2 border-gray-200 hover:scale-105 transition-all duration-300 cursor-pointer shadow-lg hover:shadow-xl"
+                              onClick={() => openLightbox(index)}
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Social Media Links - Redesigned */}
+                  {musicianProfile.socialLinks && musicianProfile.socialLinks.length > 0 && (
+                    <div className="border-t border-gray-200 pt-8">
+                      <h3 className="text-xl font-semibold text-gray-900 mb-6 flex items-center gap-2">
+                        <div className="w-1 h-6 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full"></div>
+                        Social Media
+                      </h3>
+                      <div className="flex flex-wrap gap-4">
+                        {(() => {
+                          console.log("Rendering social links:", musicianProfile.socialLinks);
+                          return musicianProfile.socialLinks.map((link: any, index: number) => {
+                            console.log("Rendering link:", link);
+                            return (
+                              <a
+                                key={index}
+                                href={link.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-gray-100 to-gray-200 hover:from-gray-200 hover:to-gray-300 rounded-xl text-sm font-medium transition-all duration-300 shadow-md hover:shadow-lg"
+                              >
+                                {link.platform === 'spotify' && <Music className="h-5 w-5 text-green-600" />}
+                                {link.platform === 'youtube' && <Youtube className="h-5 w-5 text-red-600" />}
+                                {link.platform === 'instagram' && <Instagram className="h-5 w-5 text-pink-600" />}
+                                {link.platform === 'twitter' && <Twitter className="h-5 w-5 text-blue-600" />}
+                                {link.platform}
+                              </a>
+                            );
+                          });
+                        })()}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Quick Actions - Redesigned */}
+                  <div className="flex flex-wrap gap-4 pt-8 border-t border-gray-200">
+                    <Button asChild variant="outline" className="bg-white/50 backdrop-blur-sm border-gray-200 hover:bg-white hover:shadow-md transition-all duration-300">
+                      <Link to="/availability">
+                        <Calendar className="mr-2 h-4 w-4" />
+                        Manage Availability
+                      </Link>
+                    </Button>
+                    <Button asChild variant="outline" className="bg-white/50 backdrop-blur-sm border-gray-200 hover:bg-white hover:shadow-md transition-all duration-300">
+                      <Link to="/musician-dashboard">
+                        <User className="mr-2 h-4 w-4" />
+                        View Dashboard
+                      </Link>
+                    </Button>
                   </div>
                 </div>
-
-                {/* Quick Actions */}
-                <div className="flex flex-wrap gap-3 pt-4 border-t">
-                  <Button asChild variant="outline">
-                    <Link to="/venue-events">
-                      <Calendar className="mr-2 h-4 w-4" />
-                      Manage Events
-                    </Link>
-                  </Button>
-                  <Button asChild variant="outline">
-                    <Link to="/venue-dashboard">
-                      <Building className="mr-2 h-4 w-4" />
-                      View Dashboard
+              ) : (
+                <div className="text-center py-12">
+                  <div className="p-4 bg-gradient-to-r from-blue-100 to-purple-100 rounded-full w-20 h-20 mx-auto mb-6 flex items-center justify-center">
+                    <Music className="h-10 w-10 text-blue-600" />
+                  </div>
+                  <h3 className="text-xl font-semibold mb-3 text-gray-900">No Musician Profile Found</h3>
+                  <p className="text-gray-600 mb-6 max-w-md mx-auto">
+                    Create your musician profile to start booking gigs and connecting with venues.
+                  </p>
+                  <Button asChild className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300">
+                    <Link to="/musician-profile/edit">
+                      Create Musician Profile
                     </Link>
                   </Button>
                 </div>
-              </div>
-            ) : (
-              <div className="text-center py-8">
-                <Building className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold mb-2">No Venue Profile Found</h3>
-                <p className="text-gray-600 mb-4">
-                  Create your venue profile to start hosting events and booking musicians.
-                </p>
-                <Button asChild>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Venue Profile Section */}
+        {primaryRole === 'venue' && (
+          <Card className="mb-8 shadow-lg border-0 bg-white/80 backdrop-blur-sm">
+            <CardHeader className="pb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="flex items-center gap-3 text-2xl font-bold text-gray-900">
+                    <div className="p-2 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg">
+                      <Building className="h-6 w-6 text-white" />
+                    </div>
+                    Venue Profile
+                  </CardTitle>
+                  <CardDescription className="text-gray-600 mt-2">
+                    Your venue information and booking details
+                  </CardDescription>
+                </div>
+                <Button asChild className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300">
                   <Link to="/venue-profile/edit">
-                    Create Venue Profile
+                    <Edit className="mr-2 h-4 w-4" />
+                    Edit Profile
                   </Link>
                 </Button>
               </div>
-            )}
-          </CardContent>
-        </Card>
-      )}
+            </CardHeader>
+            <CardContent className="space-y-8">
+              {loadingVenue ? (
+                <div className="animate-pulse space-y-6">
+                  <div className="h-6 bg-gray-200 rounded w-3/4"></div>
+                  <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                  <div className="h-4 bg-gray-200 rounded w-2/3"></div>
+                </div>
+              ) : venueProfile ? (
+                <div className="space-y-8">
+                  {/* Venue Stats - Redesigned */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    {venueProfile.capacity && (
+                      <div className="text-center p-6 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl border border-blue-200">
+                        <div className="p-3 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                          <User className="h-8 w-8 text-white" />
+                        </div>
+                        <div className="text-3xl font-bold text-gray-900">{venueProfile.capacity}</div>
+                        <div className="text-sm text-gray-600 font-medium">Capacity</div>
+                      </div>
+                    )}
+                    {venueProfile.rating && (
+                      <div className="text-center p-6 bg-gradient-to-br from-yellow-50 to-orange-50 rounded-2xl border border-yellow-200">
+                        <div className="p-3 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                          <Star className="h-8 w-8 text-white" />
+                        </div>
+                        <div className="text-3xl font-bold text-gray-900">{venueProfile.rating}</div>
+                        <div className="text-sm text-gray-600 font-medium">Rating</div>
+                      </div>
+                    )}
+                    {venueProfile.totalEvents && (
+                      <div className="text-center p-6 bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl border border-green-200">
+                        <div className="p-3 bg-gradient-to-r from-green-500 to-emerald-600 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                          <Calendar className="h-8 w-8 text-white" />
+                        </div>
+                        <div className="text-3xl font-bold text-gray-900">{venueProfile.totalEvents}</div>
+                        <div className="text-sm text-gray-600 font-medium">Total Events</div>
+                      </div>
+                    )}
+                  </div>
 
-      <ChangePasswordModal
-        open={isChangingPassword}
-        onClose={() => {
-          setIsChangingPassword(false);
-          revalidator.revalidate();
-        }}
-      />
+                  {/* Venue Details - Redesigned */}
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div className="space-y-6">
+                      <h3 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                        <div className="w-1 h-6 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full"></div>
+                        Venue Information
+                      </h3>
+                      <div className="space-y-4">
+                        {venueProfile.name && (
+                          <div className="p-4 bg-gray-50 rounded-xl">
+                            <span className="text-sm text-gray-600 font-medium">Venue Name</span>
+                            <p className="font-semibold text-gray-900 mt-1">{venueProfile.name}</p>
+                          </div>
+                        )}
+                        {venueProfile.type && (
+                          <div className="p-4 bg-gray-50 rounded-xl">
+                            <span className="text-sm text-gray-600 font-medium">Type</span>
+                            <p className="font-semibold text-gray-900 mt-1">{venueProfile.type}</p>
+                          </div>
+                        )}
+                        {venueProfile.city && (
+                          <div className="p-4 bg-gray-50 rounded-xl">
+                            <span className="text-sm text-gray-600 font-medium">Location</span>
+                            <p className="font-semibold text-gray-900 mt-1 flex items-center gap-2">
+                              <MapPin className="h-4 w-4 text-blue-500" />
+                              {[venueProfile.city, venueProfile.state, venueProfile.country].filter(Boolean).join(", ")}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    <div className="space-y-6">
+                      <h3 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                        <div className="w-1 h-6 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full"></div>
+                        Contact & Links
+                      </h3>
+                      <div className="space-y-4">
+                        {venueProfile.phone && (
+                          <div className="p-4 bg-gray-50 rounded-xl">
+                            <span className="text-sm text-gray-600 font-medium">Phone</span>
+                            <p className="font-semibold text-gray-900 mt-1 flex items-center gap-2">
+                              <Phone className="h-4 w-4 text-blue-500" />
+                              {venueProfile.phone}
+                            </p>
+                          </div>
+                        )}
+                        {venueProfile.website && (
+                          <div className="p-4 bg-gray-50 rounded-xl">
+                            <span className="text-sm text-gray-600 font-medium">Website</span>
+                            <p className="font-semibold text-gray-900 mt-1 flex items-center gap-2">
+                              <Globe className="h-4 w-4 text-blue-500" />
+                              <a href={venueProfile.website} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                                {venueProfile.website}
+                              </a>
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
 
-      {/* Image Lightbox */}
-      {musicianProfile && (
-        <ImageLightbox
-          images={[
-            musicianProfile.profilePicture,
-            ...(musicianProfile.additionalPictures || [])
-          ].filter(Boolean)}
-          currentIndex={currentImageIndex}
-          isOpen={lightboxOpen}
-          onClose={closeLightbox}
-          onPrevious={goToPrevious}
-          onNext={goToNext}
+                  {/* Quick Actions - Redesigned */}
+                  <div className="flex flex-wrap gap-4 pt-8 border-t border-gray-200">
+                    <Button asChild variant="outline" className="bg-white/50 backdrop-blur-sm border-gray-200 hover:bg-white hover:shadow-md transition-all duration-300">
+                      <Link to="/venue-events">
+                        <Calendar className="mr-2 h-4 w-4" />
+                        Manage Events
+                      </Link>
+                    </Button>
+                    <Button asChild variant="outline" className="bg-white/50 backdrop-blur-sm border-gray-200 hover:bg-white hover:shadow-md transition-all duration-300">
+                      <Link to="/venue-dashboard">
+                        <Building className="mr-2 h-4 w-4" />
+                        View Dashboard
+                      </Link>
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <div className="p-4 bg-gradient-to-r from-blue-100 to-purple-100 rounded-full w-20 h-20 mx-auto mb-6 flex items-center justify-center">
+                    <Building className="h-10 w-10 text-blue-600" />
+                  </div>
+                  <h3 className="text-xl font-semibold mb-3 text-gray-900">No Venue Profile Found</h3>
+                  <p className="text-gray-600 mb-6 max-w-md mx-auto">
+                    Create your venue profile to start hosting events and booking musicians.
+                  </p>
+                  <Button asChild className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300">
+                    <Link to="/venue-profile/edit">
+                      Create Venue Profile
+                    </Link>
+                  </Button>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
+        <ChangePasswordModal
+          open={isChangingPassword}
+          onClose={() => {
+            setIsChangingPassword(false);
+            revalidator.revalidate();
+          }}
         />
-      )}
+
+        {/* Image Lightbox */}
+        {musicianProfile && (
+          <ImageLightbox
+            images={[
+              musicianProfile.profilePicture,
+              ...(musicianProfile.additionalPictures || [])
+            ].filter(Boolean)}
+            currentIndex={currentImageIndex}
+            isOpen={lightboxOpen}
+            onClose={closeLightbox}
+            onPrevious={goToPrevious}
+            onNext={goToNext}
+          />
+        )}
+      </div>
     </div>
   );
 }
-
-const ChangePasswordModal = (props: { open: boolean; onClose: () => void }) => {
-  const { user } = useOutletContext<AuthOutletContext>();
-
-  const {
-    register,
-    submit,
-    reset,
-    formState: { errors, isSubmitting },
-  } = useActionForm(api.user.changePassword, {
-    defaultValues: user,
-    onSuccess: props.onClose,
-  });
-
-  const onClose = () => {
-    reset();
-    props.onClose();
-  };
-
-  return (
-    <Dialog open={props.open} onOpenChange={onClose}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Change password</DialogTitle>
-        </DialogHeader>
-        <form onSubmit={submit}>
-          <div className="space-y-4">
-            <div>
-              <Label>Current Password</Label>
-              <Input type="password" autoComplete="off" {...register("currentPassword")} />
-              {errors?.root?.message && <p className="text-red-500 text-sm mt-1">{errors.root.message}</p>}
-            </div>
-            <div>
-              <Label>New Password</Label>
-              <Input type="password" autoComplete="off" {...register("newPassword")} />
-              {errors?.user?.password?.message && (
-                <p className="text-red-500 text-sm mt-1">New password {errors.user.password.message}</p>
-              )}
-            </div>
-          </div>
-          <div className="flex justify-end gap-2 pt-4">
-            <Button variant="outline" onClick={onClose} type="button">
-              Cancel
-            </Button>
-            <Button type="submit" disabled={isSubmitting}>
-              Save
-            </Button>
-          </div>
-        </form>
-      </DialogContent>
-    </Dialog>
-  );
-};

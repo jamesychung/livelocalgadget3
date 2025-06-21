@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -6,9 +6,10 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Calendar } from "@/components/ui/calendar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Save, Calendar as CalendarIcon } from "lucide-react";
+import { Save, Calendar as CalendarIcon, AlertTriangle } from "lucide-react";
 import { format } from "date-fns";
 import { DateRange } from "react-day-picker";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface TimeSlot {
     startTime: string;
@@ -20,6 +21,7 @@ interface TimeSlot {
 
 interface AvailabilityFormProps {
     onAddAvailability: (availability: TimeSlot[]) => Promise<void>;
+    currentAvailability?: Record<string, TimeSlot[]>;
     title?: string;
     description?: string;
 }
@@ -28,6 +30,7 @@ type DateSelectionMode = 'single' | 'range';
 
 export default function AvailabilityForm({
     onAddAvailability,
+    currentAvailability = {},
     title = "Add Availability",
     description = "Select dates and times for your availability. Choose between single day or multiple days."
 }: AvailabilityFormProps) {
@@ -39,6 +42,13 @@ export default function AvailabilityForm({
     const [recurringDays, setRecurringDays] = useState<string[]>([]);
     const [recurringEndDate, setRecurringEndDate] = useState<Date | undefined>(undefined);
     const [isRecurring, setIsRecurring] = useState(false);
+    const [conflicts, setConflicts] = useState<string[]>([]);
+    const [isSaving, setIsSaving] = useState(false);
+
+    // Debug: Log when currentAvailability changes
+    useEffect(() => {
+        setConflicts([]); // Clear conflicts when data changes
+    }, [currentAvailability]);
 
     // Generate time options (every half hour)
     const generateTimeOptions = () => {
@@ -58,8 +68,113 @@ export default function AvailabilityForm({
         return date.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
     };
 
+    // Check for time conflicts
+    const checkTimeConflict = (start1: string, end1: string, start2: string, end2: string): boolean => {
+        const s1 = new Date(`2000-01-01T${start1}`);
+        const e1 = new Date(`2000-01-01T${end1}`);
+        const s2 = new Date(`2000-01-01T${start2}`);
+        const e2 = new Date(`2000-01-01T${end2}`);
+        
+        return (s1 < e2 && e1 > s2);
+    };
+
+    // Check for conflicts with existing availability
+    const checkConflicts = (): string[] => {
+        const conflictMessages = new Set<string>();
+        
+        if (!startTime || !endTime) return [];
+
+        // Validate time range
+        if (startTime >= endTime) {
+            conflictMessages.add("End time must be after start time");
+            return Array.from(conflictMessages);
+        }
+
+        const newSlots: TimeSlot[] = [];
+
+        if (isRecurring && recurringDays.length > 0) {
+            // Generate slots for recurring days
+            recurringDays.forEach(day => {
+                newSlots.push({ 
+                    startTime, 
+                    endTime,
+                    date: undefined,
+                    recurringDays: [day],
+                    recurringEndDate: recurringEndDate ? format(recurringEndDate, 'yyyy-MM-dd') : undefined
+                });
+            });
+        } else if (dateSelectionMode === 'single' && selectedDate) {
+            // Generate slot for specific date
+            newSlots.push({ 
+                startTime, 
+                endTime,
+                date: format(selectedDate, 'yyyy-MM-dd')
+            });
+        } else if (dateSelectionMode === 'range' && dateRange?.from && dateRange?.to) {
+            // Generate slots for date range
+            const currentDate = new Date(dateRange.from);
+            const endDate = new Date(dateRange.to);
+            
+            while (currentDate <= endDate) {
+                newSlots.push({ 
+                    startTime, 
+                    endTime,
+                    date: format(currentDate, 'yyyy-MM-dd')
+                });
+                currentDate.setDate(currentDate.getDate() + 1);
+            }
+        }
+
+        // Check each new slot against existing availability
+        newSlots.forEach(slot => {
+            if (slot.date) {
+                // Check specific date
+                const existingSlots = currentAvailability[slot.date] || [];
+                existingSlots.forEach(existingSlot => {
+                    if (checkTimeConflict(slot.startTime, slot.endTime, existingSlot.startTime, existingSlot.endTime)) {
+                        // Fix date formatting to avoid timezone issues
+                        const [year, month, day] = slot.date!.split('-').map(Number);
+                        const dateObj = new Date(year, month - 1, day); // month is 0-indexed
+                        const conflictMsg = `Conflict on ${format(dateObj, 'EEEE, MMMM d, yyyy')}: ${slot.startTime}-${slot.endTime} overlaps with existing ${existingSlot.startTime}-${existingSlot.endTime}`;
+                        conflictMessages.add(conflictMsg);
+                    }
+                });
+            } else if (slot.recurringDays) {
+                // Check recurring days
+                slot.recurringDays.forEach(day => {
+                    const existingSlots = currentAvailability[day] || [];
+                    existingSlots.forEach(existingSlot => {
+                        if (checkTimeConflict(slot.startTime, slot.endTime, existingSlot.startTime, existingSlot.endTime)) {
+                            const dayName = day.charAt(0).toUpperCase() + day.slice(1);
+                            const conflictMsg = `Conflict on ${dayName}: ${slot.startTime}-${slot.endTime} overlaps with existing ${existingSlot.startTime}-${existingSlot.endTime}`;
+                            conflictMessages.add(conflictMsg);
+                        }
+                    });
+                });
+            }
+        });
+
+        return Array.from(conflictMessages);
+    };
+
+    // Update conflicts when form values change
+    useEffect(() => {
+        // Don't check conflicts while saving to prevent false conflicts during data refresh
+        if (isSaving) return;
+        
+        const newConflicts = checkConflicts();
+        setConflicts(newConflicts);
+    }, [startTime, endTime, selectedDate, dateRange, recurringDays, isRecurring, currentAvailability, isSaving]);
+
     const handleSave = async () => {
         if (!startTime || !endTime) return;
+
+        // Check for conflicts before saving
+        const newConflicts = checkConflicts();
+        if (newConflicts.length > 0) {
+            setConflicts(newConflicts);
+            return;
+        }
 
         const newSlots: TimeSlot[] = [];
 
@@ -98,6 +213,7 @@ export default function AvailabilityForm({
 
         if (newSlots.length > 0) {
             try {
+                setIsSaving(true);
                 await onAddAvailability(newSlots);
                 
                 // Reset form
@@ -108,8 +224,11 @@ export default function AvailabilityForm({
                 setRecurringDays([]);
                 setRecurringEndDate(undefined);
                 setIsRecurring(false);
+                setConflicts([]);
             } catch (error) {
                 console.error("Error adding availability:", error);
+            } finally {
+                setIsSaving(false);
             }
         }
     };
@@ -170,6 +289,21 @@ export default function AvailabilityForm({
 
                     {/* Right Side - Form Controls */}
                     <div className="space-y-6">
+                        {/* Conflict Alert */}
+                        {conflicts.length > 0 && (
+                            <Alert variant="destructive">
+                                <AlertTriangle className="h-4 w-4" />
+                                <AlertDescription>
+                                    <div className="space-y-1">
+                                        <p className="font-medium">Conflicts detected:</p>
+                                        {conflicts.map((conflict, index) => (
+                                            <p key={index} className="text-sm">• {conflict}</p>
+                                        ))}
+                                    </div>
+                                </AlertDescription>
+                            </Alert>
+                        )}
+
                         {/* Selected Date/Range Display */}
                         <div className="space-y-2">
                             <Label>Selected {dateSelectionMode === 'single' ? 'Date' : 'Date Range'}</Label>
@@ -302,15 +436,17 @@ export default function AvailabilityForm({
                             onClick={handleSave}
                             className="w-full"
                             disabled={
+                                isSaving ||
                                 !startTime || 
                                 !endTime || 
+                                conflicts.length > 0 ||
                                 (isRecurring && recurringDays.length === 0) ||
                                 (dateSelectionMode === 'single' && !selectedDate && !isRecurring) ||
                                 (dateSelectionMode === 'range' && (!dateRange?.from || !dateRange?.to) && !isRecurring)
                             }
                         >
                             <Save className="mr-2 h-4 w-4" />
-                            Save Availability
+                            {isSaving ? "Saving..." : "Save Availability"}
                         </Button>
                     </div>
                 </div>

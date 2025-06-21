@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Calendar, List } from "lucide-react";
@@ -28,6 +28,20 @@ export default function AvailabilityManager({
     description = "Set your available time slots for venues to see when booking you. You can view this in weekly or monthly format."
 }: AvailabilityManagerProps) {
     const [currentAvailability, setCurrentAvailability] = useState<Record<string, TimeSlot[]>>(availability);
+    const [currentTab, setCurrentTab] = useState(() => {
+        // Try to get the saved tab from localStorage, default to "weekly"
+        return localStorage.getItem('availability-tab') || "weekly";
+    });
+
+    // Save tab selection to localStorage whenever it changes
+    useEffect(() => {
+        localStorage.setItem('availability-tab', currentTab);
+    }, [currentTab]);
+
+    // Sync local state with prop changes
+    useEffect(() => {
+        setCurrentAvailability(availability);
+    }, [availability]);
 
     const handleAddAvailability = async (newSlots: TimeSlot[]) => {
         const updatedAvailability = { ...currentAvailability };
@@ -80,6 +94,7 @@ export default function AvailabilityManager({
                 <CardContent>
                     <AvailabilityForm
                         onAddAvailability={handleAddAvailability}
+                        currentAvailability={currentAvailability}
                         title="Add New Availability"
                         description="Select dates and times for your availability"
                     />
@@ -92,7 +107,7 @@ export default function AvailabilityManager({
                     <CardTitle>View Your Schedule</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <Tabs defaultValue="weekly" className="w-full">
+                    <Tabs value={currentTab} onValueChange={setCurrentTab} className="w-full">
                         <TabsList className="grid w-full grid-cols-2">
                             <TabsTrigger value="weekly">
                                 <Calendar className="mr-2 h-4 w-4" />
