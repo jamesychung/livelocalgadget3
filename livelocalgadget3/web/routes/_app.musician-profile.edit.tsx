@@ -6,7 +6,6 @@ import { UserProfileForm } from "../components/shared/UserProfileForm";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { ArrowLeft } from "lucide-react";
-import { Client } from "@gadget-client/livelocalgadget3";
 
 interface MusicianProfile {
   id: string;
@@ -28,6 +27,8 @@ interface MusicianProfile {
   website: string;
   socialLinks: any;
   profilePicture: string;
+  audio: string;
+  additionalPictures: string[];
   isActive: boolean;
   isVerified: boolean;
   rating: number;
@@ -51,12 +52,6 @@ export default function MusicianProfileEdit() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
-  // Create a fresh API client instance for this component
-  const freshApi = new Client({
-    environment: "development",
-    authenticationMode: { browserSession: true },
-  });
-
   useEffect(() => {
     loadMusicianProfile();
   }, []);
@@ -66,7 +61,7 @@ export default function MusicianProfileEdit() {
       setLoading(true);
       setError(null);
 
-      const profileResult = await freshApi.musician.findMany({
+      const profileResult = await api.musician.findMany({
         filter: { user: { id: { equals: user.id } } },
         select: {
           id: true,
@@ -88,6 +83,8 @@ export default function MusicianProfileEdit() {
           website: true,
           socialLinks: true,
           profilePicture: true,
+          audio: true,
+          additionalPictures: true,
           isActive: true,
           isVerified: true,
           rating: true,
@@ -161,6 +158,10 @@ export default function MusicianProfileEdit() {
         yearsExperience: parseInt(formData.yearsExperience) || 0,
         hourlyRate: parseFloat(formData.hourlyRate) || 0,
         email: formData.email || user.email,
+        profilePicture: formData.profilePicture && formData.profilePicture.trim() ? formData.profilePicture.trim() : null,
+        audio: formData.audio && formData.audio.trim() ? formData.audio.trim() : null,
+        socialLinks: formData.socialLinks || [],
+        additionalPictures: formData.additionalPictures || [],
       };
 
       console.log("Website field value:", formData.website);
@@ -170,13 +171,17 @@ export default function MusicianProfileEdit() {
       console.log("Genres field type:", typeof formData.genres);
       console.log("Instruments field value:", formData.instruments);
       console.log("Instruments field type:", typeof formData.instruments);
+      console.log("Profile picture field value:", formData.profilePicture);
+      console.log("Audio field value:", formData.audio);
+      console.log("Social links field value:", formData.socialLinks);
+      console.log("Social links field type:", typeof formData.socialLinks);
 
       console.log("Update data being sent:", updateData);
       console.log("Musician profile ID:", musicianProfile.id);
 
       // Update the musician profile
       try {
-        const updateResult = await freshApi.musician.update(musicianProfile.id, updateData);
+        const updateResult = await api.musician.update(musicianProfile.id, updateData);
         console.log("Musician update result:", updateResult);
       } catch (updateError: any) {
         console.error("Musician update error details:", {
@@ -197,7 +202,7 @@ export default function MusicianProfileEdit() {
       };
       console.log("User update data:", userUpdateData);
       
-      const userUpdateResult = await freshApi.user.update(user.id, userUpdateData);
+      const userUpdateResult = await api.user.update(user.id, userUpdateData);
       console.log("User update result:", userUpdateResult);
 
       setSuccess(true);

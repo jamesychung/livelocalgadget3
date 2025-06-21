@@ -3,6 +3,9 @@ import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { Button } from "../ui/button";
 import { Checkbox } from "../ui/checkbox";
+import { FileUpload } from "./FileUpload";
+import { SocialMediaForm } from "./SocialMediaForm";
+import { MultipleImageUpload } from "./MultipleImageUpload";
 
 export type UserProfileFormProps = {
   role: "user" | "musician" | "venue";
@@ -29,6 +32,20 @@ export const UserProfileForm: React.FC<UserProfileFormProps> = ({ role, profile,
     if (value === null || value === undefined) return [];
     if (Array.isArray(value)) return value.map(String);
     if (typeof value === "string") return [value];
+    return [];
+  };
+
+  // Helper function to safely convert social links
+  const safeSocialLinks = (value: any): Array<{platform: string, url: string}> => {
+    if (value === null || value === undefined) return [];
+    if (Array.isArray(value)) return value;
+    if (typeof value === "string") {
+      try {
+        return JSON.parse(value);
+      } catch {
+        return [];
+      }
+    }
     return [];
   };
 
@@ -59,6 +76,10 @@ export const UserProfileForm: React.FC<UserProfileFormProps> = ({ role, profile,
     yearsExperience: safeString(profile?.yearsExperience) || "",
     instruments: safeString(profile?.instruments) || "",
     hourlyRate: safeString(profile?.hourlyRate) || "",
+    profilePicture: safeString(profile?.profilePicture) || "",
+    audio: safeString(profile?.audio) || "",
+    socialLinks: safeSocialLinks(profile?.socialLinks) || [],
+    additionalPictures: safeArray(profile?.additionalPictures) || [],
     // Venue fields
     description: safeString(profile?.description) || "",
   });
@@ -78,6 +99,30 @@ export const UserProfileForm: React.FC<UserProfileFormProps> = ({ role, profile,
     } else {
       setForm({ ...form, genres: form.genres.filter(g => g !== genre) });
     }
+  };
+
+  const handleProfilePictureUpload = (url: string) => {
+    setForm({ ...form, profilePicture: url });
+  };
+
+  const handleProfilePictureRemove = () => {
+    setForm({ ...form, profilePicture: "" });
+  };
+
+  const handleAudioUpload = (url: string) => {
+    setForm({ ...form, audio: url });
+  };
+
+  const handleAudioRemove = () => {
+    setForm({ ...form, audio: "" });
+  };
+
+  const handleSocialLinksChange = (links: Array<{platform: string, url: string}>) => {
+    setForm({ ...form, socialLinks: links });
+  };
+
+  const handleAdditionalPicturesChange = (images: string[]) => {
+    setForm({ ...form, additionalPictures: images });
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -117,7 +162,14 @@ export const UserProfileForm: React.FC<UserProfileFormProps> = ({ role, profile,
       yearsExperience: form.yearsExperience ? parseInt(form.yearsExperience) : 0,
       hourlyRate: form.hourlyRate ? parseFloat(form.hourlyRate) : 0,
       // Ensure website is either a valid URL or null
-      website: form.website.trim() || null
+      website: form.website.trim() || null,
+      // Ensure profile picture and audio are either valid URLs or null
+      profilePicture: form.profilePicture.trim() || null,
+      audio: form.audio.trim() || null,
+      // Keep social links as JSON
+      socialLinks: form.socialLinks,
+      // Keep additional pictures as array
+      additionalPictures: form.additionalPictures
     };
     
     console.log("Submitting data:", submitData);
@@ -196,6 +248,17 @@ export const UserProfileForm: React.FC<UserProfileFormProps> = ({ role, profile,
       {/* Musician fields */}
       {role === "musician" && (
         <>
+          {/* Profile Picture Upload */}
+          <FileUpload
+            label="Profile Picture"
+            type="image"
+            currentUrl={form.profilePicture}
+            onUpload={handleProfilePictureUpload}
+            onRemove={handleProfilePictureRemove}
+            accept="image/*"
+            maxSize={5}
+          />
+
           <div>
             <Label htmlFor="stageName">Stage Name *</Label>
             <Input
@@ -218,6 +281,27 @@ export const UserProfileForm: React.FC<UserProfileFormProps> = ({ role, profile,
               placeholder="Tell us about yourself and your music..."
             />
           </div>
+
+          {/* Audio Upload */}
+          <FileUpload
+            label="Audio Sample"
+            type="audio"
+            currentUrl={form.audio}
+            onUpload={handleAudioUpload}
+            onRemove={handleAudioRemove}
+            accept="audio/*"
+            maxSize={20}
+          />
+
+          {/* Additional Pictures */}
+          <MultipleImageUpload
+            label="Additional Photos"
+            images={form.additionalPictures}
+            onImagesChange={handleAdditionalPicturesChange}
+            maxImages={6}
+            maxSize={5}
+          />
+
           <div>
             <Label htmlFor="genre">Genres *</Label>
             <div className="mt-2 p-4 border rounded-lg bg-gray-50">
@@ -250,6 +334,13 @@ export const UserProfileForm: React.FC<UserProfileFormProps> = ({ role, profile,
               )}
             </div>
           </div>
+
+          {/* Social Media Links */}
+          <SocialMediaForm
+            socialLinks={form.socialLinks}
+            onChange={handleSocialLinksChange}
+          />
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <Label htmlFor="musician-city">City</Label>
@@ -449,21 +540,16 @@ export const UserProfileForm: React.FC<UserProfileFormProps> = ({ role, profile,
       {/* Debug button to test if the issue is with form validation */}
       <Button 
         type="button" 
-        variant="outline"
-        className="w-full mt-2" 
+        variant="outline" 
+        className="w-full" 
         onClick={() => {
           console.log("=== DEBUG BUTTON CLICKED ===");
           console.log("Current form state:", form);
-          console.log("Calling onSave directly...");
-          const submitData = {
-            ...form,
-            genre: form.genres.length > 0 ? form.genres[0] : "",
-            genres: form.genres
-          };
-          onSave(submitData);
+          console.log("isFormValid:", isFormValid);
+          console.log("isSaving:", isSaving);
         }}
       >
-        Debug: Save Profile (Bypass Validation)
+        Debug Form State
       </Button>
     </form>
   );
