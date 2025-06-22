@@ -20,6 +20,17 @@ export type RootOutletContext = {
 };
 
 export default function App() {
+  // Create a proper gadget config object based on the settings
+  const gadgetConfig: GadgetConfig = {
+    authentication: {
+      redirectOnSignIn: "/signed-in",
+      redirectOnSuccessfulSignInPath: "/signed-in",
+      signInPath: "/sign-in",
+      unauthorizedUserRedirect: "signInPath",
+      defaultSignedInRoles: ["signed-in"],
+    },
+  };
+
   return (
     <html lang="en" className="light">
       <head>
@@ -29,7 +40,7 @@ export default function App() {
       <body>
         <Suspense>
           <GadgetProvider api={api}>
-            <Outlet context={{ gadgetConfig: {} as GadgetConfig, csrfToken: undefined }} />
+            <Outlet context={{ gadgetConfig, csrfToken: undefined }} />
           </GadgetProvider>
         </Suspense>
         <ScrollRestoration />

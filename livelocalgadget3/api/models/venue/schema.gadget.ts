@@ -8,7 +8,12 @@ export const schema: GadgetModel = {
   storageKey: "venue",
   fields: {
     address: { type: "string", storageKey: "venue_address" },
-    amenities: { type: "json", storageKey: "venue_amenities" },
+    amenities: { type: "json", storageKey: "venue_amenities", default: [] },
+    additionalPictures: {
+      type: "json",
+      storageKey: "venue_additional_pictures",
+      default: [],
+    },
     bookings: {
       type: "hasMany",
       children: { model: "booking", belongsToField: "venue" },
@@ -24,7 +29,7 @@ export const schema: GadgetModel = {
       children: { model: "event", belongsToField: "venue" },
       storageKey: "96QMhngDjRWZ",
     },
-    genres: { type: "json", storageKey: "venue_genres" },
+    genres: { type: "json", storageKey: "venue_genres", default: [] },
     hours: { type: "json", storageKey: "venue_hours" },
     isActive: { type: "boolean", storageKey: "venue_is_active" },
     isVerified: { type: "boolean", storageKey: "venue_is_verified" },
@@ -37,7 +42,7 @@ export const schema: GadgetModel = {
     phone: { type: "string", storageKey: "venue_phone" },
     priceRange: { type: "string", storageKey: "venue_price_range" },
     profilePicture: {
-      type: "url",
+      type: "string",
       storageKey: "venue_profile_picture",
     },
     rating: { type: "number", storageKey: "venue_rating" },
@@ -46,7 +51,7 @@ export const schema: GadgetModel = {
       children: { model: "review", belongsToField: "event" },
       storageKey: "yvkkZs3qTqKx",
     },
-    socialLinks: { type: "json", storageKey: "venue_social_links" },
+    socialLinks: { type: "json", storageKey: "venue_social_links", default: [] },
     state: { type: "string", storageKey: "venue_state" },
     type: { type: "string", storageKey: "venue_type" },
     website: { type: "url", storageKey: "venue_website" },

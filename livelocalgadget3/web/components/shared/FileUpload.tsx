@@ -117,6 +117,10 @@ export const FileUpload: React.FC<FileUploadProps> = ({
 
   // Use currentUrl if available, otherwise use previewUrl
   const displayUrl = currentUrl || previewUrl;
+  
+  console.log("FileUpload - currentUrl:", currentUrl);
+  console.log("FileUpload - previewUrl:", previewUrl);
+  console.log("FileUpload - displayUrl:", displayUrl);
 
   return (
     <Card className="w-full">

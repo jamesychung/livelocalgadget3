@@ -106,9 +106,29 @@ export default function () {
                     onClick={async () => {
                       try {
                         await signOut();
-                        window.location.reload();
+                        // Force clear any stored session data
+                        localStorage.clear();
+                        sessionStorage.clear();
+                        
+                        // Clear all cookies
+                        document.cookie.split(";").forEach(function(c) { 
+                          document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
+                        });
+                        
+                        // Force reload to ensure clean state
+                        window.location.href = "/";
                       } catch (error) {
                         setAuthError("Failed to sign out. Please refresh the page.");
+                        // Fallback: force reload anyway
+                        localStorage.clear();
+                        sessionStorage.clear();
+                        
+                        // Clear all cookies
+                        document.cookie.split(";").forEach(function(c) { 
+                          document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
+                        });
+                        
+                        window.location.href = "/";
                       }
                     }}
                   >
@@ -209,9 +229,29 @@ export default function () {
                       onClick={async () => {
                         try {
                           await signOut();
-                          setAuthError("Session cleared. You can now sign in.");
+                          // Force clear any stored session data
+                          localStorage.clear();
+                          sessionStorage.clear();
+                          
+                          // Clear all cookies
+                          document.cookie.split(";").forEach(function(c) { 
+                            document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
+                          });
+                          
+                          // Force reload to ensure clean state
+                          window.location.href = "/";
                         } catch (error) {
                           setAuthError("Failed to clear session. Please refresh the page.");
+                          // Fallback: force reload anyway
+                          localStorage.clear();
+                          sessionStorage.clear();
+                          
+                          // Clear all cookies
+                          document.cookie.split(";").forEach(function(c) { 
+                            document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
+                          });
+                          
+                          window.location.href = "/";
                         }
                       }}
                       className="text-xs text-muted-foreground hover:text-primary"

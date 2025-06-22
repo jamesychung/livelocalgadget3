@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useOutletContext } from "react-router";
 import { useFindMany, useAction } from "@gadgetinc/react";
 import { api } from "../api";
@@ -18,7 +18,9 @@ import {
   CreditCard,
   AlertTriangle,
   CheckCircle,
-  ArrowLeft
+  ArrowLeft,
+  Building,
+  Music
 } from "lucide-react";
 import { Link } from "react-router";
 import type { AuthOutletContext } from "./_app";
@@ -43,7 +45,31 @@ export default function SettingsPage() {
     pause: !user?.id,
   });
 
+  // Fetch venue data
+  const [{ data: venueData }] = useFindMany(api.venue, {
+    filter: { owner: { id: { equals: user?.id } } },
+    select: { 
+      id: true, 
+      name: true, 
+      phone: true,
+      city: true,
+      state: true,
+      email: true,
+      website: true,
+      capacity: true,
+      priceRange: true,
+    },
+    first: 1,
+    pause: !user?.id,
+  });
+
   const musician = musicianData?.[0] as any;
+  const venue = venueData?.[0] as any;
+
+  // Determine user role
+  const isMusician = !!musician;
+  const isVenueOwner = !!venue;
+  const userRole = isMusician ? 'musician' : isVenueOwner ? 'venue' : 'user';
 
   // Actions
   const [updateUserResult, updateUser] = useAction(api.user.update, {
@@ -52,25 +78,72 @@ export default function SettingsPage() {
   const [updateMusicianResult, updateMusician] = useAction(api.musician.update, {
     pause: !user?.id,
   });
+  const [updateVenueResult, updateVenue] = useAction(api.venue.update, {
+    pause: !user?.id,
+  });
 
-  // Account Settings
+  // Account Settings - different for each role
   const [accountSettings, setAccountSettings] = useState({
     firstName: user?.firstName || '',
     lastName: user?.lastName || '',
     email: user?.email || '',
-    phone: musician?.phone || '',
+    phone: musician?.phone || venue?.phone || '',
+    // Musician-specific fields
     stageName: musician?.stageName || '',
-    city: musician?.city || '',
-    state: musician?.state || '',
     hourlyRate: musician?.hourlyRate || 0,
+    // Venue-specific fields
+    venueName: venue?.name || '',
+    venueEmail: venue?.email || '',
+    venueWebsite: venue?.website || '',
+    venueCapacity: venue?.capacity || 0,
+    venuePriceRange: venue?.priceRange || '',
+    // Common fields
+    city: musician?.city || venue?.city || '',
+    state: musician?.state || venue?.state || '',
   });
 
-  // Notification Settings
+  // Update account settings when venue/musician data loads
+  useEffect(() => {
+    if (venue) {
+      setAccountSettings(prev => ({
+        ...prev,
+        venueName: venue.name || '',
+        venueEmail: venue.email || '',
+        venueWebsite: venue.website || '',
+        venueCapacity: venue.capacity || 0,
+        venuePriceRange: venue.priceRange || '',
+        phone: venue.phone || prev.phone,
+        city: venue.city || prev.city,
+        state: venue.state || prev.state,
+      }));
+    }
+  }, [venue]);
+
+  useEffect(() => {
+    if (musician) {
+      setAccountSettings(prev => ({
+        ...prev,
+        stageName: musician.stageName || '',
+        hourlyRate: musician.hourlyRate || 0,
+        phone: musician.phone || prev.phone,
+        city: musician.city || prev.city,
+        state: musician.state || prev.state,
+      }));
+    }
+  }, [musician]);
+
+  // Notification Settings - different for each role
   const [notificationSettings, setNotificationSettings] = useState({
     emailNotifications: true,
+    // Musician-specific
     bookingRequests: true,
     bookingConfirmations: true,
     newReviews: true,
+    // Venue-specific
+    eventRequests: true,
+    eventConfirmations: true,
+    venueReviews: true,
+    // Common
     marketingEmails: false,
   });
 
@@ -96,6 +169,21 @@ export default function SettingsPage() {
           city: accountSettings.city,
           state: accountSettings.state,
           hourlyRate: accountSettings.hourlyRate,
+        });
+      }
+
+      // Update venue data if exists
+      if (venue?.id) {
+        await updateVenue({
+          id: venue.id,
+          name: accountSettings.venueName,
+          phone: accountSettings.phone,
+          email: accountSettings.venueEmail,
+          website: accountSettings.venueWebsite,
+          city: accountSettings.city,
+          state: accountSettings.state,
+          capacity: accountSettings.venueCapacity,
+          priceRange: accountSettings.venuePriceRange,
         });
       }
 
@@ -126,7 +214,7 @@ export default function SettingsPage() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Button variant="outline" asChild>
-            <Link to="/musician-dashboard">
+            <Link to={isMusician ? "/musician-dashboard" : isVenueOwner ? "/venue-dashboard" : "/"}>
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back to Dashboard
             </Link>
@@ -134,7 +222,7 @@ export default function SettingsPage() {
           <div>
             <h1 className="text-3xl font-bold">Settings</h1>
             <p className="text-muted-foreground">
-              Manage your account, notifications, and preferences
+              Manage your {userRole === 'musician' ? 'musician' : userRole === 'venue' ? 'venue' : 'account'} settings, notifications, and preferences
             </p>
           </div>
         </div>
@@ -213,23 +301,6 @@ export default function SettingsPage() {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="stageName">Stage Name</Label>
-                  <Input
-                    id="stageName"
-                    value={accountSettings.stageName}
-                    onChange={(e) => setAccountSettings(prev => ({ ...prev, stageName: e.target.value }))}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="hourlyRate">Hourly Rate ($)</Label>
-                  <Input
-                    id="hourlyRate"
-                    type="number"
-                    value={accountSettings.hourlyRate}
-                    onChange={(e) => setAccountSettings(prev => ({ ...prev, hourlyRate: parseInt(e.target.value) || 0 }))}
-                  />
-                </div>
-                <div>
                   <Label htmlFor="city">City</Label>
                   <Input
                     id="city"
@@ -245,6 +316,86 @@ export default function SettingsPage() {
                     onChange={(e) => setAccountSettings(prev => ({ ...prev, state: e.target.value }))}
                   />
                 </div>
+
+                {/* Musician-specific fields */}
+                {isMusician && (
+                  <>
+                    <div>
+                      <Label htmlFor="stageName">Stage Name</Label>
+                      <Input
+                        id="stageName"
+                        value={accountSettings.stageName}
+                        onChange={(e) => setAccountSettings(prev => ({ ...prev, stageName: e.target.value }))}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="hourlyRate">Hourly Rate ($)</Label>
+                      <Input
+                        id="hourlyRate"
+                        type="number"
+                        value={accountSettings.hourlyRate}
+                        onChange={(e) => setAccountSettings(prev => ({ ...prev, hourlyRate: parseInt(e.target.value) || 0 }))}
+                      />
+                    </div>
+                  </>
+                )}
+
+                {/* Venue-specific fields */}
+                {isVenueOwner && (
+                  <>
+                    <div>
+                      <Label htmlFor="venueName">Venue Name</Label>
+                      <Input
+                        id="venueName"
+                        value={accountSettings.venueName}
+                        onChange={(e) => setAccountSettings(prev => ({ ...prev, venueName: e.target.value }))}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="venueEmail">Venue Email</Label>
+                      <Input
+                        id="venueEmail"
+                        type="email"
+                        value={accountSettings.venueEmail}
+                        onChange={(e) => setAccountSettings(prev => ({ ...prev, venueEmail: e.target.value }))}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="venueWebsite">Website</Label>
+                      <Input
+                        id="venueWebsite"
+                        type="url"
+                        value={accountSettings.venueWebsite}
+                        onChange={(e) => setAccountSettings(prev => ({ ...prev, venueWebsite: e.target.value }))}
+                        placeholder="https://example.com"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="venueCapacity">Capacity</Label>
+                      <Input
+                        id="venueCapacity"
+                        type="number"
+                        value={accountSettings.venueCapacity}
+                        onChange={(e) => setAccountSettings(prev => ({ ...prev, venueCapacity: parseInt(e.target.value) || 0 }))}
+                        placeholder="100"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="venuePriceRange">Price Range</Label>
+                      <Select value={accountSettings.venuePriceRange} onValueChange={(value) => setAccountSettings(prev => ({ ...prev, venuePriceRange: value }))}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select price range" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="$">$ (Under $25)</SelectItem>
+                          <SelectItem value="$$">$$ ($25-$50)</SelectItem>
+                          <SelectItem value="$$$">$$$ ($50-$100)</SelectItem>
+                          <SelectItem value="$$$$">$$$$ (Over $100)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </>
+                )}
               </div>
               <Button onClick={handleAccountUpdate} disabled={isLoading}>
                 {isLoading ? 'Saving...' : 'Save Changes'}
@@ -309,36 +460,79 @@ export default function SettingsPage() {
                   />
                 </div>
                 <Separator />
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h4 className="font-medium">Booking Requests</h4>
-                    <p className="text-sm text-muted-foreground">When venues request your services</p>
-                  </div>
-                  <Switch 
-                    checked={notificationSettings.bookingRequests}
-                    onCheckedChange={(checked: boolean) => setNotificationSettings(prev => ({ ...prev, bookingRequests: checked }))}
-                  />
-                </div>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h4 className="font-medium">Booking Confirmations</h4>
-                    <p className="text-sm text-muted-foreground">When bookings are confirmed</p>
-                  </div>
-                  <Switch 
-                    checked={notificationSettings.bookingConfirmations}
-                    onCheckedChange={(checked: boolean) => setNotificationSettings(prev => ({ ...prev, bookingConfirmations: checked }))}
-                  />
-                </div>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h4 className="font-medium">New Reviews</h4>
-                    <p className="text-sm text-muted-foreground">When you receive new reviews</p>
-                  </div>
-                  <Switch 
-                    checked={notificationSettings.newReviews}
-                    onCheckedChange={(checked: boolean) => setNotificationSettings(prev => ({ ...prev, newReviews: checked }))}
-                  />
-                </div>
+
+                {/* Musician-specific notifications */}
+                {isMusician && (
+                  <>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="font-medium">Booking Requests</h4>
+                        <p className="text-sm text-muted-foreground">When venues request your services</p>
+                      </div>
+                      <Switch 
+                        checked={notificationSettings.bookingRequests}
+                        onCheckedChange={(checked: boolean) => setNotificationSettings(prev => ({ ...prev, bookingRequests: checked }))}
+                      />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="font-medium">Booking Confirmations</h4>
+                        <p className="text-sm text-muted-foreground">When bookings are confirmed</p>
+                      </div>
+                      <Switch 
+                        checked={notificationSettings.bookingConfirmations}
+                        onCheckedChange={(checked: boolean) => setNotificationSettings(prev => ({ ...prev, bookingConfirmations: checked }))}
+                      />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="font-medium">New Reviews</h4>
+                        <p className="text-sm text-muted-foreground">When you receive new reviews</p>
+                      </div>
+                      <Switch 
+                        checked={notificationSettings.newReviews}
+                        onCheckedChange={(checked: boolean) => setNotificationSettings(prev => ({ ...prev, newReviews: checked }))}
+                      />
+                    </div>
+                  </>
+                )}
+
+                {/* Venue-specific notifications */}
+                {isVenueOwner && (
+                  <>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="font-medium">Event Requests</h4>
+                        <p className="text-sm text-muted-foreground">When musicians request to play at your venue</p>
+                      </div>
+                      <Switch 
+                        checked={notificationSettings.eventRequests}
+                        onCheckedChange={(checked: boolean) => setNotificationSettings(prev => ({ ...prev, eventRequests: checked }))}
+                      />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="font-medium">Event Confirmations</h4>
+                        <p className="text-sm text-muted-foreground">When events are confirmed</p>
+                      </div>
+                      <Switch 
+                        checked={notificationSettings.eventConfirmations}
+                        onCheckedChange={(checked: boolean) => setNotificationSettings(prev => ({ ...prev, eventConfirmations: checked }))}
+                      />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="font-medium">Venue Reviews</h4>
+                        <p className="text-sm text-muted-foreground">When you receive new venue reviews</p>
+                      </div>
+                      <Switch 
+                        checked={notificationSettings.venueReviews}
+                        onCheckedChange={(checked: boolean) => setNotificationSettings(prev => ({ ...prev, venueReviews: checked }))}
+                      />
+                    </div>
+                  </>
+                )}
+
                 <div className="flex items-center justify-between">
                   <div>
                     <h4 className="font-medium">Marketing Emails</h4>
@@ -374,38 +568,80 @@ export default function SettingsPage() {
                 <div className="flex items-center justify-between">
                   <div>
                     <h4 className="font-medium">Show Contact Information</h4>
-                    <p className="text-sm text-muted-foreground">Display your email and phone to venues</p>
+                    <p className="text-sm text-muted-foreground">
+                      {isMusician ? 'Display your email and phone to venues' : isVenueOwner ? 'Display your email and phone to musicians' : 'Display your contact information'}
+                    </p>
                   </div>
                   <Switch defaultChecked />
                 </div>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h4 className="font-medium">Show Availability</h4>
-                    <p className="text-sm text-muted-foreground">Display your availability calendar</p>
-                  </div>
-                  <Switch defaultChecked />
-                </div>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h4 className="font-medium">Show Pricing</h4>
-                    <p className="text-sm text-muted-foreground">Display your hourly rate</p>
-                  </div>
-                  <Switch defaultChecked />
-                </div>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h4 className="font-medium">Allow Direct Messages</h4>
-                    <p className="text-sm text-muted-foreground">Let venues message you directly</p>
-                  </div>
-                  <Switch defaultChecked />
-                </div>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h4 className="font-medium">Show in Search Results</h4>
-                    <p className="text-sm text-muted-foreground">Appear in venue searches</p>
-                  </div>
-                  <Switch defaultChecked />
-                </div>
+
+                {/* Musician-specific privacy settings */}
+                {isMusician && (
+                  <>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="font-medium">Show Availability</h4>
+                        <p className="text-sm text-muted-foreground">Display your availability calendar</p>
+                      </div>
+                      <Switch defaultChecked />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="font-medium">Show Pricing</h4>
+                        <p className="text-sm text-muted-foreground">Display your hourly rate</p>
+                      </div>
+                      <Switch defaultChecked />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="font-medium">Allow Direct Messages</h4>
+                        <p className="text-sm text-muted-foreground">Let venues message you directly</p>
+                      </div>
+                      <Switch defaultChecked />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="font-medium">Show in Search Results</h4>
+                        <p className="text-sm text-muted-foreground">Appear in venue searches</p>
+                      </div>
+                      <Switch defaultChecked />
+                    </div>
+                  </>
+                )}
+
+                {/* Venue-specific privacy settings */}
+                {isVenueOwner && (
+                  <>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="font-medium">Show Venue Details</h4>
+                        <p className="text-sm text-muted-foreground">Display venue capacity and amenities</p>
+                      </div>
+                      <Switch defaultChecked />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="font-medium">Show Pricing</h4>
+                        <p className="text-sm text-muted-foreground">Display your price range</p>
+                      </div>
+                      <Switch defaultChecked />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="font-medium">Allow Event Requests</h4>
+                        <p className="text-sm text-muted-foreground">Let musicians request to play at your venue</p>
+                      </div>
+                      <Switch defaultChecked />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="font-medium">Show in Search Results</h4>
+                        <p className="text-sm text-muted-foreground">Appear in musician searches</p>
+                      </div>
+                      <Switch defaultChecked />
+                    </div>
+                  </>
+                )}
               </div>
               <Button onClick={() => setMessage({ type: 'success', text: 'Privacy settings saved!' })}>
                 Save Preferences

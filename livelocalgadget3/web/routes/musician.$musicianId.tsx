@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router";
-import { useFindMany, useFindFirst } from "@gadgetinc/react";
+import { useFindMany, useFindOne } from "@gadgetinc/react";
 import { api } from "../api";
 import Header from "../components/shared/Header";
 import Footer from "../components/shared/Footer";
@@ -31,12 +31,6 @@ interface MusicianData {
   phone?: string;
   email?: string;
   isVerified?: boolean;
-  user?: {
-    id: string;
-    firstName?: string;
-    lastName?: string;
-    email?: string;
-  };
 }
 
 interface BookingData {
@@ -62,42 +56,23 @@ export default function MusicianProfile() {
 
   useEffect(() => {
     setCurrentTime(new Date().toLocaleString());
-  }, []);
+    console.log("MusicianProfile - musicianId:", musicianId);
+  }, [musicianId]);
 
   // Fetch real musician data from database
-  const [{ data: musicianData, fetching: musicianFetching, error: musicianError }] = useFindFirst(api.musician, {
-    filter: { id: { equals: musicianId } },
-    select: {
-      id: true,
-      name: true,
-      stageName: true,
-      bio: true,
-      genre: true,
-      genres: true,
-      city: true,
-      state: true,
-      country: true,
-      profilePicture: true,
-      rating: true,
-      totalGigs: true,
-      hourlyRate: true,
-      instruments: true,
-      availability: true,
-      website: true,
-      experience: true,
-      yearsExperience: true,
-      phone: true,
-      email: true,
-      isVerified: true,
-      user: {
-        id: true,
-        firstName: true,
-        lastName: true,
-        email: true,
-      }
-    },
+  const [{ data: musicianData, fetching: musicianFetching, error: musicianError }] = useFindOne(api.musician, musicianId || "", {
     pause: !musicianId,
   });
+
+  // Debug logging
+  useEffect(() => {
+    if (musicianError) {
+      console.error("Musician fetch error:", musicianError);
+    }
+    if (musicianData) {
+      console.log("Musician data received:", musicianData);
+    }
+  }, [musicianError, musicianData]);
 
   // Fetch bookings for this musician
   const [{ data: bookingsData, fetching: bookingsFetching }] = useFindMany(api.booking, {
@@ -199,7 +174,7 @@ export default function MusicianProfile() {
   const hourlyRate = musician.hourlyRate ? `$${musician.hourlyRate}/hour` : "Rate not set";
 
   // Get display name
-  const displayName = musician.stageName || musician.name || `${musician.user?.firstName} ${musician.user?.lastName}`;
+  const displayName = musician.stageName || musician.name || "Musician";
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50">

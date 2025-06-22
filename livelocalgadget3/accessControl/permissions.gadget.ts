@@ -98,6 +98,10 @@ export const permissions: GadgetPermissions = {
         },
         venue: {
           read: true,
+          actions: {
+            create: true,
+            update: true
+          }
         },
         booking: {
           read: true,
@@ -293,12 +297,24 @@ export const permissions: GadgetPermissions = {
         },
         venue: {
           read: true,
+          actions: {
+            create: true,
+            update: true
+          }
         },
         booking: {
           read: true,
         },
         event: {
           read: true,
+          actions: {
+            create: {
+              filter: "accessControl/filters/event/organizer.gelly",
+            },
+            update: {
+              filter: "accessControl/filters/event/organizer.gelly",
+            },
+          },
         },
       }
     },

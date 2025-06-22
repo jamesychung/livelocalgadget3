@@ -105,23 +105,6 @@ export default function ProfilePage() {
     }
   }, [primaryRole]);
 
-  // Debug effect for musician profile
-  useEffect(() => {
-    if (musicianProfile) {
-      console.log("Musician profile state:", musicianProfile);
-      console.log("Profile picture URL:", musicianProfile.profilePicture);
-      console.log("Profile picture URL type:", typeof musicianProfile.profilePicture);
-      console.log("Profile picture starts with blob:", musicianProfile.profilePicture?.startsWith('blob:'));
-      console.log("Audio URL:", musicianProfile.audio);
-      console.log("Audio URL type:", typeof musicianProfile.audio);
-      console.log("Audio starts with blob:", musicianProfile.audio?.startsWith('blob:'));
-      console.log("Social links:", musicianProfile.socialLinks);
-      console.log("Social links type:", typeof musicianProfile.socialLinks);
-      console.log("Social links length:", musicianProfile.socialLinks?.length);
-      console.log("Additional pictures:", musicianProfile.additionalPictures);
-    }
-  }, [musicianProfile]);
-
   const loadMusicianProfile = async () => {
     try {
       setLoadingMusician(true);
@@ -171,15 +154,14 @@ export default function ProfilePage() {
     try {
       setLoadingVenue(true);
       
-      const profileResult = await api.venue.findFirst({
-        filter: { user: { id: { equals: user.id } } },
+      const profileResult = await api.venue.findMany({
+        filter: { owner: { id: { equals: user.id } } },
         select: {
           id: true,
           name: true,
           description: true,
           type: true,
           capacity: true,
-          location: true,
           city: true,
           state: true,
           country: true,
@@ -193,10 +175,21 @@ export default function ProfilePage() {
           isActive: true,
           isVerified: true,
           rating: true,
-          totalEvents: true,
+          profilePicture: true,
+          additionalPictures: true,
+          socialLinks: true,
         },
+        sort: { updatedAt: "Descending" },
+        first: 1
       });
-      setVenueProfile(profileResult);
+      
+      console.log("Loaded venue profile:", profileResult);
+      if (profileResult.length > 0) {
+        console.log("Venue profilePicture:", profileResult[0].profilePicture);
+        console.log("Venue profile ID:", profileResult[0].id);
+        console.log("Venue profile updatedAt:", profileResult[0].updatedAt);
+      }
+      setVenueProfile(profileResult.length > 0 ? profileResult[0] : null);
     } catch (err) {
       console.error("Error loading venue profile:", err);
     } finally {
@@ -217,6 +210,9 @@ export default function ProfilePage() {
     if (musicianProfile?.profilePicture) {
       setCurrentImageIndex(0); // Profile picture will be first
       setLightboxOpen(true);
+    } else if (venueProfile?.profilePicture) {
+      setCurrentImageIndex(0); // Profile picture will be first
+      setLightboxOpen(true);
     }
   };
 
@@ -226,8 +222,14 @@ export default function ProfilePage() {
 
   const goToPrevious = () => {
     const allImages = [
-      musicianProfile?.profilePicture,
-      ...(musicianProfile?.additionalPictures || [])
+      ...(musicianProfile ? [
+        musicianProfile.profilePicture,
+        ...(musicianProfile.additionalPictures || [])
+      ] : []),
+      ...(venueProfile ? [
+        venueProfile.profilePicture,
+        ...(venueProfile.additionalPictures || [])
+      ] : [])
     ].filter(Boolean);
     
     setCurrentImageIndex((prev) => 
@@ -237,8 +239,14 @@ export default function ProfilePage() {
 
   const goToNext = () => {
     const allImages = [
-      musicianProfile?.profilePicture,
-      ...(musicianProfile?.additionalPictures || [])
+      ...(musicianProfile ? [
+        musicianProfile.profilePicture,
+        ...(musicianProfile.additionalPictures || [])
+      ] : []),
+      ...(venueProfile ? [
+        venueProfile.profilePicture,
+        ...(venueProfile.additionalPictures || [])
+      ] : [])
     ].filter(Boolean);
     
     setCurrentImageIndex((prev) => 
@@ -264,9 +272,7 @@ export default function ProfilePage() {
                   {(() => {
                     console.log("Profile picture display logic:");
                     console.log("- primaryRole:", primaryRole);
-                    console.log("- musicianProfile?.profilePicture:", musicianProfile?.profilePicture);
-                    console.log("- starts with blob:", musicianProfile?.profilePicture?.startsWith('blob:'));
-                    console.log("- condition result:", primaryRole === 'musician' && musicianProfile?.profilePicture && !musicianProfile.profilePicture.startsWith('blob:'));
+                    console.log("- venueProfile?.profilePicture:", venueProfile?.profilePicture);
                     
                     if (primaryRole === 'musician' && musicianProfile?.profilePicture && !musicianProfile.profilePicture.startsWith('blob:')) {
                       return (
@@ -277,11 +283,25 @@ export default function ProfilePage() {
                           onClick={openProfilePictureLightbox}
                         />
                       );
+                    } else if (primaryRole === 'venue' && venueProfile?.profilePicture && !venueProfile.profilePicture.startsWith('blob:')) {
+                      return (
+                        <img 
+                          src={venueProfile.profilePicture} 
+                          alt="Profile" 
+                          className="h-24 w-24 rounded-2xl object-cover border-4 border-white shadow-lg cursor-pointer hover:scale-105 transition-all duration-300"
+                          onClick={openProfilePictureLightbox}
+                        />
+                      );
                     } else {
                       return <UserIcon user={user} className="h-24 w-24 rounded-2xl border-4 border-white shadow-lg" />;
                     }
                   })()}
                   {primaryRole === 'musician' && musicianProfile?.profilePicture?.startsWith('blob:') && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-gray-100 rounded-2xl">
+                      <span className="text-xs text-gray-500">Image expired</span>
+                    </div>
+                  )}
+                  {primaryRole === 'venue' && venueProfile?.profilePicture?.startsWith('blob:') && (
                     <div className="absolute inset-0 flex items-center justify-center bg-gray-100 rounded-2xl">
                       <span className="text-xs text-gray-500">Image expired</span>
                     </div>
@@ -659,6 +679,24 @@ export default function ProfilePage() {
                 </div>
               ) : venueProfile ? (
                 <div className="space-y-8">
+                  {/* Venue Profile Picture */}
+                  {venueProfile.profilePicture && (
+                    <div className="flex justify-center mb-6">
+                      <div className="relative">
+                        <img 
+                          src={venueProfile.profilePicture} 
+                          alt="Venue Profile" 
+                          className="w-32 h-32 object-cover rounded-lg border shadow-sm cursor-pointer hover:scale-105 transition-all duration-300"
+                          onClick={() => {
+                            if (venueProfile.profilePicture) {
+                              openLightbox(0);
+                            }
+                          }}
+                        />
+                      </div>
+                    </div>
+                  )}
+                  
                   {/* Venue Stats - Redesigned */}
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     {venueProfile.capacity && (
@@ -679,15 +717,6 @@ export default function ProfilePage() {
                         <div className="text-sm text-gray-600 font-medium">Rating</div>
                       </div>
                     )}
-                    {venueProfile.totalEvents && (
-                      <div className="text-center p-6 bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl border border-green-200">
-                        <div className="p-3 bg-gradient-to-r from-green-500 to-emerald-600 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-                          <Calendar className="h-8 w-8 text-white" />
-                        </div>
-                        <div className="text-3xl font-bold text-gray-900">{venueProfile.totalEvents}</div>
-                        <div className="text-sm text-gray-600 font-medium">Total Events</div>
-                      </div>
-                    )}
                   </div>
 
                   {/* Venue Details - Redesigned */}
@@ -704,10 +733,34 @@ export default function ProfilePage() {
                             <p className="font-semibold text-gray-900 mt-1">{venueProfile.name}</p>
                           </div>
                         )}
+                        {venueProfile.description && (
+                          <div className="p-4 bg-gray-50 rounded-xl">
+                            <span className="text-sm text-gray-600 font-medium">Description</span>
+                            <p className="text-gray-900 mt-1 leading-relaxed">{venueProfile.description}</p>
+                          </div>
+                        )}
                         {venueProfile.type && (
                           <div className="p-4 bg-gray-50 rounded-xl">
-                            <span className="text-sm text-gray-600 font-medium">Type</span>
+                            <span className="text-sm text-gray-600 font-medium">Venue Type</span>
                             <p className="font-semibold text-gray-900 mt-1">{venueProfile.type}</p>
+                          </div>
+                        )}
+                        {venueProfile.priceRange && (
+                          <div className="p-4 bg-gray-50 rounded-xl">
+                            <span className="text-sm text-gray-600 font-medium">Price Range</span>
+                            <p className="font-semibold text-gray-900 mt-1 flex items-center gap-2">
+                              <DollarSign className="h-4 w-4 text-green-500" />
+                              {venueProfile.priceRange}
+                            </p>
+                          </div>
+                        )}
+                        {venueProfile.address && (
+                          <div className="p-4 bg-gray-50 rounded-xl">
+                            <span className="text-sm text-gray-600 font-medium">Address</span>
+                            <p className="text-gray-900 mt-1 flex items-center gap-2">
+                              <MapPin className="h-4 w-4 text-blue-500" />
+                              {venueProfile.address}
+                            </p>
                           </div>
                         )}
                         {venueProfile.city && (
@@ -717,6 +770,18 @@ export default function ProfilePage() {
                               <MapPin className="h-4 w-4 text-blue-500" />
                               {[venueProfile.city, venueProfile.state, venueProfile.country].filter(Boolean).join(", ")}
                             </p>
+                          </div>
+                        )}
+                        {venueProfile.amenities && venueProfile.amenities.length > 0 && (
+                          <div className="p-4 bg-gray-50 rounded-xl">
+                            <span className="text-sm text-gray-600 font-medium">Amenities</span>
+                            <div className="flex flex-wrap gap-2 mt-2">
+                              {venueProfile.amenities.map((amenity: string, index: number) => (
+                                <span key={index} className="px-3 py-1 bg-blue-100 text-blue-800 text-sm rounded-full">
+                                  {amenity}
+                                </span>
+                              ))}
+                            </div>
                           </div>
                         )}
                       </div>
@@ -750,6 +815,55 @@ export default function ProfilePage() {
                       </div>
                     </div>
                   </div>
+
+                  {/* Additional Pictures - Redesigned */}
+                  {venueProfile.additionalPictures && venueProfile.additionalPictures.length > 0 && (
+                    <div className="border-t border-gray-200 pt-8">
+                      <h3 className="text-xl font-semibold text-gray-900 mb-6 flex items-center gap-2">
+                        <div className="w-1 h-6 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full"></div>
+                        Venue Photos
+                      </h3>
+                      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                        {venueProfile.additionalPictures.map((image: string, index: number) => (
+                          <div key={index} className="relative group">
+                            <img 
+                              src={image} 
+                              alt={`Venue photo ${index + 1}`}
+                              className="w-full h-40 object-cover rounded-2xl border-2 border-gray-200 hover:scale-105 transition-all duration-300 cursor-pointer shadow-lg hover:shadow-xl"
+                              onClick={() => openLightbox(index)}
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Social Media Links - Redesigned */}
+                  {venueProfile.socialLinks && venueProfile.socialLinks.length > 0 && (
+                    <div className="border-t border-gray-200 pt-8">
+                      <h3 className="text-xl font-semibold text-gray-900 mb-6 flex items-center gap-2">
+                        <div className="w-1 h-6 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full"></div>
+                        Social Media
+                      </h3>
+                      <div className="flex flex-wrap gap-4">
+                        {venueProfile.socialLinks.map((link: any, index: number) => (
+                          <a
+                            key={index}
+                            href={link.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-gray-100 to-gray-200 hover:from-gray-200 hover:to-gray-300 rounded-xl text-sm font-medium transition-all duration-300 shadow-md hover:shadow-lg"
+                          >
+                            {link.platform === 'spotify' && <Music className="h-5 w-5 text-green-600" />}
+                            {link.platform === 'youtube' && <Youtube className="h-5 w-5 text-red-600" />}
+                            {link.platform === 'instagram' && <Instagram className="h-5 w-5 text-pink-600" />}
+                            {link.platform === 'twitter' && <Twitter className="h-5 w-5 text-blue-600" />}
+                            {link.platform}
+                          </a>
+                        ))}
+                      </div>
+                    </div>
+                  )}
 
                   {/* Quick Actions - Redesigned */}
                   <div className="flex flex-wrap gap-4 pt-8 border-t border-gray-200">
@@ -796,11 +910,17 @@ export default function ProfilePage() {
         />
 
         {/* Image Lightbox */}
-        {musicianProfile && (
+        {(musicianProfile || venueProfile) && (
           <ImageLightbox
             images={[
-              musicianProfile.profilePicture,
-              ...(musicianProfile.additionalPictures || [])
+              ...(musicianProfile ? [
+                musicianProfile.profilePicture,
+                ...(musicianProfile.additionalPictures || [])
+              ] : []),
+              ...(venueProfile ? [
+                venueProfile.profilePicture,
+                ...(venueProfile.additionalPictures || [])
+              ] : [])
             ].filter(Boolean)}
             currentIndex={currentImageIndex}
             isOpen={lightboxOpen}

@@ -91,7 +91,7 @@ export const schema: GadgetModel = {
       default: "",
     },
     profilePicture: {
-      type: "url",
+      type: "string",
       storageKey: "musician_profile_picture",
     },
     rating: { 

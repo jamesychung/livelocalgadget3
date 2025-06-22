@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useActionForm } from "@gadgetinc/react";
 import { Link, useLocation, useNavigate, useOutletContext } from "react-router";
 import { useState, useEffect } from "react";
@@ -11,6 +12,7 @@ import type { RootOutletContext } from "../root";
 export default function () {
   const { gadgetConfig } = useOutletContext<RootOutletContext>();
   const [isClient, setIsClient] = useState(false);
+  const [selectedRole, setSelectedRole] = useState("regular_user");
 
   const { search } = useLocation();
   const navigate = useNavigate();
@@ -31,6 +33,11 @@ export default function () {
       }, 2000);
     },
   });
+
+  // Set the role value when it changes
+  useEffect(() => {
+    setValue("primaryRole", selectedRole);
+  }, [selectedRole, setValue]);
 
   // Ensure we're on the client side to avoid SSR issues
   useEffect(() => {
@@ -103,6 +110,26 @@ export default function () {
                       {errors?.user?.password?.message && (
                         <p className="text-sm text-destructive">{errors.user.password.message}</p>
                       )}
+                    </div>
+                  </div>
+
+                  {/* Role Selection */}
+                  <div className="space-y-2">
+                    <div className="space-y-1">
+                      <Label htmlFor="role">Role</Label>
+                      <Select
+                        value={selectedRole}
+                        onValueChange={(value) => setSelectedRole(value)}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select role" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="musician">Musician</SelectItem>
+                          <SelectItem value="venue">Venue Owner</SelectItem>
+                          <SelectItem value="user">Regular User</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
                   </div>
 

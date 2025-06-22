@@ -80,3 +80,30 @@ export const waitForAuthentication = async (timeout = 5000): Promise<boolean> =>
   console.error("Authentication timeout - API client not authenticated after", timeout, "ms");
   return false;
 };
+
+// Export a function to force reset the API client
+export const forceResetApiClient = async () => {
+  try {
+    console.log("Force resetting API client...");
+    
+    // Clear any internal session state
+    if (api.signOut) {
+      await api.signOut();
+    }
+    
+    // Force clear all storage
+    localStorage.clear();
+    sessionStorage.clear();
+    
+    // Clear all cookies
+    document.cookie.split(";").forEach(function(c) { 
+      document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
+    });
+    
+    console.log("API client reset complete");
+    return true;
+  } catch (error) {
+    console.error("Error resetting API client:", error);
+    return false;
+  }
+};

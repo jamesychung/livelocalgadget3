@@ -109,7 +109,7 @@ export default function MusicianDashboard() {
                             It looks like you haven't created your musician profile yet. Create your profile to start managing your bookings, events, and availability.
                         </p>
                         <Button asChild>
-                            <Link to="/musician-profile-create">
+                            <Link to="/musician-profile/edit">
                                 Create Musician Profile
                             </Link>
                         </Button>

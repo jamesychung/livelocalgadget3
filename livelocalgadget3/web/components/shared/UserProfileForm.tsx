@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { Button } from "../ui/button";
@@ -84,10 +84,51 @@ export const UserProfileForm: React.FC<UserProfileFormProps> = ({ role, profile,
     additionalPictures: safeArray(profile?.additionalPictures) || [],
     // Venue fields
     description: safeString(profile?.description) || "",
+    type: safeString(profile?.type) || "",
+    capacity: safeString(profile?.capacity) || "",
+    priceRange: safeString(profile?.priceRange) || "",
+    amenities: safeArray(profile?.amenities) || [],
+    address: safeString(profile?.address) || "",
+    zipCode: safeString(profile?.zipCode) || "",
   });
 
-  console.log("UserProfileForm render - profile:", profile);
-  console.log("UserProfileForm render - form state:", form);
+  // Update form when profile changes
+  useEffect(() => {
+    setForm({
+      firstName: safeString(profile?.firstName) || "",
+      lastName: safeString(profile?.lastName) || "",
+      email: safeString(profile?.email) || "",
+      // Musician fields (matching schema)
+      stageName: safeString(profile?.stageName) || "",
+      name: safeString(profile?.name) || "",
+      bio: safeString(profile?.bio) || "",
+      genre: safeString(profile?.genre) || "",
+      genres: safeArray(profile?.genres) || [],
+      city: safeString(profile?.city) || "",
+      state: safeString(profile?.state) || "",
+      country: safeString(profile?.country) || "",
+      phone: safeString(profile?.phone) || "",
+      website: safeString(profile?.website) || "",
+      experience: safeString(profile?.experience) || "",
+      yearsExperience: safeString(profile?.yearsExperience) || "",
+      instruments: safeString(profile?.instruments) || "",
+      hourlyRate: safeString(profile?.hourlyRate) || "",
+      profilePicture: safeString(profile?.profilePicture) || "",
+      audio: safeString(profile?.audio) || "",
+      audioFiles: safeArray(profile?.audioFiles) || [],
+      socialLinks: safeSocialLinks(profile?.socialLinks) || [],
+      additionalPictures: safeArray(profile?.additionalPictures) || [],
+      // Venue fields
+      description: safeString(profile?.description) || "",
+      type: safeString(profile?.type) || "",
+      capacity: safeString(profile?.capacity) || "",
+      priceRange: safeString(profile?.priceRange) || "",
+      amenities: safeArray(profile?.amenities) || [],
+      address: safeString(profile?.address) || "",
+      zipCode: safeString(profile?.zipCode) || "",
+    });
+  }, [profile]);
+
   console.log("UserProfileForm render - isSaving:", isSaving);
   console.log("UserProfileForm render - allowNameEdit:", allowNameEdit);
 
@@ -133,21 +174,20 @@ export const UserProfileForm: React.FC<UserProfileFormProps> = ({ role, profile,
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("=== FORM SUBMISSION STARTED ===");
-    console.log("Form submitted with data:", form);
-    console.log("Form element:", e.target);
-    console.log("Form validity:", (e.target as HTMLFormElement).checkValidity());
-    console.log("isSaving state:", isSaving);
     
     // Prevent submission if already saving
     if (isSaving) {
-      console.log("Form submission blocked - already saving");
       return;
     }
     
-    // Validate that stage name is provided
-    if (!form.stageName.trim()) {
+    // Validate based on role
+    if (role === "musician" && !form.stageName.trim()) {
       alert("Please enter your stage name.");
+      return;
+    }
+    
+    if (role === "venue" && !form.name.trim()) {
+      alert("Please enter your venue name.");
       return;
     }
     
@@ -159,30 +199,45 @@ export const UserProfileForm: React.FC<UserProfileFormProps> = ({ role, profile,
     
     // Prepare the data for submission
     const submitData = {
-      ...form,
+      // Include all form fields except image fields (handled separately)
+      firstName: form.firstName,
+      lastName: form.lastName,
+      email: form.email,
+      stageName: form.stageName,
+      name: form.name,
+      bio: form.bio,
+      description: form.description,
+      city: form.city,
+      state: form.state,
+      country: form.country,
+      phone: form.phone,
+      experience: form.experience,
+      yearsExperience: form.yearsExperience ? parseInt(form.yearsExperience) : 0,
+      hourlyRate: form.hourlyRate ? parseFloat(form.hourlyRate) : 0,
+      instruments: form.instruments,
+      type: form.type,
+      capacity: form.capacity ? parseInt(form.capacity) : 0,
+      priceRange: form.priceRange,
+      address: form.address,
+      zipCode: form.zipCode,
       // Use the first selected genre as the primary genre field
       genre: form.genres.length > 0 ? form.genres[0] : "",
       // Keep the genres array for the JSON field
       genres: form.genres,
-      // Ensure numeric fields are properly formatted
-      yearsExperience: form.yearsExperience ? parseInt(form.yearsExperience) : 0,
-      hourlyRate: form.hourlyRate ? parseFloat(form.hourlyRate) : 0,
       // Ensure website is either a valid URL or null
       website: form.website.trim() || null,
-      // Ensure profile picture and audio are either valid URLs or null
-      profilePicture: form.profilePicture.trim() || null,
-      audio: form.audio.trim() || null,
+      // Include image data for all profiles (now using URLs instead of base64)
+      profilePicture: form.profilePicture && form.profilePicture.trim() ? form.profilePicture.trim() : null,
+      audio: form.audio && form.audio.trim() ? form.audio.trim() : null,
       audioFiles: form.audioFiles,
+      additionalPictures: form.additionalPictures,
       // Keep social links as JSON
       socialLinks: form.socialLinks,
-      // Keep additional pictures as array
-      additionalPictures: form.additionalPictures
+      // Keep amenities as array
+      amenities: form.amenities
     };
     
-    console.log("Submitting data:", submitData);
-    console.log("Calling onSave function...");
     onSave(submitData);
-    console.log("=== FORM SUBMISSION COMPLETED ===");
   };
 
   // Helper function to validate URLs
@@ -195,13 +250,18 @@ export const UserProfileForm: React.FC<UserProfileFormProps> = ({ role, profile,
     }
   };
 
-  // Check if form is valid - simplified for testing
-  const isFormValid = form.stageName.trim() !== "";
-
-  console.log("Form validation:", {
-    stageName: form.stageName.trim() !== "",
-    isFormValid
-  });
+  // Check if form is valid - properly validate required fields for each role
+  const isFormValid = () => {
+    if (role === "musician") {
+      return form.stageName.trim() !== "";
+    } else if (role === "venue") {
+      return form.name.trim() !== "" && 
+             form.city.trim() !== "" && 
+             form.state.trim() !== "" && 
+             form.country.trim() !== "";
+    }
+    return true; // For user role
+  };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -467,15 +527,29 @@ export const UserProfileForm: React.FC<UserProfileFormProps> = ({ role, profile,
       {/* Venue fields */}
       {role === "venue" && (
         <>
+          {/* Profile Picture Upload */}
+          <FileUpload
+            label="Venue Profile Picture"
+            type="image"
+            currentUrl={form.profilePicture}
+            onUpload={handleProfilePictureUpload}
+            onRemove={handleProfilePictureRemove}
+            accept="image/*"
+            maxSize={5}
+          />
+
           <div>
-            <Label htmlFor="name">Venue Name</Label>
+            <Label htmlFor="name">Venue Name *</Label>
             <Input
               id="name"
               name="name"
               value={form.name}
               onChange={handleChange}
+              required
+              placeholder="Enter your venue name"
             />
           </div>
+
           <div>
             <Label htmlFor="description">Description</Label>
             <textarea
@@ -484,8 +558,72 @@ export const UserProfileForm: React.FC<UserProfileFormProps> = ({ role, profile,
               value={form.description}
               onChange={handleChange}
               className="w-full border rounded p-2 min-h-[80px]"
+              placeholder="Tell us about your venue..."
             />
           </div>
+
+          {/* Additional Pictures */}
+          <MultipleImageUpload
+            label="Venue Photos"
+            images={form.additionalPictures}
+            onImagesChange={handleAdditionalPicturesChange}
+            maxImages={8}
+            maxSize={5}
+          />
+
+          {/* Social Media Links */}
+          <SocialMediaForm
+            socialLinks={form.socialLinks}
+            onChange={handleSocialLinksChange}
+          />
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="type">Venue Type</Label>
+              <Input
+                id="type"
+                name="type"
+                value={form.type}
+                onChange={handleChange}
+                placeholder="e.g., Bar, Restaurant, Concert Hall"
+              />
+            </div>
+            <div>
+              <Label htmlFor="capacity">Capacity</Label>
+              <Input
+                id="capacity"
+                name="capacity"
+                type="number"
+                min="0"
+                value={form.capacity}
+                onChange={handleChange}
+                placeholder="0"
+              />
+            </div>
+          </div>
+
+          <div>
+            <Label htmlFor="priceRange">Price Range</Label>
+            <Input
+              id="priceRange"
+              name="priceRange"
+              value={form.priceRange}
+              onChange={handleChange}
+              placeholder="e.g., $10-50, Free, $20+"
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="address">Address</Label>
+            <Input
+              id="address"
+              name="address"
+              value={form.address}
+              onChange={handleChange}
+              placeholder="Enter your venue address"
+            />
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <Label htmlFor="venue-city">City *</Label>
@@ -495,6 +633,7 @@ export const UserProfileForm: React.FC<UserProfileFormProps> = ({ role, profile,
                 value={form.city}
                 onChange={handleChange}
                 required
+                placeholder="Enter your city"
               />
             </div>
             <div>
@@ -505,6 +644,7 @@ export const UserProfileForm: React.FC<UserProfileFormProps> = ({ role, profile,
                 value={form.state}
                 onChange={handleChange}
                 required
+                placeholder="Enter your state/province"
               />
             </div>
             <div>
@@ -515,26 +655,64 @@ export const UserProfileForm: React.FC<UserProfileFormProps> = ({ role, profile,
                 value={form.country}
                 onChange={handleChange}
                 required
+                placeholder="Enter your country"
               />
             </div>
           </div>
-          <div>
-            <Label htmlFor="venue-phone">Phone</Label>
-            <Input
-              id="venue-phone"
-              name="phone"
-              value={form.phone}
-              onChange={handleChange}
-            />
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="venue-phone">Phone</Label>
+              <Input
+                id="venue-phone"
+                name="phone"
+                value={form.phone}
+                onChange={handleChange}
+                placeholder="Enter your phone number"
+              />
+            </div>
+            <div>
+              <Label htmlFor="venue-zipCode">Zip Code</Label>
+              <Input
+                id="venue-zipCode"
+                name="zipCode"
+                value={form.zipCode}
+                onChange={handleChange}
+                placeholder="Enter your zip code"
+              />
+            </div>
           </div>
+
           <div>
             <Label htmlFor="venue-website">Website</Label>
             <Input
               id="venue-website"
               name="website"
+              type="url"
               value={form.website}
               onChange={handleChange}
+              placeholder="https://yourvenue.com"
             />
+            <p className="text-xs text-muted-foreground mt-1">
+              Enter a valid website URL (e.g., https://example.com) or leave empty
+            </p>
+          </div>
+
+          <div>
+            <Label htmlFor="amenities">Amenities</Label>
+            <Input
+              id="amenities"
+              name="amenities"
+              value={form.amenities.join(', ')}
+              onChange={(e) => {
+                const amenitiesArray = e.target.value.split(',').map(item => item.trim()).filter(item => item.length > 0);
+                setForm({ ...form, amenities: amenitiesArray });
+              }}
+              placeholder="e.g., Parking, Food, Bar, Stage (separate with commas)"
+            />
+            <p className="text-xs text-muted-foreground mt-1">
+              Enter venue amenities, separated by commas
+            </p>
           </div>
         </>
       )}
@@ -542,30 +720,9 @@ export const UserProfileForm: React.FC<UserProfileFormProps> = ({ role, profile,
       <Button 
         type="submit" 
         className="w-full" 
-        disabled={isSaving || !isFormValid}
-        onClick={() => {
-          console.log("=== BUTTON CLICKED ===");
-          console.log("Button clicked, isSaving:", isSaving);
-          console.log("isFormValid:", isFormValid);
-          console.log("Button disabled:", isSaving || !isFormValid);
-        }}
+        disabled={isSaving || !isFormValid()}
       >
         {isSaving ? "Saving..." : "Save Profile"}
-      </Button>
-      
-      {/* Debug button to test if the issue is with form validation */}
-      <Button 
-        type="button" 
-        variant="outline" 
-        className="w-full" 
-        onClick={() => {
-          console.log("=== DEBUG BUTTON CLICKED ===");
-          console.log("Current form state:", form);
-          console.log("isFormValid:", isFormValid);
-          console.log("isSaving:", isSaving);
-        }}
-      >
-        Debug Form State
       </Button>
     </form>
   );

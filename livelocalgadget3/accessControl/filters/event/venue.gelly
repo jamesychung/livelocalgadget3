@@ -1,1 +1,1 @@
-record.venue == context.currentUser.venue 
+record.venue.owner == context.currentUser 

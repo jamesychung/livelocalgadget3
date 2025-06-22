@@ -8,6 +8,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Clock, Plus, X, Save, Settings, Calendar as CalendarIcon, ChevronLeft, ChevronRight, Music, Building } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
+import { Link } from "react-router";
 
 interface Event {
     id: string;
@@ -30,6 +31,7 @@ interface VenueEventCalendarProps {
     onAddEvent?: (event: Partial<Event>) => Promise<void>;
     onUpdateEvent?: (eventId: string, updates: Partial<Event>) => Promise<void>;
     onDeleteEvent?: (eventId: string) => Promise<void>;
+    onEditEvent?: (event: Event) => void;
     isEditing?: boolean;
     onEditToggle?: () => void;
     title?: string;
@@ -44,6 +46,7 @@ export default function VenueEventCalendar({
     onAddEvent,
     onUpdateEvent,
     onDeleteEvent,
+    onEditEvent,
     isEditing = false,
     onEditToggle,
     title = "Venue Event Calendar",
@@ -51,8 +54,8 @@ export default function VenueEventCalendar({
 }: VenueEventCalendarProps) {
     const [viewMode, setViewMode] = useState<ViewMode>('weekly');
     const [currentMonth, setCurrentMonth] = useState(new Date());
+    const [currentWeek, setCurrentWeek] = useState(new Date());
     const [eventTypeFilter, setEventTypeFilter] = useState<EventType>('all');
-    const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
     const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
 
     // Filter events based on type
@@ -74,15 +77,31 @@ export default function VenueEventCalendar({
         );
     };
 
-    const getNextWeekDates = () => {
+    const getWeekDates = (startDate: Date) => {
         const dates = [];
-        const today = new Date();
+        const startOfWeek = new Date(startDate);
+        // Adjust to start of week (Sunday)
+        const dayOfWeek = startOfWeek.getDay();
+        startOfWeek.setDate(startOfWeek.getDate() - dayOfWeek);
+        
         for (let i = 0; i < 7; i++) {
-            const date = new Date(today);
-            date.setDate(today.getDate() + i);
+            const date = new Date(startOfWeek);
+            date.setDate(startOfWeek.getDate() + i);
             dates.push(date);
         }
         return dates;
+    };
+
+    const navigateWeek = (direction: 'prev' | 'next') => {
+        setCurrentWeek(prev => {
+            const newWeek = new Date(prev);
+            if (direction === 'prev') {
+                newWeek.setDate(prev.getDate() - 7);
+            } else {
+                newWeek.setDate(prev.getDate() + 7);
+            }
+            return newWeek;
+        });
     };
 
     const getMonthDates = () => {
@@ -133,67 +152,91 @@ export default function VenueEventCalendar({
                date.getFullYear() === currentMonth.getFullYear();
     };
 
-    const renderWeeklyView = () => (
-        <Card>
-            <CardHeader>
-                <div className="flex items-center justify-between">
-                    <div>
-                        <CardTitle>Weekly Events</CardTitle>
-                        <CardDescription>
-                            Your venue's events for the next 7 days
-                        </CardDescription>
-                    </div>
-                    {isEditing && onAddEvent && (
-                        <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-                            <DialogTrigger asChild>
-                                <Button>
-                                    <Plus className="mr-2 h-4 w-4" />
-                                    Add Event
+    const renderWeeklyView = () => {
+        const weekDates = getWeekDates(currentWeek);
+        const startDate = weekDates[0];
+        const endDate = weekDates[6];
+        
+        return (
+            <Card>
+                <CardHeader>
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <CardTitle>Weekly Events</CardTitle>
+                            <CardDescription>
+                                Your venue's events for {startDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - {endDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                            </CardDescription>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => navigateWeek('prev')}
+                            >
+                                <ChevronLeft className="h-4 w-4" />
+                            </Button>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setCurrentWeek(new Date())}
+                            >
+                                Today
+                            </Button>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => navigateWeek('next')}
+                            >
+                                <ChevronRight className="h-4 w-4" />
+                            </Button>
+                            {isEditing && onAddEvent && (
+                                <Button asChild>
+                                    <Link to="/create-event">
+                                        <Plus className="mr-2 h-4 w-4" />
+                                        Add Event
+                                    </Link>
                                 </Button>
-                            </DialogTrigger>
-                            <DialogContent>
-                                <DialogHeader>
-                                    <DialogTitle>Add New Event</DialogTitle>
-                                </DialogHeader>
-                                <div className="space-y-4">
-                                    <p className="text-muted-foreground">
-                                        Event creation form would go here...
-                                    </p>
-                                </div>
-                            </DialogContent>
-                        </Dialog>
-                    )}
-                </div>
-            </CardHeader>
-            <CardContent>
-                <div className="space-y-4">
-                    {getNextWeekDates().map((date, index) => {
-                        const dayEvents = getEventsForDate(date);
-                        const isTodayDate = isToday(date);
-                        
-                        return (
-                            <div key={index} className="border rounded-lg p-4">
-                                <div className="flex items-center justify-between mb-3">
-                                    <div className="flex items-center gap-2">
-                                        <h3 className="font-medium">
-                                            {date.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
-                                        </h3>
-                                        {isTodayDate && (
-                                            <Badge variant="secondary">Today</Badge>
-                                        )}
+                            )}
+                        </div>
+                    </div>
+                </CardHeader>
+                <CardContent>
+                    <div className="space-y-4">
+                        {weekDates.map((date, index) => {
+                            const dayEvents = getEventsForDate(date);
+                            const isTodayDate = isToday(date);
+                            
+                            return (
+                                <div key={index} className="border rounded-lg p-4">
+                                    <div className="flex items-center justify-between mb-3">
+                                        <div className="flex items-center gap-2">
+                                            <h3 className="font-medium">
+                                                {date.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
+                                            </h3>
+                                            {isTodayDate && (
+                                                <Badge variant="secondary">Today</Badge>
+                                            )}
+                                        </div>
+                                        <div className="text-sm text-muted-foreground">
+                                            {dayEvents.length} event{dayEvents.length !== 1 ? 's' : ''}
+                                        </div>
                                     </div>
-                                    <div className="text-sm text-muted-foreground">
-                                        {dayEvents.length} event{dayEvents.length !== 1 ? 's' : ''}
-                                    </div>
-                                </div>
-                                
-                                {dayEvents.length > 0 ? (
-                                    <div className="space-y-2">
-                                        {dayEvents.map((event) => (
-                                            <div key={event.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                                                <div className="flex items-center gap-3">
-                                                    <div className="flex items-center gap-2">
-                                                        <Music className="h-4 w-4 text-muted-foreground" />
+                                    
+                                    {dayEvents.length > 0 ? (
+                                        <div className="space-y-2">
+                                            {dayEvents.map((event) => (
+                                                <div 
+                                                    key={event.id} 
+                                                    className={`
+                                                        p-3 border rounded-lg cursor-pointer transition-colors
+                                                        ${event.status === 'confirmed' ? 'bg-green-50 border-green-200' : 
+                                                          event.status === 'proposed' ? 'bg-yellow-50 border-yellow-200' : 
+                                                          'bg-gray-50 border-gray-200'}
+                                                        hover:shadow-md
+                                                    `}
+                                                    onClick={() => onEditEvent?.(event)}
+                                                >
+                                                    <div className="flex items-start justify-between">
                                                         <div>
                                                             <p className="font-medium">{event.title}</p>
                                                             <p className="text-sm text-muted-foreground">
@@ -201,36 +244,42 @@ export default function VenueEventCalendar({
                                                             </p>
                                                             {event.musician && (
                                                                 <p className="text-sm text-muted-foreground">
-                                                                    {event.musician.stageName || event.musician.name}
+                                                                    <Link 
+                                                                        to={`/musician/${event.musician.id}`}
+                                                                        className="text-blue-600 hover:text-blue-800 hover:underline"
+                                                                        onClick={(e) => e.stopPropagation()}
+                                                                    >
+                                                                        {event.musician.stageName || event.musician.name}
+                                                                    </Link>
                                                                 </p>
+                                                            )}
+                                                        </div>
+                                                        <div className="flex items-center gap-2">
+                                                            {getStatusBadge(event.status)}
+                                                            {event.totalAmount && (
+                                                                <Badge variant="outline">
+                                                                    ${event.totalAmount}
+                                                                </Badge>
                                                             )}
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div className="flex items-center gap-2">
-                                                    {getStatusBadge(event.status)}
-                                                    {event.totalAmount && (
-                                                        <Badge variant="outline">
-                                                            ${event.totalAmount}
-                                                        </Badge>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                ) : (
-                                    <div className="text-center py-4 text-muted-foreground">
-                                        <CalendarIcon className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                                        <p>No events scheduled</p>
-                                    </div>
-                                )}
-                            </div>
-                        );
-                    })}
-                </div>
-            </CardContent>
-        </Card>
-    );
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <div className="text-center py-4 text-muted-foreground">
+                                            <CalendarIcon className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                                            <p>No events scheduled</p>
+                                        </div>
+                                    )}
+                                </div>
+                            );
+                        })}
+                    </div>
+                </CardContent>
+            </Card>
+        );
+    };
 
     const renderMonthlyView = () => (
         <Card>
@@ -308,10 +357,22 @@ export default function VenueEventCalendar({
                                 {dayEvents.length > 0 && (
                                     <div className="space-y-1">
                                         {dayEvents.slice(0, 2).map((event) => (
-                                            <div key={event.id} className="text-xs p-1 bg-white rounded border">
+                                            <div 
+                                                key={event.id} 
+                                                className="text-xs p-1 bg-white rounded border cursor-pointer hover:bg-gray-50"
+                                                onClick={() => onEditEvent?.(event)}
+                                            >
                                                 <div className="font-medium truncate">{event.title}</div>
                                                 <div className="text-muted-foreground truncate">
-                                                    {event.startTime} - {event.musician?.stageName || event.musician?.name}
+                                                    {event.startTime} - {event.musician && (
+                                                        <Link 
+                                                            to={`/musician/${event.musician.id}`}
+                                                            className="text-blue-600 hover:text-blue-800 hover:underline"
+                                                            onClick={(e) => e.stopPropagation()}
+                                                        >
+                                                            {event.musician.stageName || event.musician.name}
+                                                        </Link>
+                                                    )}
                                                 </div>
                                                 <div className="flex items-center gap-1">
                                                     {getStatusBadge(event.status)}

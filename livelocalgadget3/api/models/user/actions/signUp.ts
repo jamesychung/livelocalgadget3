@@ -54,7 +54,7 @@ export const onSuccess: ActionOnSuccess = async ({ params, record, logger, api, 
   if (record.primaryRole === "musician") {
     try {
       await api.musician.create({
-        user: record.id,
+        user: { _link: record.id },
         name: `${record.firstName} ${record.lastName}`,
         isActive: true,
         isVerified: false,
@@ -68,12 +68,12 @@ export const onSuccess: ActionOnSuccess = async ({ params, record, logger, api, 
   } else if (record.primaryRole === "venue") {
     try {
       await api.venue.create({
-        user: record.id,
+        owner: { _link: record.id },
         name: `${record.firstName} ${record.lastName}`,
         isActive: true,
         isVerified: false,
         rating: 0,
-        totalEvents: 0,
+        capacity: 0,
       });
       logger.info(`Created venue profile for user ${record.email}`);
     } catch (error) {

@@ -50,6 +50,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { forceResetApiClient } from "../../api";
 
 interface NavItem {
   title: string;
@@ -409,6 +410,22 @@ export const SecondaryNavigation = ({ icon, user }: SecondaryNavigationProps) =>
   const signOut = useSignOut({ redirectToPath: "/" });
   const secondaryNavigationItems = getSecondaryNavigationItems(user);
 
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      // Force reset the API client and clear all session data
+      await forceResetApiClient();
+      
+      // Force reload to ensure clean state with cache busting
+      window.location.href = "/?logout=" + Date.now();
+    } catch (error) {
+      console.error("Sign out error:", error);
+      // Fallback: force reset and reload anyway
+      await forceResetApiClient();
+      window.location.href = "/?logout=" + Date.now();
+    }
+  };
+
   return (
     <DropdownMenu open={userMenuActive} onOpenChange={setUserMenuActive}>
       <DropdownMenuTrigger asChild>
@@ -431,7 +448,7 @@ export const SecondaryNavigation = ({ icon, user }: SecondaryNavigationProps) =>
             </DropdownMenuItem>
           ))}
           <DropdownMenuItem
-            onClick={signOut}
+            onClick={handleSignOut}
             className="flex items-center text-red-600 focus:text-red-600 cursor-pointer"
           >
             <LogOut className="mr-2 h-4 w-4" />

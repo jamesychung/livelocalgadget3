@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Calendar, Clock, MapPin, Building, DollarSign, Star, Mail, Phone, Globe, Edit, Plus, CalendarDays, AlertCircle, CheckCircle, XCircle } from "lucide-react";
-import { useOutletContext, useSearchParams } from "react-router";
+import { useOutletContext, useSearchParams, Link } from "react-router";
 import { useState, useEffect } from "react";
 import { api } from "../api";
 import type { AuthOutletContext } from "./_app";
@@ -14,7 +14,6 @@ interface VenueProfile {
   description: string;
   type: string;
   capacity: number;
-  location: string;
   city: string;
   state: string;
   country: string;
@@ -28,8 +27,7 @@ interface VenueProfile {
   isActive: boolean;
   isVerified: boolean;
   rating: number;
-  totalEvents: number;
-  user: {
+  owner: {
     id: string;
     firstName: string;
     lastName: string;
@@ -94,15 +92,14 @@ export default function VenueDashboard() {
       setLoading(true);
 
       // Load venue profile
-      const profileResult = await api.venue.findFirst({
-        filter: { user: { id: { equals: user.id } } },
+      const profileResult = await api.venue.findMany({
+        filter: { owner: { id: { equals: user.id } } },
         select: {
           id: true,
           name: true,
           description: true,
           type: true,
           capacity: true,
-          location: true,
           city: true,
           state: true,
           country: true,
@@ -116,8 +113,7 @@ export default function VenueDashboard() {
           isActive: true,
           isVerified: true,
           rating: true,
-          totalEvents: true,
-          user: {
+          owner: {
             id: true,
             firstName: true,
             lastName: true,
@@ -125,10 +121,11 @@ export default function VenueDashboard() {
             primaryRole: true,
           },
         },
+        first: 1
       });
 
-      if (profileResult) {
-        setVenueProfile(profileResult);
+      if (profileResult && profileResult.length > 0) {
+        setVenueProfile(profileResult[0]);
       }
 
       // Load bookings (mock data for now)
@@ -233,8 +230,10 @@ export default function VenueDashboard() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Button onClick={() => window.location.href = "/venue-profile/edit"}>
-              Create Venue Profile
+            <Button asChild>
+              <Link to="/venue-profile/edit">
+                Create Venue Profile
+              </Link>
             </Button>
           </CardContent>
         </Card>
@@ -284,13 +283,17 @@ export default function VenueDashboard() {
             </p>
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" onClick={() => window.location.href = "/venue-profile/edit"}>
-              <Edit className="mr-2 h-4 w-4" />
-              Edit Profile
+            <Button variant="outline" asChild>
+              <Link to="/venue-profile/edit">
+                <Edit className="mr-2 h-4 w-4" />
+                Edit Profile
+              </Link>
             </Button>
-            <Button onClick={() => window.location.href = "/venue-profile/edit"}>
-              <Plus className="mr-2 h-4 w-4" />
-              Add Event
+            <Button asChild>
+              <Link to="/venue-events">
+                <Plus className="mr-2 h-4 w-4" />
+                Add Event
+              </Link>
             </Button>
           </div>
         </div>
@@ -303,7 +306,7 @@ export default function VenueDashboard() {
                 <Building className="h-4 w-4 text-muted-foreground" />
                 <div>
                   <p className="text-sm font-medium">Total Events</p>
-                  <p className="text-2xl font-bold">{safeString(venueProfile.totalEvents) || 0}</p>
+                  <p className="text-2xl font-bold">{events.length}</p>
                 </div>
               </div>
             </CardContent>
@@ -635,7 +638,7 @@ export default function VenueDashboard() {
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-medium">Total Events</span>
-                    <span className="text-sm">{safeString(venueProfile.totalEvents) || 0}</span>
+                    <span className="text-sm">{events.length}</span>
                   </div>
                 </CardContent>
               </Card>

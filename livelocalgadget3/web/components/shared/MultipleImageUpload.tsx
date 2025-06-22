@@ -36,7 +36,7 @@ export const MultipleImageUpload: React.FC<MultipleImageUploadProps> = ({
     setIsUploading(true);
 
     try {
-      const newImages: string[] = [];
+      const newImageUrls: string[] = [];
       
       for (const file of files) {
         // Validate file size
@@ -51,22 +51,27 @@ export const MultipleImageUpload: React.FC<MultipleImageUploadProps> = ({
           continue;
         }
 
-        // Convert to base64
+        // Convert file to base64 data URL (same as FileUpload component)
         const dataUrl = await new Promise<string>((resolve, reject) => {
           const reader = new FileReader();
-          reader.onload = (e) => resolve(e.target?.result as string);
-          reader.onerror = reject;
+          reader.onload = (e) => {
+            const result = e.target?.result as string;
+            resolve(result);
+          };
+          reader.onerror = () => {
+            reject(new Error(`Failed to read file ${file.name}`));
+          };
           reader.readAsDataURL(file);
         });
 
-        newImages.push(dataUrl);
+        newImageUrls.push(dataUrl);
       }
 
-      if (newImages.length > 0) {
-        onImagesChange([...images, ...newImages]);
+      if (newImageUrls.length > 0) {
+        onImagesChange([...images, ...newImageUrls]);
       }
     } catch (err) {
-      setError("Failed to upload images. Please try again.");
+      setError("Failed to process images. Please try again.");
     } finally {
       setIsUploading(false);
       if (fileInputRef.current) {
@@ -98,11 +103,14 @@ export const MultipleImageUpload: React.FC<MultipleImageUploadProps> = ({
         {images.length > 0 && (
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             {images.map((image, index) => (
-              <div key={index} className="relative group">
+              <div key={index} className="relative group border-2 border-blue-500 bg-gray-100 p-2">
                 <img 
                   src={image} 
                   alt={`Additional photo ${index + 1}`}
-                  className="w-full h-32 object-cover rounded-lg border"
+                  className="w-full h-32 object-cover rounded-lg border-2 border-green-500"
+                  onError={(e) => {
+                    console.error(`MultipleImageUpload - image ${index} failed to load:`, e);
+                  }}
                 />
                 <Button
                   size="sm"
