@@ -6,7 +6,9 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { ArrowLeft, Calendar, Clock, Music, DollarSign, Save, X } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { ArrowLeft, Calendar, Clock, Music, DollarSign, Save, X, Settings, Repeat } from "lucide-react";
 import { Link, useOutletContext, useNavigate } from "react-router";
 import { useFindMany, useAction } from "@gadgetinc/react";
 import { api } from "../api";
@@ -31,6 +33,65 @@ export default function CreateEventPage() {
 
     const timeOptions = generateTimeOptions();
 
+    // Available genres for events
+    const availableGenres = [
+        "Rock", "Pop", "Jazz", "Blues", "Country", "Folk", "Electronic", "Hip Hop", 
+        "R&B", "Classical", "Reggae", "Latin", "World Music", "Alternative", "Indie",
+        "Metal", "Punk", "Soul", "Funk", "Gospel", "Bluegrass", "EDM", "House", "Techno"
+    ];
+
+    // Equipment and supplies data
+    const equipmentData = [
+        {
+            item: "Power Outlets",
+            venueProvides: true,
+            musicianProvides: false,
+            notes: "Accessible, grounded outlets near performance area are a must"
+        },
+        {
+            item: "PA System",
+            venueProvides: false,
+            musicianProvides: true,
+            notes: "Musicians often bring portable PA (e.g. Bose, JBL, Yamaha)"
+        },
+        {
+            item: "Microphones",
+            venueProvides: false,
+            musicianProvides: true,
+            notes: "Vocal mics, sometimes instrument mics"
+        },
+        {
+            item: "Mic Stands & Cables",
+            venueProvides: false,
+            musicianProvides: true,
+            notes: "Musicians bring all essentials"
+        },
+        {
+            item: "Instruments",
+            venueProvides: false,
+            musicianProvides: true,
+            notes: "Guitars, keyboards, etc."
+        },
+        {
+            item: "Amps (Guitar/Bass)",
+            venueProvides: false,
+            musicianProvides: true,
+            notes: "Small/medium amps for compact spaces"
+        },
+        {
+            item: "Monitors (Stage)",
+            venueProvides: false,
+            musicianProvides: false,
+            notes: "Not usually provided; some musicians use in-ear monitors or small wedges"
+        },
+        {
+            item: "Lighting",
+            venueProvides: true,
+            musicianProvides: false,
+            notes: "Basic ambient only; Optional portable lighting can help if venue is dim"
+        }
+    ];
+
     // Event form state
     const [eventForm, setEventForm] = useState({
         title: "",
@@ -40,12 +101,24 @@ export default function CreateEventPage() {
         endTime: "22:00", // Default to 10:00 PM
         ticketPrice: "",
         totalCapacity: "",
-        category: "live-music",
+        category: "live-music", // Default to Live Music
         ticketType: "general",
         isPublic: true,
         isActive: true,
         status: "confirmed",
-        musicianId: "none"
+        musicianId: "none",
+        genres: [] as string[],
+        equipment: equipmentData.map(item => ({
+            item: item.item,
+            venueProvides: item.venueProvides,
+            musicianProvides: item.musicianProvides,
+            notes: item.notes
+        })),
+        isRecurring: false,
+        recurringPattern: "weekly",
+        recurringInterval: 1,
+        recurringEndDate: "",
+        recurringDays: [] as string[]
     });
 
     // Fetch venue data
@@ -106,6 +179,12 @@ export default function CreateEventPage() {
             // Create ISO datetime string for the event date field
             const startDateTime = `${dateString}T${startTimeString}:00.000Z`;
 
+            // Format recurring end date if provided
+            let recurringEndDateTime = null;
+            if (eventForm.isRecurring && eventForm.recurringEndDate) {
+                recurringEndDateTime = `${eventForm.recurringEndDate}T23:59:59.000Z`;
+            }
+
             const newEvent = {
                 title: eventForm.title,
                 description: eventForm.description,
@@ -116,9 +195,16 @@ export default function CreateEventPage() {
                 totalCapacity: parseInt(eventForm.totalCapacity) || 0,
                 category: eventForm.category,
                 ticketType: eventForm.ticketType,
+                genres: eventForm.genres,
+                equipment: eventForm.equipment,
                 isPublic: eventForm.isPublic,
                 isActive: eventForm.isActive,
                 status: eventForm.status,
+                isRecurring: eventForm.isRecurring,
+                recurringPattern: eventForm.recurringPattern,
+                recurringInterval: eventForm.recurringInterval,
+                recurringDays: eventForm.recurringDays,
+                ...(recurringEndDateTime && { recurringEndDate: recurringEndDateTime }),
                 venue: { _link: venue.id },
                 createdBy: { _link: user.id },
                 ...(eventForm.musicianId !== "none" && { musician: { _link: eventForm.musicianId } })
@@ -149,10 +235,52 @@ export default function CreateEventPage() {
         }
     };
 
-    const handleInputChange = (field: string, value: string | boolean) => {
+    const handleInputChange = (field: string, value: string | boolean | string[] | number) => {
+        console.log(`handleInputChange called: ${field} = ${value}`);
+        setEventForm(prev => {
+            const newState = {
+                ...prev,
+                [field]: value
+            };
+            console.log(`New form state:`, newState);
+            return newState;
+        });
+    };
+
+    const handleGenreChange = (genre: string, checked: boolean) => {
         setEventForm(prev => ({
             ...prev,
-            [field]: value
+            genres: checked 
+                ? [...prev.genres, genre]
+                : prev.genres.filter(g => g !== genre)
+        }));
+    };
+
+    const handleEquipmentChange = (itemIndex: number, provider: 'venueProvides' | 'musicianProvides', checked: boolean) => {
+        setEventForm(prev => ({
+            ...prev,
+            equipment: prev.equipment.map((equipment, index) => 
+                index === itemIndex 
+                    ? { ...equipment, [provider]: checked }
+                    : equipment
+            )
+        }));
+    };
+
+    const handleRecurringDayChange = (day: string, checked: boolean) => {
+        setEventForm(prev => ({
+            ...prev,
+            recurringDays: checked 
+                ? [...prev.recurringDays, day]
+                : prev.recurringDays.filter(d => d !== day)
+        }));
+    };
+
+    const handleRecurringToggle = (checked: boolean) => {
+        console.log(`Recurring toggle changed to: ${checked}`);
+        setEventForm(prev => ({
+            ...prev,
+            isRecurring: checked
         }));
     };
 
@@ -253,38 +381,17 @@ export default function CreateEventPage() {
                                 />
                             </div>
 
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <Label htmlFor="category">Category</Label>
-                                    <Select value={eventForm.category} onValueChange={(value) => handleInputChange("category", value)}>
-                                        <SelectTrigger>
-                                            <SelectValue />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="live-music">Live Music</SelectItem>
-                                            <SelectItem value="comedy">Comedy</SelectItem>
-                                            <SelectItem value="theater">Theater</SelectItem>
-                                            <SelectItem value="dance">Dance</SelectItem>
-                                            <SelectItem value="poetry">Poetry</SelectItem>
-                                            <SelectItem value="other">Other</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                                
-                                <div>
-                                    <Label htmlFor="ticketType">Ticket Type</Label>
-                                    <Select value={eventForm.ticketType} onValueChange={(value) => handleInputChange("ticketType", value)}>
-                                        <SelectTrigger>
-                                            <SelectValue />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="general">General Admission</SelectItem>
-                                            <SelectItem value="vip">VIP</SelectItem>
-                                            <SelectItem value="reserved">Reserved Seating</SelectItem>
-                                            <SelectItem value="standing">Standing Room</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </div>
+                            <div>
+                                <Label htmlFor="category">Category</Label>
+                                <Select value={eventForm.category} onValueChange={(value) => handleInputChange("category", value)}>
+                                    <SelectTrigger>
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="live-music">Live Music</SelectItem>
+                                        <SelectItem value="dj">DJ</SelectItem>
+                                    </SelectContent>
+                                </Select>
                             </div>
                         </CardContent>
                     </Card>
@@ -342,6 +449,219 @@ export default function CreateEventPage() {
                                     </Select>
                                 </div>
                             </div>
+
+                            {/* Recurring Event Options */}
+                            <div className="border-t pt-4">
+                                <div className="flex items-center justify-between mb-4">
+                                    <div className="space-y-0.5">
+                                        <Label className="text-base font-medium">Recurring Event</Label>
+                                        <p className="text-sm text-muted-foreground">
+                                            Make this event repeat on a schedule
+                                        </p>
+                                        <p className="text-xs text-blue-600">
+                                            Current state: {eventForm.isRecurring ? 'Enabled' : 'Disabled'}
+                                        </p>
+                                    </div>
+                                    <div className="flex items-center space-x-2">
+                                        <Checkbox
+                                            id="recurring-toggle"
+                                            checked={eventForm.isRecurring}
+                                            onCheckedChange={handleRecurringToggle}
+                                        />
+                                        <Label htmlFor="recurring-toggle" className="text-sm">
+                                            Enable recurring
+                                        </Label>
+                                    </div>
+                                </div>
+
+                                {eventForm.isRecurring && (
+                                    <div className="space-y-4">
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div>
+                                                <Label htmlFor="recurringPattern">Repeat Pattern</Label>
+                                                <Select 
+                                                    value={eventForm.recurringPattern} 
+                                                    onValueChange={(value) => handleInputChange("recurringPattern", value)}
+                                                >
+                                                    <SelectTrigger>
+                                                        <SelectValue />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectItem value="daily">Daily</SelectItem>
+                                                        <SelectItem value="weekly">Weekly</SelectItem>
+                                                        <SelectItem value="bi-weekly">Bi-weekly</SelectItem>
+                                                        <SelectItem value="monthly">Monthly</SelectItem>
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
+                                        </div>
+
+                                        {/* Weekly Pattern - Day Selection */}
+                                        {eventForm.recurringPattern === 'weekly' && (
+                                            <div>
+                                                <Label className="text-sm font-medium mb-2 block">Repeat on Days</Label>
+                                                <div className="grid grid-cols-4 gap-2">
+                                                    {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map((day) => (
+                                                        <div key={day} className="flex items-center space-x-2">
+                                                            <Checkbox
+                                                                id={`day-${day}`}
+                                                                checked={eventForm.recurringDays.includes(day)}
+                                                                onCheckedChange={(checked) => handleRecurringDayChange(day, checked as boolean)}
+                                                            />
+                                                            <Label 
+                                                                htmlFor={`day-${day}`} 
+                                                                className="text-sm font-normal cursor-pointer"
+                                                            >
+                                                                {day.slice(0, 3)}
+                                                            </Label>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                                <p className="text-xs text-muted-foreground mt-2">
+                                                    Select which days of the week to repeat
+                                                </p>
+                                            </div>
+                                        )}
+
+                                        {/* Bi-weekly Pattern - Every 2 weeks */}
+                                        {eventForm.recurringPattern === 'bi-weekly' && (
+                                            <div>
+                                                <Label className="text-sm font-medium mb-2 block">Bi-weekly Schedule</Label>
+                                                <div className="p-3 bg-muted rounded-md">
+                                                    <p className="text-sm">
+                                                        Event will repeat every 2 weeks on the same day of the week.
+                                                    </p>
+                                                    <p className="text-xs text-muted-foreground mt-1">
+                                                        Example: If your event is on Monday, it will repeat every other Monday.
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* Monthly Pattern - Calendar Selection */}
+                                        {eventForm.recurringPattern === 'monthly' && (
+                                            <div>
+                                                <Label className="text-sm font-medium mb-2 block">Repeat on Day of Month</Label>
+                                                <div className="grid grid-cols-7 gap-1 max-h-48 overflow-y-auto border rounded-md p-3">
+                                                    {Array.from({length: 31}, (_, i) => i + 1).map((day) => (
+                                                        <div key={day} className="flex items-center space-x-1">
+                                                            <Checkbox
+                                                                id={`monthday-${day}`}
+                                                                checked={eventForm.recurringDays.includes(day.toString())}
+                                                                onCheckedChange={(checked) => handleRecurringDayChange(day.toString(), checked as boolean)}
+                                                            />
+                                                            <Label 
+                                                                htmlFor={`monthday-${day}`} 
+                                                                className="text-xs font-normal cursor-pointer"
+                                                            >
+                                                                {day}
+                                                            </Label>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                                <p className="text-xs text-muted-foreground mt-2">
+                                                    Select which day(s) of the month to repeat (e.g., 15th = 15th of every month)
+                                                </p>
+                                            </div>
+                                        )}
+
+                                        <div>
+                                            <Label htmlFor="recurringEndDate">End Date (Optional)</Label>
+                                            <Input
+                                                id="recurringEndDate"
+                                                type="date"
+                                                value={eventForm.recurringEndDate}
+                                                onChange={(e) => handleInputChange("recurringEndDate", e.target.value)}
+                                                placeholder="Leave empty for no end date"
+                                            />
+                                            <p className="text-xs text-muted-foreground mt-1">
+                                                Leave empty if the event should continue indefinitely
+                                            </p>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    {/* Music Genres */}
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                                <Music className="h-5 w-5" />
+                                Music Genres
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <p className="text-sm text-muted-foreground mb-4">
+                                Select the genres that best describe this event
+                            </p>
+                            <div className="grid grid-cols-3 gap-2 border rounded-md p-3">
+                                {availableGenres.map((genre) => (
+                                    <div key={genre} className="flex items-center space-x-2">
+                                        <Checkbox
+                                            id={`genre-${genre}`}
+                                            checked={eventForm.genres.includes(genre)}
+                                            onCheckedChange={(checked) => handleGenreChange(genre, checked as boolean)}
+                                        />
+                                        <Label 
+                                            htmlFor={`genre-${genre}`} 
+                                            className="text-sm font-normal cursor-pointer"
+                                        >
+                                            {genre}
+                                        </Label>
+                                    </div>
+                                ))}
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    {/* Equipment & Supplies */}
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                                <Settings className="h-5 w-5" />
+                                Equipment & Supplies
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <p className="text-sm text-muted-foreground mb-4">
+                                Check who will provide each item for this event
+                            </p>
+                            <div className="overflow-x-auto">
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow>
+                                            <TableHead className="w-[150px]">Item</TableHead>
+                                            <TableHead className="w-[120px] text-center">Venue Provides</TableHead>
+                                            <TableHead className="w-[120px] text-center">Musician Provides</TableHead>
+                                            <TableHead>Notes</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {eventForm.equipment.map((equipment, index) => (
+                                            <TableRow key={index}>
+                                                <TableCell className="font-medium">{equipment.item}</TableCell>
+                                                <TableCell className="text-center">
+                                                    <Checkbox
+                                                        checked={equipment.venueProvides}
+                                                        onCheckedChange={(checked) => handleEquipmentChange(index, 'venueProvides', checked as boolean)}
+                                                    />
+                                                </TableCell>
+                                                <TableCell className="text-center">
+                                                    <Checkbox
+                                                        checked={equipment.musicianProvides}
+                                                        onCheckedChange={(checked) => handleEquipmentChange(index, 'musicianProvides', checked as boolean)}
+                                                    />
+                                                </TableCell>
+                                                <TableCell className="text-sm text-gray-600">
+                                                    {equipment.notes}
+                                                </TableCell>
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                            </div>
                         </CardContent>
                     </Card>
 
@@ -365,6 +685,21 @@ export default function CreateEventPage() {
                                     onChange={(e) => handleInputChange("ticketPrice", e.target.value)}
                                     placeholder="0.00"
                                 />
+                            </div>
+                            
+                            <div>
+                                <Label htmlFor="ticketType">Ticket Type</Label>
+                                <Select value={eventForm.ticketType} onValueChange={(value) => handleInputChange("ticketType", value)}>
+                                    <SelectTrigger>
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="general">General Admission</SelectItem>
+                                        <SelectItem value="vip">VIP</SelectItem>
+                                        <SelectItem value="reserved">Reserved Seating</SelectItem>
+                                        <SelectItem value="standing">Standing Room</SelectItem>
+                                    </SelectContent>
+                                </Select>
                             </div>
                             
                             <div>

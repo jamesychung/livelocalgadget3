@@ -24,13 +24,47 @@ export const schema: GadgetModel = {
     },
     description: { type: "string", storageKey: "event_description" },
     endTime: { type: "string", storageKey: "event_end_time" },
+    equipment: { 
+      type: "json", 
+      storageKey: "event_equipment",
+      default: [],
+    },
+    genres: { 
+      type: "json", 
+      storageKey: "event_genres",
+      default: [],
+    },
     image: { type: "url", storageKey: "event_image" },
     isActive: { type: "boolean", storageKey: "event_is_active" },
     isPublic: { type: "boolean", storageKey: "event_is_public" },
+    isRecurring: { 
+      type: "boolean", 
+      storageKey: "event_is_recurring",
+      default: false,
+    },
     musician: {
       type: "belongsTo",
       parent: { model: "musician" },
       storageKey: "event_musician",
+    },
+    recurringDays: { 
+      type: "json", 
+      storageKey: "event_recurring_days",
+      default: [],
+    },
+    recurringEndDate: { 
+      type: "dateTime", 
+      storageKey: "event_recurring_end_date",
+    },
+    recurringInterval: { 
+      type: "number", 
+      storageKey: "event_recurring_interval",
+      default: 1,
+    },
+    recurringPattern: { 
+      type: "string", 
+      storageKey: "event_recurring_pattern",
+      default: "weekly",
     },
     setlist: { type: "json", storageKey: "event_setlist" },
     startTime: { type: "string", storageKey: "event_start_time" },

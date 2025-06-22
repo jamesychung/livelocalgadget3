@@ -35,6 +35,18 @@ export const run: ActionRun = async ({ params, record, logger, api, session }) =
     if (!record.category) record.category = "";
     if (!record.ticketType) record.ticketType = "general";
     
+    // Ensure genres field has default
+    if (!record.genres) record.genres = [];
+    
+    // Ensure equipment field has default
+    if (!record.equipment) record.equipment = [];
+    
+    // Ensure recurring event fields have defaults
+    if (!record.isRecurring) record.isRecurring = false;
+    if (!record.recurringPattern) record.recurringPattern = "weekly";
+    if (!record.recurringInterval) record.recurringInterval = 1;
+    if (!record.recurringDays) record.recurringDays = [];
+    
     // Ensure numeric fields have defaults
     if (!record.ticketPrice) record.ticketPrice = 0;
     if (!record.totalCapacity) record.totalCapacity = 0;
@@ -56,6 +68,35 @@ export const run: ActionRun = async ({ params, record, logger, api, session }) =
       throw new Error("Event creator is required");
     }
     
+    // Validate recurring event fields if recurring is enabled
+    if (record.isRecurring) {
+      if (!record.recurringPattern) {
+        throw new Error("Recurring pattern is required for recurring events");
+      }
+      
+      // Validate based on pattern type
+      switch (record.recurringPattern) {
+        case "weekly":
+          if (!record.recurringDays || record.recurringDays.length === 0) {
+            throw new Error("Recurring days are required for weekly recurring events");
+          }
+          break;
+        case "bi-weekly":
+          // No additional validation needed - repeats every 2 weeks automatically
+          break;
+        case "monthly":
+          if (!record.recurringDays || record.recurringDays.length === 0) {
+            throw new Error("Recurring days of month are required for monthly recurring events");
+          }
+          break;
+        case "daily":
+          // No additional validation needed for daily
+          break;
+        default:
+          throw new Error(`Invalid recurring pattern: ${record.recurringPattern}`);
+      }
+    }
+    
     logger.info("All validations passed, saving record...");
     
     // Save the record to the database
@@ -63,6 +104,9 @@ export const run: ActionRun = async ({ params, record, logger, api, session }) =
     
     logger.info(`Created event with ID: ${record.id}`);
     logger.info(`Event title: ${record.title}, Status: ${record.status}`);
+    logger.info(`Event genres: ${JSON.stringify(record.genres)}`);
+    logger.info(`Event equipment: ${JSON.stringify(record.equipment)}`);
+    logger.info(`Event recurring: ${record.isRecurring}, Pattern: ${record.recurringPattern}`);
     
     return {
       result: "ok"
