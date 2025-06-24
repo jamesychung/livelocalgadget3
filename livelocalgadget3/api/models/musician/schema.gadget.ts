@@ -104,10 +104,6 @@ export const schema: GadgetModel = {
       children: { model: "review", belongsToField: "musician" },
       storageKey: "6uB2lE7KF-aQ",
     },
-    audio: {
-      type: "url",
-      storageKey: "musician_audio",
-    },
     audioFiles: {
       type: "json",
       storageKey: "musician_audio_files",

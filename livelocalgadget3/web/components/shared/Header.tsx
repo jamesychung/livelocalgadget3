@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router";
-import { useUser, useSignOut } from "@gadgetinc/react";
+import { Link, useNavigate } from "react-router";
+import { useUser, useSignOut, useFindMany } from "@gadgetinc/react";
 import { User, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -9,6 +9,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { api } from "../../api";
 
 interface HeaderProps {
   showBackButton?: boolean;
@@ -19,11 +20,30 @@ export default function Header({ showBackButton = false, onBackClick }: HeaderPr
   const [isClient, setIsClient] = useState(false);
   const user = useUser();
   const signOut = useSignOut({ redirectToPath: "/" });
+  const navigate = useNavigate();
+
+  // Check if user is a musician
+  const [{ data: musicianData }] = useFindMany(api.musician, {
+    filter: { user: { id: { equals: user?.id } } },
+    select: { id: true },
+    first: 1,
+    pause: !user?.id,
+  });
+
+  const isMusician = musicianData && musicianData.length > 0;
 
   // Ensure we're on the client side to avoid SSR issues
   useEffect(() => {
     setIsClient(true);
   }, []);
+
+  // Determine the events link based on user role
+  const getEventsLink = () => {
+    if (isMusician) {
+      return "/musician-events";
+    }
+    return "/events";
+  };
 
   return (
     <header style={{
@@ -74,9 +94,26 @@ export default function Header({ showBackButton = false, onBackClick }: HeaderPr
           </div>
           <nav style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
             <Link to="/" style={{ color: '#4a5568', textDecoration: 'none', fontWeight: '500' }}>Home</Link>
-            <a href="#events" style={{ color: '#4a5568', textDecoration: 'none', fontWeight: '500' }}>Events</a>
-            <a href="#musicians" style={{ color: '#4a5568', textDecoration: 'none', fontWeight: '500' }}>Musicians</a>
-            <a href="#venues" style={{ color: '#4a5568', textDecoration: 'none', fontWeight: '500' }}>Venues</a>
+            <Link to={getEventsLink()} style={{ color: '#4a5568', textDecoration: 'none', fontWeight: '500' }}>Events</Link>
+            <Link to="/musicians" style={{ color: '#4a5568', textDecoration: 'none', fontWeight: '500' }}>Musicians</Link>
+            <button 
+              onClick={() => {
+                console.log("Venues button clicked - navigating to /venues");
+                navigate('/venues');
+              }}
+              style={{ 
+                color: '#4a5568', 
+                textDecoration: 'none', 
+                fontWeight: '500',
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                fontSize: 'inherit',
+                fontFamily: 'inherit'
+              }}
+            >
+              Venues
+            </button>
             
             {isClient && user ? (
               // Signed-in user navigation

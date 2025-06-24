@@ -11,6 +11,16 @@ export const schema: GadgetModel = {
       type: "number",
       storageKey: "event_available_tickets",
     },
+    bookingType: {
+      type: "string",
+      storageKey: "event_booking_type",
+      default: "direct_invitation",
+    },
+    budgetRange: {
+      type: "json",
+      storageKey: "event_budget_range",
+      default: { min: 0, max: 0 },
+    },
     category: { type: "string", storageKey: "event_category" },
     createdBy: {
       type: "belongsTo",
@@ -35,12 +45,25 @@ export const schema: GadgetModel = {
       default: [],
     },
     image: { type: "url", storageKey: "event_image" },
+    interestDeadline: {
+      type: "dateTime",
+      storageKey: "event_interest_deadline",
+    },
+    selectedBooking: {
+      type: "belongsTo",
+      parent: { model: "booking" },
+      storageKey: "event_selected_booking",
+    },
     isActive: { type: "boolean", storageKey: "event_is_active" },
     isPublic: { type: "boolean", storageKey: "event_is_public" },
     isRecurring: { 
       type: "boolean", 
       storageKey: "event_is_recurring",
       default: false,
+    },
+    locationRequirements: {
+      type: "string",
+      storageKey: "event_location_requirements",
     },
     musician: {
       type: "belongsTo",

@@ -26,12 +26,27 @@ interface Event {
     notes?: string;
 }
 
+interface Application {
+    id: string;
+    event: {
+        id: string;
+    };
+    status: string;
+    musician: {
+        id: string;
+        name: string;
+        stageName?: string;
+    };
+}
+
 interface VenueEventCalendarProps {
     events: Event[];
+    applications?: Application[];
     onAddEvent?: (event: Partial<Event>) => Promise<void>;
     onUpdateEvent?: (eventId: string, updates: Partial<Event>) => Promise<void>;
     onDeleteEvent?: (eventId: string) => Promise<void>;
     onEditEvent?: (event: Event) => void;
+    onEventClick?: (event: Event) => void;
     isEditing?: boolean;
     onEditToggle?: () => void;
     title?: string;
@@ -43,10 +58,12 @@ type EventType = 'all' | 'confirmed' | 'proposed';
 
 export default function VenueEventCalendar({
     events,
+    applications,
     onAddEvent,
     onUpdateEvent,
     onDeleteEvent,
     onEditEvent,
+    onEventClick,
     isEditing = false,
     onEditToggle,
     title = "Venue Event Calendar",
@@ -63,6 +80,11 @@ export default function VenueEventCalendar({
         if (eventTypeFilter === 'all') return true;
         return event.status === eventTypeFilter;
     });
+
+    // Helper to get application count for an event
+    const getApplicationCount = (eventId: string) => {
+        return applications?.filter(app => app.event?.id === eventId).length || 0;
+    };
 
     const getStatusBadge = (status: string) => {
         const statusColors: Record<string, string> = {
@@ -189,14 +211,12 @@ export default function VenueEventCalendar({
                             >
                                 <ChevronRight className="h-4 w-4" />
                             </Button>
-                            {isEditing && onAddEvent && (
-                                <Button asChild>
-                                    <Link to="/create-event">
-                                        <Plus className="mr-2 h-4 w-4" />
-                                        Add Event
-                                    </Link>
-                                </Button>
-                            )}
+                            <Button asChild>
+                                <Link to="/create-event">
+                                    <Plus className="mr-2 h-4 w-4" />
+                                    Create Event
+                                </Link>
+                            </Button>
                         </div>
                     </div>
                 </CardHeader>
@@ -224,47 +244,58 @@ export default function VenueEventCalendar({
                                     
                                     {dayEvents.length > 0 ? (
                                         <div className="space-y-2">
-                                            {dayEvents.map((event) => (
-                                                <div 
-                                                    key={event.id} 
-                                                    className={`
-                                                        p-3 border rounded-lg cursor-pointer transition-colors
-                                                        ${event.status === 'confirmed' ? 'bg-green-50 border-green-200' : 
-                                                          event.status === 'proposed' ? 'bg-yellow-50 border-yellow-200' : 
-                                                          'bg-gray-50 border-gray-200'}
-                                                        hover:shadow-md
-                                                    `}
-                                                    onClick={() => onEditEvent?.(event)}
-                                                >
-                                                    <div className="flex items-start justify-between">
-                                                        <div>
-                                                            <p className="font-medium">{event.title}</p>
-                                                            <p className="text-sm text-muted-foreground">
-                                                                {event.startTime} - {event.endTime}
-                                                            </p>
-                                                            {event.musician && (
+                                            {dayEvents.map((event) => {
+                                                const applicationCount = getApplicationCount(event.id);
+                                                return (
+                                                    <div 
+                                                        key={event.id} 
+                                                        className={`
+                                                            p-3 border rounded-lg cursor-pointer transition-colors
+                                                            ${applicationCount > 0 ? 'bg-yellow-50 border-yellow-200' :
+                                                              event.status === 'confirmed' ? 'bg-green-50 border-green-200' : 
+                                                              event.status === 'proposed' ? 'bg-yellow-50 border-yellow-200' : 
+                                                              'bg-gray-50 border-gray-200'}
+                                                            hover:shadow-md
+                                                        `}
+                                                        onClick={() => (onEventClick ? onEventClick(event) : onEditEvent?.(event))}
+                                                    >
+                                                        <div className="flex items-start justify-between">
+                                                            <div>
+                                                                <div className="flex items-center gap-2 mb-1">
+                                                                    <p className="font-medium">{event.title}</p>
+                                                                    {applicationCount > 0 && (
+                                                                        <Badge variant="secondary" className="bg-yellow-100 text-yellow-800 text-xs">
+                                                                            {applicationCount} Musician{applicationCount !== 1 ? 's' : ''} Applied
+                                                                        </Badge>
+                                                                    )}
+                                                                </div>
                                                                 <p className="text-sm text-muted-foreground">
-                                                                    <Link 
-                                                                        to={`/musician/${event.musician.id}`}
-                                                                        className="text-blue-600 hover:text-blue-800 hover:underline"
-                                                                        onClick={(e) => e.stopPropagation()}
-                                                                    >
-                                                                        {event.musician.stageName || event.musician.name}
-                                                                    </Link>
+                                                                    {event.startTime} - {event.endTime}
                                                                 </p>
-                                                            )}
-                                                        </div>
-                                                        <div className="flex items-center gap-2">
-                                                            {getStatusBadge(event.status)}
-                                                            {event.totalAmount && (
-                                                                <Badge variant="outline">
-                                                                    ${event.totalAmount}
-                                                                </Badge>
-                                                            )}
+                                                                {event.musician && (
+                                                                    <p className="text-sm text-muted-foreground">
+                                                                        <Link 
+                                                                            to={`/musician/${event.musician.id}`}
+                                                                            className="text-blue-600 hover:text-blue-800 hover:underline"
+                                                                            onClick={(e) => e.stopPropagation()}
+                                                                        >
+                                                                            {event.musician.stageName || event.musician.name}
+                                                                        </Link>
+                                                                    </p>
+                                                                )}
+                                                            </div>
+                                                            <div className="flex items-center gap-2">
+                                                                {getStatusBadge(event.status)}
+                                                                {event.totalAmount && (
+                                                                    <Badge variant="outline">
+                                                                        ${event.totalAmount}
+                                                                    </Badge>
+                                                                )}
+                                                            </div>
                                                         </div>
                                                     </div>
-                                                </div>
-                                            ))}
+                                                );
+                                            })}
                                         </div>
                                     ) : (
                                         <div className="text-center py-4 text-muted-foreground">
@@ -356,29 +387,42 @@ export default function VenueEventCalendar({
                                 </div>
                                 {dayEvents.length > 0 && (
                                     <div className="space-y-1">
-                                        {dayEvents.slice(0, 2).map((event) => (
-                                            <div 
-                                                key={event.id} 
-                                                className="text-xs p-1 bg-white rounded border cursor-pointer hover:bg-gray-50"
-                                                onClick={() => onEditEvent?.(event)}
-                                            >
-                                                <div className="font-medium truncate">{event.title}</div>
-                                                <div className="text-muted-foreground truncate">
-                                                    {event.startTime} - {event.musician && (
-                                                        <Link 
-                                                            to={`/musician/${event.musician.id}`}
-                                                            className="text-blue-600 hover:text-blue-800 hover:underline"
-                                                            onClick={(e) => e.stopPropagation()}
-                                                        >
-                                                            {event.musician.stageName || event.musician.name}
-                                                        </Link>
-                                                    )}
+                                        {dayEvents.slice(0, 2).map((event) => {
+                                            const applicationCount = getApplicationCount(event.id);
+                                            return (
+                                                <div 
+                                                    key={event.id} 
+                                                    className={`
+                                                        text-xs p-1 rounded border cursor-pointer hover:bg-gray-50
+                                                        ${applicationCount > 0 ? 'bg-yellow-50 border-yellow-200' : 'bg-white'}
+                                                    `}
+                                                    onClick={() => (onEventClick ? onEventClick(event) : onEditEvent?.(event))}
+                                                >
+                                                    <div className="flex items-center gap-1 mb-1">
+                                                        <div className="font-medium truncate flex-1">{event.title}</div>
+                                                        {applicationCount > 0 && (
+                                                            <Badge variant="secondary" className="bg-yellow-100 text-yellow-800 text-xs px-1">
+                                                                {applicationCount}
+                                                            </Badge>
+                                                        )}
+                                                    </div>
+                                                    <div className="text-muted-foreground truncate">
+                                                        {event.startTime} - {event.musician && (
+                                                            <Link 
+                                                                to={`/musician/${event.musician.id}`}
+                                                                className="text-blue-600 hover:text-blue-800 hover:underline"
+                                                                onClick={(e) => e.stopPropagation()}
+                                                            >
+                                                                {event.musician.stageName || event.musician.name}
+                                                            </Link>
+                                                        )}
+                                                    </div>
+                                                    <div className="flex items-center gap-1">
+                                                        {getStatusBadge(event.status)}
+                                                    </div>
                                                 </div>
-                                                <div className="flex items-center gap-1">
-                                                    {getStatusBadge(event.status)}
-                                                </div>
-                                            </div>
-                                        ))}
+                                            );
+                                        })}
                                         {dayEvents.length > 2 && (
                                             <div className="text-xs text-muted-foreground text-center">
                                                 +{dayEvents.length - 2} more
@@ -396,77 +440,27 @@ export default function VenueEventCalendar({
 
     return (
         <div className="space-y-6">
-            {/* Header */}
             <Card>
-                <CardHeader>
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <CardTitle className="flex items-center gap-2">
-                                <Building className="h-5 w-5" />
-                                {title}
-                            </CardTitle>
-                            <CardDescription>
-                                {description}
-                            </CardDescription>
-                        </div>
-                        <div className="flex gap-2">
-                            {isEditing ? (
-                                <>
-                                    <Button 
-                                        variant="outline" 
-                                        onClick={onEditToggle}
-                                    >
-                                        <X className="mr-2 h-4 w-4" />
-                                        Cancel
-                                    </Button>
-                                    <Button>
-                                        <Save className="mr-2 h-4 w-4" />
-                                        Save Changes
-                                    </Button>
-                                </>
-                            ) : (
-                                <Button onClick={onEditToggle}>
-                                    <CalendarIcon className="mr-2 h-4 w-4" />
-                                    Manage Events
-                                </Button>
-                            )}
-                        </div>
+                <CardContent className="flex flex-col md:flex-row md:items-center justify-between gap-4 pt-6">
+                    <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium text-muted-foreground">View:</span>
+                        <Button
+                            variant={viewMode === 'weekly' ? 'default' : 'outline'}
+                            size="sm"
+                            onClick={() => setViewMode('weekly')}
+                        >
+                            Weekly
+                        </Button>
+                        <Button
+                            variant={viewMode === 'monthly' ? 'default' : 'outline'}
+                            size="sm"
+                            onClick={() => setViewMode('monthly')}
+                        >
+                            Monthly
+                        </Button>
                     </div>
-                </CardHeader>
-            </Card>
-
-            {/* View Mode Toggle */}
-            <Card>
-                <CardHeader>
-                    <div className="flex items-center justify-between">
-                        <CardTitle>Calendar View</CardTitle>
-                        <div className="flex gap-2">
-                            <Button
-                                variant={viewMode === 'weekly' ? 'default' : 'outline'}
-                                size="sm"
-                                onClick={() => setViewMode('weekly')}
-                            >
-                                Weekly
-                            </Button>
-                            <Button
-                                variant={viewMode === 'monthly' ? 'default' : 'outline'}
-                                size="sm"
-                                onClick={() => setViewMode('monthly')}
-                            >
-                                Monthly
-                            </Button>
-                        </div>
-                    </div>
-                </CardHeader>
-            </Card>
-
-            {/* Event Type Filter */}
-            <Card>
-                <CardHeader>
-                    <CardTitle>Event Filter</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <div className="flex gap-2">
+                    <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium text-muted-foreground">Filter:</span>
                         <Button
                             variant={eventTypeFilter === 'all' ? 'default' : 'outline'}
                             size="sm"
@@ -494,38 +488,6 @@ export default function VenueEventCalendar({
 
             {/* Calendar View */}
             {viewMode === 'weekly' ? renderWeeklyView() : renderMonthlyView()}
-
-            {/* Event Summary */}
-            <Card>
-                <CardHeader>
-                    <CardTitle>Event Summary</CardTitle>
-                    <CardDescription>
-                        Overview of your venue's events
-                    </CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div>
-                            <h4 className="font-medium mb-2">Total Events</h4>
-                            <div className="text-2xl font-bold text-blue-600">
-                                {events.length}
-                            </div>
-                        </div>
-                        <div>
-                            <h4 className="font-medium mb-2">Confirmed Events</h4>
-                            <div className="text-2xl font-bold text-green-600">
-                                {events.filter(e => e.status === 'confirmed').length}
-                            </div>
-                        </div>
-                        <div>
-                            <h4 className="font-medium mb-2">Proposed Events</h4>
-                            <div className="text-2xl font-bold text-yellow-600">
-                                {events.filter(e => e.status === 'proposed').length}
-                            </div>
-                        </div>
-                    </div>
-                </CardContent>
-            </Card>
         </div>
     );
 } 

@@ -29,6 +29,12 @@ export const run: ActionRun = async ({ params, record, logger, api, session }) =
   if (!record.socialLinks || !Array.isArray(record.socialLinks)) {
     record.socialLinks = [];
   }
+  if (!record.audioFiles || !Array.isArray(record.audioFiles)) {
+    record.audioFiles = [];
+  }
+  if (!record.additionalPictures || !Array.isArray(record.additionalPictures)) {
+    record.additionalPictures = [];
+  }
   if (!record.availability || typeof record.availability !== 'object') {
     record.availability = {};
   }

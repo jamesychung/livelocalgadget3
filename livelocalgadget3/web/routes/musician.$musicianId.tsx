@@ -7,7 +7,8 @@ import Footer from "../components/shared/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
-import { Star, MapPin, Calendar, Clock, Music, DollarSign, ArrowLeft, ExternalLink } from "lucide-react";
+import { Star, MapPin, Calendar, Clock, Music, DollarSign, ArrowLeft, ExternalLink, Phone, Mail, Instagram, Facebook, Twitter, Youtube, Linkedin } from "lucide-react";
+import { ImageLightbox } from "../components/shared/ImageLightbox";
 
 interface MusicianData {
   id: string;
@@ -31,6 +32,10 @@ interface MusicianData {
   phone?: string;
   email?: string;
   isVerified?: boolean;
+  additionalPictures?: string[];
+  socialLinks?: any[];
+  audioFiles?: string[];
+  isActive?: boolean;
 }
 
 interface BookingData {
@@ -53,26 +58,45 @@ interface BookingData {
 export default function MusicianProfile() {
   const { musicianId } = useParams();
   const [currentTime, setCurrentTime] = useState<string>("");
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [allImages, setAllImages] = useState<string[]>([]);
 
   useEffect(() => {
     setCurrentTime(new Date().toLocaleString());
-    console.log("MusicianProfile - musicianId:", musicianId);
   }, [musicianId]);
 
   // Fetch real musician data from database
   const [{ data: musicianData, fetching: musicianFetching, error: musicianError }] = useFindOne(api.musician, musicianId || "", {
     pause: !musicianId,
+    select: {
+      id: true,
+      name: true,
+      stageName: true,
+      bio: true,
+      genre: true,
+      genres: true,
+      city: true,
+      state: true,
+      country: true,
+      profilePicture: true,
+      rating: true,
+      totalGigs: true,
+      hourlyRate: true,
+      instruments: true,
+      availability: true,
+      website: true,
+      experience: true,
+      yearsExperience: true,
+      phone: true,
+      email: true,
+      isVerified: true,
+      additionalPictures: true,
+      socialLinks: true,
+      audioFiles: true,
+      isActive: true,
+    }
   });
-
-  // Debug logging
-  useEffect(() => {
-    if (musicianError) {
-      console.error("Musician fetch error:", musicianError);
-    }
-    if (musicianData) {
-      console.log("Musician data received:", musicianData);
-    }
-  }, [musicianError, musicianData]);
 
   // Fetch bookings for this musician
   const [{ data: bookingsData, fetching: bookingsFetching }] = useFindMany(api.booking, {
@@ -96,6 +120,29 @@ export default function MusicianProfile() {
     pause: !musicianId,
   });
 
+  // Prepare all images for lightbox - moved after data fetching
+  useEffect(() => {
+    if (musicianData) {
+      const images: string[] = [];
+      const data = musicianData as MusicianData;
+      
+      // Add profile picture if it exists
+      if (data.profilePicture) {
+        images.push(data.profilePicture);
+      }
+      
+      // Add additional pictures if they exist
+      if (data.additionalPictures && data.additionalPictures.length > 0) {
+        images.push(...data.additionalPictures);
+      }
+      
+      setAllImages(images);
+    } else {
+      // Reset images when no data
+      setAllImages([]);
+    }
+  }, [musicianData]);
+
   const handleBackClick = () => {
     window.history.back();
   };
@@ -108,6 +155,27 @@ export default function MusicianProfile() {
   const handleContact = () => {
     // Navigate to contact page
     window.location.href = `/contact/musician/${musicianId}`;
+  };
+
+  const handleImageClick = (imageIndex: number) => {
+    setCurrentImageIndex(imageIndex);
+    setLightboxOpen(true);
+  };
+
+  const handleLightboxClose = () => {
+    setLightboxOpen(false);
+  };
+
+  const handlePrevious = () => {
+    setCurrentImageIndex((prev) => 
+      prev === 0 ? allImages.length - 1 : prev - 1
+    );
+  };
+
+  const handleNext = () => {
+    setCurrentImageIndex((prev) => 
+      prev === allImages.length - 1 ? 0 : prev + 1
+    );
   };
 
   // Show loading state
@@ -176,6 +244,18 @@ export default function MusicianProfile() {
   // Get display name
   const displayName = musician.stageName || musician.name || "Musician";
 
+  // Helper function to get social media icon
+  const getSocialIcon = (platform: string) => {
+    switch (platform.toLowerCase()) {
+      case 'instagram': return Instagram;
+      case 'facebook': return Facebook;
+      case 'twitter': return Twitter;
+      case 'youtube': return Youtube;
+      case 'linkedin': return Linkedin;
+      default: return ExternalLink;
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50">
       <Header showBackButton={true} onBackClick={handleBackClick} />
@@ -187,7 +267,10 @@ export default function MusicianProfile() {
             <div className="flex flex-col lg:flex-row items-center lg:items-start gap-8">
               {/* Profile Image */}
               <div className="relative">
-                <div className="w-32 h-32 lg:w-40 lg:h-40 rounded-full overflow-hidden border-4 border-white shadow-lg">
+                <div 
+                  className="w-32 h-32 lg:w-40 lg:h-40 rounded-full overflow-hidden border-4 border-white shadow-lg cursor-pointer hover:opacity-90 transition-opacity"
+                  onClick={() => musician.profilePicture && handleImageClick(0)}
+                >
                   <img 
                     src={musician.profilePicture || "https://images.unsplash.com/photo-1494790108755-2616b612b786?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80"} 
                     alt={displayName}
@@ -215,6 +298,11 @@ export default function MusicianProfile() {
                     <Badge variant="secondary" className="bg-white/20 text-white border-white/30">
                       <MapPin className="mr-1 h-3 w-3" />
                       {location}
+                    </Badge>
+                  )}
+                  {musician.isActive !== false && (
+                    <Badge variant="secondary" className="bg-green-500/20 text-green-100 border-green-300/30">
+                      Available
                     </Badge>
                   )}
                 </div>
@@ -268,6 +356,14 @@ export default function MusicianProfile() {
               </div>
             )}
 
+            {/* Experience Section */}
+            {musician.experience && (
+              <div className="mb-6">
+                <h2 className="text-xl font-semibold mb-3">Experience</h2>
+                <p className="text-gray-600 leading-relaxed">{musician.experience}</p>
+              </div>
+            )}
+
             {/* Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
               <div className="text-center p-4 bg-gray-50 rounded-lg">
@@ -292,7 +388,7 @@ export default function MusicianProfile() {
             </div>
 
             {/* Instruments and Genres */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
               {musician.instruments && musician.instruments.length > 0 && (
                 <div>
                   <h3 className="text-lg font-semibold mb-3">Instruments</h3>
@@ -318,8 +414,113 @@ export default function MusicianProfile() {
                 </div>
               )}
             </div>
+
+            {/* Contact Information */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+              <div>
+                <h3 className="text-lg font-semibold mb-3">Contact Information</h3>
+                <div className="space-y-2">
+                  {musician.phone && (
+                    <div className="flex items-center gap-2 text-gray-600">
+                      <Phone className="h-4 w-4" />
+                      <span>{musician.phone}</span>
+                    </div>
+                  )}
+                  {musician.email && (
+                    <div className="flex items-center gap-2 text-gray-600">
+                      <Mail className="h-4 w-4" />
+                      <span>{musician.email}</span>
+                    </div>
+                  )}
+                  {musician.website && (
+                    <div className="flex items-center gap-2 text-gray-600">
+                      <ExternalLink className="h-4 w-4" />
+                      <a href={musician.website} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                        {musician.website}
+                      </a>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Social Media Links */}
+              {musician.socialLinks && musician.socialLinks.length > 0 && (
+                <div>
+                  <h3 className="text-lg font-semibold mb-3">Social Media</h3>
+                  <div className="flex flex-wrap gap-3">
+                    {musician.socialLinks.map((link: any, index: number) => {
+                      const IconComponent = getSocialIcon(link.platform || 'external');
+                      return (
+                        <a
+                          key={index}
+                          href={link.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-2 text-gray-600 hover:text-blue-600 transition-colors"
+                        >
+                          <IconComponent className="h-4 w-4" />
+                          <span className="capitalize">{link.platform || 'External'}</span>
+                        </a>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
           </CardContent>
         </Card>
+
+        {/* Additional Pictures */}
+        {musician.additionalPictures && musician.additionalPictures.length > 0 && (
+          <Card className="mb-8">
+            <CardHeader>
+              <CardTitle>Gallery</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {musician.additionalPictures.map((picture: string, index: number) => {
+                  // Calculate the correct index for the lightbox (profile picture + current index)
+                  const lightboxIndex = (musician.profilePicture ? 1 : 0) + index;
+                  return (
+                    <div 
+                      key={index} 
+                      className="aspect-square rounded-lg overflow-hidden cursor-pointer hover:scale-105 transition-transform duration-200"
+                      onClick={() => handleImageClick(lightboxIndex)}
+                    >
+                      <img
+                        src={picture}
+                        alt={`${displayName} - Image ${index + 1}`}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Audio Section */}
+        {musician.audioFiles && musician.audioFiles.length > 0 && (
+          <Card className="mb-8">
+            <CardHeader>
+              <CardTitle>Audio Samples</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {musician.audioFiles.map((audioFile: string, index: number) => (
+                  <div key={index}>
+                    <p className="text-sm text-gray-600 mb-1">Sample {index + 1}</p>
+                    <audio controls className="w-full">
+                      <source src={audioFile} type="audio/mpeg" />
+                      Your browser does not support the audio element.
+                    </audio>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Upcoming Bookings */}
         {upcomingBookings.length > 0 && (
@@ -389,27 +590,17 @@ export default function MusicianProfile() {
             </CardContent>
           </Card>
         )}
-
-        {/* Website Link */}
-        {musician.website && (
-          <Card className="mb-8">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-lg font-semibold mb-1">Website</h3>
-                  <p className="text-gray-600">{musician.website}</p>
-                </div>
-                <Button asChild variant="outline">
-                  <a href={musician.website} target="_blank" rel="noopener noreferrer">
-                    <ExternalLink className="mr-2 h-4 w-4" />
-                    Visit
-                  </a>
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        )}
       </div>
+
+      {/* Image Lightbox */}
+      <ImageLightbox
+        images={allImages}
+        currentIndex={currentImageIndex}
+        isOpen={lightboxOpen}
+        onClose={handleLightboxClose}
+        onPrevious={handlePrevious}
+        onNext={handleNext}
+      />
 
       <Footer />
     </div>

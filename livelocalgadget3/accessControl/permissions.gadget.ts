@@ -72,6 +72,20 @@ export const permissions: GadgetPermissions = {
             delete: true,
           },
         },
+        message: {
+          read: true,
+          actions: {
+            create: true,
+            update: true,
+          },
+        },
+        notification: {
+          read: true,
+          actions: {
+            create: true,
+            update: true,
+          },
+        },
       },
     },
     user: {
@@ -112,6 +126,20 @@ export const permissions: GadgetPermissions = {
             create: true,
             update: true,
             delete: true,
+          },
+        },
+        message: {
+          read: true,
+          actions: {
+            create: true,
+            update: true,
+          },
+        },
+        notification: {
+          read: true,
+          actions: {
+            create: true,
+            update: true,
           },
         },
       },
@@ -164,6 +192,20 @@ export const permissions: GadgetPermissions = {
             create: true,
             update: true,
             delete: true,
+          },
+        },
+        message: {
+          read: true,
+          actions: {
+            create: true,
+            update: true,
+          },
+        },
+        notification: {
+          read: true,
+          actions: {
+            create: true,
+            update: true,
           },
         },
       },
@@ -224,6 +266,20 @@ export const permissions: GadgetPermissions = {
             delete: true,
           },
         },
+        message: {
+          read: true,
+          actions: {
+            create: true,
+            update: true,
+          },
+        },
+        notification: {
+          read: true,
+          actions: {
+            create: true,
+            update: true,
+          },
+        },
       },
     },
     eventOrganizer: {
@@ -271,6 +327,20 @@ export const permissions: GadgetPermissions = {
             delete: true,
           },
         },
+        message: {
+          read: true,
+          actions: {
+            create: true,
+            update: true,
+          },
+        },
+        notification: {
+          read: true,
+          actions: {
+            create: true,
+            update: true,
+          },
+        },
       },
     },
     "signed-in": {
@@ -304,6 +374,10 @@ export const permissions: GadgetPermissions = {
         },
         booking: {
           read: true,
+          actions: {
+            create: true,
+            update: true
+          }
         },
         event: {
           read: true,
@@ -314,6 +388,20 @@ export const permissions: GadgetPermissions = {
             update: {
               filter: "accessControl/filters/event/organizer.gelly",
             },
+          },
+        },
+        message: {
+          read: true,
+          actions: {
+            create: true,
+            update: true,
+          },
+        },
+        notification: {
+          read: true,
+          actions: {
+            create: true,
+            update: true,
           },
         },
       }

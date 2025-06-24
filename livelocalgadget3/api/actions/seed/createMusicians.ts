@@ -30,7 +30,7 @@ export const run = async (params: any, record: any, context: any) => {
     // Get existing users to use as musician users
     const users = await api.user.findMany({
       filter: {
-        role: { equals: "musician" }
+        primaryRole: { equals: "musician" }
       }
     });
 
@@ -66,6 +66,8 @@ export const run = async (params: any, record: any, context: any) => {
           facebook: "Sarah Johnson Jazz",
           youtube: "Sarah Johnson Music"
         },
+        audioFiles: [],
+        additionalPictures: [],
         isVerified: true,
         isActive: true,
         rating: 4.8,
@@ -95,6 +97,8 @@ export const run = async (params: any, record: any, context: any) => {
           facebook: "Thunder Road Band",
           youtube: "Thunder Road Official"
         },
+        audioFiles: [],
+        additionalPictures: [],
         isVerified: true,
         isActive: true,
         rating: 4.9,
@@ -124,6 +128,8 @@ export const run = async (params: any, record: any, context: any) => {
           facebook: "The Classical Quartet",
           youtube: "Classical Quartet Official"
         },
+        audioFiles: [],
+        additionalPictures: [],
         isVerified: true,
         isActive: true,
         rating: 4.9,

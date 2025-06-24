@@ -27,11 +27,19 @@ export default function SearchMusiciansPage() {
             genres: true,
             city: true,
             state: true,
+            country: true,
             rating: true,
             hourlyRate: true,
             profilePicture: true,
             instruments: true,
-            availability: true
+            availability: true,
+            isActive: true,
+            isVerified: true,
+            totalGigs: true,
+            yearsExperience: true
+        },
+        filter: {
+            isActive: { equals: true }
         },
         first: 50,
     });

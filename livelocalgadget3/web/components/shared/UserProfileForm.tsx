@@ -78,7 +78,6 @@ export const UserProfileForm: React.FC<UserProfileFormProps> = ({ role, profile,
     instruments: safeString(profile?.instruments) || "",
     hourlyRate: safeString(profile?.hourlyRate) || "",
     profilePicture: safeString(profile?.profilePicture) || "",
-    audio: safeString(profile?.audio) || "",
     audioFiles: safeArray(profile?.audioFiles) || [],
     socialLinks: safeSocialLinks(profile?.socialLinks) || [],
     additionalPictures: safeArray(profile?.additionalPictures) || [],
@@ -114,7 +113,6 @@ export const UserProfileForm: React.FC<UserProfileFormProps> = ({ role, profile,
       instruments: safeString(profile?.instruments) || "",
       hourlyRate: safeString(profile?.hourlyRate) || "",
       profilePicture: safeString(profile?.profilePicture) || "",
-      audio: safeString(profile?.audio) || "",
       audioFiles: safeArray(profile?.audioFiles) || [],
       socialLinks: safeSocialLinks(profile?.socialLinks) || [],
       additionalPictures: safeArray(profile?.additionalPictures) || [],
@@ -150,14 +148,6 @@ export const UserProfileForm: React.FC<UserProfileFormProps> = ({ role, profile,
 
   const handleProfilePictureRemove = () => {
     setForm({ ...form, profilePicture: "" });
-  };
-
-  const handleAudioUpload = (url: string) => {
-    setForm({ ...form, audio: url });
-  };
-
-  const handleAudioRemove = () => {
-    setForm({ ...form, audio: "" });
   };
 
   const handleAudioFilesChange = (audioFiles: string[]) => {
@@ -228,7 +218,6 @@ export const UserProfileForm: React.FC<UserProfileFormProps> = ({ role, profile,
       website: form.website.trim() || null,
       // Include image data for all profiles (now using URLs instead of base64)
       profilePicture: form.profilePicture && form.profilePicture.trim() ? form.profilePicture.trim() : null,
-      audio: form.audio && form.audio.trim() ? form.audio.trim() : null,
       audioFiles: form.audioFiles,
       additionalPictures: form.additionalPictures,
       // Keep social links as JSON
@@ -349,20 +338,9 @@ export const UserProfileForm: React.FC<UserProfileFormProps> = ({ role, profile,
             />
           </div>
 
-          {/* Audio Upload */}
-          <FileUpload
-            label="Audio Sample"
-            type="audio"
-            currentUrl={form.audio}
-            onUpload={handleAudioUpload}
-            onRemove={handleAudioRemove}
-            accept="audio/*"
-            maxSize={20}
-          />
-
           {/* Audio Files Upload */}
           <div>
-            <Label>Audio Samples (multiple)</Label>
+            <Label>Audio Samples</Label>
             <MultipleAudioUpload
               audioFiles={form.audioFiles}
               onChange={handleAudioFilesChange}

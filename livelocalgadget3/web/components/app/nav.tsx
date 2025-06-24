@@ -25,6 +25,7 @@ import { useState } from "react";
 import { Link, useLocation } from "react-router";
 import { useSignOut } from "@gadgetinc/react";
 import { NavDrawer } from "@/components/shared/NavDrawer";
+import { NotificationBadge } from "@/components/shared/NotificationBadge";
 import { 
   Home, 
   User, 
@@ -120,7 +121,7 @@ const getNavigationItems = (user: any): NavItem[] => {
         },
         {
           title: "Events",
-          path: "/events",
+          path: "/musician-events",
           icon: Music,
         },
         {
@@ -387,7 +388,11 @@ export const Navigation = ({ onLinkClick, user }: NavigationProps) => {
               onClick={onLinkClick}
             >
               <item.icon className="mr-3 h-4 w-4" />
-              {item.title}
+              <span className="flex-1">{item.title}</span>
+              {/* Add notification badges for Messages and Notifications */}
+              {(item.title === "Messages" || item.title === "Notifications") && user?.id && (
+                <NotificationBadge userId={user.id} className="ml-2" />
+              )}
             </Link>
           );
         })}

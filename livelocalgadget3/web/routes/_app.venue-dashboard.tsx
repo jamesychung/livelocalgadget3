@@ -33,6 +33,11 @@ function formatDateTime(dateTime: string | Date | null | undefined) {
     });
 }
 
+// Helper to get application count for an event
+function getApplicationCount(eventId: string, applications: any[]) {
+    return applications.filter(app => app.event?.id === eventId).length;
+}
+
 export default function VenueDashboard() {
     const { user } = useOutletContext<AuthOutletContext>();
     const navigate = useNavigate();
@@ -84,6 +89,7 @@ export default function VenueDashboard() {
             description: true,
             date: true,
             status: true,
+            bookingType: true,
             musician: {
                 id: true,
                 name: true,
@@ -117,20 +123,58 @@ export default function VenueDashboard() {
         pause: !venue?.id,
     });
 
+    // Fetch applications/bookings for this venue's events
+    const [{ data: applicationsData, fetching: applicationsFetching, error: applicationsError }] = useFindMany(api.booking, {
+        filter: { venue: { id: { equals: venue?.id } } },
+        select: {
+            id: true,
+            status: true,
+            proposedRate: true,
+            musicianPitch: true,
+            createdAt: true,
+            event: {
+                id: true,
+                title: true,
+                date: true,
+                status: true
+            },
+            musician: {
+                id: true,
+                name: true,
+                stageName: true,
+                city: true,
+                state: true,
+                genre: true
+            }
+        },
+        pause: !venue?.id,
+    });
+
     const bookings: any[] = bookingsData || [];
     const events: any[] = eventsData || [];
     const reviews: any[] = reviewsData || [];
+    const applications: any[] = applicationsData || [];
+
+    // Calculate summary statistics
+    const eventsWithApplications = events.filter(event => 
+        applications.some(app => app.event?.id === event.id)
+    );
+    const totalApplications = applications.length;
+    const pendingApplications = applications.filter(app => 
+        app.status === "interest_expressed" || app.status === "pending_confirmation"
+    ).length;
 
     useEffect(() => {
         if (venueError) console.error("Error loading venue data:", venueError);
         if (bookingsError) console.error("Error loading bookings data:", bookingsError);
         if (eventsError) console.error("Error loading events data:", eventsError);
         if (reviewsError) console.error("Error loading reviews data:", reviewsError);
+        if (applicationsError) console.error("Error loading applications data:", applicationsError);
         if (venue) {
             console.log("Venue data received:", venue);
             console.log("Venue profilePicture:", venue.profilePicture);
         }
-    }, [venueError, bookingsError, eventsError, reviewsError, venue]);
+    }, [venueError, bookingsError, eventsError, reviewsError, applicationsError, venue]);
 
     // Show loading state while fetching
     if (venueFetching) {
@@ -205,58 +249,243 @@ export default function VenueDashboard() {
                 </Card>
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium">Events with Applications</CardTitle>
+                        <Users className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold">{eventsWithApplications.length}</div>
+                        <p className="text-xs text-muted-foreground">
+                            {eventsWithApplications.length > 0 ? `${totalApplications} total applications` : "No applications yet"}
+                        </p>
+                    </CardContent>
+                </Card>
+                <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium">Pending Applications</CardTitle>
+                        <AlertCircle className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold">{pendingApplications}</div>
+                        <p className="text-xs text-muted-foreground">
+                            Awaiting your review
+                        </p>
+                    </CardContent>
+                </Card>
+                <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-medium">Rating</CardTitle>
                         <Star className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent><div className="text-2xl font-bold">{venue.rating ?? 'N/A'}</div></CardContent>
-                </Card>
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Capacity</CardTitle>
-                        <Users className="h-4 w-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent><div className="text-2xl font-bold">{venue.capacity ?? 'N/A'}</div></CardContent>
-                </Card>
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Pending Bookings</CardTitle>
-                        <AlertCircle className="h-4 w-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent><div className="text-2xl font-bold">{pendingBookings.length}</div></CardContent>
                 </Card>
             </div>
 
             <Tabs defaultValue="overview" className="space-y-6">
                 <TabsList className="grid w-full grid-cols-5">
                     <TabsTrigger value="overview">Overview</TabsTrigger>
+                    <TabsTrigger value="pending-events">Pending Events</TabsTrigger>
                     <TabsTrigger value="bookings">Bookings</TabsTrigger>
                     <TabsTrigger value="events">Events</TabsTrigger>
                     <TabsTrigger value="reviews">Reviews</TabsTrigger>
-                    <TabsTrigger value="profile">Profile</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="overview">
                     <Card>
-                        <CardHeader><CardTitle>Upcoming Events</CardTitle></CardHeader>
+                        <CardHeader>
+                            <CardTitle>Dashboard Overview</CardTitle>
+                            <CardDescription>
+                                Quick summary of your venue's activity and upcoming events
+                            </CardDescription>
+                        </CardHeader>
                         <CardContent>
-                            {upcomingEvents.length > 0 ? (
-                                <div className="space-y-4">
-                                    {upcomingEvents.map((event) => (
-                                        <div key={event.id} className="flex items-center justify-between p-3 border rounded-lg">
-                                            <div>
-                                                <p className="font-medium">{event.title || 'Untitled Event'}</p>
-                                                <p className="text-sm text-muted-foreground">{formatDateTime(event.date)}</p>
-                                                {event.musician && (
-                                                    <p className="text-sm text-muted-foreground">
-                                                        Featuring: {event.musician.stageName || event.musician.name}
-                                                    </p>
-                                                )}
-                                            </div>
-                                            {getStatusBadge(event.status)}
-                                        </div>
-                                    ))}
+                            <div className="space-y-6">
+                                {/* Quick Stats */}
+                                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                                    <div className="p-4 border rounded-lg">
+                                        <h3 className="font-semibold text-lg mb-2">Upcoming Events</h3>
+                                        <p className="text-2xl font-bold text-blue-600">{upcomingEvents.length}</p>
+                                        <p className="text-sm text-muted-foreground">Next 30 days</p>
+                                    </div>
+                                    <div className="p-4 border rounded-lg">
+                                        <h3 className="font-semibold text-lg mb-2">Events with Applications</h3>
+                                        <p className="text-2xl font-bold text-yellow-600">{eventsWithApplications.length}</p>
+                                        <p className="text-sm text-muted-foreground">{totalApplications} total applications</p>
+                                    </div>
+                                    <div className="p-4 border rounded-lg">
+                                        <h3 className="font-semibold text-lg mb-2">Pending Reviews</h3>
+                                        <p className="text-2xl font-bold text-orange-600">{pendingApplications}</p>
+                                        <p className="text-sm text-muted-foreground">Awaiting your decision</p>
+                                    </div>
                                 </div>
-                            ) : <p>No upcoming events found.</p>}
+
+                                {/* Quick Actions */}
+                                <div className="border-t pt-6">
+                                    <h3 className="font-semibold text-lg mb-4">Quick Actions</h3>
+                                    <div className="flex flex-wrap gap-3">
+                                        <Button asChild>
+                                            <Link to="/venue-events">
+                                                <CalendarDays className="mr-2 h-4 w-4" />
+                                                Manage Events
+                                            </Link>
+                                        </Button>
+                                        <Button asChild variant="outline">
+                                            <Link to="/create-event">
+                                                <Plus className="mr-2 h-4 w-4" />
+                                                Create New Event
+                                            </Link>
+                                        </Button>
+                                        <Button asChild variant="outline">
+                                            <Link to="/venue-events?tab=pending">
+                                                <Users className="mr-2 h-4 w-4" />
+                                                Review Applications
+                                            </Link>
+                                        </Button>
+                                    </div>
+                                </div>
+
+                                {/* Recent Activity */}
+                                {upcomingEvents.length > 0 && (
+                                    <div className="border-t pt-6">
+                                        <h3 className="font-semibold text-lg mb-4">Upcoming Events</h3>
+                                        <div className="space-y-3">
+                                            {upcomingEvents.slice(0, 3).map((event) => (
+                                                <div key={event.id} className="flex items-center justify-between p-3 border rounded-lg">
+                                                    <div>
+                                                        <p className="font-medium">{event.title || 'Untitled Event'}</p>
+                                                        <p className="text-sm text-muted-foreground">{formatDateTime(event.date)}</p>
+                                                        {event.musician && (
+                                                            <p className="text-sm text-muted-foreground">
+                                                                Featuring: {event.musician.stageName || event.musician.name}
+                                                            </p>
+                                                        )}
+                                                    </div>
+                                                    <div className="flex items-center gap-2">
+                                                        {getStatusBadge(event.status)}
+                                                        <Button variant="ghost" size="sm" asChild>
+                                                            <Link to={`/venue-events?eventId=${event.id}`}>
+                                                                View
+                                                            </Link>
+                                                        </Button>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                            {upcomingEvents.length > 3 && (
+                                                <Button variant="outline" size="sm" asChild className="w-full">
+                                                    <Link to="/venue-events">
+                                                        View All Events
+                                                    </Link>
+                                                </Button>
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+
+                <TabsContent value="pending-events">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Events with Applications</CardTitle>
+                            <CardDescription>
+                                Review and select musicians for your events
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            {eventsWithApplications.length > 0 ? (
+                                <div className="space-y-4">
+                                    {eventsWithApplications.map((event) => {
+                                        const eventApplications = applications.filter(app => app.event?.id === event.id);
+                                        const pendingCount = eventApplications.filter(app => 
+                                            app.status === "interest_expressed" || app.status === "pending_confirmation"
+                                        ).length;
+                                        
+                                        return (
+                                            <div key={event.id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                                                <div className="flex items-start justify-between mb-3">
+                                                    <div className="flex-1">
+                                                        <div className="flex items-center gap-2 mb-2">
+                                                            <h3 className="font-semibold text-lg">{event.title || 'Untitled Event'}</h3>
+                                                            <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">
+                                                                Musicians Applied
+                                                            </Badge>
+                                                        </div>
+                                                        <p className="text-sm text-muted-foreground mb-2">
+                                                            {formatDateTime(event.date)}
+                                                        </p>
+                                                        <div className="flex items-center gap-4 text-sm">
+                                                            <span className="flex items-center gap-1">
+                                                                <Users className="h-4 w-4" />
+                                                                {eventApplications.length} application{eventApplications.length !== 1 ? 's' : ''}
+                                                            </span>
+                                                            {pendingCount > 0 && (
+                                                                <span className="flex items-center gap-1 text-orange-600">
+                                                                    <AlertCircle className="h-4 w-4" />
+                                                                    {pendingCount} pending review
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                    <Button 
+                                                        variant="outline" 
+                                                        size="sm"
+                                                        asChild
+                                                    >
+                                                        <Link to={`/venue-events?eventId=${event.id}&tab=applications`}>
+                                                            Review Applications
+                                                        </Link>
+                                                    </Button>
+                                                </div>
+                                                
+                                                {/* Quick preview of applications */}
+                                                <div className="border-t pt-3">
+                                                    <p className="text-xs text-muted-foreground mb-2">Recent applications:</p>
+                                                    <div className="space-y-2">
+                                                        {eventApplications.slice(0, 3).map((app) => (
+                                                            <div key={app.id} className="flex items-center justify-between text-sm">
+                                                                <div className="flex items-center gap-2">
+                                                                    <span className="font-medium">
+                                                                        {app.musician?.stageName || app.musician?.name}
+                                                                    </span>
+                                                                    <span className="text-muted-foreground">
+                                                                        ${app.proposedRate}
+                                                                    </span>
+                                                                </div>
+                                                                <Badge variant={
+                                                                    app.status === "interest_expressed" ? "secondary" :
+                                                                    app.status === "pending_confirmation" ? "default" :
+                                                                    "outline"
+                                                                } className="text-xs">
+                                                                    {app.status.replace("_", " ").toUpperCase()}
+                                                                </Badge>
+                                                            </div>
+                                                        ))}
+                                                        {eventApplications.length > 3 && (
+                                                            <p className="text-xs text-muted-foreground">
+                                                                +{eventApplications.length - 3} more applications
+                                                            </p>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            ) : (
+                                <div className="text-center py-8">
+                                    <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                                    <p className="text-muted-foreground">No events with applications yet.</p>
+                                    <p className="text-sm text-muted-foreground mt-2">
+                                        Create open events to start receiving musician applications!
+                                    </p>
+                                    <Button asChild className="mt-4">
+                                        <Link to="/venue-events">
+                                            Create Event
+                                        </Link>
+                                    </Button>
+                                </div>
+                            )}
                         </CardContent>
                     </Card>
                 </TabsContent>
@@ -336,48 +565,71 @@ export default function VenueDashboard() {
                         <CardContent>
                             {events && events.length > 0 ? (
                                 <div className="space-y-4">
-                                    {events.map((event) => (
-                                        <div key={event.id} className="border rounded-lg p-4">
-                                            <div className="flex items-center justify-between mb-2">
-                                                <h3 className="font-medium">{event.title || 'Untitled Event'}</h3>
-                                                {getStatusBadge(event.status)}
-                                            </div>
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-muted-foreground">
-                                                <div className="flex items-center gap-2">
-                                                    <Clock className="h-4 w-4" />
-                                                    {formatDateTime(event.date)}
-                                                </div>
-                                                {event.musician && (
+                                    {events.map((event) => {
+                                        const applicationCount = getApplicationCount(event.id, applications);
+                                        return (
+                                            <div key={event.id} className="border rounded-lg p-4">
+                                                <div className="flex items-center justify-between mb-2">
                                                     <div className="flex items-center gap-2">
-                                                        <span>Featuring: <Link 
-                                                            to={`/musician/${event.musician.id}`}
-                                                            className="text-blue-600 hover:text-blue-800 hover:underline"
+                                                        <h3 className="font-medium">{event.title || 'Untitled Event'}</h3>
+                                                        {applicationCount > 0 && (
+                                                            <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">
+                                                                {applicationCount} Musician{applicationCount !== 1 ? 's' : ''} Applied
+                                                            </Badge>
+                                                        )}
+                                                    </div>
+                                                    {getStatusBadge(event.status)}
+                                                </div>
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-muted-foreground">
+                                                    <div className="flex items-center gap-2">
+                                                        <Clock className="h-4 w-4" />
+                                                        {formatDateTime(event.date)}
+                                                    </div>
+                                                    {event.musician && (
+                                                        <div className="flex items-center gap-2">
+                                                            <span>Featuring: <Link 
+                                                                to={`/musician/${event.musician.id}`}
+                                                                className="text-blue-600 hover:text-blue-800 hover:underline"
+                                                            >
+                                                                {event.musician.stageName || event.musician.name}
+                                                            </Link></span>
+                                                        </div>
+                                                    )}
+                                                    {event.musician?.city && (
+                                                        <div className="flex items-center gap-2">
+                                                            <MapPin className="h-4 w-4" />
+                                                            {event.musician.city}{event.musician.state ? `, ${event.musician.state}` : ''}
+                                                        </div>
+                                                    )}
+                                                    {event.musician?.genre && (
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="text-xs bg-gray-100 px-2 py-1 rounded">
+                                                                {event.musician.genre}
+                                                            </span>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                {event.description && (
+                                                    <div className="mt-2 text-sm text-muted-foreground">
+                                                        {event.description}
+                                                    </div>
+                                                )}
+                                                {applicationCount > 0 && (
+                                                    <div className="mt-3 pt-3 border-t">
+                                                        <Button 
+                                                            variant="outline" 
+                                                            size="sm"
+                                                            asChild
                                                         >
-                                                            {event.musician.stageName || event.musician.name}
-                                                        </Link></span>
-                                                    </div>
-                                                )}
-                                                {event.musician?.city && (
-                                                    <div className="flex items-center gap-2">
-                                                        <MapPin className="h-4 w-4" />
-                                                        {event.musician.city}{event.musician.state ? `, ${event.musician.state}` : ''}
-                                                    </div>
-                                                )}
-                                                {event.musician?.genre && (
-                                                    <div className="flex items-center gap-2">
-                                                        <span className="text-xs bg-gray-100 px-2 py-1 rounded">
-                                                            {event.musician.genre}
-                                                        </span>
+                                                            <Link to={`/venue-events?eventId=${event.id}&tab=applications`}>
+                                                                Review {applicationCount} Application{applicationCount !== 1 ? 's' : ''}
+                                                            </Link>
+                                                        </Button>
                                                     </div>
                                                 )}
                                             </div>
-                                            {event.description && (
-                                                <div className="mt-2 text-sm text-muted-foreground">
-                                                    {event.description}
-                                                </div>
-                                            )}
-                                        </div>
-                                    ))}
+                                        );
+                                    })}
                                 </div>
                             ) : <p>No events found.</p>}
                         </CardContent>
@@ -440,89 +692,6 @@ export default function VenueDashboard() {
                                     </p>
                                 </div>
                             )}
-                        </CardContent>
-                    </Card>
-                </TabsContent>
-
-                <TabsContent value="profile">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Profile Information</CardTitle>
-                            <CardDescription>
-                                Your venue profile details. Click "Edit Profile" to make changes.
-                            </CardDescription>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                            {/* Profile Picture */}
-                            {venue.profilePicture && (
-                                <div className="flex justify-center mb-6">
-                                    <div className="relative">
-                                        <img 
-                                            src={venue.profilePicture} 
-                                            alt="Venue Profile" 
-                                            className="w-32 h-32 object-cover rounded-lg border shadow-sm"
-                                        />
-                                    </div>
-                                </div>
-                            )}
-                            
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div className="font-semibold">Venue Name:</div>
-                                <div>{venue.name || 'Not set'}</div>
-
-                                <div className="font-semibold">Contact Email:</div>
-                                <div>{venue.email || user?.email || 'Not set'}</div>
-
-                                <div className="font-semibold">Phone:</div>
-                                <div>{venue.phone || 'Not set'}</div>
-                                
-                                <div className="font-semibold">Venue Type:</div>
-                                <div>{venue.type || 'Not set'}</div>
-
-                                <div className="font-semibold">Capacity:</div>
-                                <div>{venue.capacity ? `${venue.capacity} people` : 'Not set'}</div>
-
-                                <div className="font-semibold">Price Range:</div>
-                                <div>{venue.priceRange || 'Not set'}</div>
-
-                                <div className="font-semibold">Location:</div>
-                                <div>
-                                    {[venue.city, venue.state, venue.country].filter(Boolean).join(', ') || 'Not set'}
-                                </div>
-
-                                <div className="font-semibold">Address:</div>
-                                <div>{venue.address || 'Not set'}</div>
-
-                                <div className="font-semibold">Zip Code:</div>
-                                <div>{venue.zipCode || 'Not set'}</div>
-                                
-                                <div className="font-semibold">Website:</div>
-                                <div>
-                                    {venue.website ? (
-                                        <a href={venue.website} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">
-                                            {venue.website}
-                                        </a>
-                                    ) : 'Not set'}
-                                </div>
-
-                                <div className="font-semibold">Genres:</div>
-                                <div className="flex flex-wrap gap-1">
-                                    {venue.genres && venue.genres.length > 0 ? (
-                                        venue.genres.map((g: string, i: number) => <Badge key={i} variant="secondary">{g}</Badge>)
-                                    ) : 'Not set'}
-                                </div>
-
-                                <div className="font-semibold">Amenities:</div>
-                                <div className="flex flex-wrap gap-1">
-                                    {venue.amenities && venue.amenities.length > 0 ? (
-                                        venue.amenities.map((a: string, i: number) => <Badge key={i} variant="outline">{a}</Badge>)
-                                    ) : 'Not set'}
-                                </div>
-                            </div>
-                            <div className="pt-4">
-                                <h4 className="font-semibold mb-2">Description:</h4>
-                                <p className="text-sm text-muted-foreground">{venue.description || 'No description provided.'}</p>
-                            </div>
                         </CardContent>
                     </Card>
                 </TabsContent>

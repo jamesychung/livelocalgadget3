@@ -109,6 +109,10 @@ export default function ProfilePage() {
     try {
       setLoadingMusician(true);
       
+      console.log("=== LOADING MUSICIAN PROFILE ===");
+      console.log("Profile - User ID:", user.id);
+      console.log("Profile - User email:", user.email);
+      
       const profileResult = await api.musician.findMany({
         filter: { user: { id: { equals: user.id } } },
         select: {
@@ -128,19 +132,20 @@ export default function ProfilePage() {
           email: true,
           website: true,
           profilePicture: true,
-          audio: true,
+          audioFiles: true,
           socialLinks: true,
           additionalPictures: true,
           isActive: true,
           isVerified: true,
           rating: true,
           totalGigs: true,
-          audioFiles: true,
         },
         first: 1
       });
       
-      console.log("Loaded musician profile:", profileResult);
+      console.log("Profile - Profile result:", profileResult);
+      console.log("Profile - Profile count:", profileResult.length);
+      
       setMusicianProfile(profileResult.length > 0 ? profileResult[0] : null);
       
     } catch (err) {
@@ -501,8 +506,8 @@ export default function ProfilePage() {
                     </div>
                   </div>
 
-                  {/* Audio Sample - Redesigned */}
-                  {musicianProfile.audioFiles && musicianProfile.audioFiles.length > 0 ? (
+                  {/* Audio Samples */}
+                  {musicianProfile.audioFiles && musicianProfile.audioFiles.length > 0 && (
                     <div className="border-t border-gray-200 pt-8">
                       <h3 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
                         <div className="w-1 h-6 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full"></div>
@@ -522,37 +527,6 @@ export default function ProfilePage() {
                         ))}
                       </div>
                     </div>
-                  ) : (
-                    <>
-                      {musicianProfile.audio && !musicianProfile.audio.startsWith('blob:') && (
-                        <div className="border-t border-gray-200 pt-8">
-                          <h3 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                            <div className="w-1 h-6 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full"></div>
-                            Audio Sample
-                          </h3>
-                          <div className="bg-gradient-to-r from-gray-50 to-blue-50 rounded-2xl p-6 border border-gray-200">
-                            <audio controls className="w-full">
-                              <source src={musicianProfile.audio} type="audio/mpeg" />
-                              <source src={musicianProfile.audio} type="audio/mp3" />
-                              <source src={musicianProfile.audio} type="audio/wav" />
-                              <source src={musicianProfile.audio} type="audio/ogg" />
-                              Your browser does not support the audio element.
-                            </audio>
-                          </div>
-                        </div>
-                      )}
-                      {musicianProfile.audio && musicianProfile.audio.startsWith('blob:') && (
-                        <div className="border-t border-gray-200 pt-8">
-                          <h3 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                            <div className="w-1 h-6 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full"></div>
-                            Audio Sample
-                          </h3>
-                          <div className="bg-gradient-to-r from-gray-50 to-blue-50 rounded-2xl p-6 border border-gray-200 text-center">
-                            <p className="text-gray-500">Audio file expired. Please re-upload.</p>
-                          </div>
-                        </div>
-                      )}
-                    </>
                   )}
 
                   {/* Additional Pictures - Redesigned */}
@@ -586,9 +560,7 @@ export default function ProfilePage() {
                       </h3>
                       <div className="flex flex-wrap gap-4">
                         {(() => {
-                          console.log("Rendering social links:", musicianProfile.socialLinks);
                           return musicianProfile.socialLinks.map((link: any, index: number) => {
-                            console.log("Rendering link:", link);
                             return (
                               <a
                                 key={index}

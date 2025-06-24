@@ -1,442 +1,635 @@
 import { useState, useEffect } from "react";
-import { useParams } from "react-router";
+import { useParams, Link } from "react-router";
+import { useFindMany, useFindOne } from "@gadgetinc/react";
+import { api } from "../api";
 import Header from "../components/shared/Header";
 import Footer from "../components/shared/Footer";
+import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
+import { Button } from "../components/ui/button";
+import { Badge } from "../components/ui/badge";
+import { Star, MapPin, Calendar, Clock, Music, DollarSign, ArrowLeft, ExternalLink, Phone, Mail, Instagram, Facebook, Twitter, Youtube, Linkedin, Users, Building } from "lucide-react";
+import { ImageLightbox } from "../components/shared/ImageLightbox";
+
+interface VenueData {
+  id: string;
+  name?: string;
+  type?: string;
+  description?: string;
+  address?: string;
+  city?: string;
+  state?: string;
+  country?: string;
+  zipCode?: string;
+  profilePicture?: string;
+  rating?: number;
+  capacity?: number;
+  priceRange?: string;
+  genres?: string[];
+  amenities?: string[];
+  additionalPictures?: string[];
+  socialLinks?: any[];
+  phone?: string;
+  email?: string;
+  website?: string;
+  hours?: any;
+  isActive?: boolean;
+  isVerified?: boolean;
+}
+
+interface EventData {
+  id: string;
+  title?: string;
+  description?: string;
+  date?: string;
+  startTime?: string;
+  endTime?: string;
+  ticketPrice?: number;
+  status?: string;
+  musician?: {
+    id: string;
+    name?: string;
+    stageName?: string;
+  };
+}
 
 export default function VenueProfile() {
-  const params = useParams();
-  const venueId = params?.venueId;
+  const { venueId } = useParams();
   const [currentTime, setCurrentTime] = useState<string>("");
-  const [isLoading, setIsLoading] = useState(true);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [allImages, setAllImages] = useState<string[]>([]);
 
   useEffect(() => {
     setCurrentTime(new Date().toLocaleString());
-    // Add a small delay to ensure router context is ready
-    const timer = setTimeout(() => setIsLoading(false), 100);
-    return () => clearTimeout(timer);
-  }, []);
+    console.log("VenueProfile - venueId:", venueId);
+  }, [venueId]);
 
-  // Show loading state if venueId is not available yet
-  if (isLoading || !venueId) {
-    return (
-      <div style={{ 
-        minHeight: '100vh', 
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        fontFamily: 'system-ui, -apple-system, sans-serif'
-      }}>
-        <div style={{ 
-          background: 'rgba(255, 255, 255, 0.95)',
-          padding: '2rem',
-          borderRadius: '1rem',
-          textAlign: 'center'
-        }}>
-          <h2 style={{ color: '#1a202c', marginBottom: '1rem' }}>Loading Venue...</h2>
-          <p style={{ color: '#4a5568' }}>Please wait while we load the venue information.</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Mock venue data
-  const venueData = {
-    id: venueId,
-    name: "Blue Note Lounge",
-    type: "Jazz Club",
-    location: "New York, NY",
-    address: "131 W 3rd St, New York, NY 10012",
-    bio: "A legendary jazz venue in Greenwich Village, Blue Note Lounge has been hosting world-class musicians since 1981. Known for its intimate atmosphere and exceptional acoustics.",
-    profilePic: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80",
-    rating: 4.8,
-    capacity: 150,
-    priceRange: "$$",
-    genres: ["Jazz", "Blues", "Soul", "Fusion"],
-    amenities: ["Full Bar", "Food Service", "VIP Seating", "Sound System", "Parking"],
-    upcomingEvents: [
-      {
-        id: 1,
-        title: "Jazz Night with Sarah Johnson",
-        musician: "Sarah Johnson Trio",
-        date: "June 25, 2025",
-        time: "8:00 PM - 11:00 PM",
-        status: "Confirmed",
-        ticketPrice: "$25"
-      },
-      {
-        id: 2,
-        title: "Blues Evening",
-        musician: "The Blues Brothers",
-        date: "July 2, 2025",
-        time: "8:30 PM - 11:30 PM",
-        status: "Confirmed",
-        ticketPrice: "$30"
-      }
-    ],
-    pastEvents: [
-      {
-        id: 4,
-        title: "Jazz Fusion Night",
-        musician: "Fusion Collective",
-        date: "June 15, 2025",
-        time: "9:00 PM - 12:00 AM",
-        rating: 4.9,
-        attendance: 120
-      }
-    ],
-    contactInfo: {
-      phone: "(212) 475-8592",
-      email: "info@bluenotelounge.com",
-      website: "www.bluenotelounge.com"
-    },
-    socialLinks: {
-      instagram: "@bluenotelounge",
-      facebook: "Blue Note Lounge NYC",
-      twitter: "@BlueNoteNYC"
-    },
-    hours: {
-      monday: "Closed",
-      tuesday: "6:00 PM - 2:00 AM",
-      wednesday: "6:00 PM - 2:00 AM",
-      thursday: "6:00 PM - 2:00 AM",
-      friday: "6:00 PM - 2:00 AM",
-      saturday: "6:00 PM - 2:00 AM",
-      sunday: "6:00 PM - 12:00 AM"
+  // Fetch real venue data from database
+  const [{ data: venueData, fetching: venueFetching, error: venueError }] = useFindOne(api.venue, venueId || "", {
+    pause: !venueId,
+    select: {
+      id: true,
+      name: true,
+      type: true,
+      description: true,
+      address: true,
+      city: true,
+      state: true,
+      country: true,
+      zipCode: true,
+      profilePicture: true,
+      rating: true,
+      capacity: true,
+      priceRange: true,
+      genres: true,
+      amenities: true,
+      additionalPictures: true,
+      socialLinks: true,
+      phone: true,
+      email: true,
+      website: true,
+      hours: true,
+      isActive: true,
+      isVerified: true,
     }
-  };
+  });
+
+  // Debug logging
+  useEffect(() => {
+    if (venueError) {
+      console.error("Venue fetch error:", venueError);
+    }
+    if (venueData) {
+      console.log("Venue data received:", venueData);
+    }
+  }, [venueError, venueData]);
+
+  // Fetch events for this venue
+  const [{ data: eventsData, fetching: eventsFetching }] = useFindMany(api.event, {
+    filter: { venue: { id: { equals: venueId } } },
+    select: {
+      id: true,
+      title: true,
+      description: true,
+      date: true,
+      startTime: true,
+      endTime: true,
+      ticketPrice: true,
+      status: true,
+      musician: {
+        id: true,
+        name: true,
+        stageName: true,
+      }
+    },
+    pause: !venueId,
+  });
 
   const handleBackClick = () => {
     window.history.back();
   };
 
   const handleBookMusician = () => {
+    // Navigate to booking page
     window.location.href = `/booking/venue/${venueId}`;
   };
 
   const handleContact = () => {
+    // Navigate to contact page
     window.location.href = `/contact/venue/${venueId}`;
   };
 
-  const handleViewEvent = (eventId: number) => {
+  const handleViewEvent = (eventId: string) => {
     window.location.href = `/event/${eventId}`;
   };
 
-  return (
-    <div style={{ 
-      minHeight: '100vh', 
-      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-      fontFamily: 'system-ui, -apple-system, sans-serif'
-    }}>
-      <Header showBackButton={true} onBackClick={handleBackClick} />
-
-      <section style={{ 
-        padding: '2rem 1rem',
-        background: 'rgba(255, 255, 255, 0.95)',
-        backdropFilter: 'blur(10px)'
-      }}>
-        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-          <div style={{ 
-            display: 'grid', 
-            gridTemplateColumns: '1fr 2fr',
-            gap: '2rem',
-            marginBottom: '3rem',
-            alignItems: 'start'
-          }}>
-            <div style={{ textAlign: 'center' }}>
-              <div style={{
-                width: '200px',
-                height: '200px',
-                borderRadius: '50%',
-                margin: '0 auto 1.5rem',
-                overflow: 'hidden',
-                border: '4px solid #ffdf00',
-                boxShadow: '0 8px 25px rgba(0,0,0,0.15)'
-              }}>
-                <img 
-                  src={venueData.profilePic} 
-                  alt={venueData.name}
-                  style={{
-                    width: '100%',
-                    height: '100%',
-                    objectFit: 'cover'
-                  }}
-                />
-              </div>
-              <h1 style={{ 
-                fontSize: '2.5rem', 
-                fontWeight: 'bold', 
-                color: '#1a202c',
-                marginBottom: '0.5rem'
-              }}>
-                {venueData.name}
-              </h1>
-              <p style={{ 
-                fontSize: '1.25rem', 
-                color: '#4a5568',
-                marginBottom: '0.5rem'
-              }}>
-                {venueData.type} • {venueData.location}
-              </p>
-              <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', marginBottom: '1rem' }}>
-                <span style={{ fontSize: '1.1rem', color: '#718096' }}>⭐ {venueData.rating}</span>
-                <span style={{ fontSize: '1.1rem', color: '#718096' }}>👥 {venueData.capacity} capacity</span>
-              </div>
-              <div style={{ 
-                background: '#ffdf00', 
-                color: '#1a202c',
-                padding: '0.5rem 1rem',
-                borderRadius: '0.5rem',
-                fontWeight: '600',
-                marginBottom: '1rem'
-              }}>
-                {venueData.priceRange}
-              </div>
-            </div>
-
-            <div>
-              <h2 style={{ 
-                fontSize: '1.5rem', 
-                fontWeight: '600', 
-                color: '#1a202c',
-                marginBottom: '1rem'
-              }}>
-                About
-              </h2>
-              <p style={{ 
-                fontSize: '1.1rem', 
-                color: '#4a5568',
-                lineHeight: '1.6',
-                marginBottom: '2rem'
-              }}>
-                {venueData.bio}
-              </p>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', marginBottom: '2rem' }}>
-                <div>
-                  <h3 style={{ fontSize: '1.1rem', fontWeight: '600', color: '#1a202c', marginBottom: '0.5rem' }}>
-                    Music Genres
-                  </h3>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
-                    {venueData.genres.map((genre, index) => (
-                      <span key={index} style={{
-                        background: '#e2e8f0',
-                        color: '#4a5568',
-                        padding: '0.25rem 0.75rem',
-                        borderRadius: '1rem',
-                        fontSize: '0.875rem'
-                      }}>
-                        {genre}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-                <div>
-                  <h3 style={{ fontSize: '1.1rem', fontWeight: '600', color: '#1a202c', marginBottom: '0.5rem' }}>
-                    Amenities
-                  </h3>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
-                    {venueData.amenities.map((amenity, index) => (
-                      <span key={index} style={{
-                        background: '#e2e8f0',
-                        color: '#4a5568',
-                        padding: '0.25rem 0.75rem',
-                        borderRadius: '1rem',
-                        fontSize: '0.875rem'
-                      }}>
-                        {amenity}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-                <button 
-                  onClick={handleBookMusician}
-                  style={{
-                    padding: '1rem 2rem',
-                    background: '#ffdf00',
-                    color: '#1a202c',
-                    border: 'none',
-                    borderRadius: '0.5rem',
-                    fontSize: '1.1rem',
-                    fontWeight: '600',
-                    cursor: 'pointer',
-                    boxShadow: '0 4px 14px rgba(255, 223, 0, 0.3)'
-                  }}
-                >
-                  Book Musician
-                </button>
-                <button 
-                  onClick={handleContact}
-                  style={{
-                    padding: '1rem 2rem',
-                    background: 'rgba(102, 126, 234, 0.1)',
-                    color: '#667eea',
-                    border: '2px solid #667eea',
-                    borderRadius: '0.5rem',
-                    fontSize: '1.1rem',
-                    fontWeight: '600',
-                    cursor: 'pointer'
-                  }}
-                >
-                  Contact
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <div style={{ marginBottom: '3rem' }}>
-            <h2 style={{ 
-              fontSize: '1.75rem', 
-              fontWeight: '600', 
-              color: '#1a202c',
-              marginBottom: '1.5rem'
-            }}>
-              Upcoming Events
-            </h2>
-            <div style={{ 
-              display: 'grid', 
-              gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))',
-              gap: '1.5rem'
-            }}>
-              {venueData.upcomingEvents.map(event => (
-                <div 
-                  key={event.id} 
-                  onClick={() => handleViewEvent(event.id)}
-                  style={{
-                    background: 'white',
-                    borderRadius: '1rem',
-                    padding: '1.5rem',
-                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
-                    border: '1px solid rgba(0, 0, 0, 0.05)',
-                    cursor: 'pointer',
-                    transition: 'transform 0.2s, box-shadow 0.2s'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = 'translateY(-4px)';
-                    e.currentTarget.style.boxShadow = '0 8px 25px rgba(0, 0, 0, 0.15)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = 'translateY(0)';
-                    e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.1)';
-                  }}
-                >
-                  <h3 style={{ fontSize: '1.25rem', fontWeight: '600', color: '#1a202c', marginBottom: '0.5rem' }}>
-                    {event.title}
-                  </h3>
-                  <p style={{ color: '#4a5568', marginBottom: '0.5rem', fontWeight: '500' }}>
-                    {event.musician && typeof event.musician === 'object' ? (event.musician as any)?.name || 'Unknown Musician' : String(event.musician || 'Unknown Musician')}
-                  </p>
-                  <p style={{ color: '#4a5568', marginBottom: '0.5rem' }}>
-                    📅 {event.date}
-                  </p>
-                  <p style={{ color: '#4a5568', marginBottom: '0.5rem' }}>
-                    🕐 {event.time}
-                  </p>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{
-                      background: event.status === 'Confirmed' ? '#c6f6d5' : '#fed7d7',
-                      color: event.status === 'Confirmed' ? '#22543d' : '#742a2a',
-                      padding: '0.25rem 0.75rem',
-                      borderRadius: '1rem',
-                      fontSize: '0.875rem',
-                      fontWeight: '500'
-                    }}>
-                      {event.status}
-                    </span>
-                    <span style={{ color: '#ffdf00', fontWeight: '600', fontSize: '1.1rem' }}>
-                      {event.ticketPrice}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '3rem', marginBottom: '3rem' }}>
-            <div>
-              <h2 style={{ 
-                fontSize: '1.75rem', 
-                fontWeight: '600', 
-                color: '#1a202c',
-                marginBottom: '1.5rem'
-              }}>
-                Contact Information
-              </h2>
-              <div style={{ background: 'white', borderRadius: '1rem', padding: '1.5rem', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)' }}>
-                <p style={{ marginBottom: '0.5rem' }}>
-                  📞 <strong>Phone:</strong> {venueData.contactInfo.phone}
-                </p>
-                <p style={{ marginBottom: '0.5rem' }}>
-                  📧 <strong>Email:</strong> {venueData.contactInfo.email}
-                </p>
-                <p style={{ marginBottom: '0.5rem' }}>
-                  🌐 <strong>Website:</strong> {venueData.contactInfo.website}
-                </p>
-                <p style={{ marginBottom: '0.5rem' }}>
-                  📍 <strong>Address:</strong> {venueData.address}
-                </p>
-              </div>
-            </div>
-
-            <div>
-              <h2 style={{ 
-                fontSize: '1.75rem', 
-                fontWeight: '600', 
-                color: '#1a202c',
-                marginBottom: '1.5rem'
-              }}>
-                Hours of Operation
-              </h2>
-              <div style={{ background: 'white', borderRadius: '1rem', padding: '1.5rem', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)' }}>
-                {Object.entries(venueData.hours).map(([day, hours]) => (
-                  <div key={day} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-                    <span style={{ fontWeight: '500', textTransform: 'capitalize' }}>{day}:</span>
-                    <span>{hours}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          <div>
-            <h2 style={{ 
-              fontSize: '1.75rem', 
-              fontWeight: '600', 
-              color: '#1a202c',
-              marginBottom: '1.5rem'
-            }}>
-              Follow {venueData.name}
-            </h2>
-            <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-              {Object.entries(venueData.socialLinks).map(([platform, handle]) => (
-                <a 
-                  key={platform}
-                  href={`https://${platform}.com/${handle}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{
-                    padding: '0.75rem 1.5rem',
-                    background: '#667eea',
-                    color: 'white',
-                    textDecoration: 'none',
-                    borderRadius: '0.5rem',
-                    fontWeight: '500',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem'
-                  }}
-                >
-                  <span style={{ textTransform: 'capitalize' }}>{platform}</span>
-                  <span>→</span>
-                </a>
-              ))}
+  // Show loading state
+  if (venueFetching) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50">
+        <Header showBackButton={true} onBackClick={handleBackClick} />
+        <div className="container mx-auto px-4 py-8">
+          <div className="flex items-center justify-center min-h-[400px]">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
+              <p className="text-muted-foreground">Loading venue profile...</p>
             </div>
           </div>
         </div>
-      </section>
+        <Footer />
+      </div>
+    );
+  }
+
+  // Show error state
+  if (venueError || !venueData) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50">
+        <Header showBackButton={true} onBackClick={handleBackClick} />
+        <div className="container mx-auto px-4 py-8">
+          <div className="flex items-center justify-center min-h-[400px]">
+            <div className="text-center">
+              <h1 className="text-2xl font-bold text-gray-900 mb-4">Venue Not Found</h1>
+              <p className="text-muted-foreground mb-6">
+                The venue profile you're looking for doesn't exist or has been removed.
+              </p>
+              <Button asChild>
+                <Link to="/">
+                  <ArrowLeft className="mr-2 h-4 w-4" />
+                  Back to Home
+                </Link>
+              </Button>
+            </div>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  const venue: VenueData = venueData;
+  const events: EventData[] = eventsData || [];
+  
+  // Separate upcoming and past events
+  const upcomingEvents = events.filter(event => 
+    event.date && new Date(event.date) > new Date()
+  );
+  const pastEvents = events.filter(event => 
+    event.date && new Date(event.date) <= new Date()
+  );
+
+  // Format location
+  const location = [venue.city, venue.state, venue.country]
+    .filter(Boolean)
+    .join(", ");
+
+  // Helper function to get social media icon
+  const getSocialIcon = (platform: string) => {
+    switch (platform.toLowerCase()) {
+      case 'instagram': return Instagram;
+      case 'facebook': return Facebook;
+      case 'twitter': return Twitter;
+      case 'youtube': return Youtube;
+      case 'linkedin': return Linkedin;
+      default: return ExternalLink;
+    }
+  };
+
+  // Prepare all images for lightbox
+  useEffect(() => {
+    if (venue) {
+      const images: string[] = [];
+      
+      // Add profile picture if it exists
+      if (venue.profilePicture) {
+        images.push(venue.profilePicture);
+      }
+      
+      // Add additional pictures if they exist
+      if (venue.additionalPictures && venue.additionalPictures.length > 0) {
+        images.push(...venue.additionalPictures);
+      }
+      
+      setAllImages(images);
+    }
+  }, [venue]);
+
+  const handleImageClick = (imageIndex: number) => {
+    setCurrentImageIndex(imageIndex);
+    setLightboxOpen(true);
+  };
+
+  const handleLightboxClose = () => {
+    setLightboxOpen(false);
+  };
+
+  const handlePrevious = () => {
+    setCurrentImageIndex((prev) => 
+      prev === 0 ? allImages.length - 1 : prev - 1
+    );
+  };
+
+  const handleNext = () => {
+    setCurrentImageIndex((prev) => 
+      prev === allImages.length - 1 ? 0 : prev + 1
+    );
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50">
+      <Header showBackButton={true} onBackClick={handleBackClick} />
+
+      <div className="container mx-auto px-4 py-8">
+        {/* Profile Header */}
+        <Card className="mb-8 overflow-hidden">
+          <div className="bg-gradient-to-r from-purple-600 to-blue-600 p-8 text-white">
+            <div className="flex flex-col lg:flex-row items-center lg:items-start gap-8">
+              {/* Profile Image */}
+              <div className="relative">
+                <div 
+                  className="w-32 h-32 lg:w-40 lg:h-40 rounded-full overflow-hidden border-4 border-white shadow-lg cursor-pointer hover:opacity-90 transition-opacity"
+                  onClick={() => venue.profilePicture && handleImageClick(0)}
+                >
+                  <img 
+                    src={venue.profilePicture || "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80"} 
+                    alt={venue.name || "Venue"}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                {venue.isVerified && (
+                  <div className="absolute -bottom-2 -right-2 bg-blue-500 rounded-full p-2">
+                    <Star className="h-4 w-4 text-white fill-current" />
+                  </div>
+                )}
+              </div>
+
+              {/* Profile Info */}
+              <div className="flex-1 text-center lg:text-left">
+                <h1 className="text-3xl lg:text-4xl font-bold mb-2">{venue.name || "Venue"}</h1>
+                <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4 mb-4">
+                  {venue.type && (
+                    <Badge variant="secondary" className="bg-white/20 text-white border-white/30">
+                      <Building className="mr-1 h-3 w-3" />
+                      {venue.type}
+                    </Badge>
+                  )}
+                  {location && (
+                    <Badge variant="secondary" className="bg-white/20 text-white border-white/30">
+                      <MapPin className="mr-1 h-3 w-3" />
+                      {location}
+                    </Badge>
+                  )}
+                  {venue.isActive !== false && (
+                    <Badge variant="secondary" className="bg-green-500/20 text-green-100 border-green-300/30">
+                      Open
+                    </Badge>
+                  )}
+                </div>
+                <div className="flex flex-wrap items-center justify-center lg:justify-start gap-6 text-sm">
+                  {venue.rating && (
+                    <div className="flex items-center gap-1">
+                      <Star className="h-4 w-4 text-yellow-300 fill-current" />
+                      <span>{venue.rating}</span>
+                    </div>
+                  )}
+                  {venue.capacity && (
+                    <div className="flex items-center gap-1">
+                      <Users className="h-4 w-4" />
+                      <span>{venue.capacity} capacity</span>
+                    </div>
+                  )}
+                  {venue.priceRange && (
+                    <div className="flex items-center gap-1">
+                      <DollarSign className="h-4 w-4" />
+                      <span>{venue.priceRange}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex flex-col gap-3">
+                <Button 
+                  onClick={handleBookMusician}
+                  className="bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-semibold"
+                >
+                  Book Musician
+                </Button>
+                <Button 
+                  onClick={handleContact}
+                  variant="outline"
+                  className="border-white/30 text-white hover:bg-white/10"
+                >
+                  Contact
+                </Button>
+              </div>
+            </div>
+          </div>
+
+          {/* Description Section */}
+          <CardContent className="p-8">
+            {venue.description && (
+              <div className="mb-6">
+                <h2 className="text-xl font-semibold mb-3">About</h2>
+                <p className="text-gray-600 leading-relaxed">{venue.description}</p>
+              </div>
+            )}
+
+            {/* Stats Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+              {venue.capacity && (
+                <div className="text-center p-4 bg-gray-50 rounded-lg">
+                  <Users className="h-8 w-8 text-blue-600 mx-auto mb-2" />
+                  <div className="text-2xl font-bold text-gray-900">{venue.capacity}</div>
+                  <div className="text-sm text-gray-600">Capacity</div>
+                </div>
+              )}
+              {venue.rating && (
+                <div className="text-center p-4 bg-gray-50 rounded-lg">
+                  <Star className="h-8 w-8 text-yellow-500 mx-auto mb-2" />
+                  <div className="text-2xl font-bold text-gray-900">{venue.rating}</div>
+                  <div className="text-sm text-gray-600">Rating</div>
+                </div>
+              )}
+              {venue.priceRange && (
+                <div className="text-center p-4 bg-gray-50 rounded-lg">
+                  <DollarSign className="h-8 w-8 text-green-600 mx-auto mb-2" />
+                  <div className="text-2xl font-bold text-gray-900">{venue.priceRange}</div>
+                  <div className="text-sm text-gray-600">Price Range</div>
+                </div>
+              )}
+            </div>
+
+            {/* Genres and Amenities */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+              {venue.genres && venue.genres.length > 0 && (
+                <div>
+                  <h3 className="text-lg font-semibold mb-3">Music Genres</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {venue.genres.map((genre: string, index: number) => (
+                      <Badge key={index} variant="secondary">
+                        <Music className="mr-1 h-3 w-3" />
+                        {genre}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {venue.amenities && venue.amenities.length > 0 && (
+                <div>
+                  <h3 className="text-lg font-semibold mb-3">Amenities</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {venue.amenities.map((amenity: string, index: number) => (
+                      <Badge key={index} variant="outline">
+                        {amenity}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Contact Information */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+              <div>
+                <h3 className="text-lg font-semibold mb-3">Contact Information</h3>
+                <div className="space-y-2">
+                  {venue.phone && (
+                    <div className="flex items-center gap-2 text-gray-600">
+                      <Phone className="h-4 w-4" />
+                      <span>{venue.phone}</span>
+                    </div>
+                  )}
+                  {venue.email && (
+                    <div className="flex items-center gap-2 text-gray-600">
+                      <Mail className="h-4 w-4" />
+                      <span>{venue.email}</span>
+                    </div>
+                  )}
+                  {venue.website && (
+                    <div className="flex items-center gap-2 text-gray-600">
+                      <ExternalLink className="h-4 w-4" />
+                      <a href={venue.website} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                        {venue.website}
+                      </a>
+                    </div>
+                  )}
+                  {venue.address && (
+                    <div className="flex items-center gap-2 text-gray-600">
+                      <MapPin className="h-4 w-4" />
+                      <span>{venue.address}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Social Media Links */}
+              {venue.socialLinks && venue.socialLinks.length > 0 && (
+                <div>
+                  <h3 className="text-lg font-semibold mb-3">Social Media</h3>
+                  <div className="flex flex-wrap gap-3">
+                    {venue.socialLinks.map((link: any, index: number) => {
+                      const IconComponent = getSocialIcon(link.platform || 'external');
+                      return (
+                        <a
+                          key={index}
+                          href={link.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-2 text-gray-600 hover:text-blue-600 transition-colors"
+                        >
+                          <IconComponent className="h-4 w-4" />
+                          <span className="capitalize">{link.platform || 'External'}</span>
+                        </a>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Additional Pictures */}
+        {venue.additionalPictures && venue.additionalPictures.length > 0 && (
+          <Card className="mb-8">
+            <CardHeader>
+              <CardTitle>Gallery</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {venue.additionalPictures.map((picture: string, index: number) => {
+                  // Calculate the correct index for the lightbox (profile picture + current index)
+                  const lightboxIndex = (venue.profilePicture ? 1 : 0) + index;
+                  return (
+                    <div 
+                      key={index} 
+                      className="aspect-square rounded-lg overflow-hidden cursor-pointer hover:scale-105 transition-transform duration-200"
+                      onClick={() => handleImageClick(lightboxIndex)}
+                    >
+                      <img
+                        src={picture}
+                        alt={`${venue.name} - Image ${index + 1}`}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Hours of Operation */}
+        {venue.hours && Object.keys(venue.hours).length > 0 && (
+          <Card className="mb-8">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Clock className="h-5 w-5" />
+                Hours of Operation
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {Object.entries(venue.hours).map(([day, hours]) => (
+                  <div key={day} className="flex justify-between items-center p-2 border-b border-gray-100">
+                    <span className="font-medium capitalize">{day}:</span>
+                    <span className="text-gray-600">{hours as string}</span>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Upcoming Events */}
+        {upcomingEvents.length > 0 && (
+          <Card className="mb-8">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Calendar className="h-5 w-5" />
+                Upcoming Events
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {upcomingEvents.map((event) => (
+                  <div 
+                    key={event.id} 
+                    className="p-4 border rounded-lg cursor-pointer hover:shadow-md transition-shadow"
+                    onClick={() => handleViewEvent(event.id)}
+                  >
+                    <h4 className="font-semibold mb-2">{event.title || 'Untitled Event'}</h4>
+                    {event.musician && (
+                      <p className="text-sm text-gray-600 mb-1">
+                        {event.musician.stageName || event.musician.name || 'Musician TBD'}
+                      </p>
+                    )}
+                    {event.date && (
+                      <p className="text-sm text-gray-600 mb-1">
+                        {new Date(event.date).toLocaleDateString()}
+                      </p>
+                    )}
+                    {event.startTime && (
+                      <p className="text-sm text-gray-600 mb-2">
+                        {event.startTime}{event.endTime ? ` - ${event.endTime}` : ''}
+                      </p>
+                    )}
+                    <div className="flex justify-between items-center">
+                      <Badge 
+                        variant={event.status === 'confirmed' ? 'default' : 'secondary'}
+                        className={event.status === 'confirmed' ? 'bg-green-100 text-green-800' : ''}
+                      >
+                        {event.status || 'pending'}
+                      </Badge>
+                      {event.ticketPrice && (
+                        <span className="text-sm font-medium text-green-600">
+                          ${event.ticketPrice}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Past Events */}
+        {pastEvents.length > 0 && (
+          <Card className="mb-8">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Clock className="h-5 w-5" />
+                Recent Events
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {pastEvents.slice(0, 6).map((event) => (
+                  <div 
+                    key={event.id} 
+                    className="p-4 border rounded-lg cursor-pointer hover:shadow-md transition-shadow"
+                    onClick={() => handleViewEvent(event.id)}
+                  >
+                    <h4 className="font-semibold mb-2">{event.title || 'Untitled Event'}</h4>
+                    {event.musician && (
+                      <p className="text-sm text-gray-600 mb-1">
+                        {event.musician.stageName || event.musician.name || 'Musician TBD'}
+                      </p>
+                    )}
+                    {event.date && (
+                      <p className="text-sm text-gray-600 mb-1">
+                        {new Date(event.date).toLocaleDateString()}
+                      </p>
+                    )}
+                    {event.startTime && (
+                      <p className="text-sm text-gray-600 mb-2">
+                        {event.startTime}{event.endTime ? ` - ${event.endTime}` : ''}
+                      </p>
+                    )}
+                    {event.ticketPrice && (
+                      <p className="text-sm font-medium text-green-600">
+                        ${event.ticketPrice}
+                      </p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+      </div>
+
+      {/* Image Lightbox */}
+      <ImageLightbox
+        images={allImages}
+        currentIndex={currentImageIndex}
+        isOpen={lightboxOpen}
+        onClose={handleLightboxClose}
+        onPrevious={handlePrevious}
+        onNext={handleNext}
+      />
 
       <Footer />
     </div>

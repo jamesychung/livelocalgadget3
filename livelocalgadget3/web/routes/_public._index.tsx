@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router";
+import { useFindMany } from "@gadgetinc/react";
+import { api } from "../api";
 import Footer from "../components/shared/Footer";
 import HeroSection from "../components/shared/HeroSection";
 import EventCard from "../components/public/EventCard";
@@ -15,9 +17,53 @@ export default function HomePage() {
     setCurrentTime(new Date().toLocaleString());
   }, []);
 
+  // Fetch real musicians from database
+  const [{ data: musiciansData, fetching: musiciansFetching, error: musiciansError }] = useFindMany(api.musician, {
+    select: {
+      id: true,
+      name: true,
+      stageName: true,
+      bio: true,
+      genre: true,
+      genres: true,
+      city: true,
+      state: true,
+      country: true,
+      rating: true,
+      totalGigs: true,
+      profilePicture: true,
+      isActive: true,
+      isVerified: true
+    },
+    filter: {
+      isActive: { equals: true }
+    },
+    first: 8, // Show up to 8 featured musicians
+  });
+
+  console.log("=== HOME PAGE MUSICIANS ===");
+  console.log("HomePage - musiciansData:", musiciansData);
+  console.log("HomePage - musiciansError:", musiciansError);
+  console.log("HomePage - musiciansFetching:", musiciansFetching);
+
+  // Transform database musicians to match MusicianCard component format
+  const featuredMusicians = (musiciansData || []).map((musician: any) => ({
+    id: musician.id,
+    name: musician.stageName || musician.name,
+    genre: musician.genre || "Music",
+    location: musician.city && musician.state ? `${musician.city}, ${musician.state}` : "Location TBD",
+    image: "🎵",
+    profilePic: musician.profilePicture || "https://images.unsplash.com/photo-1494790108755-2616b612b786?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
+    rating: musician.rating || 4.5,
+    gigs: musician.totalGigs || 0
+  }));
+
+  console.log("=== TRANSFORMED MUSICIANS ===");
+  console.log("HomePage - featuredMusicians:", featuredMusicians);
+
   // Navigation handlers
   const handleMusicianClick = (musicianId: number) => {
-    // Navigate to musician dashboard/profile
+    // Navigate to musician profile
     window.location.href = `/musician/${musicianId}`;
   };
 
@@ -88,49 +134,6 @@ export default function HomePage() {
       image: "🎵",
       category: "Blues",
       description: "Authentic blues and soul music experience"
-    }
-  ];
-
-  const featuredMusicians = [
-    {
-      id: 1,
-      name: "Sarah Johnson",
-      genre: "Jazz",
-      location: "New York, NY",
-      image: "🎷",
-      profilePic: "https://images.unsplash.com/photo-1494790108755-2616b612b786?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80",
-      rating: 4.8,
-      gigs: 127
-    },
-    {
-      id: 2,
-      name: "Thunder Road",
-      genre: "Rock",
-      location: "Los Angeles, CA",
-      image: "🎸",
-      profilePic: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80",
-      rating: 4.9,
-      gigs: 89
-    },
-    {
-      id: 3,
-      name: "Emma Davis",
-      genre: "Acoustic",
-      location: "Nashville, TN",
-      image: "🎤",
-      profilePic: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80",
-      rating: 4.7,
-      gigs: 156
-    },
-    {
-      id: 4,
-      name: "The Blues Brothers",
-      genre: "Blues",
-      location: "Chicago, IL",
-      image: "🎵",
-      profilePic: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80",
-      rating: 4.6,
-      gigs: 203
     }
   ];
 
@@ -279,8 +282,9 @@ export default function HomePage() {
           
           <div style={{ 
             display: 'grid', 
-            gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-            gap: '2rem'
+            gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 300px))',
+            gap: '2rem',
+            justifyContent: 'center'
           }}>
             {featuredMusicians.map(musician => (
               <MusicianCard 

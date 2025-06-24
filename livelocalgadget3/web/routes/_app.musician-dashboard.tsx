@@ -132,6 +132,18 @@ export default function MusicianDashboard() {
                 </div>
                 <div className="flex gap-2">
                     <Button asChild variant="outline">
+                        <Link to="/musician-events">
+                            <Calendar className="mr-2 h-4 w-4" />
+                            My Events
+                        </Link>
+                    </Button>
+                    <Button asChild variant="outline">
+                        <Link to="/open-events">
+                            <Music className="mr-2 h-4 w-4" />
+                            Browse Open Events
+                        </Link>
+                    </Button>
+                    <Button asChild variant="outline">
                         <Link to="/availability">
                             <Calendar className="mr-2 h-4 w-4" />
                             Manage Availability

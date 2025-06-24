@@ -27,7 +27,7 @@ interface MusicianProfile {
   website: string;
   socialLinks: any;
   profilePicture: string;
-  audio: string;
+  audioFiles: string[];
   additionalPictures: string[];
   isActive: boolean;
   isVerified: boolean;
@@ -83,7 +83,7 @@ export default function MusicianProfileEdit() {
           website: true,
           socialLinks: true,
           profilePicture: true,
-          audio: true,
+          audioFiles: true,
           additionalPictures: true,
           isActive: true,
           isVerified: true,
@@ -159,7 +159,7 @@ export default function MusicianProfileEdit() {
         hourlyRate: parseFloat(formData.hourlyRate) || 0,
         email: formData.email || user.email,
         profilePicture: formData.profilePicture && formData.profilePicture.trim() ? formData.profilePicture.trim() : null,
-        audio: formData.audio && formData.audio.trim() ? formData.audio.trim() : null,
+        audioFiles: formData.audioFiles || [],
         socialLinks: formData.socialLinks || [],
         additionalPictures: formData.additionalPictures || [],
       };

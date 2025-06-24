@@ -118,7 +118,12 @@ export default function CreateEventPage() {
         recurringPattern: "weekly",
         recurringInterval: 1,
         recurringEndDate: "",
-        recurringDays: [] as string[]
+        recurringDays: [] as string[],
+        // New fields for open events
+        bookingType: "direct_invitation" as "direct_invitation" | "open_marketplace",
+        budgetRange: { min: 0, max: 0 },
+        locationRequirements: "",
+        interestDeadline: ""
     });
 
     // Fetch venue data
@@ -199,7 +204,7 @@ export default function CreateEventPage() {
                 equipment: eventForm.equipment,
                 isPublic: eventForm.isPublic,
                 isActive: eventForm.isActive,
-                status: eventForm.status,
+                status: eventForm.bookingType === "open_marketplace" ? "open" : "confirmed",
                 isRecurring: eventForm.isRecurring,
                 recurringPattern: eventForm.recurringPattern,
                 recurringInterval: eventForm.recurringInterval,
@@ -207,7 +212,15 @@ export default function CreateEventPage() {
                 ...(recurringEndDateTime && { recurringEndDate: recurringEndDateTime }),
                 venue: { _link: venue.id },
                 createdBy: { _link: user.id },
-                ...(eventForm.musicianId !== "none" && { musician: { _link: eventForm.musicianId } })
+                ...(eventForm.musicianId !== "none" && { musician: { _link: eventForm.musicianId } }),
+                // New open event fields
+                bookingType: eventForm.bookingType,
+                budgetRange: eventForm.budgetRange,
+                locationRequirements: eventForm.locationRequirements,
+                ...(eventForm.interestDeadline && { 
+                    interestDeadline: `${eventForm.interestDeadline}T23:59:59.000Z` 
+                }),
+                interestedMusicians: []
             };
 
             console.log("Creating event with data:", newEvent);
@@ -235,7 +248,7 @@ export default function CreateEventPage() {
         }
     };
 
-    const handleInputChange = (field: string, value: string | boolean | string[] | number) => {
+    const handleInputChange = (field: string, value: string | boolean | string[] | number | object) => {
         console.log(`handleInputChange called: ${field} = ${value}`);
         setEventForm(prev => {
             const newState = {
@@ -725,23 +738,32 @@ export default function CreateEventPage() {
                             </CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-4">
-                            <div>
-                                <Label htmlFor="musician">Featured Musician</Label>
-                                <Select value={eventForm.musicianId} onValueChange={(value) => handleInputChange("musicianId", value)}>
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Select a musician" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="none">No musician selected</SelectItem>
-                                        {musicians.map((musician) => (
-                                            <SelectItem key={musician.id} value={musician.id}>
-                                                {musician.stageName || musician.name}
-                                                {musician.city && ` (${musician.city}, ${musician.state})`}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
+                            {eventForm.bookingType === "direct_invitation" ? (
+                                <div>
+                                    <Label htmlFor="musician">Featured Musician</Label>
+                                    <Select value={eventForm.musicianId} onValueChange={(value) => handleInputChange("musicianId", value)}>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select a musician" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="none">No musician selected</SelectItem>
+                                            {musicians.map((musician) => (
+                                                <SelectItem key={musician.id} value={musician.id}>
+                                                    {musician.stageName || musician.name}
+                                                    {musician.city && ` (${musician.city}, ${musician.state})`}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                            ) : (
+                                <div className="p-4 bg-blue-50 rounded-md">
+                                    <p className="text-sm text-blue-800">
+                                        <strong>Open Event:</strong> This event will be visible to musicians who can express interest. 
+                                        You'll be able to review and select from interested musicians after the interest deadline.
+                                    </p>
+                                </div>
+                            )}
 
                             <div className="space-y-4">
                                 <div className="flex items-center justify-between">
@@ -770,6 +792,111 @@ export default function CreateEventPage() {
                                     />
                                 </div>
                             </div>
+                        </CardContent>
+                    </Card>
+
+                    {/* Booking Type & Open Event Settings */}
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                                <Settings className="h-5 w-5" />
+                                Booking Type & Open Event Settings
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            <div>
+                                <Label htmlFor="bookingType">Booking Type</Label>
+                                <Select 
+                                    value={eventForm.bookingType} 
+                                    onValueChange={(value: "direct_invitation" | "open_marketplace") => handleInputChange("bookingType", value)}
+                                >
+                                    <SelectTrigger>
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="direct_invitation">
+                                            Direct Musician Invitation
+                                        </SelectItem>
+                                        <SelectItem value="open_marketplace">
+                                            Open Event (Marketplace)
+                                        </SelectItem>
+                                    </SelectContent>
+                                </Select>
+                                <p className="text-xs text-muted-foreground mt-1">
+                                    {eventForm.bookingType === "direct_invitation" 
+                                        ? "Invite a specific musician to perform at your event"
+                                        : "Create an open event for musicians to discover and express interest"
+                                    }
+                                </p>
+                            </div>
+
+                            {eventForm.bookingType === "open_marketplace" && (
+                                <>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <Label htmlFor="budgetMin">Budget Range - Min ($)</Label>
+                                            <Input
+                                                id="budgetMin"
+                                                type="number"
+                                                min="0"
+                                                step="10"
+                                                value={eventForm.budgetRange.min}
+                                                onChange={(e) => {
+                                                    const newBudgetRange = {
+                                                        ...eventForm.budgetRange,
+                                                        min: parseInt(e.target.value) || 0
+                                                    };
+                                                    handleInputChange("budgetRange", newBudgetRange);
+                                                }}
+                                                placeholder="0"
+                                            />
+                                        </div>
+                                        <div>
+                                            <Label htmlFor="budgetMax">Budget Range - Max ($)</Label>
+                                            <Input
+                                                id="budgetMax"
+                                                type="number"
+                                                min="0"
+                                                step="10"
+                                                value={eventForm.budgetRange.max}
+                                                onChange={(e) => {
+                                                    const newBudgetRange = {
+                                                        ...eventForm.budgetRange,
+                                                        max: parseInt(e.target.value) || 0
+                                                    };
+                                                    handleInputChange("budgetRange", newBudgetRange);
+                                                }}
+                                                placeholder="0"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <Label htmlFor="locationRequirements">Location Requirements</Label>
+                                        <Textarea
+                                            id="locationRequirements"
+                                            value={eventForm.locationRequirements}
+                                            onChange={(e) => handleInputChange("locationRequirements", e.target.value)}
+                                            placeholder="Describe any specific location requirements (e.g., 'Must be within 50 miles of downtown', 'Prefer musicians from the local area')"
+                                            rows={2}
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <Label htmlFor="interestDeadline">Interest Deadline</Label>
+                                        <Input
+                                            id="interestDeadline"
+                                            type="date"
+                                            value={eventForm.interestDeadline}
+                                            onChange={(e) => handleInputChange("interestDeadline", e.target.value)}
+                                            min={eventForm.date} // Must be after event date
+                                        />
+                                        <p className="text-xs text-muted-foreground mt-1">
+                                            Deadline for musicians to submit interest in this event
+                                        </p>
+                                    </div>
+                                </>
+                            )}
                         </CardContent>
                     </Card>
                 </div>

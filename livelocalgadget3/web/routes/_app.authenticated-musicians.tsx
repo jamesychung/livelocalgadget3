@@ -10,6 +10,12 @@ import type { AuthOutletContext } from "./_app";
 export default function MusiciansPage() {
     const { user } = useOutletContext<AuthOutletContext>();
 
+    console.log("=== MUSICIANS PAGE LOADED ===");
+    console.log("MusiciansPage - Current user:", user);
+    console.log("MusiciansPage - User ID:", user?.id);
+    console.log("MusiciansPage - User email:", user?.email);
+    console.log("MusiciansPage - User primaryRole:", user?.primaryRole);
+
     // Fetch musicians
     const [{ data: musiciansData, fetching: musiciansFetching, error: musiciansError }] = useFindMany(api.musician, {
         select: {
@@ -21,15 +27,78 @@ export default function MusiciansPage() {
             genres: true,
             city: true,
             state: true,
+            country: true,
             rating: true,
             hourlyRate: true,
             profilePicture: true,
-            instruments: true
+            instruments: true,
+            isActive: true,
+            isVerified: true,
+            totalGigs: true,
+            yearsExperience: true,
+            user: {
+                id: true,
+                email: true,
+                primaryRole: true
+            }
         },
         first: 50,
     });
 
+    console.log("=== API CALL RESULTS ===");
+    console.log("MusiciansPage - musiciansData:", musiciansData);
+    console.log("MusiciansPage - musicians array:", musiciansData || []);
+    console.log("MusiciansPage - musiciansError:", musiciansError);
+    console.log("MusiciansPage - musiciansFetching:", musiciansFetching);
+    console.log("MusiciansPage - API environment:", api.connection.environment);
+
     const musicians: any[] = musiciansData || [];
+
+    // Try to find your specific musician profile
+    const yourMusician = musicians.find(m => 
+      m.user?.email === 'james@allquality.com' || 
+      m.stageName === 'sad' ||
+      m.email === 'james@allquality.com'
+    );
+    
+    console.log("=== LOOKING FOR YOUR MUSICIAN PROFILE ===");
+    console.log("MusiciansPage - Your musician found:", yourMusician);
+    console.log("MusiciansPage - Searching for email: james@allquality.com");
+    console.log("MusiciansPage - Searching for stage name: sad");
+
+    // Direct search for your musician profile
+    React.useEffect(() => {
+        const searchForYourMusician = async () => {
+            try {
+                console.log("=== DIRECT SEARCH FOR YOUR MUSICIAN ===");
+                
+                // Search by stage name
+                const byStageName = await api.musician.findMany({
+                    filter: { stageName: { equals: "sad" } },
+                    first: 10
+                });
+                console.log("MusiciansPage - Search by stage name 'sad':", byStageName);
+                
+                // Search by email
+                const byEmail = await api.musician.findMany({
+                    filter: { email: { equals: "james@allquality.com" } },
+                    first: 10
+                });
+                console.log("MusiciansPage - Search by email 'james@allquality.com':", byEmail);
+                
+                // Search all musicians
+                const allMusicians = await api.musician.findMany({
+                    first: 100
+                });
+                console.log("MusiciansPage - All musicians (first 100):", allMusicians);
+                
+            } catch (error) {
+                console.error("Error in direct search:", error);
+            }
+        };
+        
+        searchForYourMusician();
+    }, []);
 
     // Show loading state while fetching
     if (musiciansFetching) {
@@ -70,6 +139,39 @@ export default function MusiciansPage() {
                     </Button>
                 </div>
             </div>
+
+            {/* Debug Section - Show All Musicians */}
+            <Card className="bg-yellow-50 border-yellow-200">
+                <CardHeader>
+                    <CardTitle className="text-yellow-800">Debug: All Musicians (Including Inactive)</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <div className="text-sm">
+                        <p><strong>Total Musicians Found:</strong> {musicians.length}</p>
+                        <p><strong>Active Musicians:</strong> {musicians.filter(m => m.isActive).length}</p>
+                        <p><strong>Inactive Musicians:</strong> {musicians.filter(m => !m.isActive).length}</p>
+                        <p><strong>Current User ID:</strong> {user?.id}</p>
+                        <p><strong>Current User Email:</strong> {user?.email}</p>
+                        <p><strong>Current User Primary Role:</strong> {user?.primaryRole}</p>
+                        <div className="mt-4">
+                            <p><strong>All Musicians:</strong></p>
+                            <div className="max-h-60 overflow-auto">
+                                {musicians.map((musician, index) => (
+                                    <div key={musician.id} className="border-b border-gray-200 py-2">
+                                        <p><strong>{index + 1}.</strong> {musician.stageName || musician.name}</p>
+                                        <p className="text-xs text-gray-600">
+                                            ID: {musician.id} | 
+                                            Active: {musician.isActive ? 'Yes' : 'No'} | 
+                                            User: {musician.user?.email || 'No user'} | 
+                                            User ID: {musician.user?.id || 'No user ID'}
+                                        </p>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                </CardContent>
+            </Card>
 
             {/* Musicians Grid */}
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
