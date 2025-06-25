@@ -1,173 +1,88 @@
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useActionForm } from "@gadgetinc/react";
-import { Link, useLocation, useNavigate, useOutletContext } from "react-router";
-import { useState, useEffect } from "react";
-import { api } from "../api";
-import type { RootOutletContext } from "../root";
+import React from "react";
+import { Link } from "react-router";
+import Header from "../components/shared/Header";
 
-export default function () {
-  const { gadgetConfig } = useOutletContext<RootOutletContext>();
-  const [isClient, setIsClient] = useState(false);
-  const [selectedRole, setSelectedRole] = useState("regular_user");
-
-  const { search } = useLocation();
-  const navigate = useNavigate();
-
-  const {
-    submit,
-    register,
-    setValue,
-    getValues,
-    watch,
-    formState: { errors, isSubmitSuccessful, isSubmitting },
-  } = useActionForm(api.user.signUp, {
-    onSuccess: (result: any) => {
-      console.log("Signup result:", result);
-      // Redirect to profile setup page
-      setTimeout(() => {
-        window.location.href = "/profile-setup";
-      }, 2000);
-    },
-  });
-
-  // Set the role value when it changes
-  useEffect(() => {
-    setValue("primaryRole", selectedRole);
-  }, [selectedRole, setValue]);
-
-  // Ensure we're on the client side to avoid SSR issues
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
-
-  // Show loading state during SSR
-  if (!isClient) {
-    return (
-      <div className="w-[420px]">
-        <div className="space-y-8">
-          <Card className="p-8">
-            <div className="space-y-6">
-              <div className="animate-pulse">
-                <div className="h-8 bg-gray-200 rounded mb-4"></div>
-                <div className="h-4 bg-gray-200 rounded mb-2"></div>
-                <div className="h-4 bg-gray-200 rounded mb-6"></div>
-                <div className="h-10 bg-gray-200 rounded mb-4"></div>
-                <div className="h-10 bg-gray-200 rounded mb-4"></div>
-                <div className="h-10 bg-gray-200 rounded mb-4"></div>
-                <div className="h-10 bg-gray-200 rounded mb-4"></div>
-                <div className="h-10 bg-gray-200 rounded"></div>
-              </div>
-            </div>
-          </Card>
-        </div>
-      </div>
-    );
-  }
-
+export default function SignUpPage() {
   return (
-    <div className="flex justify-center items-center min-h-screen py-12">
-      <div className="w-[420px]">
-        <div className="space-y-8">
-          <Card className="p-8">
-            <form onSubmit={submit}>
+    <div className="min-h-screen bg-gray-50">
+      <Header />
+      
+      <div className="flex justify-center items-center min-h-screen py-12">
+        <div className="w-[420px]">
+          <div className="space-y-8">
+            <div className="bg-white rounded-lg shadow-lg p-8">
               <div className="space-y-6">
-                <h1 className="text-3xl font-bold tracking-tight">Create your account</h1>
+                <h1 className="text-3xl font-bold tracking-tight text-center">Create Account</h1>
+                <p className="text-center text-gray-600">
+                  Join Live Local Beats to discover amazing music
+                </p>
+                
                 <div className="space-y-4">
-                  {/* Email */}
                   <div className="space-y-2">
-                    <div className="space-y-1">
-                      <Label htmlFor="email">Email</Label>
-                      <Input
-                        id="email"
-                        type="email"
-                        placeholder="Enter your email"
-                        autoComplete="email"
-                        {...register("email")}
-                        className={errors?.user?.email?.message ? "border-destructive" : ""}
-                      />
-                      {errors?.user?.email?.message && (
-                        <p className="text-sm text-destructive">{errors.user.email.message}</p>
-                      )}
-                    </div>
+                    <label className="text-sm font-medium">First Name</label>
+                    <input
+                      type="text"
+                      placeholder="Enter your first name"
+                      className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
                   </div>
 
-                  {/* Password */}
                   <div className="space-y-2">
-                    <div className="space-y-1">
-                      <Label htmlFor="password">Password</Label>
-                      <Input
-                        id="password"
-                        type="password"
-                        placeholder="Create a password"
-                        autoComplete="new-password"
-                        {...register("password")}
-                        className={errors?.user?.password?.message ? "border-red-500" : ""}
-                      />
-                      {errors?.user?.password?.message && (
-                        <p className="text-sm text-destructive">{errors.user.password.message}</p>
-                      )}
-                    </div>
+                    <label className="text-sm font-medium">Last Name</label>
+                    <input
+                      type="text"
+                      placeholder="Enter your last name"
+                      className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
                   </div>
 
-                  {/* Role Selection */}
                   <div className="space-y-2">
-                    <div className="space-y-1">
-                      <Label htmlFor="role">Role</Label>
-                      <Select
-                        value={selectedRole}
-                        onValueChange={(value) => setSelectedRole(value)}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select role" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="musician">Musician</SelectItem>
-                          <SelectItem value="venue">Venue Owner</SelectItem>
-                          <SelectItem value="user">Regular User</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
+                    <label className="text-sm font-medium">Email</label>
+                    <input
+                      type="email"
+                      placeholder="Enter your email"
+                      className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
                   </div>
 
-                  {isSubmitSuccessful && (
-                    <div className="p-4 bg-green-50 border border-green-200 rounded-md">
-                      <p className="text-sm text-green-700">
-                        Account created successfully! Redirecting to profile setup...
-                      </p>
-                      <p className="text-xs text-green-600 mt-1">
-                        Please check your email to verify your account for full access.
-                      </p>
-                    </div>
-                  )}
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Password</label>
+                    <input
+                      type="password"
+                      placeholder="Create a password"
+                      className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
 
-                  <Button 
-                    className="w-full" 
-                    size="lg" 
-                    disabled={isSubmitting} 
-                    type="submit"
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">I am a...</label>
+                    <select className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                      <option value="">Select your role</option>
+                      <option value="musician">Musician</option>
+                      <option value="venue">Venue Owner</option>
+                      <option value="organizer">Event Organizer</option>
+                      <option value="fan">Music Fan</option>
+                    </select>
+                  </div>
+
+                  <button 
+                    className="w-full bg-blue-600 text-white py-3 px-4 rounded-md hover:bg-blue-700 transition-colors duration-200 font-medium"
                   >
-                    {isSubmitting ? "Creating account..." : "Create account"}
-                  </Button>
+                    Create Account
+                  </button>
                   
-                  {errors?.root?.message && (
-                    <div className="p-4 bg-red-50 border border-red-200 rounded-md">
-                      <p className="text-sm text-destructive">{errors.root.message}</p>
-                    </div>
-                  )}
+                  <div className="text-center">
+                    <p className="text-sm text-gray-600">
+                      Already have an account?{" "}
+                      <Link to="/sign-in" className="text-blue-600 hover:underline font-medium">
+                        Sign in →
+                      </Link>
+                    </p>
+                  </div>
                 </div>
               </div>
-            </form>
-          </Card>
-          <p className="text-sm text-muted-foreground text-center mt-4">
-            Already have an account?{" "}
-            <Link to="/sign-in" className="text-primary hover:underline font-medium">
-              Login →
-            </Link>
-          </p>
+            </div>
+          </div>
         </div>
       </div>
     </div>

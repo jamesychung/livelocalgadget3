@@ -1,208 +1,230 @@
+import React from "react";
 import { Link } from "react-router";
 import Header from "../components/shared/Header";
-import Footer from "../components/shared/Footer";
 import HeroSection from "../components/shared/HeroSection";
 import EventCard from "../components/public/EventCard";
 import MusicianCard from "../components/public/MusicianCard";
 import VenueCard from "../components/public/VenueCard";
-import SeedDataButton from "../components/shared/SeedDataButton";
-import DatabaseTest from "../components/shared/DatabaseTest";
+
+// Mock data for the frontend
+const mockEvents = [
+  {
+    id: 1,
+    title: "Jazz Night at The Blue Note",
+    description: "An evening of smooth jazz featuring local talent",
+    date: "June 15, 2024",
+    startTime: "8:00 PM",
+    endTime: "11:00 PM",
+    venue: "The Blue Note",
+    venueId: 1,
+    musician: "Sarah Johnson Trio",
+    musicianId: 1,
+    image: "🎵",
+    category: "Jazz"
+  },
+  {
+    id: 2, 
+    title: "Rock Revolution",
+    description: "High-energy rock bands from the local scene",
+    date: "June 20, 2024",
+    startTime: "7:30 PM",
+    endTime: "11:30 PM",
+    venue: "The Rock House",
+    venueId: 2,
+    musician: "Thunder Road",
+    musicianId: 2,
+    image: "🎸",
+    category: "Rock"
+  },
+  {
+    id: 3,
+    title: "Acoustic Evening",
+    description: "Intimate acoustic performances in a cozy setting",
+    date: "June 25, 2024", 
+    startTime: "6:00 PM",
+    endTime: "9:00 PM",
+    venue: "The Listening Room",
+    venueId: 3,
+    musician: "Emma Rodriguez",
+    musicianId: 3,
+    image: "🎻",
+    category: "Acoustic"
+  }
+];
+
+const mockMusicians = [
+  {
+    id: 1,
+    name: "Sarah Johnson",
+    genre: "Folk/Indie",
+    location: "Downtown",
+    image: "🎵",
+    profilePic: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=300&h=300&fit=crop&crop=face",
+    rating: 4.8,
+    gigs: 127
+  },
+  {
+    id: 2,
+    name: "Mike Chen",
+    genre: "Blues/Rock",
+    location: "Westside",
+    image: "🎸",
+    profilePic: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop&crop=face",
+    rating: 4.9,
+    gigs: 89
+  },
+  {
+    id: 3, 
+    name: "Emma Rodriguez",
+    genre: "Jazz/Classical",
+    location: "Eastside",
+    image: "🎻",
+    profilePic: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=300&h=300&fit=crop&crop=face",
+    rating: 4.7,
+    gigs: 45
+  }
+];
+
+const mockVenues = [
+  {
+    id: 1,
+    name: "The Blue Note",
+    type: "Jazz Club",
+    location: "Downtown",
+    image: "🎵",
+    profilePic: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=400&h=300&fit=crop",
+    capacity: 120,
+    rating: 4.6
+  },
+  {
+    id: 2,
+    name: "The Rock House", 
+    type: "Rock Venue",
+    location: "Westside",
+    image: "🎸",
+    profilePic: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=300&fit=crop",
+    capacity: 300,
+    rating: 4.4
+  },
+  {
+    id: 3,
+    name: "The Listening Room",
+    type: "Acoustic Venue",
+    location: "Eastside",
+    image: "🎻",
+    profilePic: "https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?w=400&h=300&fit=crop", 
+    capacity: 80,
+    rating: 4.8
+  }
+];
 
 export default function HomePage() {
-  // Mock data for demonstration
-  const upcomingEvents = [
-    {
-      id: 1,
-      title: "Jazz Night at Blue Note",
-      date: "June 25, 2025",
-      startTime: "8:00 PM",
-      endTime: "11:00 PM",
-      venue: "Blue Note Lounge",
-      venueId: 1,
-      musician: "Sarah Johnson Trio",
-      musicianId: 1,
-      image: "🎵",
-      category: "Jazz",
-      description: "An evening of smooth jazz featuring the Sarah Johnson Trio."
-    },
-    {
-      id: 2, 
-      title: "Rock Revolution",
-      date: "June 28, 2025",
-      startTime: "9:30 PM",
-      endTime: "12:30 AM",
-      venue: "The Basement",
-      venueId: 2,
-      musician: "Thunder Road",
-      musicianId: 2,
-      image: "🎸",
-      category: "Rock",
-      description: "High-energy rock performance by Thunder Road."
-    },
-    {
-      id: 3,
-      title: "Classical Evening",
-      date: "July 2, 2025", 
-      startTime: "7:30 PM",
-      endTime: "10:30 PM",
-      venue: "The Grand Hall",
-      venueId: 3,
-      musician: "The Classical Quartet",
-      musicianId: 3,
-      image: "🎻",
-      category: "Classical",
-      description: "Professional string quartet performing classical masterpieces."
-    }
-  ];
-
-  const featuredMusicians = [
-    {
-      id: 1,
-      name: "Sarah Johnson",
-      genre: "Jazz",
-      image: "🎵",
-      profilePic: "https://images.unsplash.com/photo-1494790108755-2616b612b786?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
-      rating: 4.8,
-      location: "New York, NY",
-      gigs: 127
-    },
-    {
-      id: 2,
-      name: "Thunder Road",
-      genre: "Rock",
-      image: "🎸",
-      profilePic: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
-      rating: 4.9,
-      location: "Los Angeles, CA",
-      gigs: 89
-    },
-    {
-      id: 3,
-      name: "The Classical Quartet",
-      genre: "Classical",
-      image: "🎻",
-      profilePic: "https://images.unsplash.com/photo-1494790108755-2616b612b786?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
-      rating: 4.9,
-      location: "Chicago, IL",
-      gigs: 45
-    }
-  ];
-
-  const featuredVenues = [
-    {
-      id: 1,
-      name: "Blue Note Lounge",
-      type: "Jazz Club",
-      image: "🎵",
-      profilePic: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
-      rating: 4.8,
-      location: "New York, NY",
-      capacity: 150
-    },
-    {
-      id: 2,
-      name: "The Basement",
-      type: "Rock Venue",
-      image: "🎸",
-      profilePic: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
-      rating: 4.7,
-      location: "Los Angeles, CA",
-      capacity: 300
-    },
-    {
-      id: 3,
-      name: "The Grand Hall",
-      type: "Concert Hall",
-      image: "🎻",
-      profilePic: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
-      rating: 4.9,
-      location: "Chicago, IL",
-      capacity: 500
-    }
-  ];
-
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
       
-      <HeroSection />
-      
-      {/* Database Test Section */}
-      <section className="py-8 bg-white">
-        <div className="container mx-auto px-4">
-          <h2 className="text-2xl font-bold text-center mb-8 text-gray-800">
-            Database Connection Test
-          </h2>
-          <DatabaseTest />
-        </div>
-      </section>
-      
-      {/* Quick Seed Button - Remove this after seeding */}
-      <section className="py-8 bg-gray-50">
-        <div className="container mx-auto px-4">
-          <div className="bg-yellow-100 border border-yellow-400 rounded-lg p-6">
-            <h3 className="text-lg font-bold text-yellow-800 mb-4">Quick Setup</h3>
-            <p className="text-yellow-700 mb-4">Click the button below to quickly seed your database with sample data:</p>
-            <SeedDataButton />
+      <main>
+        <HeroSection />
+        
+        {/* Events Section */}
+        <section id="events" className="py-16 bg-white">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl font-bold text-gray-900 mb-4">Upcoming Events</h2>
+              <p className="text-lg text-gray-600">Discover amazing live music in your area</p>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {mockEvents.map((event) => (
+                <EventCard key={event.id} {...event} />
+              ))}
+            </div>
+            
+            <div className="text-center mt-12">
+              <Link 
+                to="/events"
+                className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 transition-colors duration-200"
+              >
+                View All Events
+              </Link>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* Upcoming Events Section */}
-      <section className="py-16 bg-white">
-        <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-12 text-gray-800">
-            Upcoming Events
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {upcomingEvents.map((event) => (
-              <EventCard 
-                key={event.id} 
-                event={event} 
-                onClick={() => window.location.href = `/events/${event.id}`}
-              />
-            ))}
+        {/* Musicians Section */}
+        <section id="musicians" className="py-16 bg-gray-50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl font-bold text-gray-900 mb-4">Featured Musicians</h2>
+              <p className="text-lg text-gray-600">Connect with talented local artists</p>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {mockMusicians.map((musician) => (
+                <MusicianCard key={musician.id} {...musician} />
+              ))}
+            </div>
+            
+            <div className="text-center mt-12">
+              <Link 
+                to="/musicians"
+                className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 transition-colors duration-200"
+              >
+                Browse All Musicians
+              </Link>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* Featured Musicians Section */}
-      <section className="py-16 bg-gray-50">
-        <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-12 text-gray-800">
-            Featured Musicians
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {featuredMusicians.map((musician) => (
-              <MusicianCard 
-                key={musician.id} 
-                musician={musician} 
-                onClick={() => window.location.href = `/musicians/${musician.id}`}
-              />
-            ))}
+        {/* Venues Section */}
+        <section id="venues" className="py-16 bg-white">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl font-bold text-gray-900 mb-4">Popular Venues</h2>
+              <p className="text-lg text-gray-600">Find the perfect place for your next event</p>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {mockVenues.map((venue) => (
+                <VenueCard key={venue.id} {...venue} />
+              ))}
+            </div>
+            
+            <div className="text-center mt-12">
+              <Link 
+                to="/venues"
+                className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 transition-colors duration-200"
+              >
+                Explore All Venues
+              </Link>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* Featured Venues Section */}
-      <section className="py-16 bg-white">
-        <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-12 text-gray-800">
-            Featured Venues
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {featuredVenues.map((venue) => (
-              <VenueCard 
-                key={venue.id} 
-                venue={venue} 
-                onClick={() => window.location.href = `/venues/${venue.id}`}
-              />
-            ))}
+        {/* CTA Section */}
+        <section className="py-16 bg-gradient-to-r from-blue-600 to-purple-600">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h2 className="text-3xl font-bold text-white mb-4">Ready to Get Started?</h2>
+            <p className="text-xl text-blue-100 mb-8">
+              Join Live Local Beats and connect with your local music community
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link 
+                to="/sign-up"
+                className="inline-flex items-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-blue-600 bg-white hover:bg-gray-50 transition-colors duration-200"
+              >
+                Create Account
+              </Link>
+              <Link 
+                to="/sign-in"
+                className="inline-flex items-center px-8 py-3 border border-white text-base font-medium rounded-md text-white hover:bg-blue-700 transition-colors duration-200"
+              >
+                Sign In
+              </Link>
+            </div>
           </div>
-        </div>
-      </section>
-
-      <Footer />
+        </section>
+      </main>
     </div>
   );
 } 
