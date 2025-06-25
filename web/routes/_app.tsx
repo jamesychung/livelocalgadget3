@@ -13,57 +13,47 @@
 import { UserIcon } from "@/components/shared/UserIcon";
 import { Toaster } from "@/components/ui/sonner";
 import { DesktopNav, MobileNav, SecondaryNavigation } from "@/components/app/nav";
-import { Outlet, useOutletContext, useNavigate } from "react-router";
-import { useState, useEffect } from "react";
-import { useUser } from "@gadgetinc/react";
+import { Outlet, redirect, useOutletContext } from "react-router";
 import type { RootOutletContext } from "../root";
+import type { Route } from "./+types/_app";
+
+export const loader = async ({ context }: Route.LoaderArgs) => {
+  const { session, gadgetConfig } = context;
+
+  const userId = session?.get("user");
+  const user = userId ? await context.api.user.findOne(userId) : undefined;
+
+  if (!user) {
+    return redirect(gadgetConfig.authentication!.signInPath);
+  }
+
+  return {
+    user,
+  };
+};
 
 export type AuthOutletContext = RootOutletContext & {
   user: any;
 };
 
-export default function () {
+export default function ({ loaderData }: Route.ComponentProps) {
   const rootOutletContext = useOutletContext<RootOutletContext>();
-  const user = useUser();
-  const navigate = useNavigate();
-  const [isClient, setIsClient] = useState(false);
 
-  // Ensure we're on the client side to avoid SSR issues
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
-
-  // Handle authentication check client-side
-  useEffect(() => {
-    if (isClient && !user) {
-      // Redirect to sign-in if not authenticated
-      navigate('/sign-in');
-    }
-  }, [isClient, user, navigate]);
-
-  // Show loading state during SSR or while checking authentication
-  if (!isClient || !user) {
-    return (
-      <div className="h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-      </div>
-    );
-  }
+  const { user } = loaderData;
 
   return (
     <div className="h-screen flex overflow-hidden">
-      <DesktopNav user={user} />
+      <DesktopNav />
 
       <div className="flex-1 flex flex-col md:pl-64 min-w-0">
         <header className="h-16 flex items-center justify-between px-6 border-b bg-background z-10 w-full">
-          <MobileNav user={user} />
+          <MobileNav />
           <div className="ml-auto">
             <SecondaryNavigation
-              user={user}
               icon={
                 <>
-                  <UserIcon user={user as any} />
-                  <span className="text-sm font-medium">{(user as any).firstName ?? (user as any).email}</span>
+                  <UserIcon user={user} />
+                  <span className="text-sm font-medium">{user.firstName ?? user.email}</span>
                 </>
               }
             />

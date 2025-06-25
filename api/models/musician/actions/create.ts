@@ -62,7 +62,7 @@ export const run: ActionRun = async ({ params, record, logger, api, session }) =
   logger.info(`Created musician profile with ID: ${record.id}`);
   logger.info(`Musician name: ${record.name}, Stage name: ${record.stageName}`);
   
-  // Update user's role to musician if they don't already have it
+  // Add musician role to user if they don't already have it
   if (session?.user) {
     try {
       const user = await api.user.findOne(session.user.id);
@@ -71,14 +71,13 @@ export const run: ActionRun = async ({ params, record, logger, api, session }) =
         if (!currentRoles.includes('musician')) {
           const updatedRoles = [...currentRoles, 'musician'];
           await api.user.update(session.user.id, {
-            roles: updatedRoles,
-            primaryRole: 'musician'
+            roles: updatedRoles
           });
-          logger.info(`Updated user ${session.user.id} roles to: ${updatedRoles.join(', ')}`);
+          logger.info(`Added musician role to user ${session.user.id}`);
         }
       }
     } catch (error) {
-      logger.error(`Failed to update user roles: ${error}`);
+      logger.error(`Failed to add musician role: ${error}`);
     }
   }
   

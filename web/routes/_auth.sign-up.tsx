@@ -11,15 +11,16 @@ import type { RootOutletContext } from "../root";
 export default function () {
   const { gadgetConfig } = useOutletContext<RootOutletContext>();
 
+  const { search } = useLocation();
   const navigate = useNavigate();
+
   const {
-    register,
     submit,
-    formState: { errors, isSubmitting },
-  } = useActionForm(api.user.signIn, {
+    register,
+    formState: { errors, isSubmitSuccessful, isSubmitting },
+  } = useActionForm(api.user.signUp, {
     onSuccess: () => navigate(gadgetConfig.authentication!.redirectOnSuccessfulSignInPath!),
   });
-  const { search } = useLocation();
 
   return (
     <div className="w-[420px]">
@@ -27,7 +28,7 @@ export default function () {
         <Card className="p-8">
           <form onSubmit={submit}>
             <div className="space-y-6">
-              <h1 className="text-3xl font-bold tracking-tight">Login</h1>
+              <h1 className="text-3xl font-bold tracking-tight">Get started</h1>
               <Button variant="outline" size="lg" className="w-full" asChild>
                 <a href={`/auth/google/start${search}`}>
                   <img
@@ -35,7 +36,7 @@ export default function () {
                     src="https://assets.gadget.dev/assets/default-app-assets/google.svg"
                     alt="Google logo"
                   />
-                  Continue with Google
+                  Sign up with Google
                 </a>
               </Button>
               <Separator />
@@ -65,34 +66,29 @@ export default function () {
                       placeholder="Password"
                       autoComplete="off"
                       {...register("password")}
-                      className={errors?.user?.password?.message ? "border-destructive" : ""}
+                      className={errors?.user?.password?.message ? "border-red-500" : ""}
                     />
                     {errors?.user?.password?.message && (
                       <p className="text-sm text-destructive">{errors.user.password.message}</p>
                     )}
                   </div>
                 </div>
+                {isSubmitSuccessful && <p className="text-sm text-green-500">Please check your inbox</p>}
                 <Button className="w-full" size="lg" disabled={isSubmitting} type="submit">
-                  Continue with email
+                  Sign up with email
                 </Button>
                 {errors?.root?.message && <p className="text-sm text-destructive">{errors.root.message}</p>}
-                <p className="text-sm text-muted-foreground">
-                  Forgot your password?{" "}
-                  <Link to="/forgot-password" className="text-primary hover:underline font-medium">
-                    Reset password
-                  </Link>
-                </p>
               </div>
             </div>
           </form>
         </Card>
         <p className="text-sm text-muted-foreground text-center mt-4">
-          Don't have an account?{" "}
-          <Link to="/sign-up" className="text-primary hover:underline font-medium">
-            Get started →
+          Already have an account?{" "}
+          <Link to="/sign-in" className="text-primary hover:underline font-medium">
+            Login →
           </Link>
         </p>
       </div>
     </div>
   );
-}
+} 

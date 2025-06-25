@@ -1,9 +1,9 @@
 {
-  "application": "livelocalgadget3",
+  "application": "livelocalgadget6",
   "environment": "development",
   "environments": {
     "development": {
-      "filesVersion": "562"
+      "filesVersion": "22"
     }
   }
 }

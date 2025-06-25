@@ -1,52 +1,20 @@
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useUser } from "@gadgetinc/react";
-import { useState, useEffect } from "react";
+import { useOutletContext } from "react-router";
 import { api } from "../api";
-import { useNavigate } from "react-router";
+import type { AuthOutletContext } from "./_app";
 
 export default function ProfileSetup() {
-  const [isClient, setIsClient] = useState(false);
-  const [selectedRole, setSelectedRole] = useState("user");
+  const { user } = useOutletContext<AuthOutletContext>();
+  const [selectedRole, setSelectedRole] = useState<string>("user");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitSuccessful, setIsSubmitSuccessful] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const navigate = useNavigate();
-  const user = useUser();
 
-  // Ensure we're on the client side to avoid SSR issues
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
-
-  // Show loading state during SSR
-  if (!isClient) {
-    return (
-      <div className="w-[420px]">
-        <div className="space-y-8">
-          <Card className="p-8">
-            <div className="space-y-6">
-              <div className="animate-pulse">
-                <div className="h-8 bg-gray-200 rounded mb-4"></div>
-                <div className="h-4 bg-gray-200 rounded mb-2"></div>
-                <div className="h-4 bg-gray-200 rounded mb-6"></div>
-                <div className="h-10 bg-gray-200 rounded mb-4"></div>
-                <div className="h-10 bg-gray-200 rounded mb-4"></div>
-                <div className="h-10 bg-gray-200 rounded mb-4"></div>
-                <div className="h-10 bg-gray-200 rounded mb-4"></div>
-                <div className="h-10 bg-gray-200 rounded"></div>
-              </div>
-            </div>
-          </Card>
-        </div>
-      </div>
-    );
-  }
-
-  // If no user is found, redirect to sign in
   if (!user) {
     return (
       <div className="flex justify-center items-center min-h-screen py-12">
@@ -57,7 +25,7 @@ export default function ProfileSetup() {
               <p className="text-muted-foreground mb-4">
                 You need to be signed in to complete your profile setup.
               </p>
-              <Button onClick={() => navigate("/sign-in")}>
+              <Button onClick={() => window.location.href = "/sign-in"}>
                 Sign In
               </Button>
             </div>
@@ -83,14 +51,30 @@ export default function ProfileSetup() {
     const lastName = formData.get("lastName") as string;
     
     try {
-      // Call the update action with the user ID
-      const result = await api.user.update(user.id, {
+      // Update user's name first
+      await api.user.update(user.id, {
         firstName,
-        lastName,
-        primaryRole: selectedRole
+        lastName
       });
       
-      console.log("Profile setup result:", result);
+      // Create profile based on selected role
+      if (selectedRole === "musician") {
+        await api.musician.create({
+          user: { _link: user.id },
+          name: `${firstName} ${lastName}`,
+          email: user.email,
+          isActive: true
+        });
+      } else if (selectedRole === "venue") {
+        await api.venue.create({
+          owner: { _link: user.id },
+          name: `${firstName} ${lastName}`,
+          email: user.email,
+          isActive: true
+        });
+      }
+      
+      console.log("Profile setup complete");
       setIsSubmitSuccessful(true);
       
       // Redirect based on role
@@ -161,7 +145,7 @@ export default function ProfileSetup() {
                     <div className="space-y-1">
                       <Label htmlFor="role" className="text-base font-medium">I am a...</Label>
                       <div className="text-sm text-muted-foreground mb-3">
-                        Choose your role carefully - this cannot be changed after setup
+                        Choose your role to create your profile
                       </div>
                       <Select 
                         value={selectedRole} 
@@ -184,10 +168,10 @@ export default function ProfileSetup() {
                           ))}
                         </SelectContent>
                       </Select>
-                      <div className="mt-2 p-3 bg-amber-50 border border-amber-200 rounded-md">
-                        <p className="text-xs text-amber-700">
-                          ⚠️ <strong>Important:</strong> Your role selection is permanent and cannot be changed after setup. 
-                          Choose the role that best represents how you'll use the platform.
+                      <div className="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-md">
+                        <p className="text-xs text-blue-700">
+                          ℹ️ <strong>Note:</strong> This will create a profile for you based on your role selection. 
+                          You can always create additional profiles later.
                         </p>
                       </div>
                     </div>
@@ -215,36 +199,6 @@ export default function ProfileSetup() {
                   >
                     {isSubmitting ? "Setting up profile..." : "Complete Setup"}
                   </Button>
-                  
-                  {/* Debug button to show form values */}
-                  <Button 
-                    type="button" 
-                    variant="outline" 
-                    onClick={() => {
-                      const formData = new FormData(document.querySelector('form') as HTMLFormElement);
-                      console.log("Form data:", {
-                        firstName: formData.get("firstName"),
-                        lastName: formData.get("lastName"),
-                        selectedRole
-                      });
-                      console.log("Current user:", user);
-                      alert(`Form data: ${JSON.stringify({
-                        firstName: formData.get("firstName"),
-                        lastName: formData.get("lastName"),
-                        selectedRole
-                      }, null, 2)}\nUser ID: ${user.id}`);
-                    }}
-                  >
-                    Debug: Show Form Values
-                  </Button>
-                  
-                  {/* Debug display */}
-                  <div className="p-3 bg-gray-100 rounded text-xs">
-                    <p><strong>Debug Info:</strong></p>
-                    <p>Selected Role: {selectedRole}</p>
-                    <p>User ID: {user.id}</p>
-                    <p>User Email: {user.email}</p>
-                  </div>
                 </div>
               </div>
             </form>

@@ -68,7 +68,7 @@ export const run: ActionRun = async ({ params, record, logger, api, session }) =
   logger.info(`Created venue profile with ID: ${record.id}`);
   logger.info(`Venue name: ${record.name}, Type: ${record.type}`);
   
-  // Update user's role to venueOwner if they don't already have it
+  // Add venueOwner role to user if they don't already have it
   if (session?.user) {
     try {
       const user = await api.user.findOne(session.user.id);
@@ -77,14 +77,13 @@ export const run: ActionRun = async ({ params, record, logger, api, session }) =
         if (!currentRoles.includes('venueOwner')) {
           const updatedRoles = [...currentRoles, 'venueOwner'];
           await api.user.update(session.user.id, {
-            roles: updatedRoles,
-            primaryRole: 'venue'
+            roles: updatedRoles
           });
-          logger.info(`Updated user ${session.user.id} roles to: ${updatedRoles.join(', ')}`);
+          logger.info(`Added venueOwner role to user ${session.user.id}`);
         }
       }
     } catch (error) {
-      logger.error(`Failed to update user roles: ${error}`);
+      logger.error(`Failed to add venueOwner role: ${error}`);
     }
   }
   
