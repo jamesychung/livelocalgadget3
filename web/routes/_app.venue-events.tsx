@@ -10,13 +10,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ArrowLeft, Plus, Music, Building, Search, Calendar, Clock, MapPin, DollarSign, Users, Edit, X, CheckCircle } from "lucide-react";
 import { Link, useOutletContext, useNavigate } from "react-router";
-import { useFindMany, useAction } from "@gadgetinc/react";
-import { api } from "../api";
+// import { useFindMany, useAction } from "@gadgetinc/react";
+// import { api } from "../api";
 import type { AuthOutletContext } from "./_app";
 import VenueEventCalendar from "../components/shared/VenueEventCalendar";
 import { BookingMessaging } from "../components/shared/BookingMessaging";
-import { MonthlyCalendar } from "../components/shared/MonthlyCalendar";
-import { CreateEventForm } from "../components/shared/CreateEventForm";
+// import MonthlyCalendar from "../components/shared/MonthlyCalendar";
+// import { CreateEventForm } from "../components/shared/CreateEventForm";
 
 export default function VenueEventsPage() {
     const { user } = useOutletContext<AuthOutletContext>();
@@ -38,6 +38,62 @@ export default function VenueEventsPage() {
         status: ""
     });
 
+    // Check if API is properly initialized
+    // const isApiReady = api && api.venue && api.event && api.booking && api.musician;
+    // const isUserAuthenticated = user?.id && api.isAuthenticated;
+    const isApiReady = false; // Temporarily disabled
+    const isUserAuthenticated = false; // Temporarily disabled
+
+    // Set empty/default values for UI-only mode
+    const venue: any = { id: "mock-venue-1", name: "The Grand Hall", city: "Austin", state: "TX" };
+    const allEvents: any[] = [
+        {
+            id: "event-1",
+            title: "Jazz Night",
+            date: "2024-01-15",
+            startTime: "19:00",
+            endTime: "22:00",
+            status: "confirmed",
+            musician: { id: "musician-1", name: "Sarah Johnson", stageName: "Sarah J" },
+            totalAmount: 25,
+            notes: "Capacity: 100, Available: 75"
+        },
+        {
+            id: "event-2", 
+            title: "Rock Band Show",
+            date: "2024-01-20",
+            startTime: "20:00",
+            endTime: "23:00",
+            status: "proposed",
+            musician: { id: "musician-2", name: "Mike Davis", stageName: "The Rockers" },
+            totalAmount: 30,
+            notes: "Capacity: 150, Available: 120"
+        }
+    ];
+    const applications: any[] = [
+        {
+            id: "app-1",
+            status: "interest_expressed",
+            proposedRate: 200,
+            musicianPitch: "We're an experienced jazz quartet looking for regular gigs.",
+            createdAt: "2024-01-10T10:00:00Z",
+            event: { id: "event-1", title: "Jazz Night" },
+            musician: { id: "musician-3", name: "Alex Chen", stageName: "Jazz Collective", city: "Austin", state: "TX", genre: "Jazz" }
+        }
+    ];
+    const musiciansData: any[] = [
+        { id: "musician-1", name: "Sarah Johnson", stageName: "Sarah J", genre: "Jazz", city: "Austin", state: "TX", hourlyRate: 150 },
+        { id: "musician-2", name: "Mike Davis", stageName: "The Rockers", genre: "Rock", city: "Austin", state: "TX", hourlyRate: 200 },
+        { id: "musician-3", name: "Alex Chen", stageName: "Jazz Collective", genre: "Jazz", city: "Austin", state: "TX", hourlyRate: 180 }
+    ];
+
+    // Mock action functions
+    const updateEvent = async (data: any) => { console.log("Mock updateEvent:", data); };
+    const createEvent = async (data: any) => { console.log("Mock createEvent:", data); };
+    const updateBooking = async (data: any) => { console.log("Mock updateBooking:", data); };
+
+    // TODO: Re-enable API calls once backend is configured
+    /*
     // Fetch venue data
     const [{ data: venueData, fetching: venueFetching, error: venueError }] = useFindMany(api.venue, {
         filter: { owner: { id: { equals: user?.id } } },
@@ -48,7 +104,7 @@ export default function VenueEventsPage() {
             state: true
         },
         first: 1,
-        pause: !user?.id,
+        pause: !isUserAuthenticated || !isApiReady,
     });
 
     const venue: any = venueData?.[0];
@@ -72,7 +128,7 @@ export default function VenueEventsPage() {
                 stageName: true
             }
         },
-        pause: !venue?.id,
+        pause: !venue?.id || !isApiReady,
     });
 
     // Fetch applications/bookings for this venue's events
@@ -108,7 +164,7 @@ export default function VenueEventsPage() {
                 }
             }
         },
-        pause: !venue?.id,
+        pause: !venue?.id || !isApiReady,
     });
 
     // Fetch musicians for event creation
@@ -123,32 +179,57 @@ export default function VenueEventsPage() {
             hourlyRate: true
         },
         first: 50,
+        pause: !isApiReady,
     });
 
-    // Only initialize useAction hooks when user is authenticated
-    const [updateEventResult, updateEvent] = useAction(api.event.update);
-    const [createEventResult, createEvent] = useAction(api.event.create);
-    const [updateBookingResult, updateBooking] = useAction(api.booking.update);
+    // Only initialize useAction hooks when user is authenticated and API is ready
+    // const [updateEventResult, updateEvent] = isApiReady ? useAction(api.event.update) : [null, null];
+    // const [createEventResult, createEvent] = isApiReady ? useAction(api.event.create) : [null, null];
+    // const [updateBookingResult, updateBooking] = isApiReady ? useAction(api.booking.update) : [null, null];
 
-    useEffect(() => {
-        if (venueError) console.error("Error loading venue data:", venueError);
-        if (eventsError) console.error("Error loading events data:", eventsError);
-        if (applicationsError) console.error("Error loading applications data:", applicationsError);
-    }, [venueError, eventsError, applicationsError]);
+    // useEffect(() => {
+    //     if (venueError) console.error("Error loading venue data:", venueError);
+    //     if (eventsError) console.error("Error loading events data:", eventsError);
+    //     if (applicationsError) console.error("Error loading applications data:", applicationsError);
+    // }, [venueError, eventsError, applicationsError]);
+    */
 
-    // Show loading state while fetching
-    if (venueFetching || eventsFetching || applicationsFetching) {
-        return (
-            <div className="container mx-auto p-6">
-                <div className="flex items-center justify-center min-h-[400px]">
-                    <div className="text-center">
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                        <p className="text-muted-foreground">Loading your venue events...</p>
-                    </div>
-                </div>
-            </div>
-        );
-    }
+    // Show loading state while fetching or if API is not ready
+    // if (!isApiReady || false) { // Temporarily disabled loading check
+    //     return (
+    //         <div className="container mx-auto p-6">
+    //             <div className="flex items-center justify-center min-h-[400px]">
+    //                 <div className="text-center">
+    //                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+    //                     <p className="text-muted-foreground">
+    //                         {!isApiReady ? "Initializing..." : "Loading your venue events..."}
+    //                     </p>
+    //                 </div>
+    //             </div>
+    //         </div>
+    //     );
+    // }
+
+    // If user is not authenticated, show authentication message
+    // if (!isUserAuthenticated) {
+    //     return (
+    //         <div className="container mx-auto p-6">
+    //             <div className="flex items-center justify-center min-h-[400px]">
+    //                 <div className="text-center max-w-md">
+    //                     <h1 className="text-2xl font-bold mb-4">Authentication Required</h1>
+    //                     <p className="text-muted-foreground mb-6">
+    //                         Please sign in to access venue events management.
+    //                     </p>
+    //                     <Button asChild>
+    //                         <Link to="/sign-in">
+    //                             Sign In
+    //                         </Link>
+    //                     </Button>
+    //                 </div>
+    //             </div>
+    //         </div>
+    //     );
+    // }
 
     // If no venue profile found, show a message with option to create one
     if (!venue) {
@@ -166,7 +247,7 @@ export default function VenueEventsPage() {
                                     Create Venue Profile
                                 </Link>
                             </Button>
-                            <Button variant="outline" asChild>
+                            <Button asChild>
                                 <Link to="/venue-dashboard">
                                     <ArrowLeft className="mr-2 h-4 w-4" />
                                     Back to Dashboard
@@ -179,6 +260,8 @@ export default function VenueEventsPage() {
         );
     }
 
+    // TODO: Re-enable data processing once API is configured
+    /*
     // Combine events and bookings into a single events array
     const allEvents = [
         ...(eventsData || []).map((event: any) => ({
@@ -223,6 +306,7 @@ export default function VenueEventsPage() {
             status: app.status
         });
     });
+    */
 
     // Helper functions for application management
     const getApplicationCount = (eventId: string) => {
@@ -310,7 +394,7 @@ export default function VenueEventsPage() {
                 endTime: eventData.endTime,
                 ticketPrice: parseFloat(eventData.ticketPrice) || 0,
                 totalCapacity: parseInt(eventData.totalCapacity) || 0,
-                venue: { id: venue.id },
+                venue: { id: venue?.id ?? "no-venue" },
                 ...(eventData.musicianId && { musician: { id: eventData.musicianId } })
             };
 
@@ -404,7 +488,7 @@ export default function VenueEventsPage() {
                     <div>
                         <h1 className="text-3xl font-bold">Venue Events Management</h1>
                         <p className="text-muted-foreground">
-                            Manage events and bookings for {venue.name}
+                            Manage events and bookings for {venue?.name ?? "your venue"}
                         </p>
                     </div>
                 </div>
@@ -487,7 +571,6 @@ export default function VenueEventsPage() {
                 <TabsContent value="calendar" className="space-y-6">
                     <VenueEventCalendar
                         events={allEvents}
-                        applications={applications}
                         onAddEvent={handleAddEvent}
                         onUpdateEvent={handleUpdateEvent}
                         onEditEvent={handleEditEvent}
@@ -495,11 +578,6 @@ export default function VenueEventsPage() {
                         onEditToggle={() => setIsEditing(!isEditing)}
                         title="Venue Events & Bookings"
                         description="Manage your venue's events, bookings, and scheduling. View both confirmed events and proposed bookings."
-                        onEventClick={(event) => {
-                          if (event.id && typeof event.id === 'string' && !event.id.startsWith('booking-')) {
-                            navigate(`/event/${event.id}`);
-                          }
-                        }}
                     />
                 </TabsContent>
 
@@ -519,7 +597,7 @@ export default function VenueEventsPage() {
                                                     <div className="flex items-center gap-2">
                                                         <h3 className="font-semibold">{event.title}</h3>
                                                         {applicationCount > 0 && (
-                                                            <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">
+                                                            <Badge className="bg-yellow-100 text-yellow-800">
                                                                 {applicationCount} Musician{applicationCount !== 1 ? 's' : ''} Applied
                                                             </Badge>
                                                         )}
@@ -530,8 +608,7 @@ export default function VenueEventsPage() {
                                                             {new Date(event.date).toLocaleDateString()}
                                                         </div>
                                                         <Button
-                                                            variant="outline"
-                                                            size="sm"
+                                                            className="h-8 px-3 text-xs"
                                                             onClick={() => handleEditEvent(event)}
                                                         >
                                                             <Edit className="h-4 w-4" />
@@ -614,7 +691,7 @@ export default function VenueEventsPage() {
                                             <Label htmlFor="edit-status">Status</Label>
                                             <Select 
                                                 value={editFormData.status} 
-                                                onValueChange={(value) => setEditFormData({...editFormData, status: value})}
+                                                onValueChange={(value: string) => setEditFormData({...editFormData, status: value})}
                                             >
                                                 <SelectTrigger>
                                                     <SelectValue placeholder="Select status" />
@@ -657,7 +734,7 @@ export default function VenueEventsPage() {
                                             <Label htmlFor="edit-start-time">Start Time</Label>
                                             <Select 
                                                 value={editFormData.startTime} 
-                                                onValueChange={(value) => setEditFormData({...editFormData, startTime: value})}
+                                                onValueChange={(value: string) => setEditFormData({...editFormData, startTime: value})}
                                             >
                                                 <SelectTrigger>
                                                     <SelectValue placeholder="Select start time" />
@@ -680,7 +757,7 @@ export default function VenueEventsPage() {
                                             <Label htmlFor="edit-end-time">End Time</Label>
                                             <Select 
                                                 value={editFormData.endTime} 
-                                                onValueChange={(value) => setEditFormData({...editFormData, endTime: value})}
+                                                onValueChange={(value: string) => setEditFormData({...editFormData, endTime: value})}
                                             >
                                                 <SelectTrigger>
                                                     <SelectValue placeholder="Select end time" />
@@ -739,7 +816,7 @@ export default function VenueEventsPage() {
                                         <Label htmlFor="edit-musician">Select Musician</Label>
                                         <Select 
                                             value={editFormData.musicianId} 
-                                            onValueChange={(value) => setEditFormData({...editFormData, musicianId: value})}
+                                            onValueChange={(value: string) => setEditFormData({...editFormData, musicianId: value})}
                                         >
                                             <SelectTrigger>
                                                 <SelectValue placeholder="Select a musician (optional)" />
@@ -760,7 +837,6 @@ export default function VenueEventsPage() {
                                 <div className="flex justify-end gap-2 pt-4 border-t">
                                     <Button
                                         type="button"
-                                        variant="outline"
                                         onClick={() => setEditDialogOpen(false)}
                                     >
                                         Cancel
@@ -798,7 +874,7 @@ export default function VenueEventsPage() {
                                                     <div className="flex-1">
                                                         <div className="flex items-center gap-2 mb-2">
                                                             <h3 className="font-semibold text-lg">{event.title}</h3>
-                                                            <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">
+                                                            <Badge className="bg-yellow-100 text-yellow-800">
                                                                 Musicians Applied
                                                             </Badge>
                                                         </div>
@@ -828,8 +904,7 @@ export default function VenueEventsPage() {
                                                         </div>
                                                     </div>
                                                     <Button 
-                                                        variant="outline" 
-                                                        size="sm"
+                                                        className="h-8 px-3 text-xs"
                                                         onClick={() => toggleApplicationExpansion(event.id)}
                                                     >
                                                         {isExpanded ? "Hide Applications" : "Review Applications"}
@@ -876,13 +951,7 @@ export default function VenueEventsPage() {
                                                                                         <h5 className="font-medium">
                                                                                             {app.musician?.stageName || app.musician?.name}
                                                                                         </h5>
-                                                                                        <Badge variant={
-                                                                                            app.status === "interest_expressed" ? "secondary" :
-                                                                                            app.status === "pending_confirmation" ? "default" :
-                                                                                            app.status === "confirmed" ? "default" :
-                                                                                            app.status === "rejected" ? "destructive" :
-                                                                                            "outline"
-                                                                                        } className="text-xs">
+                                                                                        <Badge className="text-xs">
                                                                                             {app.status.replace("_", " ").toUpperCase()}
                                                                                         </Badge>
                                                                                     </div>
@@ -903,8 +972,7 @@ export default function VenueEventsPage() {
                                                                                 </div>
                                                                                 <div className="flex items-center gap-2">
                                                                                     <Button
-                                                                                        variant="outline"
-                                                                                        size="sm"
+                                                                                        className="h-8 px-3 text-xs"
                                                                                         onClick={() => window.open(`/musician/${app.musician?.id}`, '_blank')}
                                                                                     >
                                                                                         Musician Profile
@@ -912,16 +980,13 @@ export default function VenueEventsPage() {
                                                                                     {app.status === "interest_expressed" && (
                                                                                         <>
                                                                                             <Button
-                                                                                                variant="outline"
-                                                                                                size="sm"
+                                                                                                className="h-8 px-3 text-xs text-red-600 hover:text-red-700"
                                                                                                 onClick={() => handleRejectApplication(app.id)}
-                                                                                                className="text-red-600 hover:text-red-700"
                                                                                             >
                                                                                                 Reject
                                                                                             </Button>
                                                                                             <Button
-                                                                                                variant="default"
-                                                                                                size="sm"
+                                                                                                className="h-8 px-3 text-xs"
                                                                                                 onClick={() => handleBookApplication(app.id, event.id)}
                                                                                             >
                                                                                                 Book
