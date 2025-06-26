@@ -1,8 +1,8 @@
 import type { GadgetPermissions } from "gadget-server";
 
 /**
- * Simplified permissions - just use signed-in role
- * All authenticated users can access everything they own
+ * Open permissions - no filters, just basic role-based access
+ * This should eliminate any tenant filter requirements
  */
 export const permissions: GadgetPermissions = {
   type: "gadget/permissions/v1",

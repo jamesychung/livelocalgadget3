@@ -3,7 +3,6 @@ import { Card } from "@/components/ui/card";
 import { Pencil } from "lucide-react";
 import { useOutletContext, useNavigate } from "react-router";
 import { useEffect, useState } from "react";
-import { useFindMany } from "@gadgetinc/react";
 import { api } from "../api";
 import type { AuthOutletContext } from "./_app";
 
@@ -12,32 +11,10 @@ export default function () {
   const navigate = useNavigate();
   const [isCheckingProfiles, setIsCheckingProfiles] = useState(true);
 
-  // Check if user has musician or venue profiles
-  const [{ data: musicianData }] = useFindMany(api.musician, {
-    filter: { user: { id: { equals: user?.id } } },
-    first: 1,
-    pause: !user?.id,
-  });
-
-  const [{ data: venueData }] = useFindMany(api.venue, {
-    filter: { owner: { id: { equals: user?.id } } },
-    first: 1,
-    pause: !user?.id,
-  });
-
   useEffect(() => {
-    if (user && musicianData !== undefined && venueData !== undefined) {
-      setIsCheckingProfiles(false);
-      
-      // Simple profile-based routing
-      if (musicianData && musicianData.length > 0) {
-        navigate('/musician-dashboard');
-      } else if (venueData && venueData.length > 0) {
-        navigate('/venue-dashboard');
-      }
-      // If no profiles, stay on this page for profile setup
-    }
-  }, [user, musicianData, venueData, navigate]);
+    // Temporarily skip profile checking to test basic login
+    setIsCheckingProfiles(false);
+  }, []);
 
   // Show loading while checking profiles
   if (isCheckingProfiles) {
