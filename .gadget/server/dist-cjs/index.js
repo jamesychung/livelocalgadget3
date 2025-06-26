@@ -20,16 +20,16 @@ _export(exports, {
     /**
 * This is the Gadget server side types library for:
 *
-*   _ _           _                 _                 _            _   _____ 
-*  | (_)_   _____| | ___   ___ __ _| | __ _  __ _  __| | __ _  ___| |_|___ / 
-*  | | \ \ / / _ \ |/ _ \ / __/ _` | |/ _` |/ _` |/ _` |/ _` |/ _ \ __| |_ \ 
-*  | | |\ V /  __/ | (_) | (_| (_| | | (_| | (_| | (_| | (_| |  __/ |_ ___) |
-*  |_|_| \_/ \___|_|\___/ \___\__,_|_|\__, |\__,_|\__,_|\__, |\___|\__|____/ 
+*   _ _           _                 _                 _            _    __   
+*  | (_)_   _____| | ___   ___ __ _| | __ _  __ _  __| | __ _  ___| |_ / /_  
+*  | | \ \ / / _ \ |/ _ \ / __/ _` | |/ _` |/ _` |/ _` |/ _` |/ _ \ __| '_ \ 
+*  | | |\ V /  __/ | (_) | (_| (_| | | (_| | (_| | (_| | (_| |  __/ |_| (_) |
+*  |_|_| \_/ \___|_|\___/ \___\__,_|_|\__, |\__,_|\__,_|\__, |\___|\__|\___/ 
 *                                     |___/             |___/                
 *
-* Built for environment `Development` at version 155
+* Built for environment `Development` at version 42
 * Framework version: ^1.4.0
-* Edit this app here: https://livelocalgadget3.gadget.dev/edit
+* Edit this app here: https://livelocalgadget6.gadget.dev/edit
 */ /// <reference path="./ActionContextTypes.d.ts" />
     InvalidRecordError: function() {
         return _apiclientcore.InvalidRecordError;
@@ -110,13 +110,13 @@ const _index1 = require("./shopify/index");
 const _globals = require(/**
  * @internal
  */ "./globals");
+_export_star(require("./models/User"), exports);
 _export_star(require("./models/Session"), exports);
 _export_star(require("./models/Booking"), exports);
 _export_star(require("./models/Event"), exports);
 _export_star(require("./models/Musician"), exports);
 _export_star(require("./models/Review"), exports);
 _export_star(require("./models/Venue"), exports);
-_export_star(require("./models/User"), exports);
 function _export_star(from, to) {
     Object.keys(from).forEach(function(k) {
         if (k !== "default" && !Object.prototype.hasOwnProperty.call(to, k)) {

@@ -1,5 +1,5 @@
 /**
-* A map from configuration value name to value all the configuration values and secrets in livelocalgadget3.
+* A map from configuration value name to value all the configuration values and secrets in livelocalgadget6.
 * __Note__: Any encrypted configuration values are decrypted and ready for use in this map.
 */
 export interface AppConfiguration {

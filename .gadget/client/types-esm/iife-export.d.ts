@@ -1,4 +1,4 @@
-import { Livelocalgadget3Client } from ".";
+import { Livelocalgadget6Client } from ".";
 declare global {
     interface Window {
         /**
@@ -6,14 +6,14 @@ declare global {
          *
          * @example
          * ```ts
-         * const api = new Livelocalgadget3Client();
+         * const api = new Livelocalgadget6Client();
          * ```
          */
-        Livelocalgadget3Client: typeof Livelocalgadget3Client;
+        Livelocalgadget6Client: typeof Livelocalgadget6Client;
         /**
-         * The Gadget client for Livelocalgadget3Client
-         * @deprecated Use window.Livelocalgadget3Client instead
+         * The Gadget client for Livelocalgadget6Client
+         * @deprecated Use window.Livelocalgadget6Client instead
          */
-        Gadget: typeof Livelocalgadget3Client;
+        Gadget: typeof Livelocalgadget6Client;
     }
 }

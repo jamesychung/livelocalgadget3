@@ -7,6 +7,25 @@ import type { GadgetPermissions } from "gadget-server";
 export const permissions: GadgetPermissions = {
   type: "gadget/permissions/v1",
   roles: {
+    unauthenticated: {
+      storageKey: "unauthenticated",
+      default: {
+        read: false,
+        action: false,
+      },
+      models: {
+        user: {
+          read: false,
+          actions: {
+            signIn: true,
+            signUp: true,
+            sendResetPassword: true,
+            resetPassword: true,
+            verifyEmail: true,
+          },
+        },
+      },
+    },
     admin: {
       storageKey: "admin",
       default: {
@@ -82,6 +101,7 @@ export const permissions: GadgetPermissions = {
           read: true,
           actions: {
             changePassword: true,
+            signIn: true,
             signOut: true,
             update: true,
           },

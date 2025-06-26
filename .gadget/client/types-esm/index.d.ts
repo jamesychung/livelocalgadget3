@@ -1,16 +1,16 @@
 /**
 * This is the Gadget API client library for:
 *
-*   _ _           _                 _                 _            _   _____
-*  | (_)_   _____| | ___   ___ __ _| | __ _  __ _  __| | __ _  ___| |_|___ /
-*  | | \ \ / / _ \ |/ _ \ / __/ _` | |/ _` |/ _` |/ _` |/ _` |/ _ \ __| |_ \
-*  | | |\ V /  __/ | (_) | (_| (_| | | (_| | (_| | (_| | (_| |  __/ |_ ___) |
-*  |_|_| \_/ \___|_|\___/ \___\__,_|_|\__, |\__,_|\__,_|\__, |\___|\__|____/
+*   _ _           _                 _                 _            _    __
+*  | (_)_   _____| | ___   ___ __ _| | __ _  __ _  __| | __ _  ___| |_ / /_
+*  | | \ \ / / _ \ |/ _ \ / __/ _` | |/ _` |/ _` |/ _` |/ _` |/ _ \ __| '_ \
+*  | | |\ V /  __/ | (_) | (_| (_| | | (_| | (_| | (_| | (_| |  __/ |_| (_) |
+*  |_|_| \_/ \___|_|\___/ \___\__,_|_|\__, |\__,_|\__,_|\__, |\___|\__|\___/
 *                                     |___/             |___/
 *
-* Built for environment "Development" at version 155
-* API docs: https://docs.gadget.dev/api/livelocalgadget3
-* Edit this app here: https://livelocalgadget3.gadget.app/edit
+* Built for environment "Development" at version 42
+* API docs: https://docs.gadget.dev/api/livelocalgadget6
+* Edit this app here: https://livelocalgadget6.gadget.app/edit
 */
 export { BrowserSessionStorageType, GadgetClientError, GadgetConnection, GadgetInternalError, GadgetOperationError, GadgetRecord, GadgetRecordList, GadgetValidationError, InvalidRecordError, ChangeTracking } from "@gadgetinc/api-client-core";
 export type { AuthenticationModeOptions, BrowserSessionAuthenticationModeOptions, ClientOptions, InvalidFieldError, Select } from "@gadgetinc/api-client-core";

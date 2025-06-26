@@ -22,7 +22,11 @@ import {
   Venue,
   AvailableVenueSelection,
   VenueSort,
-  VenueFilter
+  VenueFilter,
+  CreateVenueInput,
+  UpdateVenueInput,
+  Scalars,
+  UpsertVenueInput
 } from "../types.js";
 
 import { buildModelManager } from "../builder.js";
@@ -71,28 +75,29 @@ export type VenueRecord<Selection extends AvailableVenueSelection | undefined = 
 export const DefaultVenueSelection = {
      __typename: true,
      id: true,
+     additionalPictures: true,
      address: true,
      amenities: true,
      capacity: true,
      city: true,
      country: true,
      createdAt: true,
-     description: true,
+     email: true,
      genres: true,
      hours: true,
-     isActive: true,
+     isVerified: true,
      name: true,
      ownerId: true,
-     phone: true,
+     priceRange: true,
      profilePicture: true,
      rating: true,
-     socialLinks: true,
+     type: true,
      updatedAt: true,
      state: true,
-     email: true,
-     isVerified: true,
-     priceRange: true,
-     type: true,
+     description: true,
+     isActive: true,
+     phone: true,
+     socialLinks: true,
      website: true,
      zipCode: true
    } as const;
@@ -155,6 +160,80 @@ const pluralModelApiIdentifier = "venues" as const;
   /** Only return records matching this freeform search string */
   search?: string | null;
 };
+export interface CreateVenueOptions {
+  /** Select fields other than the defaults of the record to return */
+  select?: AvailableVenueSelection;
+};
+export interface UpdateVenueOptions {
+  /** Select fields other than the defaults of the record to return */
+  select?: AvailableVenueSelection;
+};
+export interface UpsertVenueOptions {
+  /** Select fields other than the defaults of the record to return */
+  select?: AvailableVenueSelection;
+};
+/**
+ * The fully-qualified, expanded form of the inputs for executing the create action.
+ * The flattened style should be preferred over this style, but for models with ambiguous API identifiers, this style can be used to remove any ambiguity.
+ **/
+export type FullyQualifiedCreateVenueVariables = {
+  venue?: CreateVenueInput;
+}
+/**
+ * The inputs for executing create on venue.
+ * This is the flattened style of inputs, suitable for general use, and should be preferred.
+ **/
+export type CreateVenueVariables = CreateVenueInput;
+/**
+ * The return value from executing create on venue
+ *
+ **/
+export type CreateVenueResult<Options extends CreateVenueOptions> = any;
+/**
+ * The fully-qualified, expanded form of the inputs for executing the update action.
+ * The flattened style should be preferred over this style, but for models with ambiguous API identifiers, this style can be used to remove any ambiguity.
+ **/
+export type FullyQualifiedUpdateVenueVariables = {
+  venue?: UpdateVenueInput;
+}
+/**
+ * The inputs for executing update on venue.
+ * This is the flattened style of inputs, suitable for general use, and should be preferred.
+ **/
+export type UpdateVenueVariables = UpdateVenueInput;
+/**
+ * The return value from executing update on venue
+ *
+ **/
+export type UpdateVenueResult<Options extends UpdateVenueOptions> = any;
+/**
+ * The return value from executing findFirst on venue
+ *
+ **/
+export type FindFirstVenueResult<Options extends FindFirstVenueOptions> = any;
+/**
+ * The fully-qualified, expanded form of the inputs for executing the upsert action.
+ * The flattened style should be preferred over this style, but for models with ambiguous API identifiers, this style can be used to remove any ambiguity.
+ **/
+export type FullyQualifiedUpsertVenueVariables = {
+  on?: ((Scalars['String'] | null))[];
+  venue?: UpsertVenueInput;
+}
+/**
+ * The inputs for executing upsert on venue.
+ * This is the flattened style of inputs, suitable for general use, and should be preferred.
+ **/
+export type UpsertVenueVariables = Omit<
+     UpsertVenueInput,
+     "on"
+   > & {
+     on?: ((Scalars['String'] | null))[];
+   };
+/**
+ * The return value from executing upsert on venue
+ *
+ **/
+export type UpsertVenueResult<Options extends UpsertVenueOptions> = any;
 
 /**
  * A manager for the venue model with all the available operations for reading and writing to it.*/
@@ -265,6 +344,392 @@ export type VenueManager = {
       selectionType: AvailableVenueSelection;
       schemaType: Query["venue"];
     }
+  create: {
+      /**
+       * Executes the create action.Accepts the parameters for the action via the `variables` argument.Runs the action and returns a Promise for the updated record.
+      *
+      * This is the flat style, all-params-together overload that most use cases should use.
+      *
+      * @example
+      * * const result = await api.venue.create({
+        *   additionalPictures: {
+        *     example: true,
+        *     key: "value",
+        *   },
+        *   address: "example value for address",
+        *   amenities: {
+        *     example: true,
+        *     key: "value",
+        *   },
+        *   state: "example value for state",
+        * });
+      **/
+      <Options extends CreateVenueOptions>(
+      
+        variables: CreateVenueVariables,
+        options?: LimitToKnownKeys<Options, CreateVenueOptions>
+      ): Promise<CreateVenueResult<Options>>;
+      /**
+       * Executes the create action.Accepts the parameters for the action via the `variables` argument.Runs the action and returns a Promise for the updated record.
+      *
+      * This is the fully qualified, nested api identifier style overload that should be used when there's an ambiguity between an action param and a model field.
+      *
+      * @example
+      * * const result = await api.venue.create({
+        *   venue: {
+        *     additionalPictures: {
+        *       example: true,
+        *       key: "value",
+        *     },
+        *     address: "example value for address",
+        *     amenities: {
+        *       example: true,
+        *       key: "value",
+        *     },
+        *     state: "example value for state",
+        *   },
+        * });
+      **/
+      <Options extends CreateVenueOptions>(
+      
+        variables: FullyQualifiedCreateVenueVariables,
+        options?: LimitToKnownKeys<Options, CreateVenueOptions>
+      ): Promise<CreateVenueResult<Options>>;
+      type: 'action';
+      operationName: 'createVenue';
+      operationReturnType: 'CreateVenue';
+      namespace: null;
+      modelApiIdentifier: typeof modelApiIdentifier;
+      operatesWithRecordIdentity: false;
+      modelSelectionField: typeof modelApiIdentifier;
+      isBulk: false;
+      isDeleter: false;
+      variables: { venue: { required: false, type: 'CreateVenueInput' } };
+      variablesType: ((
+               
+               & (FullyQualifiedCreateVenueVariables | CreateVenueVariables)
+             ) | undefined);
+      hasAmbiguousIdentifier: false;
+      paramOnlyVariables: [];
+      hasReturnType: true;
+      acceptsModelInput: true;
+      hasCreateOrUpdateEffect: true;
+      imports: [ 'CreateVenueInput' ];
+      optionsType: CreateVenueOptions;
+      selectionType: AvailableVenueSelection;
+      schemaType: Query["venue"];
+      defaultSelection: typeof DefaultVenueSelection;
+    }
+  bulkCreate: {
+      /**
+        * Executes the bulkCreate action with the given inputs.
+        */
+       <Options extends CreateVenueOptions>(
+          inputs: (FullyQualifiedCreateVenueVariables | CreateVenueVariables)[],
+          options?: LimitToKnownKeys<Options, CreateVenueOptions>
+       ): Promise<any[]>
+      type: 'action';
+      operationName: 'bulkCreateVenues';
+      isBulk: true;
+      isDeleter: false;
+      hasReturnType: true;
+      acceptsModelInput: true;
+      operatesWithRecordIdentity: false;
+      singleActionFunctionName: 'create';
+      modelApiIdentifier: typeof modelApiIdentifier;
+      modelSelectionField: typeof pluralModelApiIdentifier;
+      optionsType: CreateVenueOptions;
+      namespace: null;
+      variables: { inputs: { required: true, type: '[BulkCreateVenuesInput!]' } };
+      variablesType: (FullyQualifiedCreateVenueVariables | CreateVenueVariables)[];
+      paramOnlyVariables: [];
+      selectionType: AvailableVenueSelection;
+      schemaType: Query["venue"];
+      defaultSelection: typeof DefaultVenueSelection;
+    }
+  update: {
+      /**
+       * Executes the update actionon one record specified by `id`.Runs the action and returns a Promise for the updated record.
+      *
+      * This is the flat style, all-params-together overload that most use cases should use.
+      *
+      * @example
+      * * const result = await api.venue.update("1", {
+        *   additionalPictures: {
+        *     example: true,
+        *     key: "value",
+        *   },
+        *   address: "example value for address",
+        *   amenities: {
+        *     example: true,
+        *     key: "value",
+        *   },
+        *   state: "example value for state",
+        * });
+      **/
+      <Options extends UpdateVenueOptions>(
+        id: string,
+        variables: UpdateVenueVariables,
+        options?: LimitToKnownKeys<Options, UpdateVenueOptions>
+      ): Promise<UpdateVenueResult<Options>>;
+      /**
+       * Executes the update actionon one record specified by `id`.Runs the action and returns a Promise for the updated record.
+      *
+      * This is the fully qualified, nested api identifier style overload that should be used when there's an ambiguity between an action param and a model field.
+      *
+      * @example
+      * * const result = await api.venue.update("1", {
+        *   venue: {
+        *     additionalPictures: {
+        *       example: true,
+        *       key: "value",
+        *     },
+        *     address: "example value for address",
+        *     amenities: {
+        *       example: true,
+        *       key: "value",
+        *     },
+        *     state: "example value for state",
+        *   },
+        * });
+      **/
+      <Options extends UpdateVenueOptions>(
+        id: string,
+        variables: FullyQualifiedUpdateVenueVariables,
+        options?: LimitToKnownKeys<Options, UpdateVenueOptions>
+      ): Promise<UpdateVenueResult<Options>>;
+      type: 'action';
+      operationName: 'updateVenue';
+      operationReturnType: 'UpdateVenue';
+      namespace: null;
+      modelApiIdentifier: typeof modelApiIdentifier;
+      operatesWithRecordIdentity: true;
+      modelSelectionField: typeof modelApiIdentifier;
+      isBulk: false;
+      isDeleter: false;
+      variables: {
+          id: { required: true, type: 'GadgetID' },
+          venue: { required: false, type: 'UpdateVenueInput' }
+        };
+      variablesType: (
+              { id: string }
+              & (FullyQualifiedUpdateVenueVariables | UpdateVenueVariables)
+            );
+      hasAmbiguousIdentifier: false;
+      paramOnlyVariables: [];
+      hasReturnType: true;
+      acceptsModelInput: true;
+      hasCreateOrUpdateEffect: true;
+      imports: [ 'UpdateVenueInput' ];
+      optionsType: UpdateVenueOptions;
+      selectionType: AvailableVenueSelection;
+      schemaType: Query["venue"];
+      defaultSelection: typeof DefaultVenueSelection;
+    }
+  bulkUpdate: {
+      /**
+        * Executes the bulkUpdate action with the given inputs.
+        */
+       <Options extends UpdateVenueOptions>(
+          inputs: (FullyQualifiedUpdateVenueVariables | UpdateVenueVariables & { id: string })[],
+          options?: LimitToKnownKeys<Options, UpdateVenueOptions>
+       ): Promise<any[]>
+      type: 'action';
+      operationName: 'bulkUpdateVenues';
+      isBulk: true;
+      isDeleter: false;
+      hasReturnType: true;
+      acceptsModelInput: true;
+      operatesWithRecordIdentity: true;
+      singleActionFunctionName: 'update';
+      modelApiIdentifier: typeof modelApiIdentifier;
+      modelSelectionField: typeof pluralModelApiIdentifier;
+      optionsType: UpdateVenueOptions;
+      namespace: null;
+      variables: { inputs: { required: true, type: '[BulkUpdateVenuesInput!]' } };
+      variablesType: (FullyQualifiedUpdateVenueVariables | UpdateVenueVariables & { id: string })[];
+      paramOnlyVariables: [];
+      selectionType: AvailableVenueSelection;
+      schemaType: Query["venue"];
+      defaultSelection: typeof DefaultVenueSelection;
+    }
+  findFirst: {
+      /**
+       * Executes the findFirst actionon one record specified by `id`.Runs the action and returns a Promise for the updated record.
+      *
+      * This is the fully qualified, nested api identifier style overload that should be used when there's an ambiguity between an action param and a model field.
+      *
+      * @example
+      * * const result = await api.venue.findFirst("1");
+      **/
+      <Options extends FindFirstVenueOptions>(
+        id: string,
+      
+        options?: LimitToKnownKeys<Options, FindFirstVenueOptions>
+      ): Promise<FindFirstVenueResult<Options>>;
+      type: 'action';
+      operationName: 'findFirstVenue';
+      operationReturnType: 'FindFirstVenue';
+      namespace: null;
+      modelApiIdentifier: typeof modelApiIdentifier;
+      operatesWithRecordIdentity: true;
+      modelSelectionField: typeof modelApiIdentifier;
+      isBulk: false;
+      isDeleter: false;
+      variables: { id: { required: true, type: 'GadgetID' } };
+      variablesType: (
+              { id: string }
+              
+            );
+      hasAmbiguousIdentifier: false;
+      paramOnlyVariables: [];
+      hasReturnType: true;
+      acceptsModelInput: false;
+      hasCreateOrUpdateEffect: false;
+      imports: [];
+      optionsType: FindFirstVenueOptions;
+      selectionType: AvailableVenueSelection;
+      schemaType: Query["venue"];
+      defaultSelection: typeof DefaultVenueSelection;
+    }
+  bulkFindFirst: {
+      /**
+        * Executes the bulkFindFirst action with the given inputs.
+        */
+       <Options extends FindFirstVenueOptions>(
+          ids: string[],
+          options?: LimitToKnownKeys<Options, FindFirstVenueOptions>
+       ): Promise<any[]>
+      type: 'action';
+      operationName: 'bulkFindFirstVenues';
+      isBulk: true;
+      isDeleter: false;
+      hasReturnType: true;
+      acceptsModelInput: false;
+      operatesWithRecordIdentity: true;
+      singleActionFunctionName: 'findFirst';
+      modelApiIdentifier: typeof modelApiIdentifier;
+      modelSelectionField: typeof pluralModelApiIdentifier;
+      optionsType: FindFirstVenueOptions;
+      namespace: null;
+      variables: { ids: { required: true, type: '[GadgetID!]' } };
+      variablesType: IDsList | undefined;
+      paramOnlyVariables: [];
+      selectionType: AvailableVenueSelection;
+      schemaType: Query["venue"];
+      defaultSelection: typeof DefaultVenueSelection;
+    }
+  upsert: {
+      /**
+       * Executes the upsert action.Accepts the parameters for the action via the `variables` argument.Runs the action and returns a Promise for the updated record.
+      *
+      * This is the flat style, all-params-together overload that most use cases should use.
+      *
+      * @example
+      * * const result = await api.venue.upsert({
+        *   additionalPictures: {
+        *     example: true,
+        *     key: "value",
+        *   },
+        *   address: "example value for address",
+        *   amenities: {
+        *     example: true,
+        *     key: "value",
+        *   },
+        *   id: "1",
+        *   state: "example value for state",
+        * });
+      **/
+      <Options extends UpsertVenueOptions>(
+      
+        variables: UpsertVenueVariables,
+        options?: LimitToKnownKeys<Options, UpsertVenueOptions>
+      ): Promise<UpsertVenueResult<Options>>;
+      /**
+       * Executes the upsert action.Accepts the parameters for the action via the `variables` argument.Runs the action and returns a Promise for the updated record.
+      *
+      * This is the fully qualified, nested api identifier style overload that should be used when there's an ambiguity between an action param and a model field.
+      *
+      * @example
+      * * const result = await api.venue.upsert({
+        *   venue: {
+        *     additionalPictures: {
+        *       example: true,
+        *       key: "value",
+        *     },
+        *     address: "example value for address",
+        *     amenities: {
+        *       example: true,
+        *       key: "value",
+        *     },
+        *     id: "1",
+        *     state: "example value for state",
+        *   },
+        * });
+      **/
+      <Options extends UpsertVenueOptions>(
+      
+        variables: FullyQualifiedUpsertVenueVariables,
+        options?: LimitToKnownKeys<Options, UpsertVenueOptions>
+      ): Promise<UpsertVenueResult<Options>>;
+      type: 'action';
+      operationName: 'upsertVenue';
+      operationReturnType: 'UpsertVenue';
+      namespace: null;
+      modelApiIdentifier: typeof modelApiIdentifier;
+      operatesWithRecordIdentity: false;
+      modelSelectionField: typeof modelApiIdentifier;
+      isBulk: false;
+      isDeleter: false;
+      variables: {
+          on: { required: false, type: '[String!]' },
+          venue: { required: false, type: 'UpsertVenueInput' }
+        };
+      variablesType: ((
+               
+               & (FullyQualifiedUpsertVenueVariables | UpsertVenueVariables)
+             ) | undefined);
+      hasAmbiguousIdentifier: false;
+      paramOnlyVariables: [ 'on' ];
+      hasReturnType: {
+          '... on CreateVenueResult': { hasReturnType: true },
+          '... on UpdateVenueResult': { hasReturnType: true }
+        };
+      acceptsModelInput: true;
+      hasCreateOrUpdateEffect: true;
+      imports: [ 'Scalars', 'UpsertVenueInput' ];
+      optionsType: UpsertVenueOptions;
+      selectionType: AvailableVenueSelection;
+      schemaType: Query["venue"];
+      defaultSelection: typeof DefaultVenueSelection;
+    }
+  bulkUpsert: {
+      /**
+        * Executes the bulkUpsert action with the given inputs.
+        */
+       <Options extends UpsertVenueOptions>(
+          inputs: (FullyQualifiedUpsertVenueVariables | UpsertVenueVariables)[],
+          options?: LimitToKnownKeys<Options, UpsertVenueOptions>
+       ): Promise<any[]>
+      type: 'action';
+      operationName: 'bulkUpsertVenues';
+      isBulk: true;
+      isDeleter: false;
+      hasReturnType: true;
+      acceptsModelInput: true;
+      operatesWithRecordIdentity: false;
+      singleActionFunctionName: 'upsert';
+      modelApiIdentifier: typeof modelApiIdentifier;
+      modelSelectionField: typeof pluralModelApiIdentifier;
+      optionsType: UpsertVenueOptions;
+      namespace: null;
+      variables: { inputs: { required: true, type: '[BulkUpsertVenuesInput!]' } };
+      variablesType: (FullyQualifiedUpsertVenueVariables | UpsertVenueVariables)[];
+      paramOnlyVariables: [ 'on' ];
+      selectionType: AvailableVenueSelection;
+      schemaType: Query["venue"];
+      defaultSelection: typeof DefaultVenueSelection;
+    }
   view: {
       (query: string, variables?: Record<string, unknown>): Promise<unknown>
       type: 'computedView';
@@ -345,6 +810,159 @@ export const VenueManager = buildModelManager(
       modelApiIdentifier: modelApiIdentifier,
       defaultSelection: DefaultVenueSelection,
       namespace: null
+    },
+    {
+      type: 'action',
+      operationName: 'createVenue',
+      operationReturnType: 'CreateVenue',
+      functionName: 'create',
+      namespace: null,
+      modelApiIdentifier: modelApiIdentifier,
+      operatesWithRecordIdentity: false,
+      modelSelectionField: modelApiIdentifier,
+      isBulk: false,
+      isDeleter: false,
+      variables: { venue: { required: false, type: 'CreateVenueInput' } },
+      hasAmbiguousIdentifier: false,
+      paramOnlyVariables: [],
+      hasReturnType: true,
+      acceptsModelInput: true,
+      hasCreateOrUpdateEffect: true,
+      defaultSelection: DefaultVenueSelection
+    },
+    {
+      type: 'action',
+      operationName: 'bulkCreateVenues',
+      functionName: 'bulkCreate',
+      isBulk: true,
+      isDeleter: false,
+      hasReturnType: true,
+      acceptsModelInput: true,
+      operatesWithRecordIdentity: false,
+      singleActionFunctionName: 'create',
+      modelApiIdentifier: modelApiIdentifier,
+      modelSelectionField: pluralModelApiIdentifier,
+      namespace: null,
+      variables: { inputs: { required: true, type: '[BulkCreateVenuesInput!]' } },
+      paramOnlyVariables: [],
+      defaultSelection: DefaultVenueSelection
+    },
+    {
+      type: 'action',
+      operationName: 'updateVenue',
+      operationReturnType: 'UpdateVenue',
+      functionName: 'update',
+      namespace: null,
+      modelApiIdentifier: modelApiIdentifier,
+      operatesWithRecordIdentity: true,
+      modelSelectionField: modelApiIdentifier,
+      isBulk: false,
+      isDeleter: false,
+      variables: {
+        id: { required: true, type: 'GadgetID' },
+        venue: { required: false, type: 'UpdateVenueInput' }
+      },
+      hasAmbiguousIdentifier: false,
+      paramOnlyVariables: [],
+      hasReturnType: true,
+      acceptsModelInput: true,
+      hasCreateOrUpdateEffect: true,
+      defaultSelection: DefaultVenueSelection
+    },
+    {
+      type: 'action',
+      operationName: 'bulkUpdateVenues',
+      functionName: 'bulkUpdate',
+      isBulk: true,
+      isDeleter: false,
+      hasReturnType: true,
+      acceptsModelInput: true,
+      operatesWithRecordIdentity: true,
+      singleActionFunctionName: 'update',
+      modelApiIdentifier: modelApiIdentifier,
+      modelSelectionField: pluralModelApiIdentifier,
+      namespace: null,
+      variables: { inputs: { required: true, type: '[BulkUpdateVenuesInput!]' } },
+      paramOnlyVariables: [],
+      defaultSelection: DefaultVenueSelection
+    },
+    {
+      type: 'action',
+      operationName: 'findFirstVenue',
+      operationReturnType: 'FindFirstVenue',
+      functionName: 'findFirst',
+      namespace: null,
+      modelApiIdentifier: modelApiIdentifier,
+      operatesWithRecordIdentity: true,
+      modelSelectionField: modelApiIdentifier,
+      isBulk: false,
+      isDeleter: false,
+      variables: { id: { required: true, type: 'GadgetID' } },
+      hasAmbiguousIdentifier: false,
+      paramOnlyVariables: [],
+      hasReturnType: true,
+      acceptsModelInput: false,
+      hasCreateOrUpdateEffect: false,
+      defaultSelection: DefaultVenueSelection
+    },
+    {
+      type: 'action',
+      operationName: 'bulkFindFirstVenues',
+      functionName: 'bulkFindFirst',
+      isBulk: true,
+      isDeleter: false,
+      hasReturnType: true,
+      acceptsModelInput: false,
+      operatesWithRecordIdentity: true,
+      singleActionFunctionName: 'findFirst',
+      modelApiIdentifier: modelApiIdentifier,
+      modelSelectionField: pluralModelApiIdentifier,
+      namespace: null,
+      variables: { ids: { required: true, type: '[GadgetID!]' } },
+      paramOnlyVariables: [],
+      defaultSelection: DefaultVenueSelection
+    },
+    {
+      type: 'action',
+      operationName: 'upsertVenue',
+      operationReturnType: 'UpsertVenue',
+      functionName: 'upsert',
+      namespace: null,
+      modelApiIdentifier: modelApiIdentifier,
+      operatesWithRecordIdentity: false,
+      modelSelectionField: modelApiIdentifier,
+      isBulk: false,
+      isDeleter: false,
+      variables: {
+        on: { required: false, type: '[String!]' },
+        venue: { required: false, type: 'UpsertVenueInput' }
+      },
+      hasAmbiguousIdentifier: false,
+      paramOnlyVariables: [ 'on' ],
+      hasReturnType: {
+        '... on CreateVenueResult': { hasReturnType: true },
+        '... on UpdateVenueResult': { hasReturnType: true }
+      },
+      acceptsModelInput: true,
+      hasCreateOrUpdateEffect: true,
+      defaultSelection: DefaultVenueSelection
+    },
+    {
+      type: 'action',
+      operationName: 'bulkUpsertVenues',
+      functionName: 'bulkUpsert',
+      isBulk: true,
+      isDeleter: false,
+      hasReturnType: true,
+      acceptsModelInput: true,
+      operatesWithRecordIdentity: false,
+      singleActionFunctionName: 'upsert',
+      modelApiIdentifier: modelApiIdentifier,
+      modelSelectionField: pluralModelApiIdentifier,
+      namespace: null,
+      variables: { inputs: { required: true, type: '[BulkUpsertVenuesInput!]' } },
+      paramOnlyVariables: [ 'on' ],
+      defaultSelection: DefaultVenueSelection
     },
     {
       type: 'computedView',

@@ -1,4 +1,4 @@
-import { Livelocalgadget3Client } from ".";
+import { Livelocalgadget6Client } from ".";
 
 declare global {
   interface Window {
@@ -7,24 +7,24 @@ declare global {
      *
      * @example
      * ```ts
-     * const api = new Livelocalgadget3Client();
+     * const api = new Livelocalgadget6Client();
      * ```
      */
-    Livelocalgadget3Client: typeof Livelocalgadget3Client;
+    Livelocalgadget6Client: typeof Livelocalgadget6Client;
 
     /**
-     * The Gadget client for Livelocalgadget3Client
-     * @deprecated Use window.Livelocalgadget3Client instead
+     * The Gadget client for Livelocalgadget6Client
+     * @deprecated Use window.Livelocalgadget6Client instead
      */
-    Gadget: typeof Livelocalgadget3Client;
+    Gadget: typeof Livelocalgadget6Client;
   }
 }
 
 // add the client to the window
-window.Livelocalgadget3Client = Livelocalgadget3Client;
+window.Livelocalgadget6Client = Livelocalgadget6Client;
 
 const previousValue: any = window.Gadget;
 
-// add the client to the window at the old .Gadget property for backwards compatibility -- the Livelocalgadget3Client property should be preferred instead
-window.Gadget = Livelocalgadget3Client;
+// add the client to the window at the old .Gadget property for backwards compatibility -- the Livelocalgadget6Client property should be preferred instead
+window.Gadget = Livelocalgadget6Client;
 (window.Gadget as any).previousValue = previousValue;

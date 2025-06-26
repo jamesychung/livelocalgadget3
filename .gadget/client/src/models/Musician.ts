@@ -75,6 +75,9 @@ export type MusicianRecord<Selection extends AvailableMusicianSelection | undefi
 export const DefaultMusicianSelection = {
      __typename: true,
      id: true,
+     additionalPictures: true,
+     audio: true,
+     audioFiles: true,
      availability: true,
      bio: true,
      city: true,
@@ -90,14 +93,14 @@ export const DefaultMusicianSelection = {
      name: true,
      profilePicture: true,
      rating: true,
-     socialLinks: true,
-     totalGigs: true,
+     stageName: true,
      updatedAt: true,
      state: true,
      genre: true,
      isActive: true,
      phone: true,
-     stageName: true,
+     socialLinks: true,
+     totalGigs: true,
      userId: true,
      website: true,
      yearsExperience: true
@@ -357,6 +360,8 @@ export type MusicianManager = {
         *     example: true,
         *     key: "value",
         *   },
+        *   bio: "example value for bio",
+        *   city: "example value for city",
         *   state: "example value for state",
         * });
       **/
@@ -377,6 +382,8 @@ export type MusicianManager = {
         *       example: true,
         *       key: "value",
         *     },
+        *     bio: "example value for bio",
+        *     city: "example value for city",
         *     state: "example value for state",
         *   },
         * });
@@ -450,6 +457,8 @@ export type MusicianManager = {
         *     example: true,
         *     key: "value",
         *   },
+        *   bio: "example value for bio",
+        *   city: "example value for city",
         *   state: "example value for state",
         * });
       **/
@@ -470,6 +479,8 @@ export type MusicianManager = {
         *       example: true,
         *       key: "value",
         *     },
+        *     bio: "example value for bio",
+        *     city: "example value for city",
         *     state: "example value for state",
         *   },
         * });
@@ -608,6 +619,11 @@ export type MusicianManager = {
       *
       * @example
       * * const result = await api.musician.upsert({
+        *   availability: {
+        *     example: true,
+        *     key: "value",
+        *   },
+        *   bio: "example value for bio",
         *   id: "1",
         *   state: "example value for state",
         * });
@@ -625,6 +641,11 @@ export type MusicianManager = {
       * @example
       * * const result = await api.musician.upsert({
         *   musician: {
+        *     availability: {
+        *       example: true,
+        *       key: "value",
+        *     },
+        *     bio: "example value for bio",
         *     id: "1",
         *     state: "example value for state",
         *   },

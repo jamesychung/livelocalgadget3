@@ -27,19 +27,19 @@ const _overlay = require("../core/errors/overlay");
                 plugin: options,
                 params: {
                     assetsBucketDomain: "app-assets.gadget.dev",
-                    applicationId: "239221",
-                    productionEnvironmentId: "481841",
+                    applicationId: "240767",
+                    productionEnvironmentId: "484999",
                     developmentEnvironmentVariables: {
-                        "GADGET_APP": "livelocalgadget3",
+                        "GADGET_APP": "livelocalgadget6",
                         "GADGET_ENV": "development",
-                        "GADGET_PUBLIC_APP_SLUG": "livelocalgadget3",
+                        "GADGET_PUBLIC_APP_SLUG": "livelocalgadget6",
                         "GADGET_PUBLIC_APP_ENV": "development",
                         "GADGET_FLAG_ASSISTANT_ENABLED": "true"
                     },
                     productionEnvironmentVariables: {
-                        "GADGET_APP": "livelocalgadget3",
+                        "GADGET_APP": "livelocalgadget6",
                         "GADGET_ENV": "production",
-                        "GADGET_PUBLIC_APP_SLUG": "livelocalgadget3",
+                        "GADGET_PUBLIC_APP_SLUG": "livelocalgadget6",
                         "GADGET_PUBLIC_APP_ENV": "production"
                     }
                 }

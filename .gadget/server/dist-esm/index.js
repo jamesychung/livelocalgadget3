@@ -1,16 +1,16 @@
 /**
 * This is the Gadget server side types library for:
 *
-*   _ _           _                 _                 _            _   _____ 
-*  | (_)_   _____| | ___   ___ __ _| | __ _  __ _  __| | __ _  ___| |_|___ / 
-*  | | \ \ / / _ \ |/ _ \ / __/ _` | |/ _` |/ _` |/ _` |/ _` |/ _ \ __| |_ \ 
-*  | | |\ V /  __/ | (_) | (_| (_| | | (_| | (_| | (_| | (_| |  __/ |_ ___) |
-*  |_|_| \_/ \___|_|\___/ \___\__,_|_|\__, |\__,_|\__,_|\__, |\___|\__|____/ 
+*   _ _           _                 _                 _            _    __   
+*  | (_)_   _____| | ___   ___ __ _| | __ _  __ _  __| | __ _  ___| |_ / /_  
+*  | | \ \ / / _ \ |/ _ \ / __/ _` | |/ _` |/ _` |/ _` |/ _` |/ _ \ __| '_ \ 
+*  | | |\ V /  __/ | (_) | (_| (_| | | (_| | (_| | (_| | (_| |  __/ |_| (_) |
+*  |_|_| \_/ \___|_|\___/ \___\__,_|_|\__, |\__,_|\__,_|\__, |\___|\__|\___/ 
 *                                     |___/             |___/                
 *
-* Built for environment `Development` at version 155
+* Built for environment `Development` at version 42
 * Framework version: ^1.4.0
-* Edit this app here: https://livelocalgadget3.gadget.dev/edit
+* Edit this app here: https://livelocalgadget6.gadget.dev/edit
 */ /// <reference path="./ActionContextTypes.d.ts" />
 export { InvalidRecordError } from '@gadgetinc/api-client-core';
 export * from "./metadataFileTypes.js";
@@ -33,13 +33,13 @@ export { preventCrossShopDataAccess, ShopifyBulkOperationState, ShopifySellingPl
 /**
  * @internal
  */ import { Globals, actionContextLocalStorage } from "./globals.js";
+export * from "./models/User.js";
 export * from "./models/Session.js";
 export * from "./models/Booking.js";
 export * from "./models/Event.js";
 export * from "./models/Musician.js";
 export * from "./models/Review.js";
 export * from "./models/Venue.js";
-export * from "./models/User.js";
 /**
 * A map of connection name to instantiated connection objects for the app.
 */ let connections;

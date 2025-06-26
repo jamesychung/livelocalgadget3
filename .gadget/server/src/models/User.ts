@@ -1,8 +1,8 @@
 // All the generated types for the "user" model preconditions, actions, params, etc
 import { AmbientContext } from "../AmbientContext";
 import { ActionExecutionScope, NotYetTyped, ValidationErrors, ActionTrigger, TriggerWithType } from "../types";
-import type { Scalars } from "@gadget-client/livelocalgadget3";
-import { GadgetRecord, User } from "@gadget-client/livelocalgadget3";
+import type { Scalars } from "@gadget-client/livelocalgadget6";
+import { GadgetRecord, User } from "@gadget-client/livelocalgadget6";
 import { Select } from "@gadgetinc/api-client-core";
 
 export type DefaultUserServerSelection = {
@@ -10,21 +10,20 @@ export type DefaultUserServerSelection = {
       readonly id: true;
       readonly createdAt: true;
       readonly updatedAt: true;
-      readonly password: true;
-      readonly emailVerified: true;
       readonly email: true;
-      readonly lastSignedIn: true;
-      readonly firstName: true;
-      readonly roles: true;
-      readonly googleImageUrl: true;
       readonly emailVerificationToken: true;
-      readonly primaryRole: true;
       readonly emailVerificationTokenExpiration: true;
+      readonly emailVerified: true;
+      readonly firstName: true;
+      readonly googleImageUrl: true;
+      readonly googleProfileId: true;
+      readonly lastName: true;
+      readonly password: true;
+      readonly lastSignedIn: true;
       readonly profilePicture: true;
       readonly resetPasswordTokenExpiration: true;
       readonly resetPasswordToken: true;
-      readonly lastName: true;
-      readonly googleProfileId: true;
+      readonly roles: true;
   };
 
   
@@ -45,7 +44,7 @@ export interface SignUpUserActionContext extends AmbientContext {
   /**
   * An object specifying the trigger to this action (e.g. API call, webhook events etc.).
   */
-  trigger: TriggerWithType<"user_sign_up">;
+  trigger: TriggerWithType<"user_sign_up"> | TriggerWithType<"google_oauth_signup">;
   /**
   * An object containing the incoming data(this models fields) passed by triggers or user inputs.
   */
@@ -78,7 +77,7 @@ export interface SignInUserActionContext extends AmbientContext {
   /**
   * An object specifying the trigger to this action (e.g. API call, webhook events etc.).
   */
-  trigger: TriggerWithType<"user_sign_in">;
+  trigger: TriggerWithType<"user_sign_in"> | TriggerWithType<"google_oauth_signin">;
   /**
   * An object containing the incoming data(this models fields) passed by triggers or user inputs.
   */
@@ -148,7 +147,7 @@ export interface UpdateUserActionContext extends AmbientContext {
   * An object containing the incoming data(this models fields) passed by triggers or user inputs.
   */
   params: {
-user?: { password?: string;emailVerified?: boolean;email?: string;lastSignedIn?: Date;firstName?: string;roles?: string[];googleImageUrl?: string;emailVerificationToken?: string;primaryRole?: string;emailVerificationTokenExpiration?: Date;profilePicture?: { fileName: string; byteSize: number; mimeType: string; storageToken: string; url: string };resetPasswordTokenExpiration?: Date;resetPasswordToken?: string;lastName?: string;googleProfileId?: string; };    
+user?: { email?: string;emailVerificationToken?: string;emailVerificationTokenExpiration?: Date;emailVerified?: boolean;firstName?: string;googleImageUrl?: string;googleProfileId?: string;lastName?: string;password?: string;lastSignedIn?: Date;profilePicture?: { fileName: string; byteSize: number; mimeType: string; storageToken: string; url: string };resetPasswordTokenExpiration?: Date;resetPasswordToken?: string;roles?: string[]; };    
 id?: string;
 };
   /**
@@ -354,39 +353,6 @@ id?: string;
   * @private The context of this action.
   */
   context: ChangePasswordUserActionContext;
-};
-
-
-    
-/** Context of the `updateRole` action on the `user` model. */
-export interface UpdateRoleUserActionContext extends AmbientContext {
-  /**
-  * The model this action is operating on
-  */
-  model: NotYetTyped;
-  /**
-  * An object specifying the `user` record this action is operating on.
-  */
-  record: GadgetRecord<Select<User, DefaultUserServerSelection>>;
-  /**
-  * @deprecated Use 'return' instead.
-  */
-  scope: ActionExecutionScope;
-  /**
-  * An object specifying the trigger to this action (e.g. API call, webhook events etc.).
-  */
-  trigger: TriggerWithType<"api"> | TriggerWithType<"background-action">;
-  /**
-  * An object containing the incoming data(this models fields) passed by triggers or user inputs.
-  */
-  params: {
-user?: { password?: string;emailVerified?: boolean;email?: string;lastSignedIn?: Date;firstName?: string;roles?: string[];googleImageUrl?: string;emailVerificationToken?: string;primaryRole?: string;emailVerificationTokenExpiration?: Date;profilePicture?: { fileName: string; byteSize: number; mimeType: string; storageToken: string; url: string };resetPasswordTokenExpiration?: Date;resetPasswordToken?: string;lastName?: string;googleProfileId?: string; };    
-id?: string;
-};
-  /**
-  * @private The context of this action.
-  */
-  context: UpdateRoleUserActionContext;
 };
 
 

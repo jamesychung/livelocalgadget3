@@ -1,5 +1,5 @@
 
-import { Livelocalgadget3Client } from "@gadget-client/livelocalgadget3";
+import { Livelocalgadget6Client } from "@gadget-client/livelocalgadget6";
 import { FastifyBaseLogger } from "fastify";
 import { AppConfiguration } from "./AppConfiguration";
 import { AppConnections } from "./AppConnections";
@@ -15,18 +15,18 @@ export interface AmbientContext {
   session?: Session;
   /** The current request's session ID, if it has one. Requests made by browsers are given sessions, but requests made using Gadget API Keys are not. */
   sessionID?: string;
-  /** All livelocalgadget3 configuration values */
+  /** All livelocalgadget6 configuration values */
   config: AppConfiguration;
-  /** A map of connection name to instantiated connection objects for livelocalgadget3 */
+  /** A map of connection name to instantiated connection objects for livelocalgadget6 */
   connections: AppConnections;
   /** A high performance structured logger which writes logs to the Logs Viewer in the Gadget Editor. */
   logger: Logger;
   /**
-   * An instance of the API client for livelocalgadget3.
+   * An instance of the API client for livelocalgadget6.
    *
    * __Note__: This client is authorized using a superuser internal api token and has permission to invoke any action in the system using normal API mutations or the Internal API.
    **/
-  api: Livelocalgadget3Client;
+  api: Livelocalgadget6Client;
   /**
    * The details of the request that is invoking this unit of work, if it was invoked by a request.
    *

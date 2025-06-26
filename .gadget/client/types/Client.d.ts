@@ -2,6 +2,7 @@ import type { OperationContext } from "@urql/core";
 import { GadgetConnection, GadgetTransaction, InternalModelManager, ActionFunctionMetadata, GlobalActionFunction, BackgroundActionHandle } from "@gadgetinc/api-client-core";
 import type { ClientOptions as ApiClientOptions, AnyClient, EnqueueBackgroundActionOptions, AnyActionFunction } from '@gadgetinc/api-client-core';
 import type { DocumentNode } from 'graphql';
+import { UserManager } from "./models/User.js";
 import { SessionManager } from "./models/Session.js";
 import { CurrentSessionManager } from "./models/CurrentSession.js";
 import { BookingManager } from "./models/Booking.js";
@@ -9,20 +10,21 @@ import { EventManager } from "./models/Event.js";
 import { MusicianManager } from "./models/Musician.js";
 import { ReviewManager } from "./models/Review.js";
 import { VenueManager } from "./models/Venue.js";
-import { UserManager } from "./models/User.js";
 import { SeedNamespace } from "./namespaces/seed.js";
+export { DefaultUserSelection, type UserRecord } from "./models/User.js";
 export { DefaultSessionSelection, type SessionRecord } from "./models/Session.js";
 export { DefaultBookingSelection, type BookingRecord } from "./models/Booking.js";
 export { DefaultEventSelection, type EventRecord } from "./models/Event.js";
 export { DefaultMusicianSelection, type MusicianRecord } from "./models/Musician.js";
 export { DefaultReviewSelection, type ReviewRecord } from "./models/Review.js";
 export { DefaultVenueSelection, type VenueRecord } from "./models/Venue.js";
-export { DefaultUserSelection, type UserRecord } from "./models/User.js";
 type ClientOptions = Omit<ApiClientOptions, "environment"> & {
     environment?: string;
 };
 type AllOptionalVariables<T> = Partial<T> extends T ? object : never;
 export type InternalModelManagers = {
+    /** The internal API model manager for the user model */
+    user: InternalModelManager;
     /** The internal API model manager for the session model */
     session: InternalModelManager;
     /** The internal API model manager for the booking model */
@@ -35,8 +37,6 @@ export type InternalModelManagers = {
     review: InternalModelManager;
     /** The internal API model manager for the venue model */
     venue: InternalModelManager;
-    /** The internal API model manager for the user model */
-    user: InternalModelManager;
     seed: {};
 };
 /**
@@ -47,13 +47,14 @@ type InlineViewFunction = {
     (query: string, variables?: Record<string, unknown>): Promise<unknown>;
 };
 /**
- * Root object used for interacting with the livelocalgadget3 API. `Livelocalgadget3Client` has `query` and `mutation` functions for executing raw GraphQL queries and mutations, as well as `ModelManager` objects for manipulating models with a JavaScript API. `Livelocalgadget3Client` also has a `fetch` function for making raw requests to your backend.
+ * Root object used for interacting with the livelocalgadget6 API. `Livelocalgadget6Client` has `query` and `mutation` functions for executing raw GraphQL queries and mutations, as well as `ModelManager` objects for manipulating models with a JavaScript API. `Livelocalgadget6Client` also has a `fetch` function for making raw requests to your backend.
  * */
-export declare class Livelocalgadget3Client implements AnyClient {
+export declare class Livelocalgadget6Client implements AnyClient {
     readonly options?: ClientOptions | undefined;
     connection: GadgetConnection;
     /** Executes an inline computed view. */
     view: InlineViewFunction;
+    user: UserManager;
     session: SessionManager;
     currentSession: CurrentSessionManager;
     booking: BookingManager;
@@ -61,7 +62,6 @@ export declare class Livelocalgadget3Client implements AnyClient {
     musician: MusicianManager;
     review: ReviewManager;
     venue: VenueManager;
-    user: UserManager;
     seed: SeedNamespace;
     /**
     * Namespaced object for accessing models via the Gadget internal APIs, which provide lower level and higher privileged operations directly against the database. Useful for maintenance operations like migrations or correcting broken data, and for implementing the high level actions.
@@ -82,15 +82,15 @@ export declare class Livelocalgadget3Client implements AnyClient {
     /**
      * Returns a new Client instance that will call the Gadget API as the application's admin user.
      * This can only be used for API clients using internal authentication.
-     * @returns {Livelocalgadget3Client} A new Livelocalgadget3Client instance with admin authentication
+     * @returns {Livelocalgadget6Client} A new Livelocalgadget6Client instance with admin authentication
      */
-    get actAsAdmin(): Livelocalgadget3Client;
+    get actAsAdmin(): Livelocalgadget6Client;
     /**
-     * Returns a new Livelocalgadget3Client instance that will call the Gadget API as with the permission of the current session.
+     * Returns a new Livelocalgadget6Client instance that will call the Gadget API as with the permission of the current session.
      * This can only be used for API clients using internal authentication.
-     * @returns {Livelocalgadget3Client} A new Livelocalgadget3Client instance with session authentication
+     * @returns {Livelocalgadget6Client} A new Livelocalgadget6Client instance with session authentication
      */
-    get actAsSession(): Livelocalgadget3Client;
+    get actAsSession(): Livelocalgadget6Client;
     /** Run an arbitrary GraphQL query. */
     query<T = any>(graphQL: string | DocumentNode, variables?: Record<string, any>, options?: Partial<OperationContext>): Promise<T>;
     /** Run an arbitrary GraphQL mutation. */
@@ -259,5 +259,5 @@ export declare class Livelocalgadget3Client implements AnyClient {
     toJSON(): string;
 }
 /** Legacy export under the `Client` name for backwards compatibility. */
-export declare const Client: typeof Livelocalgadget3Client;
-export type Client = InstanceType<typeof Livelocalgadget3Client>;
+export declare const Client: typeof Livelocalgadget6Client;
+export type Client = InstanceType<typeof Livelocalgadget6Client>;

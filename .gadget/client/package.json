@@ -1,6 +1,6 @@
 {
-  "name": "@gadget-client/livelocalgadget3",
-  "version": "1.2.0-development.155",
+  "name": "@gadget-client/livelocalgadget6",
+  "version": "1.2.0-development.42",
   "files": [
     "dist-*/",
     "types",
@@ -39,8 +39,8 @@
     "typecheck": "tsc --noEmit"
   },
   "gadget": {
-    "applicationName": "livelocalgadget3",
+    "applicationName": "livelocalgadget6",
     "environmentName": "Development",
-    "environmentVersion": "155"
+    "environmentVersion": "42"
   }
 }

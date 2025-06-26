@@ -22,7 +22,11 @@ import {
   Event,
   AvailableEventSelection,
   EventSort,
-  EventFilter
+  EventFilter,
+  CreateEventInput,
+  UpdateEventInput,
+  Scalars,
+  UpsertEventInput
 } from "../types.js";
 
 import { buildModelManager } from "../builder.js";
@@ -78,10 +82,17 @@ export const DefaultEventSelection = {
      date: true,
      description: true,
      endTime: true,
+     equipment: true,
+     genres: true,
      image: true,
      isActive: true,
      isPublic: true,
+     isRecurring: true,
      musicianId: true,
+     recurringDays: true,
+     recurringEndDate: true,
+     recurringInterval: true,
+     recurringPattern: true,
      setlist: true,
      startTime: true,
      status: true,
@@ -151,6 +162,80 @@ const pluralModelApiIdentifier = "events" as const;
   /** Only return records matching this freeform search string */
   search?: string | null;
 };
+export interface CreateEventOptions {
+  /** Select fields other than the defaults of the record to return */
+  select?: AvailableEventSelection;
+};
+export interface UpdateEventOptions {
+  /** Select fields other than the defaults of the record to return */
+  select?: AvailableEventSelection;
+};
+export interface UpsertEventOptions {
+  /** Select fields other than the defaults of the record to return */
+  select?: AvailableEventSelection;
+};
+/**
+ * The fully-qualified, expanded form of the inputs for executing the create action.
+ * The flattened style should be preferred over this style, but for models with ambiguous API identifiers, this style can be used to remove any ambiguity.
+ **/
+export type FullyQualifiedCreateEventVariables = {
+  event?: CreateEventInput;
+}
+/**
+ * The inputs for executing create on event.
+ * This is the flattened style of inputs, suitable for general use, and should be preferred.
+ **/
+export type CreateEventVariables = CreateEventInput;
+/**
+ * The return value from executing create on event
+ *
+ **/
+export type CreateEventResult<Options extends CreateEventOptions> = any;
+/**
+ * The fully-qualified, expanded form of the inputs for executing the update action.
+ * The flattened style should be preferred over this style, but for models with ambiguous API identifiers, this style can be used to remove any ambiguity.
+ **/
+export type FullyQualifiedUpdateEventVariables = {
+  event?: UpdateEventInput;
+}
+/**
+ * The inputs for executing update on event.
+ * This is the flattened style of inputs, suitable for general use, and should be preferred.
+ **/
+export type UpdateEventVariables = UpdateEventInput;
+/**
+ * The return value from executing update on event
+ *
+ **/
+export type UpdateEventResult<Options extends UpdateEventOptions> = any;
+/**
+ * The return value from executing findFirst on event
+ *
+ **/
+export type FindFirstEventResult<Options extends FindFirstEventOptions> = any;
+/**
+ * The fully-qualified, expanded form of the inputs for executing the upsert action.
+ * The flattened style should be preferred over this style, but for models with ambiguous API identifiers, this style can be used to remove any ambiguity.
+ **/
+export type FullyQualifiedUpsertEventVariables = {
+  on?: ((Scalars['String'] | null))[];
+  event?: UpsertEventInput;
+}
+/**
+ * The inputs for executing upsert on event.
+ * This is the flattened style of inputs, suitable for general use, and should be preferred.
+ **/
+export type UpsertEventVariables = Omit<
+     UpsertEventInput,
+     "on"
+   > & {
+     on?: ((Scalars['String'] | null))[];
+   };
+/**
+ * The return value from executing upsert on event
+ *
+ **/
+export type UpsertEventResult<Options extends UpsertEventOptions> = any;
 
 /**
  * A manager for the event model with all the available operations for reading and writing to it.*/
@@ -261,6 +346,372 @@ export type EventManager = {
       selectionType: AvailableEventSelection;
       schemaType: Query["event"];
     }
+  create: {
+      /**
+       * Executes the create action.Accepts the parameters for the action via the `variables` argument.Runs the action and returns a Promise for the updated record.
+      *
+      * This is the flat style, all-params-together overload that most use cases should use.
+      *
+      * @example
+      * * const result = await api.event.create({
+        *   availableTickets: 123,
+        *   category: "example value for category",
+        *   createdBy: {
+        *     _link: "1",
+        *   },
+        *   date: "2025-06-01T00:00:00.000+00:00",
+        *   description: "example value for description",
+        * });
+      **/
+      <Options extends CreateEventOptions>(
+      
+        variables: CreateEventVariables,
+        options?: LimitToKnownKeys<Options, CreateEventOptions>
+      ): Promise<CreateEventResult<Options>>;
+      /**
+       * Executes the create action.Accepts the parameters for the action via the `variables` argument.Runs the action and returns a Promise for the updated record.
+      *
+      * This is the fully qualified, nested api identifier style overload that should be used when there's an ambiguity between an action param and a model field.
+      *
+      * @example
+      * * const result = await api.event.create({
+        *   event: {
+        *     availableTickets: 123,
+        *     category: "example value for category",
+        *     createdBy: {
+        *       _link: "1",
+        *     },
+        *     date: "2025-06-01T00:00:00.000+00:00",
+        *     description: "example value for description",
+        *   },
+        * });
+      **/
+      <Options extends CreateEventOptions>(
+      
+        variables: FullyQualifiedCreateEventVariables,
+        options?: LimitToKnownKeys<Options, CreateEventOptions>
+      ): Promise<CreateEventResult<Options>>;
+      type: 'action';
+      operationName: 'createEvent';
+      operationReturnType: 'CreateEvent';
+      namespace: null;
+      modelApiIdentifier: typeof modelApiIdentifier;
+      operatesWithRecordIdentity: false;
+      modelSelectionField: typeof modelApiIdentifier;
+      isBulk: false;
+      isDeleter: false;
+      variables: { event: { required: false, type: 'CreateEventInput' } };
+      variablesType: ((
+               
+               & (FullyQualifiedCreateEventVariables | CreateEventVariables)
+             ) | undefined);
+      hasAmbiguousIdentifier: false;
+      paramOnlyVariables: [];
+      hasReturnType: true;
+      acceptsModelInput: true;
+      hasCreateOrUpdateEffect: true;
+      imports: [ 'CreateEventInput' ];
+      optionsType: CreateEventOptions;
+      selectionType: AvailableEventSelection;
+      schemaType: Query["event"];
+      defaultSelection: typeof DefaultEventSelection;
+    }
+  bulkCreate: {
+      /**
+        * Executes the bulkCreate action with the given inputs.
+        */
+       <Options extends CreateEventOptions>(
+          inputs: (FullyQualifiedCreateEventVariables | CreateEventVariables)[],
+          options?: LimitToKnownKeys<Options, CreateEventOptions>
+       ): Promise<any[]>
+      type: 'action';
+      operationName: 'bulkCreateEvents';
+      isBulk: true;
+      isDeleter: false;
+      hasReturnType: true;
+      acceptsModelInput: true;
+      operatesWithRecordIdentity: false;
+      singleActionFunctionName: 'create';
+      modelApiIdentifier: typeof modelApiIdentifier;
+      modelSelectionField: typeof pluralModelApiIdentifier;
+      optionsType: CreateEventOptions;
+      namespace: null;
+      variables: { inputs: { required: true, type: '[BulkCreateEventsInput!]' } };
+      variablesType: (FullyQualifiedCreateEventVariables | CreateEventVariables)[];
+      paramOnlyVariables: [];
+      selectionType: AvailableEventSelection;
+      schemaType: Query["event"];
+      defaultSelection: typeof DefaultEventSelection;
+    }
+  update: {
+      /**
+       * Executes the update actionon one record specified by `id`.Runs the action and returns a Promise for the updated record.
+      *
+      * This is the flat style, all-params-together overload that most use cases should use.
+      *
+      * @example
+      * * const result = await api.event.update("1", {
+        *   availableTickets: 123,
+        *   category: "example value for category",
+        *   createdBy: {
+        *     _link: "1",
+        *   },
+        *   date: "2025-06-01T00:00:00.000+00:00",
+        *   description: "example value for description",
+        * });
+      **/
+      <Options extends UpdateEventOptions>(
+        id: string,
+        variables: UpdateEventVariables,
+        options?: LimitToKnownKeys<Options, UpdateEventOptions>
+      ): Promise<UpdateEventResult<Options>>;
+      /**
+       * Executes the update actionon one record specified by `id`.Runs the action and returns a Promise for the updated record.
+      *
+      * This is the fully qualified, nested api identifier style overload that should be used when there's an ambiguity between an action param and a model field.
+      *
+      * @example
+      * * const result = await api.event.update("1", {
+        *   event: {
+        *     availableTickets: 123,
+        *     category: "example value for category",
+        *     createdBy: {
+        *       _link: "1",
+        *     },
+        *     date: "2025-06-01T00:00:00.000+00:00",
+        *     description: "example value for description",
+        *   },
+        * });
+      **/
+      <Options extends UpdateEventOptions>(
+        id: string,
+        variables: FullyQualifiedUpdateEventVariables,
+        options?: LimitToKnownKeys<Options, UpdateEventOptions>
+      ): Promise<UpdateEventResult<Options>>;
+      type: 'action';
+      operationName: 'updateEvent';
+      operationReturnType: 'UpdateEvent';
+      namespace: null;
+      modelApiIdentifier: typeof modelApiIdentifier;
+      operatesWithRecordIdentity: true;
+      modelSelectionField: typeof modelApiIdentifier;
+      isBulk: false;
+      isDeleter: false;
+      variables: {
+          id: { required: true, type: 'GadgetID' },
+          event: { required: false, type: 'UpdateEventInput' }
+        };
+      variablesType: (
+              { id: string }
+              & (FullyQualifiedUpdateEventVariables | UpdateEventVariables)
+            );
+      hasAmbiguousIdentifier: false;
+      paramOnlyVariables: [];
+      hasReturnType: true;
+      acceptsModelInput: true;
+      hasCreateOrUpdateEffect: true;
+      imports: [ 'UpdateEventInput' ];
+      optionsType: UpdateEventOptions;
+      selectionType: AvailableEventSelection;
+      schemaType: Query["event"];
+      defaultSelection: typeof DefaultEventSelection;
+    }
+  bulkUpdate: {
+      /**
+        * Executes the bulkUpdate action with the given inputs.
+        */
+       <Options extends UpdateEventOptions>(
+          inputs: (FullyQualifiedUpdateEventVariables | UpdateEventVariables & { id: string })[],
+          options?: LimitToKnownKeys<Options, UpdateEventOptions>
+       ): Promise<any[]>
+      type: 'action';
+      operationName: 'bulkUpdateEvents';
+      isBulk: true;
+      isDeleter: false;
+      hasReturnType: true;
+      acceptsModelInput: true;
+      operatesWithRecordIdentity: true;
+      singleActionFunctionName: 'update';
+      modelApiIdentifier: typeof modelApiIdentifier;
+      modelSelectionField: typeof pluralModelApiIdentifier;
+      optionsType: UpdateEventOptions;
+      namespace: null;
+      variables: { inputs: { required: true, type: '[BulkUpdateEventsInput!]' } };
+      variablesType: (FullyQualifiedUpdateEventVariables | UpdateEventVariables & { id: string })[];
+      paramOnlyVariables: [];
+      selectionType: AvailableEventSelection;
+      schemaType: Query["event"];
+      defaultSelection: typeof DefaultEventSelection;
+    }
+  findFirst: {
+      /**
+       * Executes the findFirst actionon one record specified by `id`.Runs the action and returns a Promise for the updated record.
+      *
+      * This is the fully qualified, nested api identifier style overload that should be used when there's an ambiguity between an action param and a model field.
+      *
+      * @example
+      * * const result = await api.event.findFirst("1");
+      **/
+      <Options extends FindFirstEventOptions>(
+        id: string,
+      
+        options?: LimitToKnownKeys<Options, FindFirstEventOptions>
+      ): Promise<FindFirstEventResult<Options>>;
+      type: 'action';
+      operationName: 'findFirstEvent';
+      operationReturnType: 'FindFirstEvent';
+      namespace: null;
+      modelApiIdentifier: typeof modelApiIdentifier;
+      operatesWithRecordIdentity: true;
+      modelSelectionField: typeof modelApiIdentifier;
+      isBulk: false;
+      isDeleter: false;
+      variables: { id: { required: true, type: 'GadgetID' } };
+      variablesType: (
+              { id: string }
+              
+            );
+      hasAmbiguousIdentifier: false;
+      paramOnlyVariables: [];
+      hasReturnType: true;
+      acceptsModelInput: false;
+      hasCreateOrUpdateEffect: false;
+      imports: [];
+      optionsType: FindFirstEventOptions;
+      selectionType: AvailableEventSelection;
+      schemaType: Query["event"];
+      defaultSelection: typeof DefaultEventSelection;
+    }
+  bulkFindFirst: {
+      /**
+        * Executes the bulkFindFirst action with the given inputs.
+        */
+       <Options extends FindFirstEventOptions>(
+          ids: string[],
+          options?: LimitToKnownKeys<Options, FindFirstEventOptions>
+       ): Promise<any[]>
+      type: 'action';
+      operationName: 'bulkFindFirstEvents';
+      isBulk: true;
+      isDeleter: false;
+      hasReturnType: true;
+      acceptsModelInput: false;
+      operatesWithRecordIdentity: true;
+      singleActionFunctionName: 'findFirst';
+      modelApiIdentifier: typeof modelApiIdentifier;
+      modelSelectionField: typeof pluralModelApiIdentifier;
+      optionsType: FindFirstEventOptions;
+      namespace: null;
+      variables: { ids: { required: true, type: '[GadgetID!]' } };
+      variablesType: IDsList | undefined;
+      paramOnlyVariables: [];
+      selectionType: AvailableEventSelection;
+      schemaType: Query["event"];
+      defaultSelection: typeof DefaultEventSelection;
+    }
+  upsert: {
+      /**
+       * Executes the upsert action.Accepts the parameters for the action via the `variables` argument.Runs the action and returns a Promise for the updated record.
+      *
+      * This is the flat style, all-params-together overload that most use cases should use.
+      *
+      * @example
+      * * const result = await api.event.upsert({
+        *   availableTickets: 123,
+        *   category: "example value for category",
+        *   createdBy: {
+        *     _link: "1",
+        *   },
+        *   date: "2025-06-01T00:00:00.000+00:00",
+        *   id: "1",
+        * });
+      **/
+      <Options extends UpsertEventOptions>(
+      
+        variables: UpsertEventVariables,
+        options?: LimitToKnownKeys<Options, UpsertEventOptions>
+      ): Promise<UpsertEventResult<Options>>;
+      /**
+       * Executes the upsert action.Accepts the parameters for the action via the `variables` argument.Runs the action and returns a Promise for the updated record.
+      *
+      * This is the fully qualified, nested api identifier style overload that should be used when there's an ambiguity between an action param and a model field.
+      *
+      * @example
+      * * const result = await api.event.upsert({
+        *   event: {
+        *     availableTickets: 123,
+        *     category: "example value for category",
+        *     createdBy: {
+        *       _link: "1",
+        *     },
+        *     date: "2025-06-01T00:00:00.000+00:00",
+        *     id: "1",
+        *   },
+        * });
+      **/
+      <Options extends UpsertEventOptions>(
+      
+        variables: FullyQualifiedUpsertEventVariables,
+        options?: LimitToKnownKeys<Options, UpsertEventOptions>
+      ): Promise<UpsertEventResult<Options>>;
+      type: 'action';
+      operationName: 'upsertEvent';
+      operationReturnType: 'UpsertEvent';
+      namespace: null;
+      modelApiIdentifier: typeof modelApiIdentifier;
+      operatesWithRecordIdentity: false;
+      modelSelectionField: typeof modelApiIdentifier;
+      isBulk: false;
+      isDeleter: false;
+      variables: {
+          on: { required: false, type: '[String!]' },
+          event: { required: false, type: 'UpsertEventInput' }
+        };
+      variablesType: ((
+               
+               & (FullyQualifiedUpsertEventVariables | UpsertEventVariables)
+             ) | undefined);
+      hasAmbiguousIdentifier: false;
+      paramOnlyVariables: [ 'on' ];
+      hasReturnType: {
+          '... on CreateEventResult': { hasReturnType: true },
+          '... on UpdateEventResult': { hasReturnType: true }
+        };
+      acceptsModelInput: true;
+      hasCreateOrUpdateEffect: true;
+      imports: [ 'Scalars', 'UpsertEventInput' ];
+      optionsType: UpsertEventOptions;
+      selectionType: AvailableEventSelection;
+      schemaType: Query["event"];
+      defaultSelection: typeof DefaultEventSelection;
+    }
+  bulkUpsert: {
+      /**
+        * Executes the bulkUpsert action with the given inputs.
+        */
+       <Options extends UpsertEventOptions>(
+          inputs: (FullyQualifiedUpsertEventVariables | UpsertEventVariables)[],
+          options?: LimitToKnownKeys<Options, UpsertEventOptions>
+       ): Promise<any[]>
+      type: 'action';
+      operationName: 'bulkUpsertEvents';
+      isBulk: true;
+      isDeleter: false;
+      hasReturnType: true;
+      acceptsModelInput: true;
+      operatesWithRecordIdentity: false;
+      singleActionFunctionName: 'upsert';
+      modelApiIdentifier: typeof modelApiIdentifier;
+      modelSelectionField: typeof pluralModelApiIdentifier;
+      optionsType: UpsertEventOptions;
+      namespace: null;
+      variables: { inputs: { required: true, type: '[BulkUpsertEventsInput!]' } };
+      variablesType: (FullyQualifiedUpsertEventVariables | UpsertEventVariables)[];
+      paramOnlyVariables: [ 'on' ];
+      selectionType: AvailableEventSelection;
+      schemaType: Query["event"];
+      defaultSelection: typeof DefaultEventSelection;
+    }
   view: {
       (query: string, variables?: Record<string, unknown>): Promise<unknown>
       type: 'computedView';
@@ -341,6 +792,159 @@ export const EventManager = buildModelManager(
       modelApiIdentifier: modelApiIdentifier,
       defaultSelection: DefaultEventSelection,
       namespace: null
+    },
+    {
+      type: 'action',
+      operationName: 'createEvent',
+      operationReturnType: 'CreateEvent',
+      functionName: 'create',
+      namespace: null,
+      modelApiIdentifier: modelApiIdentifier,
+      operatesWithRecordIdentity: false,
+      modelSelectionField: modelApiIdentifier,
+      isBulk: false,
+      isDeleter: false,
+      variables: { event: { required: false, type: 'CreateEventInput' } },
+      hasAmbiguousIdentifier: false,
+      paramOnlyVariables: [],
+      hasReturnType: true,
+      acceptsModelInput: true,
+      hasCreateOrUpdateEffect: true,
+      defaultSelection: DefaultEventSelection
+    },
+    {
+      type: 'action',
+      operationName: 'bulkCreateEvents',
+      functionName: 'bulkCreate',
+      isBulk: true,
+      isDeleter: false,
+      hasReturnType: true,
+      acceptsModelInput: true,
+      operatesWithRecordIdentity: false,
+      singleActionFunctionName: 'create',
+      modelApiIdentifier: modelApiIdentifier,
+      modelSelectionField: pluralModelApiIdentifier,
+      namespace: null,
+      variables: { inputs: { required: true, type: '[BulkCreateEventsInput!]' } },
+      paramOnlyVariables: [],
+      defaultSelection: DefaultEventSelection
+    },
+    {
+      type: 'action',
+      operationName: 'updateEvent',
+      operationReturnType: 'UpdateEvent',
+      functionName: 'update',
+      namespace: null,
+      modelApiIdentifier: modelApiIdentifier,
+      operatesWithRecordIdentity: true,
+      modelSelectionField: modelApiIdentifier,
+      isBulk: false,
+      isDeleter: false,
+      variables: {
+        id: { required: true, type: 'GadgetID' },
+        event: { required: false, type: 'UpdateEventInput' }
+      },
+      hasAmbiguousIdentifier: false,
+      paramOnlyVariables: [],
+      hasReturnType: true,
+      acceptsModelInput: true,
+      hasCreateOrUpdateEffect: true,
+      defaultSelection: DefaultEventSelection
+    },
+    {
+      type: 'action',
+      operationName: 'bulkUpdateEvents',
+      functionName: 'bulkUpdate',
+      isBulk: true,
+      isDeleter: false,
+      hasReturnType: true,
+      acceptsModelInput: true,
+      operatesWithRecordIdentity: true,
+      singleActionFunctionName: 'update',
+      modelApiIdentifier: modelApiIdentifier,
+      modelSelectionField: pluralModelApiIdentifier,
+      namespace: null,
+      variables: { inputs: { required: true, type: '[BulkUpdateEventsInput!]' } },
+      paramOnlyVariables: [],
+      defaultSelection: DefaultEventSelection
+    },
+    {
+      type: 'action',
+      operationName: 'findFirstEvent',
+      operationReturnType: 'FindFirstEvent',
+      functionName: 'findFirst',
+      namespace: null,
+      modelApiIdentifier: modelApiIdentifier,
+      operatesWithRecordIdentity: true,
+      modelSelectionField: modelApiIdentifier,
+      isBulk: false,
+      isDeleter: false,
+      variables: { id: { required: true, type: 'GadgetID' } },
+      hasAmbiguousIdentifier: false,
+      paramOnlyVariables: [],
+      hasReturnType: true,
+      acceptsModelInput: false,
+      hasCreateOrUpdateEffect: false,
+      defaultSelection: DefaultEventSelection
+    },
+    {
+      type: 'action',
+      operationName: 'bulkFindFirstEvents',
+      functionName: 'bulkFindFirst',
+      isBulk: true,
+      isDeleter: false,
+      hasReturnType: true,
+      acceptsModelInput: false,
+      operatesWithRecordIdentity: true,
+      singleActionFunctionName: 'findFirst',
+      modelApiIdentifier: modelApiIdentifier,
+      modelSelectionField: pluralModelApiIdentifier,
+      namespace: null,
+      variables: { ids: { required: true, type: '[GadgetID!]' } },
+      paramOnlyVariables: [],
+      defaultSelection: DefaultEventSelection
+    },
+    {
+      type: 'action',
+      operationName: 'upsertEvent',
+      operationReturnType: 'UpsertEvent',
+      functionName: 'upsert',
+      namespace: null,
+      modelApiIdentifier: modelApiIdentifier,
+      operatesWithRecordIdentity: false,
+      modelSelectionField: modelApiIdentifier,
+      isBulk: false,
+      isDeleter: false,
+      variables: {
+        on: { required: false, type: '[String!]' },
+        event: { required: false, type: 'UpsertEventInput' }
+      },
+      hasAmbiguousIdentifier: false,
+      paramOnlyVariables: [ 'on' ],
+      hasReturnType: {
+        '... on CreateEventResult': { hasReturnType: true },
+        '... on UpdateEventResult': { hasReturnType: true }
+      },
+      acceptsModelInput: true,
+      hasCreateOrUpdateEffect: true,
+      defaultSelection: DefaultEventSelection
+    },
+    {
+      type: 'action',
+      operationName: 'bulkUpsertEvents',
+      functionName: 'bulkUpsert',
+      isBulk: true,
+      isDeleter: false,
+      hasReturnType: true,
+      acceptsModelInput: true,
+      operatesWithRecordIdentity: false,
+      singleActionFunctionName: 'upsert',
+      modelApiIdentifier: modelApiIdentifier,
+      modelSelectionField: pluralModelApiIdentifier,
+      namespace: null,
+      variables: { inputs: { required: true, type: '[BulkUpsertEventsInput!]' } },
+      paramOnlyVariables: [ 'on' ],
+      defaultSelection: DefaultEventSelection
     },
     {
       type: 'computedView',

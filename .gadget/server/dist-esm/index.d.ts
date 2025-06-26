@@ -2,18 +2,18 @@
 /**
 * This is the Gadget server side types library for:
 *
-*   _ _           _                 _                 _            _   _____ 
-*  | (_)_   _____| | ___   ___ __ _| | __ _  __ _  __| | __ _  ___| |_|___ / 
-*  | | \ \ / / _ \ |/ _ \ / __/ _` | |/ _` |/ _` |/ _` |/ _` |/ _ \ __| |_ \ 
-*  | | |\ V /  __/ | (_) | (_| (_| | | (_| | (_| | (_| | (_| |  __/ |_ ___) |
-*  |_|_| \_/ \___|_|\___/ \___\__,_|_|\__, |\__,_|\__,_|\__, |\___|\__|____/ 
+*   _ _           _                 _                 _            _    __   
+*  | (_)_   _____| | ___   ___ __ _| | __ _  __ _  __| | __ _  ___| |_ / /_  
+*  | | \ \ / / _ \ |/ _ \ / __/ _` | |/ _` |/ _` |/ _` |/ _` |/ _ \ __| '_ \ 
+*  | | |\ V /  __/ | (_) | (_| (_| | | (_| | (_| | (_| | (_| |  __/ |_| (_) |
+*  |_|_| \_/ \___|_|\___/ \___\__,_|_|\__, |\__,_|\__,_|\__, |\___|\__|\___/ 
 *                                     |___/             |___/                
 *
-* Built for environment `Development` at version 155
+* Built for environment `Development` at version 42
 * Framework version: ^1.4.0
-* Edit this app here: https://livelocalgadget3.gadget.dev/edit
+* Edit this app here: https://livelocalgadget6.gadget.dev/edit
 */
-import type { Livelocalgadget3Client } from "@gadget-client/livelocalgadget3";
+import type { Livelocalgadget6Client } from "@gadget-client/livelocalgadget6";
 import { Logger } from "./AmbientContext.js";
 export { InvalidRecordError } from "@gadgetinc/api-client-core";
 export * from "./metadataFileTypes.js";
@@ -39,13 +39,13 @@ export { preventCrossShopDataAccess, ShopifyBulkOperationState, ShopifySellingPl
 * @internal
 */
 import { Globals, actionContextLocalStorage } from "./globals.js";
+export * from "./models/User.js";
 export * from "./models/Session.js";
 export * from "./models/Booking.js";
 export * from "./models/Event.js";
 export * from "./models/Musician.js";
 export * from "./models/Review.js";
 export * from "./models/Venue.js";
-export * from "./models/User.js";
 /**
 * A map of connection name to instantiated connection objects for the app.
 */
@@ -57,7 +57,7 @@ declare let logger: Logger;
 /**
 * An instance of the Gadget API client that has admin permissions
 */
-declare let api: Livelocalgadget3Client;
+declare let api: Livelocalgadget6Client;
 /**
 * This is used internally to set the connections.
 * @internal
@@ -72,7 +72,7 @@ export declare const setLogger: (rootLogger: Logger) => void;
 * This is used internally to set the client Instance
 * @internal
 */
-export declare const setApiClient: (client: Livelocalgadget3Client) => void;
+export declare const setApiClient: (client: Livelocalgadget6Client) => void;
 export { api, logger, connections };
 /**
 * @internal

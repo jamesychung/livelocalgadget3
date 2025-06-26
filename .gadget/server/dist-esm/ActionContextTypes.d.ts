@@ -1,11 +1,5 @@
 import "path";
 
-import { CreateMusicianActionContext } from "./models/Musician.js";
-
-import { UpdateMusicianActionContext } from "./models/Musician.js";
-
-import { FindFirstMusicianActionContext } from "./models/Musician.js";
-
 import { SignUpUserActionContext } from "./models/User.js";
 
 import { SignInUserActionContext } from "./models/User.js";
@@ -26,7 +20,23 @@ import { ResetPasswordUserActionContext } from "./models/User.js";
 
 import { ChangePasswordUserActionContext } from "./models/User.js";
 
-import { UpdateRoleUserActionContext } from "./models/User.js";
+import { CreateEventActionContext } from "./models/Event.js";
+
+import { UpdateEventActionContext } from "./models/Event.js";
+
+import { FindFirstEventActionContext } from "./models/Event.js";
+
+import { CreateMusicianActionContext } from "./models/Musician.js";
+
+import { UpdateMusicianActionContext } from "./models/Musician.js";
+
+import { FindFirstMusicianActionContext } from "./models/Musician.js";
+
+import { CreateVenueActionContext } from "./models/Venue.js";
+
+import { UpdateVenueActionContext } from "./models/Venue.js";
+
+import { FindFirstVenueActionContext } from "./models/Venue.js";
 
 import { SeedCreateEventsGlobalActionContext } from "./global-actions.js";
 
@@ -51,24 +61,6 @@ import { SeedSimpleSeedGlobalActionContext } from "./global-actions.js";
 import { SeedTestContextGlobalActionContext } from "./global-actions.js";
 
 
-
-
-declare module "../../../api/models/musician/actions/create" {
-  export type ActionRun = (params: CreateMusicianActionContext) => Promise<any>;
-  export type ActionOnSuccess = (params: CreateMusicianActionContext) => Promise<any>;
-}
-
-
-declare module "../../../api/models/musician/actions/update" {
-  export type ActionRun = (params: UpdateMusicianActionContext) => Promise<any>;
-  export type ActionOnSuccess = (params: UpdateMusicianActionContext) => Promise<any>;
-}
-
-
-declare module "../../../api/models/musician/actions/findFirst" {
-  export type ActionRun = (params: FindFirstMusicianActionContext) => Promise<any>;
-  export type ActionOnSuccess = (params: FindFirstMusicianActionContext) => Promise<any>;
-}
 
 
 declare module "../../../api/models/user/actions/signUp" {
@@ -131,9 +123,57 @@ declare module "../../../api/models/user/actions/changePassword" {
 }
 
 
-declare module "../../../api/models/user/actions/updateRole" {
-  export type ActionRun = (params: UpdateRoleUserActionContext) => Promise<any>;
-  export type ActionOnSuccess = (params: UpdateRoleUserActionContext) => Promise<any>;
+declare module "../../../api/models/event/actions/create" {
+  export type ActionRun = (params: CreateEventActionContext) => Promise<any>;
+  export type ActionOnSuccess = (params: CreateEventActionContext) => Promise<any>;
+}
+
+
+declare module "../../../api/models/event/actions/update" {
+  export type ActionRun = (params: UpdateEventActionContext) => Promise<any>;
+  export type ActionOnSuccess = (params: UpdateEventActionContext) => Promise<any>;
+}
+
+
+declare module "../../../api/models/event/actions/findFirst" {
+  export type ActionRun = (params: FindFirstEventActionContext) => Promise<any>;
+  export type ActionOnSuccess = (params: FindFirstEventActionContext) => Promise<any>;
+}
+
+
+declare module "../../../api/models/musician/actions/create" {
+  export type ActionRun = (params: CreateMusicianActionContext) => Promise<any>;
+  export type ActionOnSuccess = (params: CreateMusicianActionContext) => Promise<any>;
+}
+
+
+declare module "../../../api/models/musician/actions/update" {
+  export type ActionRun = (params: UpdateMusicianActionContext) => Promise<any>;
+  export type ActionOnSuccess = (params: UpdateMusicianActionContext) => Promise<any>;
+}
+
+
+declare module "../../../api/models/musician/actions/findFirst" {
+  export type ActionRun = (params: FindFirstMusicianActionContext) => Promise<any>;
+  export type ActionOnSuccess = (params: FindFirstMusicianActionContext) => Promise<any>;
+}
+
+
+declare module "../../../api/models/venue/actions/create" {
+  export type ActionRun = (params: CreateVenueActionContext) => Promise<any>;
+  export type ActionOnSuccess = (params: CreateVenueActionContext) => Promise<any>;
+}
+
+
+declare module "../../../api/models/venue/actions/update" {
+  export type ActionRun = (params: UpdateVenueActionContext) => Promise<any>;
+  export type ActionOnSuccess = (params: UpdateVenueActionContext) => Promise<any>;
+}
+
+
+declare module "../../../api/models/venue/actions/findFirst" {
+  export type ActionRun = (params: FindFirstVenueActionContext) => Promise<any>;
+  export type ActionOnSuccess = (params: FindFirstVenueActionContext) => Promise<any>;
 }
 
 

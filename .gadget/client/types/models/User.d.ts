@@ -1,5 +1,5 @@
 import { GadgetConnection, GadgetRecord, GadgetRecordList, LimitToKnownKeys, Selectable } from "@gadgetinc/api-client-core";
-import { Query, IDsList, PromiseOrLiveIterator, User, AvailableUserSelection, UserSort, UserFilter, Scalars, UpdateUserInput, UpdateRoleUserInput, UpsertUserInput } from "../types.js";
+import { Query, IDsList, PromiseOrLiveIterator, User, AvailableUserSelection, UserSort, UserFilter, Scalars, UpdateUserInput, UpsertUserInput } from "../types.js";
 import { DefaultSelection, Select, DeepFilterNever } from "../utils.js";
 /**
 * A type that holds only the selected fields (and nested fields) of user. The present fields in the result type of this are dynamic based on the options to each call that uses it.
@@ -39,7 +39,6 @@ export declare const DefaultUserSelection: {
     readonly googleProfileId: true;
     readonly lastName: true;
     readonly lastSignedIn: true;
-    readonly primaryRole: true;
     readonly profilePicture: {
         readonly url: true;
         readonly mimeType: true;
@@ -147,10 +146,6 @@ export interface ResetPasswordUserOptions {
     select?: AvailableUserSelection;
 }
 export interface ChangePasswordUserOptions {
-    /** Select fields other than the defaults of the record to return */
-    select?: AvailableUserSelection;
-}
-export interface UpdateRoleUserOptions {
     /** Select fields other than the defaults of the record to return */
     select?: AvailableUserSelection;
 }
@@ -308,23 +303,6 @@ export type ChangePasswordUserVariables = FullyQualifiedChangePasswordUserVariab
  * Is a GadgetRecord of the model's type.
  **/
 export type ChangePasswordUserResult<Options extends ChangePasswordUserOptions> = SelectedUserOrDefault<Options> extends void ? void : GadgetRecord<SelectedUserOrDefault<Options>>;
-/**
- * The fully-qualified, expanded form of the inputs for executing the updateRole action.
- * The flattened style should be preferred over this style, but for models with ambiguous API identifiers, this style can be used to remove any ambiguity.
- **/
-export type FullyQualifiedUpdateRoleUserVariables = {
-    user?: UpdateRoleUserInput;
-};
-/**
- * The inputs for executing updateRole on user.
- * This is the flattened style of inputs, suitable for general use, and should be preferred.
- **/
-export type UpdateRoleUserVariables = UpdateRoleUserInput;
-/**
- * The return value from executing updateRole on user
- *
- **/
-export type UpdateRoleUserResult<Options extends UpdateRoleUserOptions> = any;
 /**
  * The fully-qualified, expanded form of the inputs for executing the upsert action.
  * The flattened style should be preferred over this style, but for models with ambiguous API identifiers, this style can be used to remove any ambiguity.
@@ -738,10 +716,10 @@ export type UserManager = {
         * @example
         * * const result = await api.user.update("1", {
           *   email: "example@email.com",
+          *   emailVerificationToken: "example value for emailVerificationToken",
+          *   emailVerificationTokenExpiration: "2025-06-01T00:00:00.000+00:00",
           *   emailVerified: true,
           *   firstName: "example value for firstName",
-          *   lastSignedIn: "2025-06-01T00:00:00.000+00:00",
-          *   password: "nohacking123%",
           * });
         **/
         <Options extends UpdateUserOptions>(id: string, variables: UpdateUserVariables, options?: LimitToKnownKeys<Options, UpdateUserOptions>): Promise<UpdateUserResult<Options>>;
@@ -754,10 +732,10 @@ export type UserManager = {
         * * const result = await api.user.update("1", {
           *   user: {
           *     email: "example@email.com",
+          *     emailVerificationToken: "example value for emailVerificationToken",
+          *     emailVerificationTokenExpiration: "2025-06-01T00:00:00.000+00:00",
           *     emailVerified: true,
           *     firstName: "example value for firstName",
-          *     lastSignedIn: "2025-06-01T00:00:00.000+00:00",
-          *     password: "nohacking123%",
           *   },
           * });
         **/
@@ -1329,105 +1307,6 @@ export type UserManager = {
         schemaType: Query["user"];
         defaultSelection: typeof DefaultUserSelection;
     };
-    updateRole: {
-        /**
-         * Executes the updateRole actionon one record specified by `id`.Runs the action and returns a Promise for the updated record.
-        *
-        * This is the flat style, all-params-together overload that most use cases should use.
-        *
-        * @example
-        * * const result = await api.user.updateRole("1", {
-          *   email: "example@email.com",
-          *   emailVerified: true,
-          *   firstName: "example value for firstName",
-          *   lastSignedIn: "2025-06-01T00:00:00.000+00:00",
-          *   password: "nohacking123%",
-          * });
-        **/
-        <Options extends UpdateRoleUserOptions>(id: string, variables: UpdateRoleUserVariables, options?: LimitToKnownKeys<Options, UpdateRoleUserOptions>): Promise<UpdateRoleUserResult<Options>>;
-        /**
-         * Executes the updateRole actionon one record specified by `id`.Runs the action and returns a Promise for the updated record.
-        *
-        * This is the fully qualified, nested api identifier style overload that should be used when there's an ambiguity between an action param and a model field.
-        *
-        * @example
-        * * const result = await api.user.updateRole("1", {
-          *   user: {
-          *     email: "example@email.com",
-          *     emailVerified: true,
-          *     firstName: "example value for firstName",
-          *     lastSignedIn: "2025-06-01T00:00:00.000+00:00",
-          *     password: "nohacking123%",
-          *   },
-          * });
-        **/
-        <Options extends UpdateRoleUserOptions>(id: string, variables: FullyQualifiedUpdateRoleUserVariables, options?: LimitToKnownKeys<Options, UpdateRoleUserOptions>): Promise<UpdateRoleUserResult<Options>>;
-        type: 'action';
-        operationName: 'updateRoleUser';
-        operationReturnType: 'UpdateRoleUser';
-        namespace: null;
-        modelApiIdentifier: typeof modelApiIdentifier;
-        operatesWithRecordIdentity: true;
-        modelSelectionField: typeof modelApiIdentifier;
-        isBulk: false;
-        isDeleter: false;
-        variables: {
-            id: {
-                required: true;
-                type: 'GadgetID';
-            };
-            user: {
-                required: false;
-                type: 'UpdateRoleUserInput';
-            };
-        };
-        variablesType: ({
-            id: string;
-        } & (FullyQualifiedUpdateRoleUserVariables | UpdateRoleUserVariables));
-        hasAmbiguousIdentifier: false;
-        paramOnlyVariables: [];
-        hasReturnType: true;
-        acceptsModelInput: true;
-        hasCreateOrUpdateEffect: true;
-        imports: ['UpdateRoleUserInput'];
-        optionsType: UpdateRoleUserOptions;
-        selectionType: AvailableUserSelection;
-        schemaType: Query["user"];
-        defaultSelection: typeof DefaultUserSelection;
-    };
-    bulkUpdateRole: {
-        /**
-          * Executes the bulkUpdateRole action with the given inputs.
-          */
-        <Options extends UpdateRoleUserOptions>(inputs: (FullyQualifiedUpdateRoleUserVariables | UpdateRoleUserVariables & {
-            id: string;
-        })[], options?: LimitToKnownKeys<Options, UpdateRoleUserOptions>): Promise<any[]>;
-        type: 'action';
-        operationName: 'bulkUpdateRoleUsers';
-        isBulk: true;
-        isDeleter: false;
-        hasReturnType: true;
-        acceptsModelInput: true;
-        operatesWithRecordIdentity: true;
-        singleActionFunctionName: 'updateRole';
-        modelApiIdentifier: typeof modelApiIdentifier;
-        modelSelectionField: typeof pluralModelApiIdentifier;
-        optionsType: UpdateRoleUserOptions;
-        namespace: null;
-        variables: {
-            inputs: {
-                required: true;
-                type: '[BulkUpdateRoleUsersInput!]';
-            };
-        };
-        variablesType: (FullyQualifiedUpdateRoleUserVariables | UpdateRoleUserVariables & {
-            id: string;
-        })[];
-        paramOnlyVariables: [];
-        selectionType: AvailableUserSelection;
-        schemaType: Query["user"];
-        defaultSelection: typeof DefaultUserSelection;
-    };
     upsert: {
         /**
          * Executes the upsert action.Accepts the parameters for the action via the `variables` argument.Runs the action and returns a Promise for the updated record.
@@ -1437,9 +1316,10 @@ export type UserManager = {
         * @example
         * * const result = await api.user.upsert({
           *   email: "example@email.com",
+          *   emailVerificationToken: "example value for emailVerificationToken",
+          *   emailVerificationTokenExpiration: "2025-06-01T00:00:00.000+00:00",
           *   emailVerified: true,
           *   id: "1",
-          *   lastSignedIn: "2025-06-01T00:00:00.000+00:00",
           *   on: ["email"],
           *   password: "nohacking123%",
           * });
@@ -1457,10 +1337,10 @@ export type UserManager = {
           *   password: "nohacking123%",
           *   user: {
           *     email: "example@email.com",
+          *     emailVerificationToken: "example value for emailVerificationToken",
+          *     emailVerificationTokenExpiration: "2025-06-01T00:00:00.000+00:00",
           *     emailVerified: true,
           *     id: "1",
-          *     lastSignedIn: "2025-06-01T00:00:00.000+00:00",
-          *     password: "nohacking123%",
           *   },
           * });
         **/

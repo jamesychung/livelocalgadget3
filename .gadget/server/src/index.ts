@@ -1,19 +1,19 @@
 /**
 * This is the Gadget server side types library for:
 *
-*   _ _           _                 _                 _            _   _____ 
-*  | (_)_   _____| | ___   ___ __ _| | __ _  __ _  __| | __ _  ___| |_|___ / 
-*  | | \ \ / / _ \ |/ _ \ / __/ _` | |/ _` |/ _` |/ _` |/ _` |/ _ \ __| |_ \ 
-*  | | |\ V /  __/ | (_) | (_| (_| | | (_| | (_| | (_| | (_| |  __/ |_ ___) |
-*  |_|_| \_/ \___|_|\___/ \___\__,_|_|\__, |\__,_|\__,_|\__, |\___|\__|____/ 
+*   _ _           _                 _                 _            _    __   
+*  | (_)_   _____| | ___   ___ __ _| | __ _  __ _  __| | __ _  ___| |_ / /_  
+*  | | \ \ / / _ \ |/ _ \ / __/ _` | |/ _` |/ _` |/ _` |/ _` |/ _ \ __| '_ \ 
+*  | | |\ V /  __/ | (_) | (_| (_| | | (_| | (_| | (_| | (_| |  __/ |_| (_) |
+*  |_|_| \_/ \___|_|\___/ \___\__,_|_|\__, |\__,_|\__,_|\__, |\___|\__|\___/ 
 *                                     |___/             |___/                
 *
-* Built for environment `Development` at version 155
+* Built for environment `Development` at version 42
 * Framework version: ^1.4.0
-* Edit this app here: https://livelocalgadget3.gadget.dev/edit
+* Edit this app here: https://livelocalgadget6.gadget.dev/edit
 */
 /// <reference path="./ActionContextTypes.d.ts" />
-import type { Livelocalgadget3Client } from "@gadget-client/livelocalgadget3";
+import type { Livelocalgadget6Client } from "@gadget-client/livelocalgadget6";
 import { Logger } from "./AmbientContext";
 export { InvalidRecordError } from '@gadgetinc/api-client-core'
 
@@ -53,13 +53,13 @@ export {
  * @internal
  */
 import { Globals, actionContextLocalStorage } from "./globals";
+export * from "./models/User";
 export * from "./models/Session";
 export * from "./models/Booking";
 export * from "./models/Event";
 export * from "./models/Musician";
 export * from "./models/Review";
 export * from "./models/Venue";
-export * from "./models/User";
 
 /**
 * A map of connection name to instantiated connection objects for the app.
@@ -73,7 +73,7 @@ let logger: Logger;
 /**
  * An instance of the Gadget API client that has admin permissions
  */
-let api: Livelocalgadget3Client;
+let api: Livelocalgadget6Client;
 
 /**
 * This is used internally to set the connections.
@@ -113,7 +113,7 @@ export const setLogger = (rootLogger: Logger): void => {
  * This is used internally to set the client Instance
  * @internal
  */
-export const setApiClient = (client: Livelocalgadget3Client): void => {
+export const setApiClient = (client: Livelocalgadget6Client): void => {
   api = client;
 }
 

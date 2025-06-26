@@ -19,7 +19,10 @@ export default function () {
     register,
     formState: { errors, isSubmitSuccessful, isSubmitting },
   } = useActionForm(api.user.signUp, {
-    onSuccess: () => navigate(gadgetConfig.authentication!.redirectOnSuccessfulSignInPath!),
+    onSuccess: () => {
+      // After successful sign-up, show verification message
+      // User will need to verify email before they can sign in
+    },
   });
 
   return (
@@ -73,9 +76,16 @@ export default function () {
                     )}
                   </div>
                 </div>
-                {isSubmitSuccessful && <p className="text-sm text-green-500">Please check your inbox</p>}
+                {isSubmitSuccessful && (
+                  <div className="p-4 bg-green-50 border border-green-200 rounded-md">
+                    <p className="text-sm text-green-800 font-medium">Check your email!</p>
+                    <p className="text-sm text-green-700 mt-1">
+                      We've sent a verification link to your email address. Please verify your email before signing in.
+                    </p>
+                  </div>
+                )}
                 <Button className="w-full" size="lg" disabled={isSubmitting} type="submit">
-                  Sign up with email
+                  {isSubmitting ? "Creating account..." : "Sign up with email"}
                 </Button>
                 {errors?.root?.message && <p className="text-sm text-destructive">{errors.root.message}</p>}
               </div>

@@ -1,23 +1,48 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Pencil } from "lucide-react";
 import { useOutletContext, useNavigate } from "react-router";
 import { useEffect, useState } from "react";
 import { api } from "../api";
 import type { AuthOutletContext } from "./_app";
 
 export default function () {
-  const { gadgetConfig, user } = useOutletContext<AuthOutletContext>();
+  const { user } = useOutletContext<AuthOutletContext>();
   const navigate = useNavigate();
-  const [isCheckingProfiles, setIsCheckingProfiles] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Temporarily skip profile checking to test basic login
-    setIsCheckingProfiles(false);
-  }, []);
+    const checkUserProfile = async () => {
+      try {
+        // Check if user has completed profile setup
+        if (!user.firstName || !user.lastName) {
+          // Redirect to role selection if profile is incomplete
+          navigate("/role-selection");
+          return;
+        }
 
-  // Show loading while checking profiles
-  if (isCheckingProfiles) {
+        // Check if user has a role assigned
+        const hasMusicianRole = user.roles?.includes("musician");
+        const hasVenueRole = user.roles?.includes("venueOwner");
+        
+        if (hasMusicianRole) {
+          navigate("/musician-dashboard");
+        } else if (hasVenueRole) {
+          navigate("/venue-dashboard");
+        } else {
+          // User is a fan, stay on this page
+          setIsLoading(false);
+        }
+      } catch (error) {
+        console.error("Error checking user profile:", error);
+        setIsLoading(false);
+      }
+    };
+
+    checkUserProfile();
+  }, [user, navigate]);
+
+  // Show loading while checking profile
+  if (isLoading) {
     return (
       <div className="container mx-auto p-6">
         <div className="flex items-center justify-center min-h-[400px]">
@@ -30,79 +55,56 @@ export default function () {
     );
   }
 
+  // Welcome page for fans (users without musician/venue roles)
   return (
     <div className="container mx-auto p-6">
-      <div className="grid gap-6">
-        <div>
-          <Card className="overflow-hidden">
-            <div className="flex items-start justify-between p-6">
-              <div className="space-y-4">
-                <h2 className="text-2xl font-bold">Welcome to LiveLocal!</h2>
-                <div className="space-y-2">
-                  <p className="text-base">Choose your profile type to get started.</p>
-                </div>
-                <div className="flex gap-4">
-                  <Button asChild>
-                    <a href="/musician-profile/edit">
-                      <Pencil className="mr-2 h-4 w-4" />
-                      Create Musician Profile
-                    </a>
-                  </Button>
-                  <Button asChild variant="outline">
-                    <a href="/venue-profile/edit">
-                      <Pencil className="mr-2 h-4 w-4" />
-                      Create Venue Profile
-                    </a>
-                  </Button>
-                </div>
+      <div className="max-w-4xl mx-auto">
+        <Card className="p-8">
+          <div className="text-center space-y-6">
+            <h1 className="text-3xl font-bold">Welcome to Live Local!</h1>
+            <p className="text-xl text-muted-foreground">
+              Hi {user.firstName}, welcome to your music discovery dashboard.
+            </p>
+            
+            <div className="grid md:grid-cols-3 gap-6 mt-8">
+              <div className="text-center p-4">
+                <h3 className="font-semibold mb-2">Discover Musicians</h3>
+                <p className="text-sm text-muted-foreground">
+                  Find talented local musicians and bands
+                </p>
+                <Button 
+                  className="mt-4" 
+                  onClick={() => navigate("/musicians")}
+                >
+                  Browse Musicians
+                </Button>
               </div>
-              <img
-                src="https://assets.gadget.dev/assets/default-app-assets/react-logo.svg"
-                className="app-logo h-24 w-24 animate-spin"
-                style={{ animationDuration: "10s" }}
-                alt="logo"
-              />
-            </div>
-          </Card>
-        </div>
-        <Card className="p-6">
-          <div className="space-y-6">
-            <h2 className="text-xl font-semibold">Current user</h2>
-            <dl className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <div>
-                <dt className="text-sm font-medium text-muted-foreground">ID</dt>
-                <dd className="text-base">{user.id}</dd>
+              
+              <div className="text-center p-4">
+                <h3 className="font-semibold mb-2">Find Venues</h3>
+                <p className="text-sm text-muted-foreground">
+                  Discover great places to see live music
+                </p>
+                <Button 
+                  className="mt-4" 
+                  onClick={() => navigate("/venues")}
+                >
+                  Browse Venues
+                </Button>
               </div>
-              <div>
-                <dt className="text-sm font-medium text-muted-foreground">Name</dt>
-                <dd className="text-base">{`${user.firstName} ${user.lastName}`}</dd>
+              
+              <div className="text-center p-4">
+                <h3 className="font-semibold mb-2">Upcoming Events</h3>
+                <p className="text-sm text-muted-foreground">
+                  See what's happening in your area
+                </p>
+                <Button 
+                  className="mt-4" 
+                  onClick={() => navigate("/events")}
+                >
+                  View Events
+                </Button>
               </div>
-              <div>
-                <dt className="text-sm font-medium text-muted-foreground">Email</dt>
-                <dd className="text-base">
-                  <a href={`mailto:${user.email}`} className="text-primary hover:underline">
-                    {user.email}
-                  </a>
-                </dd>
-              </div>
-              <div>
-                <dt className="text-sm font-medium text-muted-foreground">Created</dt>
-                <dd className="text-base">{user.createdAt.toLocaleString("en-US", { timeZone: "UTC" })} (in UTC)</dd>
-              </div>
-              <div>
-                <dt className="text-sm font-medium text-muted-foreground">Roles</dt>
-                <dd className="text-base">
-                  {Array.isArray(user.roles) 
-                    ? user.roles.map((role: unknown) => typeof role === 'string' ? role : 
-                        (role as any)?.name || (role as any)?.key || String(role)).join(', ')
-                    : 'No roles'}
-                </dd>
-              </div>
-            </dl>
-            <div className="space-y-4">
-              <p className="text-sm text-muted-foreground">
-                Create a profile to access your dashboard and start using the platform.
-              </p>
             </div>
           </div>
         </Card>

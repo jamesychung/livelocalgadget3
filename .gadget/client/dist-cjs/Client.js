@@ -26,12 +26,13 @@ __export(Client_exports, {
   DefaultSessionSelection: () => import_Session2.DefaultSessionSelection,
   DefaultUserSelection: () => import_User2.DefaultUserSelection,
   DefaultVenueSelection: () => import_Venue2.DefaultVenueSelection,
-  Livelocalgadget3Client: () => Livelocalgadget3Client
+  Livelocalgadget6Client: () => Livelocalgadget6Client
 });
 module.exports = __toCommonJS(Client_exports);
 var import_wonka = require("wonka");
 var import_api_client_core = require("@gadgetinc/api-client-core");
 var import_builder = require("./builder.js");
+var import_User = require("./models/User.js");
 var import_Session = require("./models/Session.js");
 var import_CurrentSession = require("./models/CurrentSession.js");
 var import_Booking = require("./models/Booking.js");
@@ -39,15 +40,14 @@ var import_Event = require("./models/Event.js");
 var import_Musician = require("./models/Musician.js");
 var import_Review = require("./models/Review.js");
 var import_Venue = require("./models/Venue.js");
-var import_User = require("./models/User.js");
 var import_seed = require("./namespaces/seed.js");
+var import_User2 = require("./models/User.js");
 var import_Session2 = require("./models/Session.js");
 var import_Booking2 = require("./models/Booking.js");
 var import_Event2 = require("./models/Event.js");
 var import_Musician2 = require("./models/Musician.js");
 var import_Review2 = require("./models/Review.js");
 var import_Venue2 = require("./models/Venue.js");
-var import_User2 = require("./models/User.js");
 const import_meta = {};
 const productionEnv = "production";
 const fallbackEnv = "development";
@@ -58,7 +58,7 @@ const getImplicitEnv = () => {
     return void 0;
   }
 };
-class Livelocalgadget3Client {
+class Livelocalgadget6Client {
   constructor(options) {
     this.options = options;
     /** Executes an inline computed view. */
@@ -76,8 +76,8 @@ class Livelocalgadget3Client {
     /**
      * The list of environments with a customized API root endpoint
      */
-    this.apiRoots = { "development": "https://livelocalgadget3--development.gadget.app/", "production": "https://livelocalgadget3.gadget.app/" };
-    this.applicationId = "239221";
+    this.apiRoots = { "development": "https://livelocalgadget6--development.gadget.app/", "production": "https://livelocalgadget6.gadget.app/" };
+    this.applicationId = "240767";
     /** Start a transaction against the Gadget backend which will atomically commit (or rollback). */
     this.transaction = async (callback) => {
       return await this.connection.transaction(callback);
@@ -111,7 +111,7 @@ class Livelocalgadget3Client {
       apiRoot = this.apiRoots[this.environment];
     } else {
       const envPart = this.environment == productionEnv ? "" : `--${this.environment}`;
-      apiRoot = `https://livelocalgadget3${envPart}.gadget.app`;
+      apiRoot = `https://livelocalgadget6${envPart}.gadget.app`;
     }
     const exchanges = { ...options == null ? void 0 : options.exchanges };
     if (this.environment !== productionEnv) {
@@ -150,6 +150,7 @@ class Livelocalgadget3Client {
     if (typeof window != "undefined" && this.connection.authenticationMode == import_api_client_core.AuthenticationMode.APIKey && !((_b = options == null ? void 0 : options.authenticationMode) == null ? void 0 : _b.dangerouslyAllowBrowserApiKey)) {
       throw new Error("GGT_BROWSER_API_KEY_USAGE: Using a Gadget API key to authenticate this client object is insecure and will leak your API keys to attackers. Please use a different authentication mode.");
     }
+    this.user = new import_User.UserManager(this.connection);
     this.session = new import_Session.SessionManager(this.connection);
     this.currentSession = new import_CurrentSession.CurrentSessionManager(this.connection);
     this.booking = new import_Booking.BookingManager(this.connection);
@@ -157,28 +158,27 @@ class Livelocalgadget3Client {
     this.musician = new import_Musician.MusicianManager(this.connection);
     this.review = new import_Review.ReviewManager(this.connection);
     this.venue = new import_Venue.VenueManager(this.connection);
-    this.user = new import_User.UserManager(this.connection);
     this.seed = new import_seed.SeedNamespace(this);
     this.internal = {
+      user: new import_api_client_core.InternalModelManager("user", this.connection, { "pluralApiIdentifier": "users", "hasAmbiguousIdentifiers": false, "namespace": [] }),
       session: new import_api_client_core.InternalModelManager("session", this.connection, { "pluralApiIdentifier": "sessions", "hasAmbiguousIdentifiers": false, "namespace": [] }),
       booking: new import_api_client_core.InternalModelManager("booking", this.connection, { "pluralApiIdentifier": "bookings", "hasAmbiguousIdentifiers": false, "namespace": [] }),
       event: new import_api_client_core.InternalModelManager("event", this.connection, { "pluralApiIdentifier": "events", "hasAmbiguousIdentifiers": false, "namespace": [] }),
       musician: new import_api_client_core.InternalModelManager("musician", this.connection, { "pluralApiIdentifier": "musicians", "hasAmbiguousIdentifiers": false, "namespace": [] }),
       review: new import_api_client_core.InternalModelManager("review", this.connection, { "pluralApiIdentifier": "reviews", "hasAmbiguousIdentifiers": false, "namespace": [] }),
       venue: new import_api_client_core.InternalModelManager("venue", this.connection, { "pluralApiIdentifier": "venues", "hasAmbiguousIdentifiers": false, "namespace": [] }),
-      user: new import_api_client_core.InternalModelManager("user", this.connection, { "pluralApiIdentifier": "users", "hasAmbiguousIdentifiers": false, "namespace": [] }),
       seed: {}
     };
   }
   /**
    * Returns a new Client instance that will call the Gadget API as the application's admin user.
    * This can only be used for API clients using internal authentication.
-   * @returns {Livelocalgadget3Client} A new Livelocalgadget3Client instance with admin authentication
+   * @returns {Livelocalgadget6Client} A new Livelocalgadget6Client instance with admin authentication
    */
   get actAsAdmin() {
     var _a, _b, _c;
     (0, import_api_client_core.assert)((_b = (_a = this.options) == null ? void 0 : _a.authenticationMode) == null ? void 0 : _b.internal, `actAsAdmin can only be used for API clients using internal authentication, this client is using ${JSON.stringify((_c = this.options) == null ? void 0 : _c.authenticationMode)}`);
-    return new Livelocalgadget3Client({
+    return new Livelocalgadget6Client({
       ...this.options,
       authenticationMode: {
         internal: {
@@ -189,14 +189,14 @@ class Livelocalgadget3Client {
     });
   }
   /**
-   * Returns a new Livelocalgadget3Client instance that will call the Gadget API as with the permission of the current session.
+   * Returns a new Livelocalgadget6Client instance that will call the Gadget API as with the permission of the current session.
    * This can only be used for API clients using internal authentication.
-   * @returns {Livelocalgadget3Client} A new Livelocalgadget3Client instance with session authentication
+   * @returns {Livelocalgadget6Client} A new Livelocalgadget6Client instance with session authentication
    */
   get actAsSession() {
     var _a, _b;
     (0, import_api_client_core.assert)((_b = (_a = this.options) == null ? void 0 : _a.authenticationMode) == null ? void 0 : _b.internal, "actAsSession can only be used for API clients using internal authentication");
-    return new Livelocalgadget3Client({
+    return new Livelocalgadget6Client({
       ...this.options,
       authenticationMode: {
         internal: {
@@ -269,14 +269,14 @@ class Livelocalgadget3Client {
     return new import_api_client_core.BackgroundActionHandle(this.connection, action, id);
   }
   toString() {
-    return `Livelocalgadget3Client<${this.environment}>`;
+    return `Livelocalgadget6Client<${this.environment}>`;
   }
   toJSON() {
     return this.toString();
   }
 }
-Livelocalgadget3Client.prototype[Symbol.for("gadget/modelRelationships")] = { "session": { "user": { "type": "BelongsTo", "model": "user" } }, "booking": { "bookedBy": { "type": "BelongsTo", "model": "user" }, "musician": { "type": "BelongsTo", "model": "musician" }, "venue": { "type": "BelongsTo", "model": "venue" } }, "event": { "createdBy": { "type": "BelongsTo", "model": "user" }, "musician": { "type": "BelongsTo", "model": "musician" }, "venue": { "type": "BelongsTo", "model": "venue" } }, "musician": { "reviews": { "type": "HasMany", "model": "review" }, "bookings": { "type": "HasMany", "model": "booking" }, "events": { "type": "HasMany", "model": "event" }, "user": { "type": "BelongsTo", "model": "user" } }, "review": { "event": { "type": "BelongsTo", "model": "venue" }, "musician": { "type": "BelongsTo", "model": "musician" }, "reviewer": { "type": "BelongsTo", "model": "user" }, "venue": { "type": "BelongsTo", "model": "venue" } }, "venue": { "events": { "type": "HasMany", "model": "event" }, "bookings": { "type": "HasMany", "model": "booking" }, "owner": { "type": "BelongsTo", "model": "user" }, "reviews": { "type": "HasMany", "model": "review" } }, "user": {} };
-const Client = Livelocalgadget3Client;
+Livelocalgadget6Client.prototype[Symbol.for("gadget/modelRelationships")] = { "user": {}, "session": { "user": { "type": "BelongsTo", "model": "user" } }, "booking": { "bookedBy": { "type": "BelongsTo", "model": "user" }, "musician": { "type": "BelongsTo", "model": "musician" }, "venue": { "type": "BelongsTo", "model": "venue" } }, "event": { "createdBy": { "type": "BelongsTo", "model": "user" }, "musician": { "type": "BelongsTo", "model": "musician" }, "venue": { "type": "BelongsTo", "model": "venue" } }, "musician": { "bookings": { "type": "HasMany", "model": "booking" }, "events": { "type": "HasMany", "model": "event" }, "reviews": { "type": "HasMany", "model": "review" }, "user": { "type": "BelongsTo", "model": "user" } }, "review": { "event": { "type": "BelongsTo", "model": "venue" }, "musician": { "type": "BelongsTo", "model": "musician" }, "reviewer": { "type": "BelongsTo", "model": "user" }, "venue": { "type": "BelongsTo", "model": "venue" } }, "venue": { "bookings": { "type": "HasMany", "model": "booking" }, "events": { "type": "HasMany", "model": "event" }, "owner": { "type": "BelongsTo", "model": "user" }, "reviews": { "type": "HasMany", "model": "review" } } };
+const Client = Livelocalgadget6Client;
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
   Client,
@@ -287,6 +287,6 @@ const Client = Livelocalgadget3Client;
   DefaultSessionSelection,
   DefaultUserSelection,
   DefaultVenueSelection,
-  Livelocalgadget3Client
+  Livelocalgadget6Client
 });
 //# sourceMappingURL=Client.js.map

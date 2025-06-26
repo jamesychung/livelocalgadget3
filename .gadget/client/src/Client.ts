@@ -1,4 +1,4 @@
-// generated with metadata generator for livelocalgadget3 for fv ^1.4.0
+// generated with metadata generator for livelocalgadget6 for fv ^1.4.0
 import type { OperationContext, Exchange } from "@urql/core";
 import { pipe, map } from "wonka";
 import { assert, GadgetConnection, AuthenticationMode, GadgetTransaction, InternalModelManager, ActionFunctionMetadata, GlobalActionFunction, enqueueActionRunner, BackgroundActionHandle } from "@gadgetinc/api-client-core";
@@ -6,6 +6,7 @@ import type { ClientOptions as ApiClientOptions, AnyClient, EnqueueBackgroundAct
 import type { DocumentNode } from 'graphql';
 
 import { buildInlineComputedView } from "./builder.js";
+import { DefaultUserSelection, UserManager } from "./models/User.js";
 import { DefaultSessionSelection, SessionManager } from "./models/Session.js";
 import { CurrentSessionManager } from "./models/CurrentSession.js";
 import { DefaultBookingSelection, BookingManager } from "./models/Booking.js";
@@ -13,19 +14,20 @@ import { DefaultEventSelection, EventManager } from "./models/Event.js";
 import { DefaultMusicianSelection, MusicianManager } from "./models/Musician.js";
 import { DefaultReviewSelection, ReviewManager } from "./models/Review.js";
 import { DefaultVenueSelection, VenueManager } from "./models/Venue.js";
-import { DefaultUserSelection, UserManager } from "./models/User.js";
 import { SeedNamespace } from "./namespaces/seed.js";
+export { DefaultUserSelection, type UserRecord } from "./models/User.js";
 export { DefaultSessionSelection, type SessionRecord } from "./models/Session.js";
 export { DefaultBookingSelection, type BookingRecord } from "./models/Booking.js";
 export { DefaultEventSelection, type EventRecord } from "./models/Event.js";
 export { DefaultMusicianSelection, type MusicianRecord } from "./models/Musician.js";
 export { DefaultReviewSelection, type ReviewRecord } from "./models/Review.js";
 export { DefaultVenueSelection, type VenueRecord } from "./models/Venue.js";
-export { DefaultUserSelection, type UserRecord } from "./models/User.js";
 
 type ClientOptions = Omit<ApiClientOptions, "environment"> & { environment?: string };
 type AllOptionalVariables<T> = Partial<T> extends T ? object : never;
 export type InternalModelManagers = {
+   /** The internal API model manager for the user model */
+   user: InternalModelManager;
    /** The internal API model manager for the session model */
    session: InternalModelManager;
    /** The internal API model manager for the booking model */
@@ -38,8 +40,6 @@ export type InternalModelManagers = {
    review: InternalModelManager;
    /** The internal API model manager for the venue model */
    venue: InternalModelManager;
-   /** The internal API model manager for the user model */
-   user: InternalModelManager;
    seed: {
    
    };
@@ -69,9 +69,9 @@ type InlineViewFunction = {
 }
 
 /**
- * Root object used for interacting with the livelocalgadget3 API. `Livelocalgadget3Client` has `query` and `mutation` functions for executing raw GraphQL queries and mutations, as well as `ModelManager` objects for manipulating models with a JavaScript API. `Livelocalgadget3Client` also has a `fetch` function for making raw requests to your backend.
+ * Root object used for interacting with the livelocalgadget6 API. `Livelocalgadget6Client` has `query` and `mutation` functions for executing raw GraphQL queries and mutations, as well as `ModelManager` objects for manipulating models with a JavaScript API. `Livelocalgadget6Client` also has a `fetch` function for making raw requests to your backend.
  * */
-export class Livelocalgadget3Client implements AnyClient {
+export class Livelocalgadget6Client implements AnyClient {
   connection!: GadgetConnection;
 
   /** Executes an inline computed view. */
@@ -86,6 +86,7 @@ export class Livelocalgadget3Client implements AnyClient {
                                args: { type: 'JSONObject' }
                              }
                            } as const);
+  user!: UserManager;
   session!: SessionManager;
   currentSession!: CurrentSessionManager;
   booking!: BookingManager;
@@ -93,7 +94,6 @@ export class Livelocalgadget3Client implements AnyClient {
   musician!: MusicianManager;
   review!: ReviewManager;
   venue!: VenueManager;
-  user!: UserManager;
   seed!: SeedNamespace;
 
   /**
@@ -109,11 +109,11 @@ export class Livelocalgadget3Client implements AnyClient {
   /**
    * The list of environments with a customized API root endpoint
    */
-  apiRoots: Record<string, string> = {"development":"https://livelocalgadget3--development.gadget.app/","production":"https://livelocalgadget3.gadget.app/"};
+  apiRoots: Record<string, string> = {"development":"https://livelocalgadget6--development.gadget.app/","production":"https://livelocalgadget6.gadget.app/"};
 
 
 
-  applicationId: string = "239221";
+  applicationId: string = "240767";
   environment!: string;
 
   constructor(readonly options?: ClientOptions | undefined) {
@@ -144,7 +144,7 @@ export class Livelocalgadget3Client implements AnyClient {
       apiRoot = this.apiRoots[this.environment];
     } else {
       const envPart = this.environment == productionEnv ? "" : `--${this.environment}`;
-      apiRoot = `https://livelocalgadget3${envPart}.gadget.app`;
+      apiRoot = `https://livelocalgadget6${envPart}.gadget.app`;
     }
 
     const exchanges = {...options?.exchanges};
@@ -197,6 +197,7 @@ export class Livelocalgadget3Client implements AnyClient {
 
 
 
+    this.user = new UserManager(this.connection);
     this.session = new SessionManager(this.connection);
     this.currentSession = new CurrentSessionManager(this.connection);
     this.booking = new BookingManager(this.connection);
@@ -204,17 +205,16 @@ export class Livelocalgadget3Client implements AnyClient {
     this.musician = new MusicianManager(this.connection);
     this.review = new ReviewManager(this.connection);
     this.venue = new VenueManager(this.connection);
-    this.user = new UserManager(this.connection);
     this.seed = new SeedNamespace(this);
 
     this.internal = {
+                      user: new InternalModelManager("user", this.connection, {"pluralApiIdentifier":"users","hasAmbiguousIdentifiers":false,"namespace":[]}),
                       session: new InternalModelManager("session", this.connection, {"pluralApiIdentifier":"sessions","hasAmbiguousIdentifiers":false,"namespace":[]}),
                       booking: new InternalModelManager("booking", this.connection, {"pluralApiIdentifier":"bookings","hasAmbiguousIdentifiers":false,"namespace":[]}),
                       event: new InternalModelManager("event", this.connection, {"pluralApiIdentifier":"events","hasAmbiguousIdentifiers":false,"namespace":[]}),
                       musician: new InternalModelManager("musician", this.connection, {"pluralApiIdentifier":"musicians","hasAmbiguousIdentifiers":false,"namespace":[]}),
                       review: new InternalModelManager("review", this.connection, {"pluralApiIdentifier":"reviews","hasAmbiguousIdentifiers":false,"namespace":[]}),
                       venue: new InternalModelManager("venue", this.connection, {"pluralApiIdentifier":"venues","hasAmbiguousIdentifiers":false,"namespace":[]}),
-                      user: new InternalModelManager("user", this.connection, {"pluralApiIdentifier":"users","hasAmbiguousIdentifiers":false,"namespace":[]}),
                       seed: {
                       
                       },
@@ -224,12 +224,12 @@ export class Livelocalgadget3Client implements AnyClient {
   /**
    * Returns a new Client instance that will call the Gadget API as the application's admin user.
    * This can only be used for API clients using internal authentication.
-   * @returns {Livelocalgadget3Client} A new Livelocalgadget3Client instance with admin authentication
+   * @returns {Livelocalgadget6Client} A new Livelocalgadget6Client instance with admin authentication
    */
-  get actAsAdmin(): Livelocalgadget3Client {
+  get actAsAdmin(): Livelocalgadget6Client {
     assert(this.options?.authenticationMode?.internal, `actAsAdmin can only be used for API clients using internal authentication, this client is using ${JSON.stringify(this.options?.authenticationMode)}`)
 
-    return new Livelocalgadget3Client({
+    return new Livelocalgadget6Client({
     ...this.options,
     authenticationMode: {
       internal: {
@@ -241,14 +241,14 @@ export class Livelocalgadget3Client implements AnyClient {
   }
 
   /**
-   * Returns a new Livelocalgadget3Client instance that will call the Gadget API as with the permission of the current session.
+   * Returns a new Livelocalgadget6Client instance that will call the Gadget API as with the permission of the current session.
    * This can only be used for API clients using internal authentication.
-   * @returns {Livelocalgadget3Client} A new Livelocalgadget3Client instance with session authentication
+   * @returns {Livelocalgadget6Client} A new Livelocalgadget6Client instance with session authentication
    */
-  get actAsSession(): Livelocalgadget3Client {
+  get actAsSession(): Livelocalgadget6Client {
     assert(this.options?.authenticationMode?.internal, "actAsSession can only be used for API clients using internal authentication")
 
-    return new Livelocalgadget3Client({
+    return new Livelocalgadget6Client({
       ...this.options,
       authenticationMode: {
         internal: {
@@ -468,7 +468,7 @@ export class Livelocalgadget3Client implements AnyClient {
   }
 
   toString(): string {
-    return `Livelocalgadget3Client<${this.environment}>`;
+    return `Livelocalgadget6Client<${this.environment}>`;
   }
 
   toJSON(): string {
@@ -476,8 +476,8 @@ export class Livelocalgadget3Client implements AnyClient {
   }
 }
 
-(Livelocalgadget3Client.prototype as any)[Symbol.for("gadget/modelRelationships")] = {"session":{"user":{"type":"BelongsTo","model":"user"}},"booking":{"bookedBy":{"type":"BelongsTo","model":"user"},"musician":{"type":"BelongsTo","model":"musician"},"venue":{"type":"BelongsTo","model":"venue"}},"event":{"createdBy":{"type":"BelongsTo","model":"user"},"musician":{"type":"BelongsTo","model":"musician"},"venue":{"type":"BelongsTo","model":"venue"}},"musician":{"reviews":{"type":"HasMany","model":"review"},"bookings":{"type":"HasMany","model":"booking"},"events":{"type":"HasMany","model":"event"},"user":{"type":"BelongsTo","model":"user"}},"review":{"event":{"type":"BelongsTo","model":"venue"},"musician":{"type":"BelongsTo","model":"musician"},"reviewer":{"type":"BelongsTo","model":"user"},"venue":{"type":"BelongsTo","model":"venue"}},"venue":{"events":{"type":"HasMany","model":"event"},"bookings":{"type":"HasMany","model":"booking"},"owner":{"type":"BelongsTo","model":"user"},"reviews":{"type":"HasMany","model":"review"}},"user":{}};
+(Livelocalgadget6Client.prototype as any)[Symbol.for("gadget/modelRelationships")] = {"user":{},"session":{"user":{"type":"BelongsTo","model":"user"}},"booking":{"bookedBy":{"type":"BelongsTo","model":"user"},"musician":{"type":"BelongsTo","model":"musician"},"venue":{"type":"BelongsTo","model":"venue"}},"event":{"createdBy":{"type":"BelongsTo","model":"user"},"musician":{"type":"BelongsTo","model":"musician"},"venue":{"type":"BelongsTo","model":"venue"}},"musician":{"bookings":{"type":"HasMany","model":"booking"},"events":{"type":"HasMany","model":"event"},"reviews":{"type":"HasMany","model":"review"},"user":{"type":"BelongsTo","model":"user"}},"review":{"event":{"type":"BelongsTo","model":"venue"},"musician":{"type":"BelongsTo","model":"musician"},"reviewer":{"type":"BelongsTo","model":"user"},"venue":{"type":"BelongsTo","model":"venue"}},"venue":{"bookings":{"type":"HasMany","model":"booking"},"events":{"type":"HasMany","model":"event"},"owner":{"type":"BelongsTo","model":"user"},"reviews":{"type":"HasMany","model":"review"}}};
 
 /** Legacy export under the `Client` name for backwards compatibility. */
-export const Client: typeof Livelocalgadget3Client = Livelocalgadget3Client;
-export type Client = InstanceType<typeof Livelocalgadget3Client>;
+export const Client: typeof Livelocalgadget6Client = Livelocalgadget6Client;
+export type Client = InstanceType<typeof Livelocalgadget6Client>;

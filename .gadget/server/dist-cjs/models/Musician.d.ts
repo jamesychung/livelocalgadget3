@@ -1,8 +1,8 @@
 
 import { AmbientContext } from "../AmbientContext";
 import { ActionExecutionScope, NotYetTyped, TriggerWithType } from "../types";
-import type { Scalars } from "@gadget-client/livelocalgadget3";
-import { GadgetRecord, Musician } from "@gadget-client/livelocalgadget3";
+import type { Scalars } from "@gadget-client/livelocalgadget6";
+import { GadgetRecord, Musician } from "@gadget-client/livelocalgadget6";
 import { Select } from "@gadgetinc/api-client-core";
 export type DefaultMusicianServerSelection = {
 	readonly __typename: true
@@ -10,14 +10,13 @@ export type DefaultMusicianServerSelection = {
 	readonly createdAt: true
 	readonly updatedAt: true
 	readonly state: true
-	readonly reviews: false
-	readonly bookings: false
-	readonly events: false
 	readonly availability: true
 	readonly bio: true
+	readonly bookings: false
 	readonly city: true
 	readonly country: true
 	readonly email: true
+	readonly events: false
 	readonly experience: true
 	readonly genre: true
 	readonly genres: true
@@ -29,7 +28,11 @@ export type DefaultMusicianServerSelection = {
 	readonly name: true
 	readonly phone: true
 	readonly profilePicture: true
+	readonly reviews: false
 	readonly rating: true
+	readonly audio: true
+	readonly audioFiles: true
+	readonly additionalPictures: true
 	readonly socialLinks: true
 	readonly stageName: true
 	readonly totalGigs: true
@@ -79,6 +82,9 @@ export interface CreateMusicianActionContext extends AmbientContext {
 			phone?: string
 			profilePicture?: string
 			rating?: number
+			audio?: string
+			audioFiles?: Scalars["JSON"]
+			additionalPictures?: Scalars["JSON"]
 			socialLinks?: Scalars["JSON"]
 			stageName?: string
 			totalGigs?: number
@@ -135,6 +141,9 @@ export interface UpdateMusicianActionContext extends AmbientContext {
 			phone?: string
 			profilePicture?: string
 			rating?: number
+			audio?: string
+			audioFiles?: Scalars["JSON"]
+			additionalPictures?: Scalars["JSON"]
 			socialLinks?: Scalars["JSON"]
 			stageName?: string
 			totalGigs?: number

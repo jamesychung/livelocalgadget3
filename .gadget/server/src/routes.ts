@@ -1,4 +1,4 @@
-import { Livelocalgadget3Client } from "@gadget-client/livelocalgadget3";
+import { Livelocalgadget6Client } from "@gadget-client/livelocalgadget6";
 import type {
   FastifyInstance,
   FastifyReply,
@@ -30,10 +30,10 @@ declare module "fastify" {
     /** The current request's session ID, if it has one. Requests made by browsers are given sessions, but requests made using Gadget API Keys are not. */
     sessionID: string | null;
 
-    /** All livelocalgadget3 configuration values */
+    /** All livelocalgadget6 configuration values */
     config: AppConfiguration;
 
-    /** A map of connection name to instantiated connection objects for livelocalgadget3 */
+    /** A map of connection name to instantiated connection objects for livelocalgadget6 */
     connections: AppConnections;
 
     /** A high performance structured logger which writes logs to the Logs Viewer in the Gadget Editor. */
@@ -46,11 +46,11 @@ declare module "fastify" {
     gadgetContext: Record<string, any>;
 
     /**
-     * An instance of the API client for livelocalgadget3.
+     * An instance of the API client for livelocalgadget6.
      *
      * __Note__: This client is authorized using a superuser internal api token and has permission to invoke any action in the system using normal API mutations or the Internal API.
      **/
-    api: Livelocalgadget3Client;
+    api: Livelocalgadget6Client;
 
     /** App URL for the current environment e.g. https://example.gadget.app */
     currentAppUrl: string;

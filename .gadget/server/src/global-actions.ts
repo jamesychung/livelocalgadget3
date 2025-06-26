@@ -1,6 +1,6 @@
 import type { AmbientContext } from "./AmbientContext";
 import type { ActionTrigger, TriggerWithType, ActionExecutionScope } from "./types";
-import type { Scalars } from "@gadget-client/livelocalgadget3";
+import type { Scalars } from "@gadget-client/livelocalgadget6";
 
 /** Context of the `createEvents` action. */
 export interface SeedCreateEventsGlobalActionContext extends AmbientContext {

@@ -1,8 +1,8 @@
 // All the generated types for the "review" model preconditions, actions, params, etc
 import { AmbientContext } from "../AmbientContext";
 import { ActionExecutionScope, NotYetTyped, ValidationErrors, ActionTrigger, TriggerWithType } from "../types";
-import type { Scalars } from "@gadget-client/livelocalgadget3";
-import { GadgetRecord, Review } from "@gadget-client/livelocalgadget3";
+import type { Scalars } from "@gadget-client/livelocalgadget6";
+import { GadgetRecord, Review } from "@gadget-client/livelocalgadget6";
 import { Select } from "@gadgetinc/api-client-core";
 
 export type DefaultReviewServerSelection = {
