@@ -8,6 +8,7 @@ import { Edit, Clock, MapPin, CalendarDays, Star, DollarSign, AlertCircle, Build
 import { useFindMany } from "@gadgetinc/react";
 import { api } from "../api";
 import type { AuthOutletContext } from "./_app";
+import { ClickableImage } from "../components/shared/ClickableImage";
 
 // Helper function to render status badges
 function getStatusBadge(status: string) {
@@ -107,10 +108,6 @@ export default function VenueDashboard() {
                 firstName: true,
                 lastName: true,
             },
-            event: {
-                title: true,
-                date: true,
-            }
         },
         sort: { createdAt: "Descending" },
         first: 10,
@@ -126,11 +123,7 @@ export default function VenueDashboard() {
         if (bookingsError) console.error("Error loading bookings data:", bookingsError);
         if (eventsError) console.error("Error loading events data:", eventsError);
         if (reviewsError) console.error("Error loading reviews data:", reviewsError);
-        if (venue) {
-            console.log("Venue data received:", venue);
-            console.log("Venue profilePicture:", venue.profilePicture);
-        }
-    }, [venueError, bookingsError, eventsError, reviewsError, venue]);
+    }, [venueError, bookingsError, eventsError, reviewsError]);
 
     // Show loading state while fetching
     if (venueFetching) {
@@ -422,11 +415,6 @@ export default function VenueDashboard() {
                                                     {new Date(review.createdAt).toLocaleDateString()}
                                                 </span>
                                             </div>
-                                            {review.event && (
-                                                <div className="text-sm text-muted-foreground mb-2">
-                                                    Event: {review.event.title} - {new Date(review.event.date).toLocaleDateString()}
-                                                </div>
-                                            )}
                                             <p className="text-sm text-muted-foreground">{review.comment}</p>
                                         </div>
                                     ))}
@@ -457,7 +445,7 @@ export default function VenueDashboard() {
                             {venue.profilePicture && (
                                 <div className="flex justify-center mb-6">
                                     <div className="relative">
-                                        <img 
+                                        <ClickableImage 
                                             src={venue.profilePicture} 
                                             alt="Venue Profile" 
                                             className="w-32 h-32 object-cover rounded-lg border shadow-sm"

@@ -3,6 +3,7 @@ import { Button } from "../ui/button";
 import { Label } from "../ui/label";
 import { Card, CardContent } from "../ui/card";
 import { Upload, X, Music, Image, Play, Pause } from "lucide-react";
+import { ClickableImage } from "./ClickableImage";
 
 interface FileUploadProps {
   label: string;
@@ -117,10 +118,6 @@ export const FileUpload: React.FC<FileUploadProps> = ({
 
   // Use currentUrl if available, otherwise use previewUrl
   const displayUrl = currentUrl || previewUrl;
-  
-  console.log("FileUpload - currentUrl:", currentUrl);
-  console.log("FileUpload - previewUrl:", previewUrl);
-  console.log("FileUpload - displayUrl:", displayUrl);
 
   return (
     <Card className="w-full">
@@ -131,11 +128,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
           <div className="space-y-3">
             {type === "image" ? (
               <div className="relative inline-block">
-                <img 
-                  src={displayUrl} 
-                  alt="Profile" 
-                  className="w-32 h-32 object-cover rounded-lg border"
-                />
+                <ClickableImage src={displayUrl} alt="Profile" className="w-32 h-32 object-cover rounded-lg border" />
                 <Button
                   size="sm"
                   variant="destructive"

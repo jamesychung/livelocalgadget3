@@ -27,7 +27,7 @@ interface MusicianProfile {
   website: string;
   socialLinks: any;
   profilePicture: string;
-  audio: string;
+  audioFiles: string[];
   additionalPictures: string[];
   isActive: boolean;
   isVerified: boolean;
@@ -39,7 +39,6 @@ interface MusicianProfile {
     firstName: string;
     lastName: string;
     email: string;
-    primaryRole: string;
   };
 }
 
@@ -83,7 +82,7 @@ export default function MusicianProfileEdit() {
           website: true,
           socialLinks: true,
           profilePicture: true,
-          audio: true,
+          audioFiles: true,
           additionalPictures: true,
           isActive: true,
           isVerified: true,
@@ -95,7 +94,6 @@ export default function MusicianProfileEdit() {
             firstName: true,
             lastName: true,
             email: true,
-            primaryRole: true,
           },
         },
         first: 1
@@ -159,7 +157,7 @@ export default function MusicianProfileEdit() {
         hourlyRate: parseFloat(formData.hourlyRate) || 0,
         email: formData.email || user.email,
         profilePicture: formData.profilePicture && formData.profilePicture.trim() ? formData.profilePicture.trim() : null,
-        audio: formData.audio && formData.audio.trim() ? formData.audio.trim() : null,
+        audioFiles: formData.audioFiles || [],
         socialLinks: formData.socialLinks || [],
         additionalPictures: formData.additionalPictures || [],
       };
@@ -172,7 +170,7 @@ export default function MusicianProfileEdit() {
       console.log("Instruments field value:", formData.instruments);
       console.log("Instruments field type:", typeof formData.instruments);
       console.log("Profile picture field value:", formData.profilePicture);
-      console.log("Audio field value:", formData.audio);
+      console.log("Audio field value:", formData.audioFiles);
       console.log("Social links field value:", formData.socialLinks);
       console.log("Social links field type:", typeof formData.socialLinks);
 

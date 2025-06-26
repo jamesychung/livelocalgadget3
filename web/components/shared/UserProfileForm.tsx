@@ -129,9 +129,6 @@ export const UserProfileForm: React.FC<UserProfileFormProps> = ({ role, profile,
     });
   }, [profile]);
 
-  console.log("UserProfileForm render - isSaving:", isSaving);
-  console.log("UserProfileForm render - allowNameEdit:", allowNameEdit);
-
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };

@@ -33,7 +33,6 @@ export const SocialMediaForm: React.FC<SocialMediaFormProps> = ({
   const addLink = () => {
     if (newPlatform && newUrl && !socialLinks.find(link => link.platform === newPlatform)) {
       const newLink = { platform: newPlatform, url: newUrl.trim() };
-      console.log("Adding social link:", newLink);
       onChange([...socialLinks, newLink]);
       setNewPlatform("");
       setNewUrl("");
@@ -41,12 +40,10 @@ export const SocialMediaForm: React.FC<SocialMediaFormProps> = ({
   };
 
   const removeLink = (platform: string) => {
-    console.log("Removing social link for platform:", platform);
     onChange(socialLinks.filter(link => link.platform !== platform));
   };
 
   const updateLink = (platform: string, url: string) => {
-    console.log("Updating social link:", { platform, url });
     onChange(socialLinks.map(link => 
       link.platform === platform ? { ...link, url: url.trim() } : link
     ));
@@ -59,9 +56,6 @@ export const SocialMediaForm: React.FC<SocialMediaFormProps> = ({
   const availablePlatforms = SOCIAL_PLATFORMS.filter(
     platform => !socialLinks.find(link => link.platform === platform.key)
   );
-
-  console.log("SocialMediaForm render - socialLinks:", socialLinks);
-  console.log("SocialMediaForm render - availablePlatforms:", availablePlatforms);
 
   return (
     <Card>

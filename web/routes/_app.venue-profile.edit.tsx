@@ -37,7 +37,6 @@ interface VenueProfile {
     firstName: string;
     lastName: string;
     email: string;
-    primaryRole: string;
   };
 }
 
@@ -63,13 +62,21 @@ export default function VenueProfileEdit() {
   const [success, setSuccess] = useState(false);
 
   useEffect(() => {
-    loadVenueProfile();
-  }, []);
+    if (user?.id) {
+      loadVenueProfile();
+    }
+  }, [user?.id]);
 
   const loadVenueProfile = async () => {
     try {
       setLoading(true);
       setError(null);
+
+      // Only try to load if user exists
+      if (!user?.id) {
+        setLoading(false);
+        return;
+      }
 
       const profileResult = await api.venue.findMany({
         filter: { owner: { id: { equals: user.id } } },
@@ -102,7 +109,6 @@ export default function VenueProfileEdit() {
             firstName: true,
             lastName: true,
             email: true,
-            primaryRole: true,
           },
         },
         sort: { updatedAt: "Descending" },
@@ -114,11 +120,17 @@ export default function VenueProfileEdit() {
         setVenueProfile(venueProfile);
         setReviews([]); // Set empty reviews for now
       } else {
-        console.log("No venue profile found for user");
+        setVenueProfile(null); // Explicitly set to null
       }
     } catch (err) {
       console.error("Error loading venue profile:", err);
-      setError("Failed to load profile. Please try again.");
+      // Only show error if it's not a "not found" type error
+      if (err && typeof err === 'object' && 'message' in err) {
+        const errorMessage = (err as any).message;
+        if (!errorMessage.includes('not found') && !errorMessage.includes('No records')) {
+          setError("Failed to load profile. Please try again.");
+        }
+      }
     } finally {
       setLoading(false);
     }
@@ -153,7 +165,6 @@ export default function VenueProfileEdit() {
         };
 
         const updateResult = await api.venue.update(venueProfile.id, updateData);
-        console.log("Venue update result:", updateResult);
       } else {
         // Create new venue profile
         const createData = {
@@ -178,7 +189,6 @@ export default function VenueProfileEdit() {
         };
 
         const createResult = await api.venue.create(createData);
-        console.log("Venue create result:", createResult);
         setVenueProfile(createResult);
       }
 
@@ -190,7 +200,6 @@ export default function VenueProfileEdit() {
       };
       
       const userUpdateResult = await api.user.update(user.id, userUpdateData);
-      console.log("User update result:", userUpdateResult);
 
       setSuccess(true);
       
@@ -303,11 +312,9 @@ export default function VenueProfileEdit() {
                 <UserProfileForm
                   role="venue"
                   profile={{ 
-                    ...venueProfile, 
-                    ...user,  // User data should override venue data for email, firstName, lastName
+                    ...user,  // User data first (firstName, lastName, email)
+                    ...venueProfile,  // Venue data second (including profilePicture)
                     email: user.email, // Explicitly ensure user email is used
-                    firstName: user.firstName,
-                    lastName: user.lastName
                   }}
                   onSave={handleSave}
                   isSaving={saving}

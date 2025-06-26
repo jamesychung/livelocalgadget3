@@ -156,23 +156,23 @@ const secondaryNavigationItems: NavItem[] = [
 export const Navigation = ({ onLinkClick, user }: { onLinkClick?: () => void, user: any }) => {
   const location = useLocation();
 
-  // Debug logging
-  console.log("Navigation - User:", user);
-  console.log("Navigation - User type:", user?.userType);
-
-  // Filter navigation items based on user type
+  // Filter navigation items based on user roles
   const filteredNavigationItems = navigationItems.filter(item => {
-    if (!item.roles) {
-      console.log(`Item "${item.title}" - No role restriction, showing`);
-      return true; // Show items without role restrictions
+    // If no role restriction, show the item
+    if (!item.roles || item.roles.length === 0) {
+      return true;
     }
-    
-    const hasRole = item.roles.includes(user?.userType || "");
-    console.log(`Item "${item.title}" - Roles: ${item.roles.join(', ')}, User type: ${user?.userType}, Has role: ${hasRole}`);
+
+    // Check if user has any of the required roles
+    const hasRole = item.roles.some(role => {
+      if (role === "musician") return user?.userType === "musician";
+      if (role === "venue") return user?.userType === "venue";
+      if (role === "fan") return user?.userType === "fan";
+      return false;
+    });
+
     return hasRole;
   });
-
-  console.log("Filtered navigation items:", filteredNavigationItems.map(item => item.title));
 
   return (
     <>

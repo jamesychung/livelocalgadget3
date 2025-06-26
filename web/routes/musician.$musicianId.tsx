@@ -8,6 +8,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card"
 import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
 import { Star, MapPin, Calendar, Clock, Music, DollarSign, ArrowLeft, ExternalLink } from "lucide-react";
+import { ClickableImage } from "../components/shared/ClickableImage";
+import { ImageLightbox } from "../components/shared/ImageLightbox";
 
 interface MusicianData {
   id: string;
@@ -31,6 +33,7 @@ interface MusicianData {
   phone?: string;
   email?: string;
   isVerified?: boolean;
+  additionalPictures?: string[];
 }
 
 interface BookingData {
@@ -53,6 +56,8 @@ interface BookingData {
 export default function MusicianProfile() {
   const { musicianId } = useParams();
   const [currentTime, setCurrentTime] = useState<string>("");
+  const [isLightboxOpen, setIsLightboxOpen] = useState(false);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   useEffect(() => {
     setCurrentTime(new Date().toLocaleString());
@@ -108,6 +113,19 @@ export default function MusicianProfile() {
   const handleContact = () => {
     // Navigate to contact page
     window.location.href = `/contact/musician/${musicianId}`;
+  };
+
+  const handleImageClick = (index: number) => {
+    setCurrentImageIndex(index);
+    setIsLightboxOpen(true);
+  };
+
+  const handleCloseLightbox = () => {
+    setIsLightboxOpen(false);
+  };
+
+  const handleNavigateLightbox = (index: number) => {
+    setCurrentImageIndex(index);
   };
 
   // Show loading state
@@ -176,6 +194,15 @@ export default function MusicianProfile() {
   // Get display name
   const displayName = musician.stageName || musician.name || "Musician";
 
+  // Prepare images array for lightbox
+  const allImages: string[] = [];
+  if (musician.profilePicture) {
+    allImages.push(musician.profilePicture);
+  }
+  if (musician.additionalPictures && Array.isArray(musician.additionalPictures)) {
+    allImages.push(...musician.additionalPictures);
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50">
       <Header showBackButton={true} onBackClick={handleBackClick} />
@@ -188,10 +215,12 @@ export default function MusicianProfile() {
               {/* Profile Image */}
               <div className="relative">
                 <div className="w-32 h-32 lg:w-40 lg:h-40 rounded-full overflow-hidden border-4 border-white shadow-lg">
-                  <img 
+                  <ClickableImage 
                     src={musician.profilePicture || "https://images.unsplash.com/photo-1494790108755-2616b612b786?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80"} 
                     alt={displayName}
                     className="w-full h-full object-cover"
+                    images={allImages}
+                    index={0}
                   />
                 </div>
                 {musician.isVerified && (
@@ -206,13 +235,13 @@ export default function MusicianProfile() {
                 <h1 className="text-3xl lg:text-4xl font-bold mb-2">{displayName}</h1>
                 <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4 mb-4">
                   {musician.genre && (
-                    <Badge variant="secondary" className="bg-white/20 text-white border-white/30">
+                    <Badge className="bg-white/20 text-white border-white/30">
                       <Music className="mr-1 h-3 w-3" />
                       {musician.genre}
                     </Badge>
                   )}
                   {location && (
-                    <Badge variant="secondary" className="bg-white/20 text-white border-white/30">
+                    <Badge className="bg-white/20 text-white border-white/30">
                       <MapPin className="mr-1 h-3 w-3" />
                       {location}
                     </Badge>
@@ -250,7 +279,6 @@ export default function MusicianProfile() {
                 </Button>
                 <Button 
                   onClick={handleContact}
-                  variant="outline"
                   className="border-white/30 text-white hover:bg-white/10"
                 >
                   Contact
@@ -265,6 +293,26 @@ export default function MusicianProfile() {
               <div className="mb-6">
                 <h2 className="text-xl font-semibold mb-3">About</h2>
                 <p className="text-gray-600 leading-relaxed">{musician.bio}</p>
+              </div>
+            )}
+
+            {/* Additional Pictures Section */}
+            {musician.additionalPictures && Array.isArray(musician.additionalPictures) && musician.additionalPictures.length > 0 && (
+              <div className="mb-6">
+                <h2 className="text-xl font-semibold mb-3">Photos</h2>
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                  {musician.additionalPictures.map((image: string, index: number) => (
+                    <div key={index} className="relative group">
+                      <ClickableImage
+                        src={image}
+                        alt={`${displayName} photo ${index + 1}`}
+                        className="w-full h-32 object-cover rounded-lg border-2 border-gray-200 hover:border-blue-300 transition-colors"
+                        images={allImages}
+                        index={musician.profilePicture ? index + 1 : index}
+                      />
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
 
@@ -298,7 +346,7 @@ export default function MusicianProfile() {
                   <h3 className="text-lg font-semibold mb-3">Instruments</h3>
                   <div className="flex flex-wrap gap-2">
                     {musician.instruments.map((instrument: string, index: number) => (
-                      <Badge key={index} variant="outline">
+                      <Badge key={index}>
                         {instrument}
                       </Badge>
                     ))}
@@ -310,7 +358,7 @@ export default function MusicianProfile() {
                   <h3 className="text-lg font-semibold mb-3">Genres</h3>
                   <div className="flex flex-wrap gap-2">
                     {musician.genres.map((genre: string, index: number) => (
-                      <Badge key={index} variant="secondary">
+                      <Badge key={index}>
                         {genre}
                       </Badge>
                     ))}
@@ -344,7 +392,6 @@ export default function MusicianProfile() {
                       </p>
                     )}
                     <Badge 
-                      variant={booking.status === 'confirmed' ? 'default' : 'secondary'}
                       className={booking.status === 'confirmed' ? 'bg-green-100 text-green-800' : ''}
                     >
                       {booking.status}
@@ -399,7 +446,7 @@ export default function MusicianProfile() {
                   <h3 className="text-lg font-semibold mb-1">Website</h3>
                   <p className="text-gray-600">{musician.website}</p>
                 </div>
-                <Button asChild variant="outline">
+                <Button asChild>
                   <a href={musician.website} target="_blank" rel="noopener noreferrer">
                     <ExternalLink className="mr-2 h-4 w-4" />
                     Visit
@@ -410,6 +457,15 @@ export default function MusicianProfile() {
           </Card>
         )}
       </div>
+
+      {/* Lightbox */}
+      <ImageLightbox
+        isOpen={isLightboxOpen}
+        onClose={handleCloseLightbox}
+        images={allImages}
+        currentIndex={currentImageIndex}
+        onNavigate={handleNavigateLightbox}
+      />
 
       <Footer />
     </div>

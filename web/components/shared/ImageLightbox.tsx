@@ -1,96 +1,118 @@
 import React from "react";
-import { Dialog, DialogContent } from "../ui/dialog";
-import { Button } from "../ui/button";
 import { X, ChevronLeft, ChevronRight } from "lucide-react";
+import { Button } from "../ui/button";
 
 interface ImageLightboxProps {
-  images: string[];
-  currentIndex: number;
   isOpen: boolean;
   onClose: () => void;
-  onPrevious: () => void;
-  onNext: () => void;
+  images: string[];
+  currentIndex: number;
+  onNavigate: (index: number) => void;
 }
 
 export const ImageLightbox: React.FC<ImageLightboxProps> = ({
-  images,
-  currentIndex,
   isOpen,
   onClose,
-  onPrevious,
-  onNext
+  images,
+  currentIndex,
+  onNavigate,
 }) => {
+  if (!isOpen || images.length === 0) return null;
+
   const currentImage = images[currentIndex];
+  const hasPrevious = currentIndex > 0;
+  const hasNext = currentIndex < images.length - 1;
+
+  const handlePrevious = () => {
+    if (hasPrevious) {
+      onNavigate(currentIndex - 1);
+    }
+  };
+
+  const handleNext = () => {
+    if (hasNext) {
+      onNavigate(currentIndex + 1);
+    }
+  };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Escape') {
-      onClose();
-    } else if (e.key === 'ArrowLeft') {
-      onPrevious();
-    } else if (e.key === 'ArrowRight') {
-      onNext();
+    switch (e.key) {
+      case "Escape":
+        onClose();
+        break;
+      case "ArrowLeft":
+        handlePrevious();
+        break;
+      case "ArrowRight":
+        handleNext();
+        break;
     }
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] p-0 bg-black/95 border-0">
-        <div 
-          className="relative w-full h-full flex items-center justify-center"
-          onKeyDown={handleKeyDown}
-          tabIndex={0}
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-90"
+      onClick={onClose}
+      onKeyDown={handleKeyDown}
+      tabIndex={0}
+    >
+      {/* Close button */}
+      <Button
+        variant="ghost"
+        size="sm"
+        className="absolute top-4 right-4 text-white hover:bg-white hover:bg-opacity-20 z-10"
+        onClick={onClose}
+      >
+        <X className="h-6 w-6" />
+      </Button>
+
+      {/* Navigation buttons */}
+      {hasPrevious && (
+        <Button
+          variant="ghost"
+          size="sm"
+          className="absolute left-4 top-1/2 transform -translate-y-1/2 text-white hover:bg-white hover:bg-opacity-20 z-10"
+          onClick={(e) => {
+            e.stopPropagation();
+            handlePrevious();
+          }}
         >
-          {/* Close button */}
-          <Button
-            variant="ghost"
-            size="sm"
-            className="absolute top-4 right-4 z-10 text-white hover:bg-white/20"
-            onClick={onClose}
-          >
-            <X className="h-6 w-6" />
-          </Button>
+          <ChevronLeft className="h-8 w-8" />
+        </Button>
+      )}
 
-          {/* Previous button */}
-          {images.length > 1 && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="absolute left-4 top-1/2 transform -translate-y-1/2 z-10 text-white hover:bg-white/20"
-              onClick={onPrevious}
-            >
-              <ChevronLeft className="h-8 w-8" />
-            </Button>
-          )}
+      {hasNext && (
+        <Button
+          variant="ghost"
+          size="sm"
+          className="absolute right-4 top-1/2 transform -translate-y-1/2 text-white hover:bg-white hover:bg-opacity-20 z-10"
+          onClick={(e) => {
+            e.stopPropagation();
+            handleNext();
+          }}
+        >
+          <ChevronRight className="h-8 w-8" />
+        </Button>
+      )}
 
-          {/* Image */}
-          <div className="flex items-center justify-center w-full h-full p-8">
-            <img
-              src={currentImage}
-              alt={`Photo ${currentIndex + 1}`}
-              className="max-w-full max-h-full object-contain"
-            />
-          </div>
+      {/* Image */}
+      <div
+        className="relative max-w-[90vw] max-h-[90vh] flex items-center justify-center"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <img
+          src={currentImage}
+          alt={`Image ${currentIndex + 1}`}
+          className="max-w-full max-h-full object-contain rounded-lg"
+        />
+      </div>
 
-          {/* Next button */}
-          {images.length > 1 && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="absolute right-4 top-1/2 transform -translate-y-1/2 z-10 text-white hover:bg-white/20"
-              onClick={onNext}
-            >
-              <ChevronRight className="h-8 w-8" />
-            </Button>
-          )}
-
-          {/* Image counter */}
-          {images.length > 1 && (
-            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 text-white text-sm">
-              {currentIndex + 1} of {images.length}
-            </div>
-          )}
+      {/* Image counter */}
+      {images.length > 1 && (
+        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 text-white bg-black bg-opacity-50 px-3 py-1 rounded-full text-sm">
+          {currentIndex + 1} / {images.length}
         </div>
-      </DialogContent>
-    </Dialog>
+      )}
+    </div>
   );
 }; 
