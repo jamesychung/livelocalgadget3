@@ -22,10 +22,10 @@
 
 import type { ExoticComponent, ReactNode } from "react";
 import { useState } from "react";
-import { Link, useLocation } from "react-router";
+import { Link, useLocation, useOutletContext } from "react-router";
 import { useSignOut } from "@gadgetinc/react";
 import { NavDrawer } from "@/components/shared/NavDrawer";
-import { Home, User, LogOut } from "lucide-react";
+import { Home, User, LogOut, Calendar, Music, Settings, Clock, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -33,11 +33,13 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import type { AuthOutletContext } from "../../routes/_app";
 
 interface NavItem {
   title: string;
   path: string;
   icon: ExoticComponent<{ className: string }>;
+  roles?: string[];
 }
 
 /**
@@ -51,23 +53,83 @@ const navigationItems: NavItem[] = [
     path: "/signed-in",
     icon: Home,
   },
+  {
+    title: "Dashboard",
+    path: "/musician-dashboard",
+    icon: Music,
+    roles: ["musician"],
+  },
+  {
+    title: "Profile",
+    path: "/musician-profile/edit",
+    icon: User,
+    roles: ["musician"],
+  },
+  {
+    title: "Bookings",
+    path: "/musician-bookings",
+    icon: Calendar,
+    roles: ["musician"],
+  },
+  {
+    title: "Availability",
+    path: "/availability",
+    icon: Clock,
+    roles: ["musician"],
+  },
+  {
+    title: "Events",
+    path: "/musician-events",
+    icon: Star,
+    roles: ["musician"],
+  },
+  // Venue Owner Navigation
+  {
+    title: "Venue Dashboard",
+    path: "/venue-dashboard",
+    icon: Music,
+    roles: ["venue"],
+  },
+  {
+    title: "Venue Profile",
+    path: "/venue-profile/edit",
+    icon: User,
+    roles: ["venue"],
+  },
+  {
+    title: "Venue Bookings",
+    path: "/venue-bookings",
+    icon: Calendar,
+    roles: ["venue"],
+  },
+  {
+    title: "Venue Events",
+    path: "/venue-events",
+    icon: Star,
+    roles: ["venue"],
+  },
+  {
+    title: "Settings",
+    path: "/settings",
+    icon: Settings,
+  },
 ];
 
 // Mobile hamburger menu, uses Sheet for slide-out drawer
-export const MobileNav = () => {
+export const MobileNav = ({ user }: { user: any }) => {
   return (
     <div className="flex md:hidden">
-      <NavDrawer>{({ close }) => <Navigation onLinkClick={close} />}</NavDrawer>
+      <NavDrawer>{({ close }) => <Navigation onLinkClick={close} user={user} />}</NavDrawer>
     </div>
   );
 };
 
 // Desktop left nav bar
-export const DesktopNav = () => {
+export const DesktopNav = ({ user }: { user: any }) => {
   return (
     <div className="hidden md:flex w-64 flex-col fixed inset-y-0 z-30">
       <div className="flex flex-col flex-grow bg-background border-r h-full">
-        <Navigation />
+        <Navigation user={user} />
       </div>
     </div>
   );
@@ -91,8 +153,26 @@ const secondaryNavigationItems: NavItem[] = [
  * Renders navigationItems as vertical links with icons.
  */
 
-export const Navigation = ({ onLinkClick }: { onLinkClick?: () => void }) => {
+export const Navigation = ({ onLinkClick, user }: { onLinkClick?: () => void, user: any }) => {
   const location = useLocation();
+
+  // Debug logging
+  console.log("Navigation - User:", user);
+  console.log("Navigation - User type:", user?.userType);
+
+  // Filter navigation items based on user type
+  const filteredNavigationItems = navigationItems.filter(item => {
+    if (!item.roles) {
+      console.log(`Item "${item.title}" - No role restriction, showing`);
+      return true; // Show items without role restrictions
+    }
+    
+    const hasRole = item.roles.includes(user?.userType || "");
+    console.log(`Item "${item.title}" - Roles: ${item.roles.join(', ')}, User type: ${user?.userType}, Has role: ${hasRole}`);
+    return hasRole;
+  });
+
+  console.log("Filtered navigation items:", filteredNavigationItems.map(item => item.title));
 
   return (
     <>
@@ -102,7 +182,7 @@ export const Navigation = ({ onLinkClick }: { onLinkClick?: () => void }) => {
         </Link>
       </div>
       <nav className="flex-1 px-4 py-4 space-y-1">
-        {navigationItems.map((item) => (
+        {filteredNavigationItems.map((item) => (
           <Link
             key={item.title}
             to={item.path}

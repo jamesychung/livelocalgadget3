@@ -56,5 +56,9 @@ export const schema: GadgetModel = {
       default: ["unauthenticated"],
       storageKey: "YZoQg8wSA07s",
     },
+    userType: { 
+      type: "string", 
+      storageKey: "userTypeField"
+    },
   },
 };

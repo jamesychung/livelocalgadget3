@@ -14,24 +14,57 @@ export default function () {
     const checkUserProfile = async () => {
       try {
         // Check if user has completed profile setup
-        if (!user.firstName || !user.lastName) {
-          // Redirect to role selection if profile is incomplete
-          navigate("/role-selection");
+        if (!user.firstName || !user.lastName || !user.userType) {
+          navigate("/profile-setup");
           return;
         }
 
-        // Check if user has a role assigned
-        const hasMusicianRole = user.roles?.includes("musician");
-        const hasVenueRole = user.roles?.includes("venueOwner");
-        
-        if (hasMusicianRole) {
+        // Check user type and redirect accordingly
+        if (user.userType === "musician") {
+          // Check if user has a musician profile, create if not
+          const musicianProfile = await api.musician.findFirst({
+            filter: {
+              user: { equals: user.id }
+            }
+          });
+          
+          if (!musicianProfile) {
+            // Create musician profile
+            await api.musician.create({
+              user: { _link: user.id },
+              name: `${user.firstName} ${user.lastName}`,
+              stageName: user.firstName,
+              email: user.email,
+            });
+          }
+          
           navigate("/musician-dashboard");
-        } else if (hasVenueRole) {
-          navigate("/venue-dashboard");
-        } else {
-          // User is a fan, stay on this page
-          setIsLoading(false);
+          return;
         }
+
+        if (user.userType === "venue") {
+          // Check if user has a venue profile, create if not
+          const venueProfile = await api.venue.findFirst({
+            filter: {
+              owner: { equals: user.id }
+            }
+          });
+          
+          if (!venueProfile) {
+            // Create venue profile
+            await api.venue.create({
+              owner: { _link: user.id },
+              name: `${user.firstName}'s Venue`,
+              email: user.email,
+            });
+          }
+          
+          navigate("/venue-dashboard");
+          return;
+        }
+
+        // User is a fan, stay on this page
+        setIsLoading(false);
       } catch (error) {
         console.error("Error checking user profile:", error);
         setIsLoading(false);
@@ -63,7 +96,7 @@ export default function () {
           <div className="text-center space-y-6">
             <h1 className="text-3xl font-bold">Welcome to Live Local!</h1>
             <p className="text-xl text-muted-foreground">
-              Hi {user.firstName}, welcome to your music discovery dashboard.
+              Hi {user.firstName || user.email.split('@')[0]}, welcome to your music discovery dashboard.
             </p>
             
             <div className="grid md:grid-cols-3 gap-6 mt-8">

@@ -16,20 +16,32 @@ export const run: ActionRun = async ({ params, record, logger, api, session }) =
   
   logger.info(`Musician created successfully with ID: ${record.id}`);
   
+  // Assign the musician role to the user immediately after creating the profile
+  if (session?.userId) {
+    try {
+      logger.info(`Attempting to add musician role to user ${session.userId}`);
+      
+      // Get current user to see existing roles
+      const currentUser = await api.user.findOne(session.userId);
+      logger.info(`Current user roles: ${JSON.stringify(currentUser?.roles)}`);
+      
+      // Add musician role using array approach
+      const currentRoles = currentUser?.roles || [];
+      const updatedRoles = [...currentRoles, "musician"];
+      
+      await api.user.update(session.userId, {
+        roles: updatedRoles
+      });
+      
+      logger.info(`Successfully added musician role to user ${session.userId}. New roles: ${JSON.stringify(updatedRoles)}`);
+    } catch (error) {
+      logger.error(`Failed to add musician role: ${error}`);
+    }
+  }
+  
   return {
     result: "ok"
   };
-};
-
-export const onSuccess = async ({ params, record, logger, api, session }) => {
-  // Assign the musician role to the user
-  if (session?.userId) {
-    await api.user.update(session.userId, {
-      roles: {
-        add: ["musician"]
-      }
-    });
-  }
 };
 
 export const options: ActionOptions = {

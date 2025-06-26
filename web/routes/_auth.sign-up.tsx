@@ -20,8 +20,8 @@ export default function () {
     formState: { errors, isSubmitSuccessful, isSubmitting },
   } = useActionForm(api.user.signUp, {
     onSuccess: () => {
-      // After successful sign-up, show verification message
-      // User will need to verify email before they can sign in
+      // After successful sign-up, redirect to profile setup
+      navigate("/profile-setup");
     },
   });
 
@@ -78,9 +78,9 @@ export default function () {
                 </div>
                 {isSubmitSuccessful && (
                   <div className="p-4 bg-green-50 border border-green-200 rounded-md">
-                    <p className="text-sm text-green-800 font-medium">Check your email!</p>
+                    <p className="text-sm text-green-800 font-medium">Account created!</p>
                     <p className="text-sm text-green-700 mt-1">
-                      We've sent a verification link to your email address. Please verify your email before signing in.
+                      Redirecting you to complete your profile...
                     </p>
                   </div>
                 )}
