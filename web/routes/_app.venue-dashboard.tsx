@@ -66,7 +66,6 @@ export default function VenueDashboard() {
             notes: true,
             musician: { 
                 id: true, 
-                name: true, 
                 stageName: true,
                 city: true,
                 state: true,
@@ -87,7 +86,6 @@ export default function VenueDashboard() {
             status: true,
             musician: {
                 id: true,
-                name: true,
                 stageName: true,
                 city: true,
                 state: true,
@@ -150,7 +148,7 @@ export default function VenueDashboard() {
                             It looks like you haven't created your venue profile yet. Create your profile to start managing your events, bookings, and venue information.
                         </p>
                         <Button asChild>
-                            <Link to="/venue-profile/edit">
+                            <Link to="/venue-profile/create">
                                 Create Venue Profile
                             </Link>
                         </Button>

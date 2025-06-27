@@ -3,7 +3,7 @@ import { useOutletContext, useNavigate } from "react-router";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Save, Building, MapPin, Phone, Globe, DollarSign, Star, Users, Clock } from "lucide-react";
+import { ArrowLeft, Save, Building, MapPin, Phone, Globe, DollarSign, Star, Users, Clock, AlertCircle } from "lucide-react";
 import { api } from "../api";
 import type { AuthOutletContext } from "./_app";
 import { UserProfileForm } from "../components/shared/UserProfileForm";
@@ -120,17 +120,13 @@ export default function VenueProfileEdit() {
         setVenueProfile(venueProfile);
         setReviews([]); // Set empty reviews for now
       } else {
-        setVenueProfile(null); // Explicitly set to null
+        // If no venue profile found, redirect to create page
+        navigate("/venue-profile/create");
+        return;
       }
     } catch (err) {
       console.error("Error loading venue profile:", err);
-      // Only show error if it's not a "not found" type error
-      if (err && typeof err === 'object' && 'message' in err) {
-        const errorMessage = (err as any).message;
-        if (!errorMessage.includes('not found') && !errorMessage.includes('No records')) {
-          setError("Failed to load profile. Please try again.");
-        }
-      }
+      setError("Failed to load profile. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -142,55 +138,34 @@ export default function VenueProfileEdit() {
       setError(null);
       setSuccess(false);
 
-      if (venueProfile) {
-        // Update existing venue profile
-        const updateData = {
-          name: formData.name || "",
-          description: formData.description || "",
-          city: formData.city || "",
-          state: formData.state || "",
-          country: formData.country || "",
-          phone: formData.phone || "",
-          website: formData.website && formData.website.trim() ? formData.website.trim() : null,
-          profilePicture: formData.profilePicture && formData.profilePicture.trim() ? formData.profilePicture.trim() : null,
-          additionalPictures: formData.additionalPictures || [],
-          socialLinks: formData.socialLinks || [],
-          genres: formData.genres || [],
-          type: formData.type || "",
-          capacity: parseInt(formData.capacity) || 0,
-          priceRange: formData.priceRange || "",
-          amenities: formData.amenities || [],
-          address: formData.address || "",
-          zipCode: formData.zipCode || "",
-        };
-
-        const updateResult = await api.venue.update(venueProfile.id, updateData);
-      } else {
-        // Create new venue profile
-        const createData = {
-          name: formData.name || "",
-          description: formData.description || "",
-          city: formData.city || "",
-          state: formData.state || "",
-          country: formData.country || "",
-          phone: formData.phone || "",
-          website: formData.website && formData.website.trim() ? formData.website.trim() : null,
-          profilePicture: formData.profilePicture && formData.profilePicture.trim() ? formData.profilePicture.trim() : null,
-          additionalPictures: formData.additionalPictures || [],
-          socialLinks: formData.socialLinks || [],
-          genres: formData.genres || [],
-          type: formData.type || "",
-          capacity: parseInt(formData.capacity) || 0,
-          priceRange: formData.priceRange || "",
-          amenities: formData.amenities || [],
-          address: formData.address || "",
-          zipCode: formData.zipCode || "",
-          owner: { _link: user.id },
-        };
-
-        const createResult = await api.venue.create(createData);
-        setVenueProfile(createResult);
+      if (!venueProfile) {
+        setError("No venue profile found to update.");
+        return;
       }
+
+      // Update existing venue profile
+      const updateData = {
+        name: formData.name || "",
+        description: formData.description || "",
+        city: formData.city || "",
+        state: formData.state || "",
+        country: formData.country || "",
+        phone: formData.phone || "",
+        website: formData.website && formData.website.trim() ? formData.website.trim() : null,
+        profilePicture: formData.profilePicture && formData.profilePicture.trim() ? formData.profilePicture.trim() : null,
+        additionalPictures: formData.additionalPictures || [],
+        socialLinks: formData.socialLinks || [],
+        genres: formData.genres || [],
+        type: formData.type || "",
+        capacity: parseInt(formData.capacity) || 0,
+        priceRange: formData.priceRange || "",
+        amenities: formData.amenities || [],
+        address: formData.address || "",
+        zipCode: formData.zipCode || "",
+        email: formData.email || "",
+      };
+
+      const updateResult = await api.venue.update(venueProfile.id, updateData);
 
       // Update the user profile (firstName, lastName, email)
       const userUpdateData = {
@@ -198,143 +173,153 @@ export default function VenueProfileEdit() {
         lastName: formData.lastName || user.lastName,
         email: formData.email || user.email,
       };
-      
-      const userUpdateResult = await api.user.update(user.id, userUpdateData);
+
+      await api.user.update(user.id, userUpdateData);
 
       setSuccess(true);
       
-      // Reload the profile to get updated data
-      await loadVenueProfile();
-      
-      // Show success message for 5 seconds, then redirect
+      // Navigate back to venue dashboard after successful update
       setTimeout(() => {
         navigate("/venue-dashboard");
-      }, 5000);
+      }, 1500);
 
-    } catch (err: any) {
-      console.error("Error saving profile:", err);
-      
-      // Show more specific error message
-      if (err.message) {
-        setError(`Failed to save profile: ${err.message}`);
-      } else {
-        setError("Failed to save profile. Please try again.");
-      }
+    } catch (err) {
+      console.error("Error updating venue profile:", err);
+      setError("Failed to update profile. Please try again.");
     } finally {
       setSaving(false);
     }
   };
 
-  // Helper function to safely convert values to strings
   const safeString = (value: any): string => {
-    if (value === null || value === undefined) return "";
-    if (typeof value === "string") return value;
-    if (Array.isArray(value)) return value.join(", ");
-    return String(value);
+    if (typeof value === 'string') return value;
+    if (Array.isArray(value)) return value.join(', ');
+    return '';
   };
 
-  // Helper function to safely convert arrays
   const safeArray = (value: any): string[] => {
-    if (!value) return [];
     if (Array.isArray(value)) return value;
-    if (typeof value === "string") {
-      try {
-        const parsed = JSON.parse(value);
-        return Array.isArray(parsed) ? parsed : [];
-      } catch {
-        return value.split(",").map((item: string) => item.trim()).filter((item: string) => item.length > 0);
-      }
-    }
+    if (typeof value === 'string' && value.trim()) return [value];
     return [];
   };
 
+  // Show loading state while fetching
   if (loading) {
     return (
       <div className="container mx-auto p-6">
-        <Card>
-          <CardContent className="p-6">
-            <div className="animate-pulse space-y-4">
-              <div className="h-8 bg-gray-200 rounded"></div>
-              <div className="h-4 bg-gray-200 rounded"></div>
-              <div className="space-y-3">
-                <div className="h-10 bg-gray-200 rounded"></div>
-                <div className="h-10 bg-gray-200 rounded"></div>
-                <div className="h-10 bg-gray-200 rounded"></div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-muted-foreground">Loading your venue profile...</p>
+          </div>
+        </div>
       </div>
     );
   }
 
+  // If no venue profile found, this should redirect to create page
+  if (!venueProfile) {
+    return (
+      <div className="container mx-auto p-6">
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center">
+            <p className="text-muted-foreground">Redirecting to create profile...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Prepare form data for editing
+  const formData = {
+    firstName: venueProfile.owner?.firstName || user?.firstName || "",
+    lastName: venueProfile.owner?.lastName || user?.lastName || "",
+    email: venueProfile.email || user?.email || "",
+    name: venueProfile.name || "",
+    description: venueProfile.description || "",
+    type: venueProfile.type || "",
+    capacity: venueProfile.capacity?.toString() || "",
+    city: venueProfile.city || "",
+    state: venueProfile.state || "",
+    country: venueProfile.country || "",
+    address: venueProfile.address || "",
+    zipCode: venueProfile.zipCode || "",
+    phone: venueProfile.phone || "",
+    website: venueProfile.website || "",
+    priceRange: venueProfile.priceRange || "",
+    genres: safeArray(venueProfile.genres),
+    amenities: safeArray(venueProfile.amenities),
+    profilePicture: venueProfile.profilePicture || "",
+    additionalPictures: safeArray(venueProfile.additionalPictures),
+    socialLinks: venueProfile.socialLinks || [],
+    hours: venueProfile.hours || {},
+  };
+
   return (
-    <div className="container mx-auto p-6">
-      <div className="max-w-4xl mx-auto">
-        <div className="mb-6">
-          <Button 
-            variant="outline" 
-            onClick={() => navigate("/venue-dashboard")}
-            className="mb-4"
-          >
+    <div className="container mx-auto p-6 space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <Button variant="outline" onClick={() => navigate("/venue-dashboard")}>
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Dashboard
           </Button>
-          
-          <Card>
-            <CardHeader>
-              <CardTitle>
-                {venueProfile ? "Edit Venue Profile" : "Create Venue Profile"}
-              </CardTitle>
-              <CardDescription>
-                {venueProfile 
-                  ? "Update your venue profile information" 
-                  : "Create your venue profile to start managing events and bookings"
-                }
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {success && (
-                <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-md">
-                  <p className="text-sm text-green-700">
-                    Profile {venueProfile ? "updated" : "created"} successfully! Redirecting to dashboard...
-                  </p>
-                </div>
-              )}
-
-              {error && (
-                <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-md">
-                  <p className="text-sm text-red-700">{error}</p>
-                </div>
-              )}
-
-              {venueProfile && (
-                <UserProfileForm
-                  role="venue"
-                  profile={{ 
-                    ...user,  // User data first (firstName, lastName, email)
-                    ...venueProfile,  // Venue data second (including profilePicture)
-                    email: user.email, // Explicitly ensure user email is used
-                  }}
-                  onSave={handleSave}
-                  isSaving={saving}
-                  allowNameEdit={true}
-                />
-              )}
-
-              {!venueProfile && (
-                <UserProfileForm
-                  role="venue"
-                  profile={{ ...user }}
-                  onSave={handleSave}
-                  isSaving={saving}
-                  allowNameEdit={true}
-                />
-              )}
-            </CardContent>
-          </Card>
+          <div>
+            <h1 className="text-3xl font-bold">Edit Venue Profile</h1>
+            <p className="text-muted-foreground">
+              Update your venue information and settings
+            </p>
+          </div>
         </div>
       </div>
+
+      {/* Success Message */}
+      {success && (
+        <Card className="border-green-200 bg-green-50">
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-2 text-green-800">
+              <Star className="h-5 w-5" />
+              <p className="font-medium">Venue profile updated successfully!</p>
+            </div>
+            <p className="text-green-700 mt-1">Redirecting to your dashboard...</p>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Error Message */}
+      {error && (
+        <Card className="border-red-200 bg-red-50">
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-2 text-red-800">
+              <AlertCircle className="h-5 w-5" />
+              <p className="font-medium">Error</p>
+            </div>
+            <p className="text-red-700 mt-1">{error}</p>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Profile Form */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Building className="h-5 w-5" />
+            Venue Information
+          </CardTitle>
+          <CardDescription>
+            Update your venue details, amenities, and contact information
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <UserProfileForm
+            role="venue"
+            profile={formData}
+            onSave={handleSave}
+            isSaving={saving}
+            allowNameEdit={true}
+          />
+        </CardContent>
+      </Card>
     </div>
   );
 } 

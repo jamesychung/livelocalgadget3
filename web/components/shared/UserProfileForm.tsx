@@ -261,7 +261,7 @@ export const UserProfileForm: React.FC<UserProfileFormProps> = ({ role, profile,
       // Keep social links as JSON
       socialLinks: form.socialLinks,
       // Keep amenities as array
-      amenities: form.amenities
+      amenities: form.amenities,
     };
     
     console.log("Form submission data:", submitData);
@@ -295,6 +295,13 @@ export const UserProfileForm: React.FC<UserProfileFormProps> = ({ role, profile,
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
+      {/* Primary Contact Label for Venue Users */}
+      {role === "venue" && (
+        <div className="border-b pb-4 mb-6">
+          <h3 className="text-lg font-semibold mb-4">Primary Contact</h3>
+        </div>
+      )}
+
       {/* User fields */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
@@ -557,56 +564,195 @@ export const UserProfileForm: React.FC<UserProfileFormProps> = ({ role, profile,
       {/* Venue fields */}
       {role === "venue" && (
         <>
-          {/* Profile Picture Upload */}
-          <FileUpload
-            label="Venue Profile Picture"
-            type="image"
-            currentUrl={form.profilePicture}
-            onUpload={handleProfilePictureUpload}
-            onRemove={handleProfilePictureRemove}
-            accept="image/*"
-            maxSize={5}
-          />
+          {/* Venue Contact Information Section */}
+          <div className="border-b pb-6 mb-6">
+            <h3 className="text-lg font-semibold mb-4">Venue Contact Information</h3>
+            
+            <div>
+              <Label htmlFor="name">Venue Name *</Label>
+              <Input
+                id="name"
+                name="name"
+                value={form.name}
+                onChange={handleChange}
+                required
+                placeholder="Enter your venue name"
+              />
+            </div>
 
-          <div>
-            <Label htmlFor="name">Venue Name *</Label>
-            <Input
-              id="name"
-              name="name"
-              value={form.name}
-              onChange={handleChange}
-              required
-              placeholder="Enter your venue name"
-            />
+            <div>
+              <Label htmlFor="address">Address</Label>
+              <Input
+                id="address"
+                name="address"
+                value={form.address}
+                onChange={handleChange}
+                placeholder="Enter your venue address"
+              />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <Label htmlFor="venue-city">City *</Label>
+                <Input
+                  id="venue-city"
+                  name="city"
+                  value={form.city}
+                  onChange={handleChange}
+                  required
+                  placeholder="Enter your city"
+                />
+              </div>
+              <div>
+                <Label htmlFor="venue-state">State *</Label>
+                <Input
+                  id="venue-state"
+                  name="state"
+                  value={form.state}
+                  onChange={handleChange}
+                  required
+                  placeholder="Enter your state/province"
+                />
+              </div>
+              <div>
+                <Label htmlFor="venue-country">Country *</Label>
+                <Input
+                  id="venue-country"
+                  name="country"
+                  value={form.country}
+                  onChange={handleChange}
+                  required
+                  placeholder="Enter your country"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="venue-phone">Phone</Label>
+                <Input
+                  id="venue-phone"
+                  name="phone"
+                  value={form.phone}
+                  onChange={handleChange}
+                  placeholder="Enter your phone number"
+                />
+              </div>
+              <div>
+                <Label htmlFor="venue-zipCode">Zip Code</Label>
+                <Input
+                  id="venue-zipCode"
+                  name="zipCode"
+                  value={form.zipCode}
+                  onChange={handleChange}
+                  placeholder="Enter your zip code"
+                />
+              </div>
+            </div>
+
+            <div>
+              <Label htmlFor="venue-email">Venue Email</Label>
+              <Input
+                id="venue-email"
+                name="email"
+                type="email"
+                value={form.email}
+                onChange={handleChange}
+                placeholder="Enter your venue email address"
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                Business email for venue inquiries (different from your personal email above)
+              </p>
+            </div>
+
+            <div>
+              <Label htmlFor="venue-website">Website</Label>
+              <Input
+                id="venue-website"
+                name="website"
+                type="url"
+                value={form.website}
+                onChange={handleChange}
+                placeholder="https://yourvenue.com"
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                Enter a valid website URL (e.g., https://example.com) or leave empty
+              </p>
+            </div>
           </div>
 
-          <div>
-            <Label htmlFor="description">Description</Label>
-            <textarea
-              id="description"
-              name="description"
-              value={form.description}
-              onChange={handleChange}
-              className="w-full border rounded p-2 min-h-[80px]"
-              placeholder="Tell us about your venue..."
+          {/* Venue Details Section */}
+          <div className="border-b pb-6 mb-6">
+            <h3 className="text-lg font-semibold mb-4">Venue Details</h3>
+            
+            <div>
+              <Label htmlFor="description">Description</Label>
+              <textarea
+                id="description"
+                name="description"
+                value={form.description}
+                onChange={handleChange}
+                className="w-full border rounded p-2 min-h-[80px]"
+                placeholder="Tell us about your venue..."
+              />
+            </div>
+
+            {/* Profile Picture Upload */}
+            <FileUpload
+              label="Venue Profile Picture"
+              type="image"
+              currentUrl={form.profilePicture}
+              onUpload={handleProfilePictureUpload}
+              onRemove={handleProfilePictureRemove}
+              accept="image/*"
+              maxSize={5}
             />
+
+            {/* Additional Pictures */}
+            <MultipleImageUpload
+              label="Venue Photos"
+              images={form.additionalPictures}
+              onImagesChange={handleAdditionalPicturesChange}
+              maxImages={8}
+              maxSize={5}
+            />
+
+            <div>
+              <Label htmlFor="amenities">Amenities</Label>
+              <Input
+                id="amenities"
+                name="amenities"
+                value={form.amenities.join(', ')}
+                onChange={(e) => {
+                  const amenitiesArray = e.target.value.split(',').map(item => item.trim()).filter(item => item.length > 0);
+                  setForm({ ...form, amenities: amenitiesArray });
+                }}
+                placeholder="e.g., Parking, Food, Bar, Stage (separate with commas)"
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                Enter venue amenities, separated by commas
+              </p>
+            </div>
+
+            {/* Social Media Links */}
+            <SocialMediaForm
+              socialLinks={form.socialLinks}
+              onChange={handleSocialLinksChange}
+            />
+
+            <div>
+              <Label htmlFor="priceRange">Price Range</Label>
+              <Input
+                id="priceRange"
+                name="priceRange"
+                value={form.priceRange}
+                onChange={handleChange}
+                placeholder="e.g., $10-50, Free, $20+"
+              />
+            </div>
           </div>
 
-          {/* Additional Pictures */}
-          <MultipleImageUpload
-            label="Venue Photos"
-            images={form.additionalPictures}
-            onImagesChange={handleAdditionalPicturesChange}
-            maxImages={8}
-            maxSize={5}
-          />
-
-          {/* Social Media Links */}
-          <SocialMediaForm
-            socialLinks={form.socialLinks}
-            onChange={handleSocialLinksChange}
-          />
-
+          {/* Additional Venue Information */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <Label htmlFor="type">Venue Type</Label>
@@ -630,119 +776,6 @@ export const UserProfileForm: React.FC<UserProfileFormProps> = ({ role, profile,
                 placeholder="0"
               />
             </div>
-          </div>
-
-          <div>
-            <Label htmlFor="priceRange">Price Range</Label>
-            <Input
-              id="priceRange"
-              name="priceRange"
-              value={form.priceRange}
-              onChange={handleChange}
-              placeholder="e.g., $10-50, Free, $20+"
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="address">Address</Label>
-            <Input
-              id="address"
-              name="address"
-              value={form.address}
-              onChange={handleChange}
-              placeholder="Enter your venue address"
-            />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <Label htmlFor="venue-city">City *</Label>
-              <Input
-                id="venue-city"
-                name="city"
-                value={form.city}
-                onChange={handleChange}
-                required
-                placeholder="Enter your city"
-              />
-            </div>
-            <div>
-              <Label htmlFor="venue-state">State *</Label>
-              <Input
-                id="venue-state"
-                name="state"
-                value={form.state}
-                onChange={handleChange}
-                required
-                placeholder="Enter your state/province"
-              />
-            </div>
-            <div>
-              <Label htmlFor="venue-country">Country *</Label>
-              <Input
-                id="venue-country"
-                name="country"
-                value={form.country}
-                onChange={handleChange}
-                required
-                placeholder="Enter your country"
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="venue-phone">Phone</Label>
-              <Input
-                id="venue-phone"
-                name="phone"
-                value={form.phone}
-                onChange={handleChange}
-                placeholder="Enter your phone number"
-              />
-            </div>
-            <div>
-              <Label htmlFor="venue-zipCode">Zip Code</Label>
-              <Input
-                id="venue-zipCode"
-                name="zipCode"
-                value={form.zipCode}
-                onChange={handleChange}
-                placeholder="Enter your zip code"
-              />
-            </div>
-          </div>
-
-          <div>
-            <Label htmlFor="venue-website">Website</Label>
-            <Input
-              id="venue-website"
-              name="website"
-              type="url"
-              value={form.website}
-              onChange={handleChange}
-              placeholder="https://yourvenue.com"
-            />
-            <p className="text-xs text-muted-foreground mt-1">
-              Enter a valid website URL (e.g., https://example.com) or leave empty
-            </p>
-          </div>
-
-          <div>
-            <Label htmlFor="amenities">Amenities</Label>
-            <Input
-              id="amenities"
-              name="amenities"
-              value={form.amenities.join(', ')}
-              onChange={(e) => {
-                const amenitiesArray = e.target.value.split(',').map(item => item.trim()).filter(item => item.length > 0);
-                setForm({ ...form, amenities: amenitiesArray });
-              }}
-              placeholder="e.g., Parking, Food, Bar, Stage (separate with commas)"
-            />
-            <p className="text-xs text-muted-foreground mt-1">
-              Enter venue amenities, separated by commas
-            </p>
           </div>
         </>
       )}

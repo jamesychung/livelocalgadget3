@@ -20,7 +20,6 @@ export default function SearchMusiciansPage() {
     const [{ data: musiciansData, fetching: musiciansFetching, error: musiciansError }] = useFindMany(api.musician, {
         select: {
             id: true,
-            name: true,
             stageName: true,
             bio: true,
             genre: true,

@@ -30,8 +30,7 @@ export default function EventsPage() {
             },
             musician: {
                 id: true,
-                stageName: true,
-                name: true
+                stageName: true
             }
         },
         first: 50,

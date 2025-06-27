@@ -140,7 +140,6 @@ export default function CreateEventPage() {
     const [{ data: musiciansData, fetching: musiciansFetching }] = useFindMany(api.musician, {
         select: {
             id: true,
-            name: true,
             stageName: true,
             genre: true,
             city: true,

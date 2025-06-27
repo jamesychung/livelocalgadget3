@@ -36,19 +36,13 @@ export default function ProfileSetupPage() {
       if (userType === "musician") {
         await api.musician.create({
           user: { _link: user.id },
-          name: `${user.firstName} ${user.lastName}`,
           stageName: user.firstName,
           email: user.email,
           genres: [],
         });
         navigate("/musician-dashboard");
       } else if (userType === "venue") {
-        await api.venue.create({
-          owner: { _link: user.id },
-          name: `${user.firstName}'s Venue`,
-          email: user.email,
-        });
-        navigate("/venue-dashboard");
+        navigate("/venue-profile/create");
       } else {
         navigate("/signed-in");
       }

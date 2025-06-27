@@ -124,7 +124,6 @@ export default function VenueEventsPage() {
             ticketPrice: true,
             musician: {
                 id: true,
-                name: true,
                 stageName: true
             }
         },
@@ -154,7 +153,6 @@ export default function VenueEventsPage() {
             },
             musician: {
                 id: true,
-                name: true,
                 stageName: true,
                 city: true,
                 state: true,
@@ -171,7 +169,6 @@ export default function VenueEventsPage() {
     const [{ data: musiciansData, fetching: musiciansFetching }] = useFindMany(api.musician, {
         select: {
             id: true,
-            name: true,
             stageName: true,
             genre: true,
             city: true,
