@@ -9,7 +9,6 @@ import { ArrowLeft } from "lucide-react";
 
 interface MusicianProfile {
   id: string;
-  name: string;
   bio: string;
   genre: string;
   genres: string[];
@@ -82,48 +81,24 @@ export default function MusicianProfileCreate() {
       setLoading(true);
       setError(null);
 
-      const profileResult = await api.musician.findMany({
+      console.log("Checking existing profile for user ID:", user.id, "Type:", typeof user.id);
+
+      const existingProfile = await api.musician.findMany({
         filter: { user: { id: { equals: user.id } } },
         select: {
-          id: true,
-          name: true,
-          bio: true,
-          genre: true,
-          genres: true,
-          instruments: true,
-          hourlyRate: true,
-          location: true,
-          city: true,
-          state: true,
-          country: true,
-          experience: true,
-          yearsExperience: true,
-          stageName: true,
-          phone: true,
-          email: true,
-          website: true,
-          socialLinks: true,
-          profilePicture: true,
-          audioFiles: true,
-          additionalPictures: true,
-          isActive: true,
-          isVerified: true,
-          rating: true,
-          totalGigs: true,
-          availability: true,
-          user: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            email: true,
-          },
+          id: true, stageName: true, bio: true, genre: true, genres: true, city: true,
+          state: true, country: true, website: true, profilePicture: true, totalGigs: true,
+          rating: true, hourlyRate: true, yearsExperience: true, experience: true, instruments: true,
+          phone: true, email: true, availability: true
         },
         first: 1
       });
 
-      if (profileResult && profileResult.length > 0) {
+      console.log("Existing profile result:", existingProfile);
+
+      if (existingProfile && existingProfile.length > 0) {
         // Profile already exists, redirect to edit
-        setExistingProfile(profileResult[0]);
+        setExistingProfile(existingProfile[0]);
         setError("You already have a musician profile. Redirecting to edit page...");
         setTimeout(() => {
           navigate("/musician-profile/edit");

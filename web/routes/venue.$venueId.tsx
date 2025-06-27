@@ -327,7 +327,7 @@ export default function VenueProfile() {
                     {event.title}
                   </h3>
                   <p style={{ color: '#4a5568', marginBottom: '0.5rem', fontWeight: '500' }}>
-                    {event.musician && typeof event.musician === 'object' ? (event.musician as any)?.name || 'Unknown Musician' : String(event.musician || 'Unknown Musician')}
+                    {event.musician && typeof event.musician === 'object' ? (event.musician as any)?.stageName || 'Unknown Musician' : String(event.musician || 'Unknown Musician')}
                   </p>
                   <p style={{ color: '#4a5568', marginBottom: '0.5rem' }}>
                     📅 {event.date}

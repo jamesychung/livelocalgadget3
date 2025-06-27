@@ -374,7 +374,7 @@ export default function VenueDashboard() {
                       {bookings.slice(0, 5).map((booking) => (
                         <div key={booking.id} className="flex items-center justify-between p-3 border rounded-lg">
                           <div>
-                            <p className="font-medium">{safeString(booking.musician?.name)}</p>
+                            <p className="font-medium">{safeString(booking.musician?.stageName)}</p>
                             <p className="text-sm text-muted-foreground">
                               {formatDateTime(booking.proposedDateTime)}
                             </p>
@@ -440,7 +440,7 @@ export default function VenueDashboard() {
                         <div className="flex items-start justify-between">
                           <div className="space-y-2">
                             <div className="flex items-center gap-2">
-                              <h3 className="font-semibold">{safeString(booking.musician?.name)}</h3>
+                              <h3 className="font-semibold">{safeString(booking.musician?.stageName)}</h3>
                               {getStatusBadge(booking.status)}
                             </div>
                             <p className="text-sm text-muted-foreground">
@@ -500,7 +500,7 @@ export default function VenueDashboard() {
                             </p>
                             <p className="text-sm text-muted-foreground">
                               <MapPin className="inline h-4 w-4 mr-1" />
-                              {safeString(event.musician?.name)} - {safeString(event.musician?.location)}
+                              {safeString(event.musician?.stageName)} - {safeString(event.musician?.location)}
                             </p>
                             {event.description && (
                               <p className="text-sm">{safeString(event.description)}</p>

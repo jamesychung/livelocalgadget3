@@ -81,10 +81,6 @@ export const schema: GadgetModel = {
       storageKey: "musician_location",
       default: "",
     },
-    name: { 
-      type: "string", 
-      storageKey: "musician_name",
-    },
     phone: { 
       type: "string", 
       storageKey: "musician_phone",

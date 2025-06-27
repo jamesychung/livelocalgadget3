@@ -192,7 +192,7 @@ export default function MusicianProfile() {
   const hourlyRate = musician.hourlyRate ? `$${musician.hourlyRate}/hour` : "Rate not set";
 
   // Get display name
-  const displayName = musician.stageName || musician.name || "Musician";
+  const displayName = musician.stageName;
 
   // Prepare images array for lightbox
   const allImages: string[] = [];

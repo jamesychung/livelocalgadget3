@@ -41,7 +41,7 @@ export default function MusicianDashboard() {
     const [{ data: musicianData, fetching: musicianFetching, error: musicianError }] = useFindMany(api.musician, {
         filter: { user: { id: { equals: user?.id } } },
         select: {
-            id: true, name: true, stageName: true, bio: true, genre: true, genres: true, city: true,
+            id: true, stageName: true, bio: true, genre: true, genres: true, city: true,
             state: true, country: true, website: true, profilePicture: true, totalGigs: true,
             rating: true, hourlyRate: true, yearsExperience: true, experience: true, instruments: true,
             phone: true, email: true, availability: true

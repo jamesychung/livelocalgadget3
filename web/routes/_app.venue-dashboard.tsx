@@ -241,7 +241,7 @@ export default function VenueDashboard() {
                                                 <p className="text-sm text-muted-foreground">{formatDateTime(event.date)}</p>
                                                 {event.musician && (
                                                     <p className="text-sm text-muted-foreground">
-                                                        Featuring: {event.musician.stageName || event.musician.name}
+                                                        Featuring: {event.musician.stageName}
                                                     </p>
                                                 )}
                                             </div>
@@ -269,7 +269,7 @@ export default function VenueDashboard() {
                                                             to={`/musician/${booking.musician.id}`}
                                                             className="text-blue-600 hover:text-blue-800 hover:underline"
                                                         >
-                                                            {booking.musician.stageName || booking.musician.name}
+                                                            {booking.musician.stageName}
                                                         </Link>
                                                     ) : (
                                                         'Musician TBD'
@@ -346,7 +346,7 @@ export default function VenueDashboard() {
                                                             to={`/musician/${event.musician.id}`}
                                                             className="text-blue-600 hover:text-blue-800 hover:underline"
                                                         >
-                                                            {event.musician.stageName || event.musician.name}
+                                                            {event.musician.stageName}
                                                         </Link></span>
                                                     </div>
                                                 )}

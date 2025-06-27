@@ -302,7 +302,7 @@ export default function VenueEventsPage() {
             eventId: app.event?.id,
             eventTitle: app.event?.title,
             eventVenueId: app.event?.venue?.id,
-            musicianName: app.musician?.name,
+            musicianName: app.musician?.stageName,
             status: app.status
         });
     });
@@ -630,7 +630,7 @@ export default function VenueEventsPage() {
                                                                 to={`/musician/${event.musician.id}`}
                                                                 className="text-blue-600 hover:text-blue-800 hover:underline"
                                                             >
-                                                                {event.musician.stageName || event.musician.name}
+                                                                {event.musician.stageName}
                                                             </Link>
                                                         </div>
                                                     )}
@@ -825,7 +825,7 @@ export default function VenueEventsPage() {
                                                 <SelectItem value="none">No musician</SelectItem>
                                                 {musiciansData?.map((musician: any) => (
                                                     <SelectItem key={musician.id} value={musician.id}>
-                                                        {musician.stageName || musician.name} - {musician.genre} - ${musician.hourlyRate}/hr
+                                                        {musician.stageName} - {musician.genre} - ${musician.hourlyRate}/hr
                                                     </SelectItem>
                                                 ))}
                                             </SelectContent>
@@ -949,7 +949,7 @@ export default function VenueEventsPage() {
                                                                                 <div className="flex-1">
                                                                                     <div className="flex items-center gap-2 mb-2">
                                                                                         <h5 className="font-medium">
-                                                                                            {app.musician?.stageName || app.musician?.name}
+                                                                                            {app.musician?.stageName}
                                                                                         </h5>
                                                                                         <Badge className="text-xs">
                                                                                             {app.status.replace("_", " ").toUpperCase()}
@@ -1007,7 +1007,7 @@ export default function VenueEventsPage() {
                                                                             <BookingMessaging
                                                                                 bookingId={app.id}
                                                                                 eventTitle={event.title}
-                                                                                musicianName={app.musician?.stageName || app.musician?.name}
+                                                                                musicianName={app.musician?.stageName}
                                                                                 bookingData={app}
                                                                             />
                                                                         </div>

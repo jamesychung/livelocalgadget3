@@ -79,7 +79,7 @@ export default function MusiciansPage() {
                             <CardHeader>
                                 <CardTitle className="flex items-center gap-2">
                                     <Music className="h-5 w-5" />
-                                    {musician.stageName || musician.name}
+                                    {musician.stageName}
                                 </CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-4">

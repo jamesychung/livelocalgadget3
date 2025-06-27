@@ -249,7 +249,7 @@ export default function VenueEventCalendar({
                                                                         className="text-blue-600 hover:text-blue-800 hover:underline"
                                                                         onClick={(e) => e.stopPropagation()}
                                                                     >
-                                                                        {event.musician.stageName || event.musician.name}
+                                                                        {event.musician.stageName}
                                                                     </Link>
                                                                 </p>
                                                             )}
@@ -370,7 +370,7 @@ export default function VenueEventCalendar({
                                                             className="text-blue-600 hover:text-blue-800 hover:underline"
                                                             onClick={(e) => e.stopPropagation()}
                                                         >
-                                                            {event.musician.stageName || event.musician.name}
+                                                            {event.musician.stageName}
                                                         </Link>
                                                     )}
                                                 </div>

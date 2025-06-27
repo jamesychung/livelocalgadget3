@@ -14,7 +14,6 @@ export const DatabaseTest: React.FC = () => {
     try {
       // Test creating a musician with multiple genres
       const testMusician = await api.musician.create({
-        name: "Test Musician",
         stageName: "Test Artist",
         email: "test@example.com",
         genre: "Jazz",

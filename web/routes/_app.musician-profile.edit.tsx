@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useOutletContext, useNavigate } from "react-router";
+import { useFindMany } from "@gadgetinc/react";
 import { api } from "../api";
 import type { AuthOutletContext } from "./_app";
 import { UserProfileForm } from "../components/shared/UserProfileForm";
@@ -9,7 +10,6 @@ import { ArrowLeft } from "lucide-react";
 
 interface MusicianProfile {
   id: string;
-  name: string;
   bio: string;
   genre: string;
   genres: string[];
@@ -45,8 +45,6 @@ interface MusicianProfile {
 export default function MusicianProfileEdit() {
   const outletContext = useOutletContext<AuthOutletContext>();
   const navigate = useNavigate();
-  const [musicianProfile, setMusicianProfile] = useState<MusicianProfile | null>(null);
-  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
@@ -71,72 +69,37 @@ export default function MusicianProfileEdit() {
     );
   }
 
+  // Use the same hook as the dashboard
+  const [{ data: musicianData, fetching: musicianFetching, error: musicianError }] = useFindMany(api.musician, {
+    filter: { user: { id: { equals: user?.id } } },
+    select: {
+      id: true, stageName: true, bio: true, genre: true, genres: true, city: true,
+      state: true, country: true, website: true, profilePicture: true, totalGigs: true,
+      rating: true, hourlyRate: true, yearsExperience: true, experience: true, instruments: true,
+      phone: true, email: true, availability: true
+    },
+    first: 1,
+    pause: !user?.id,
+  });
+
+  const musicianProfile: any = musicianData?.[0];
+
   useEffect(() => {
-    if (user?.id) {
-      loadMusicianProfile();
-    }
-  }, [user?.id]);
-
-  const loadMusicianProfile = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-
-      const profileResult = await api.musician.findMany({
-        filter: { user: { id: { equals: user.id } } },
-        select: {
-          id: true,
-          name: true,
-          bio: true,
-          genre: true,
-          genres: true,
-          instruments: true,
-          hourlyRate: true,
-          location: true,
-          city: true,
-          state: true,
-          country: true,
-          experience: true,
-          yearsExperience: true,
-          stageName: true,
-          phone: true,
-          email: true,
-          website: true,
-          socialLinks: true,
-          profilePicture: true,
-          audioFiles: true,
-          additionalPictures: true,
-          isActive: true,
-          isVerified: true,
-          rating: true,
-          totalGigs: true,
-          availability: true,
-          user: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            email: true,
-          },
-        },
-        first: 1
-      });
-
-      if (profileResult && profileResult.length > 0) {
-        setMusicianProfile(profileResult[0]);
-      } else {
-        // No profile exists, redirect to create
-        setError("No musician profile found. Redirecting to create page...");
-        setTimeout(() => {
-          navigate("/musician-profile/create");
-        }, 2000);
-      }
-    } catch (err) {
-      console.error("Error loading musician profile:", err);
+    if (musicianError) {
+      console.error("Error loading musician data:", musicianError);
       setError("Failed to load profile. Please try again.");
-    } finally {
-      setLoading(false);
     }
-  };
+  }, [musicianError]);
+
+  // If no profile exists, redirect to create
+  useEffect(() => {
+    if (!musicianFetching && !musicianProfile) {
+      setError("No musician profile found. Redirecting to create page...");
+      setTimeout(() => {
+        navigate("/musician-profile/create");
+      }, 2000);
+    }
+  }, [musicianFetching, musicianProfile, navigate]);
 
   const handleSave = async (formData: any) => {
     try {
@@ -205,9 +168,6 @@ export default function MusicianProfileEdit() {
       setSuccess(true);
       console.log("=== EDIT PROFILE SAVE COMPLETED ===");
       
-      // Reload the profile to get updated data
-      await loadMusicianProfile();
-      
       // Show success message for 2 seconds, then redirect
       setTimeout(() => {
         navigate("/musician-dashboard");
@@ -221,7 +181,7 @@ export default function MusicianProfileEdit() {
     }
   };
 
-  if (loading) {
+  if (musicianFetching) {
     return (
       <div className="container mx-auto p-6">
         <Card>

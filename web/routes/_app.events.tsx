@@ -123,7 +123,7 @@ export default function EventsPage() {
                                         <div className="flex items-center gap-2">
                                             <Music className="h-4 w-4 text-muted-foreground" />
                                             <span>
-                                                {event.musician.stageName || event.musician.name}
+                                                {event.musician.stageName}
                                             </span>
                                         </div>
                                     )}

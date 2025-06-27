@@ -42,7 +42,6 @@ export default function SearchMusiciansPage() {
     const filteredMusicians = musicians.filter((musician) => {
         const matchesSearch = !searchTerm || 
             (musician.stageName && musician.stageName.toLowerCase().includes(searchTerm.toLowerCase())) ||
-            (musician.name && musician.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
             (musician.bio && musician.bio.toLowerCase().includes(searchTerm.toLowerCase()));
         
         const matchesGenre = selectedGenre === "all" || 
@@ -173,7 +172,7 @@ export default function SearchMusiciansPage() {
                                 <CardHeader>
                                     <CardTitle className="flex items-center gap-2">
                                         <Music className="h-5 w-5" />
-                                        {musician.stageName || musician.name}
+                                        {musician.stageName}
                                     </CardTitle>
                                 </CardHeader>
                                 <CardContent className="space-y-4">

@@ -16,7 +16,6 @@ export default function AvailabilityPage() {
         filter: { user: { id: { equals: user?.id } } },
         select: {
             id: true, 
-            name: true, 
             stageName: true, 
             availability: true
         },
@@ -25,6 +24,7 @@ export default function AvailabilityPage() {
     });
 
     const musician: any = musicianData?.[0];
+
     const [updateMusicianResult, updateMusician] = useAction(api.musician.update);
 
     useEffect(() => {

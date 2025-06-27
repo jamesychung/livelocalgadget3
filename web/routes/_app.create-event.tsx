@@ -735,7 +735,7 @@ export default function CreateEventPage() {
                                         <SelectItem value="none">No musician selected</SelectItem>
                                         {musicians.map((musician) => (
                                             <SelectItem key={musician.id} value={musician.id}>
-                                                {musician.stageName || musician.name}
+                                                {musician.stageName}
                                                 {musician.city && ` (${musician.city}, ${musician.state})`}
                                             </SelectItem>
                                         ))}
