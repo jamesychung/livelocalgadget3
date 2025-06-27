@@ -35,6 +35,7 @@ export default function () {
               name: `${user.firstName} ${user.lastName}`,
               stageName: user.firstName,
               email: user.email,
+              genres: [],
             });
           }
           

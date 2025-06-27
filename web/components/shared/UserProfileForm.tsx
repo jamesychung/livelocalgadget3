@@ -183,6 +183,11 @@ export const UserProfileForm: React.FC<UserProfileFormProps> = ({ role, profile,
       return;
     }
     
+    if (role === "musician" && form.genres.length === 0) {
+      alert("Please select at least one genre.");
+      return;
+    }
+    
     if (role === "venue" && !form.name.trim()) {
       alert("Please enter your venue name.");
       return;
@@ -219,8 +224,8 @@ export const UserProfileForm: React.FC<UserProfileFormProps> = ({ role, profile,
       zipCode: form.zipCode,
       // Use the first selected genre as the primary genre field
       genre: form.genres.length > 0 ? form.genres[0] : "",
-      // Keep the genres array for the JSON field
-      genres: form.genres,
+      // Keep the genres array for the JSON field - ensure it's always an array
+      genres: Array.isArray(form.genres) ? form.genres : [],
       // Ensure website is either a valid URL or null
       website: form.website.trim() || null,
       // Include image data for all profiles (now using URLs instead of base64)
@@ -233,6 +238,9 @@ export const UserProfileForm: React.FC<UserProfileFormProps> = ({ role, profile,
       // Keep amenities as array
       amenities: form.amenities
     };
+    
+    console.log("Form submission data:", submitData);
+    console.log("Genres being submitted:", submitData.genres);
     
     onSave(submitData);
   };

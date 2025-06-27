@@ -59,7 +59,7 @@ export default function AvailabilityPage() {
                         </p>
                         <div className="flex gap-2 justify-center">
                             <Button asChild>
-                                <Link to="/musician-profile/edit">
+                                <Link to="/musician-profile/create">
                                     Create Musician Profile
                                 </Link>
                             </Button>

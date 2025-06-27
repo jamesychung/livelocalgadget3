@@ -39,6 +39,7 @@ export default function ProfileSetupPage() {
           name: `${user.firstName} ${user.lastName}`,
           stageName: user.firstName,
           email: user.email,
+          genres: [],
         });
         navigate("/musician-dashboard");
       } else if (userType === "venue") {

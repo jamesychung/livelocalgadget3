@@ -42,14 +42,14 @@ interface MusicianProfile {
   };
 }
 
-export default function MusicianProfileEdit() {
+export default function MusicianProfileCreate() {
   const outletContext = useOutletContext<AuthOutletContext>();
   const navigate = useNavigate();
-  const [musicianProfile, setMusicianProfile] = useState<MusicianProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [existingProfile, setExistingProfile] = useState<MusicianProfile | null>(null);
 
   // Ensure we have the user from context
   const user = outletContext?.user;
@@ -73,11 +73,11 @@ export default function MusicianProfileEdit() {
 
   useEffect(() => {
     if (user?.id) {
-      loadMusicianProfile();
+      checkExistingProfile();
     }
   }, [user?.id]);
 
-  const loadMusicianProfile = async () => {
+  const checkExistingProfile = async () => {
     try {
       setLoading(true);
       setError(null);
@@ -122,17 +122,19 @@ export default function MusicianProfileEdit() {
       });
 
       if (profileResult && profileResult.length > 0) {
-        setMusicianProfile(profileResult[0]);
-      } else {
-        // No profile exists, redirect to create
-        setError("No musician profile found. Redirecting to create page...");
+        // Profile already exists, redirect to edit
+        setExistingProfile(profileResult[0]);
+        setError("You already have a musician profile. Redirecting to edit page...");
         setTimeout(() => {
-          navigate("/musician-profile/create");
+          navigate("/musician-profile/edit");
         }, 2000);
+      } else {
+        // No profile exists, allow creation
+        setExistingProfile(null);
       }
     } catch (err) {
-      console.error("Error loading musician profile:", err);
-      setError("Failed to load profile. Please try again.");
+      console.error("Error checking musician profile:", err);
+      setError("Failed to check profile. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -144,16 +146,11 @@ export default function MusicianProfileEdit() {
       setError(null);
       setSuccess(false);
 
-      console.log("=== EDIT PROFILE SAVE STARTED ===");
+      console.log("=== CREATE PROFILE SAVE STARTED ===");
       console.log("Form data received:", formData);
-      console.log("Current musician profile:", musicianProfile);
 
-      if (!musicianProfile) {
-        throw new Error("No profile to update");
-      }
-
-      // Prepare the update data
-      const updateData = {
+      // Prepare the create data
+      const createData = {
         stageName: formData.stageName || "",
         bio: formData.bio || "",
         genre: formData.genre || "",
@@ -186,23 +183,28 @@ export default function MusicianProfileEdit() {
         audioFiles: formData.audioFiles || [],
         socialLinks: formData.socialLinks || [],
         additionalPictures: formData.additionalPictures || [],
+        user: { _link: user.id },
+        isActive: true,
+        isVerified: false,
+        rating: 0,
+        totalGigs: 0,
       };
 
-      console.log("Update data being sent:", updateData);
+      console.log("Create data being sent:", createData);
 
-      // Update the musician profile
+      // Create the musician profile
       try {
-        const updateResult = await api.musician.update(musicianProfile.id, updateData);
-        console.log("Musician update result:", updateResult);
-      } catch (updateError: any) {
-        console.error("Musician update error details:", {
-          message: updateError.message,
-          code: updateError.code,
-          status: updateError.status,
-          response: updateError.response,
-          data: updateError.data
+        const createResult = await api.musician.create(createData);
+        console.log("Musician create result:", createResult);
+      } catch (createError: any) {
+        console.error("Musician create error details:", {
+          message: createError.message,
+          code: createError.code,
+          status: createError.status,
+          response: createError.response,
+          data: createError.data
         });
-        throw updateError;
+        throw createError;
       }
 
       // Update the user profile (firstName, lastName, email)
@@ -217,10 +219,7 @@ export default function MusicianProfileEdit() {
       console.log("User update result:", userUpdateResult);
 
       setSuccess(true);
-      console.log("=== EDIT PROFILE SAVE COMPLETED ===");
-      
-      // Reload the profile to get updated data
-      await loadMusicianProfile();
+      console.log("=== CREATE PROFILE SAVE COMPLETED ===");
       
       // Show success message for 2 seconds, then redirect
       setTimeout(() => {
@@ -228,8 +227,8 @@ export default function MusicianProfileEdit() {
       }, 2000);
 
     } catch (err) {
-      console.error("Error saving profile:", err);
-      setError("Failed to save profile. Please try again.");
+      console.error("Error creating profile:", err);
+      setError("Failed to create profile. Please try again.");
     } finally {
       setSaving(false);
     }
@@ -255,12 +254,12 @@ export default function MusicianProfileEdit() {
     );
   }
 
-  if (!musicianProfile) {
+  if (existingProfile) {
     return (
       <div className="container mx-auto p-6">
         <Card>
           <CardHeader>
-            <CardTitle>No Profile Found</CardTitle>
+            <CardTitle>Profile Already Exists</CardTitle>
             <CardDescription>{error}</CardDescription>
           </CardHeader>
           <CardContent>
@@ -269,8 +268,8 @@ export default function MusicianProfileEdit() {
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Back to Dashboard
               </Button>
-              <Button onClick={() => navigate("/musician-profile/create")}>
-                Create Profile
+              <Button onClick={() => navigate("/musician-profile/edit")}>
+                Edit Profile
               </Button>
             </div>
           </CardContent>
@@ -294,16 +293,16 @@ export default function MusicianProfileEdit() {
           
           <Card>
             <CardHeader>
-              <CardTitle>Edit Musician Profile</CardTitle>
+              <CardTitle>Create Musician Profile</CardTitle>
               <CardDescription>
-                Update your musician profile information
+                Set up your musician profile to start getting booked for events
               </CardDescription>
             </CardHeader>
             <CardContent>
               {success && (
                 <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-md">
                   <p className="text-sm text-green-700">
-                    Profile updated successfully! Redirecting to dashboard...
+                    Profile created successfully! Redirecting to dashboard...
                   </p>
                 </div>
               )}
@@ -316,7 +315,7 @@ export default function MusicianProfileEdit() {
 
               <UserProfileForm
                 role="musician"
-                profile={{ ...user, ...musicianProfile }}
+                profile={{ ...user }}
                 onSave={handleSave}
                 isSaving={saving}
               />

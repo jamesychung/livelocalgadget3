@@ -61,7 +61,7 @@ const navigationItems: NavItem[] = [
   },
   {
     title: "Profile",
-    path: "/musician-profile/edit",
+    path: "/musician-dashboard",
     icon: User,
     roles: ["musician"],
   },

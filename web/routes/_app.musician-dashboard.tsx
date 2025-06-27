@@ -8,6 +8,7 @@ import { Edit, Clock, MapPin, CalendarDays, Star, DollarSign, AlertCircle, Music
 import { useFindMany } from "@gadgetinc/react";
 import { api } from "../api";
 import type { AuthOutletContext } from "./_app";
+import { DatabaseTest } from "../components/shared/DatabaseTest";
 
 // Helper function to render status badges
 function getStatusBadge(status: string) {
@@ -109,7 +110,7 @@ export default function MusicianDashboard() {
                             It looks like you haven't created your musician profile yet. Create your profile to start managing your bookings, events, and availability.
                         </p>
                         <Button asChild>
-                            <Link to="/musician-profile/edit">
+                            <Link to="/musician-profile/create">
                                 Create Musician Profile
                             </Link>
                         </Button>
@@ -298,7 +299,7 @@ export default function MusicianDashboard() {
                                 <div className="font-semibold">Instruments:</div>
                                 <div className="flex flex-wrap gap-1">
                                     {musician.instruments && musician.instruments.length > 0 ? (
-                                        musician.instruments.flat().map((inst: string, i: number) => inst && <Badge key={i} variant="outline">{inst}</Badge>)
+                                        musician.instruments.map((i: string, index: number) => <Badge key={index} variant="secondary">{i}</Badge>)
                                     ) : 'Not set'}
                                 </div>
 
@@ -326,6 +327,19 @@ export default function MusicianDashboard() {
                                 <h4 className="font-semibold mb-2">Bio:</h4>
                                 <p className="text-sm text-muted-foreground">{musician.bio || 'No bio provided.'}</p>
                             </div>
+                        </CardContent>
+                    </Card>
+
+                    {/* Database Test Component */}
+                    <Card className="mt-6">
+                        <CardHeader>
+                            <CardTitle>Debug: Genre Test</CardTitle>
+                            <CardDescription>
+                                Test the genre saving functionality
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <DatabaseTest />
                         </CardContent>
                     </Card>
                 </TabsContent>
