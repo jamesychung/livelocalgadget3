@@ -57,6 +57,31 @@ export const UserProfileForm: React.FC<UserProfileFormProps> = ({ role, profile,
     "Indie", "Metal", "Punk", "Gospel", "Bluegrass", "Ska", "Disco", "House"
   ];
 
+  // Helper function to convert instruments array to comma-separated string
+  const instrumentsArrayToString = (instruments: any): string => {
+    if (!instruments) return "";
+    if (typeof instruments === 'string') {
+      // If it's already a string, try to parse it as JSON
+      try {
+        const parsed = JSON.parse(instruments);
+        return Array.isArray(parsed) ? parsed.join(", ") : instruments;
+      } catch {
+        // If it's not valid JSON, return as is (might be comma-separated already)
+        return instruments;
+      }
+    }
+    if (Array.isArray(instruments)) {
+      return instruments.join(", ");
+    }
+    return "";
+  };
+
+  // Helper function to convert comma-separated string to instruments array
+  const instrumentsStringToArray = (instrumentsStr: string): string[] => {
+    if (!instrumentsStr || !instrumentsStr.trim()) return [];
+    return instrumentsStr.split(",").map(item => item.trim()).filter(item => item.length > 0);
+  };
+
   // Set up local state for all possible fields
   const [form, setForm] = useState({
     firstName: safeString(profile?.firstName) || "",
@@ -75,7 +100,7 @@ export const UserProfileForm: React.FC<UserProfileFormProps> = ({ role, profile,
     website: safeString(profile?.website) || "",
     experience: safeString(profile?.experience) || "",
     yearsExperience: safeString(profile?.yearsExperience) || "",
-    instruments: safeString(profile?.instruments) || "",
+    instruments: instrumentsArrayToString(profile?.instruments) || "",
     hourlyRate: safeString(profile?.hourlyRate) || "",
     profilePicture: safeString(profile?.profilePicture) || "",
     audio: safeString(profile?.audio) || "",
@@ -111,7 +136,7 @@ export const UserProfileForm: React.FC<UserProfileFormProps> = ({ role, profile,
       website: safeString(profile?.website) || "",
       experience: safeString(profile?.experience) || "",
       yearsExperience: safeString(profile?.yearsExperience) || "",
-      instruments: safeString(profile?.instruments) || "",
+      instruments: instrumentsArrayToString(profile?.instruments) || "",
       hourlyRate: safeString(profile?.hourlyRate) || "",
       profilePicture: safeString(profile?.profilePicture) || "",
       audio: safeString(profile?.audio) || "",
@@ -216,7 +241,7 @@ export const UserProfileForm: React.FC<UserProfileFormProps> = ({ role, profile,
       experience: form.experience,
       yearsExperience: form.yearsExperience ? parseInt(form.yearsExperience) : 0,
       hourlyRate: form.hourlyRate ? parseFloat(form.hourlyRate) : 0,
-      instruments: form.instruments,
+      instruments: instrumentsStringToArray(form.instruments),
       type: form.type,
       capacity: form.capacity ? parseInt(form.capacity) : 0,
       priceRange: form.priceRange,
@@ -395,7 +420,7 @@ export const UserProfileForm: React.FC<UserProfileFormProps> = ({ role, profile,
                     <Checkbox
                       id={genre}
                       checked={form.genres.includes(genre)}
-                      onCheckedChange={(checked) => handleGenreChange(genre, checked === true)}
+                      onCheckedChange={(checked: boolean | "indeterminate") => handleGenreChange(genre, checked === true)}
                     />
                     <Label 
                       htmlFor={genre} 
@@ -507,10 +532,10 @@ export const UserProfileForm: React.FC<UserProfileFormProps> = ({ role, profile,
               name="instruments"
               value={form.instruments}
               onChange={handleChange}
-              placeholder="e.g., Guitar, Piano, Drums (separate with commas)"
+              placeholder="Guitar, Piano, Drums, Vocals"
             />
             <p className="text-xs text-muted-foreground mt-1">
-              Enter your primary instrument(s), separated by commas
+              Enter your instruments, separated by commas (e.g., Guitar, Piano, Drums)
             </p>
           </div>
           <div>

@@ -158,21 +158,7 @@ export default function MusicianProfileEdit() {
         bio: formData.bio || "",
         genre: formData.genre || "",
         genres: Array.isArray(formData.genres) ? formData.genres : [],
-        instruments: formData.instruments ? 
-          (typeof formData.instruments === 'string' ? 
-            (formData.instruments === '[]' || formData.instruments.includes('[]') ? [] :
-             formData.instruments.startsWith('[') && formData.instruments.endsWith(']') ?
-             (() => {
-               try {
-                 const parsed = JSON.parse(formData.instruments);
-                 return Array.isArray(parsed) ? parsed : [];
-               } catch {
-                 return formData.instruments.split(',').map((i: string) => i.trim()).filter((i: string) => i.length > 0);
-               }
-             })() :
-             formData.instruments.split(',').map((i: string) => i.trim()).filter((i: string) => i.length > 0)) : 
-            formData.instruments) : 
-          [],
+        instruments: formData.instruments || [],
         city: formData.city || "",
         state: formData.state || "",
         country: formData.country || "",
