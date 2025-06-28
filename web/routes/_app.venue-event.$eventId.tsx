@@ -32,6 +32,10 @@ export default function VenueEventManagementPage() {
     const [selectedMusician, setSelectedMusician] = useState<any>(null);
     const [newMessage, setNewMessage] = useState("");
 
+    // Sorting state for bookings table
+    const [sortColumn, setSortColumn] = useState('applied'); // default sort by Applied
+    const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+
     // Static mock data for demonstration
     const event = {
         id: eventId,
@@ -254,6 +258,48 @@ export default function VenueEventManagementPage() {
             console.log("Sending message:", newMessage);
             setNewMessage("");
         }
+    };
+
+    // Helper to get value for sorting
+    const getSortValue = (booking, column) => {
+        switch (column) {
+            case 'musician':
+                return booking.musician.stageName.toLowerCase();
+            case 'genre':
+                return booking.musician.genre.toLowerCase();
+            case 'location':
+                return `${booking.musician.city}, ${booking.musician.state}`.toLowerCase();
+            case 'rate':
+                return booking.proposedRate;
+            case 'status':
+                return booking.status.toLowerCase();
+            case 'applied':
+                return new Date(booking.createdAt).getTime();
+            default:
+                return '';
+        }
+    };
+
+    // Sort bookingsData for table display
+    const sortedBookings = [...bookingsData].sort((a, b) => {
+        const aValue = getSortValue(a, sortColumn);
+        const bValue = getSortValue(b, sortColumn);
+        if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1;
+        if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1;
+        return 0;
+    });
+
+    // Helper to render sort indicator
+    const renderSortIndicator = (column) => {
+        if (sortColumn === column) {
+            return sortDirection === 'asc' ? (
+                <span style={{ fontWeight: 700, marginLeft: 2 }}>▲</span>
+            ) : (
+                <span style={{ fontWeight: 700, marginLeft: 2 }}>▼</span>
+            );
+        }
+        // Faint up/down arrows for unsorted columns
+        return <span style={{ color: '#bbb', marginLeft: 2, fontSize: '0.9em' }}>▲▼</span>;
     };
 
     const confirmedBookings = bookingsData.filter(b => b.status === "confirmed");
@@ -535,24 +581,76 @@ export default function VenueEventManagementPage() {
                             </p>
                         </CardHeader>
                         <CardContent>
-                            {bookingsData.length > 0 ? (
+                            {sortedBookings.length > 0 ? (
                                 <div className="space-y-4">
+                                    {/* Summary Stats - Moved to top */}
+                                    <div className="grid grid-cols-5 gap-4 pb-4 border-b">
+                                        <div className="text-center">
+                                            <div className="text-2xl font-bold text-blue-600">
+                                                {bookingsData.filter((b: any) => b.status === "applied").length}
+                                            </div>
+                                            <div className="text-sm text-muted-foreground">Applied</div>
+                                        </div>
+                                        <div className="text-center">
+                                            <div className="text-2xl font-bold text-yellow-600">
+                                                {bookingsData.filter((b: any) => b.status === "invited").length}
+                                            </div>
+                                            <div className="text-sm text-muted-foreground">Invited</div>
+                                        </div>
+                                        <div className="text-center">
+                                            <div className="text-2xl font-bold text-purple-600">
+                                                {bookingsData.filter((b: any) => b.status === "communicating").length}
+                                            </div>
+                                            <div className="text-sm text-muted-foreground">Communicating</div>
+                                        </div>
+                                        <div className="text-center">
+                                            <div className="text-2xl font-bold text-green-600">
+                                                {bookingsData.filter((b: any) => b.status === "confirmed").length}
+                                            </div>
+                                            <div className="text-sm text-muted-foreground">Confirmed</div>
+                                        </div>
+                                        <div className="text-center">
+                                            <div className="text-2xl font-bold text-red-600">
+                                                {bookingsData.filter((b: any) => b.status === "rejected").length}
+                                            </div>
+                                            <div className="text-sm text-muted-foreground">Rejected</div>
+                                        </div>
+                                    </div>
+                                    
                                     {/* Table View */}
                                     <div className="overflow-x-auto">
                                         <table className="w-full">
                                             <thead>
                                                 <tr className="border-b">
-                                                    <th className="text-left py-3 px-2 font-medium text-sm">Musician</th>
-                                                    <th className="text-left py-3 px-2 font-medium text-sm">Genre</th>
-                                                    <th className="text-left py-3 px-2 font-medium text-sm">Location</th>
-                                                    <th className="text-left py-3 px-2 font-medium text-sm">Rate</th>
-                                                    <th className="text-left py-3 px-2 font-medium text-sm">Status</th>
-                                                    <th className="text-left py-3 px-2 font-medium text-sm">Applied</th>
+                                                    <th className="text-left py-3 px-2 font-medium text-sm cursor-pointer select-none" onClick={() => {
+                                                        if (sortColumn === 'musician') setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+                                                        setSortColumn('musician');
+                                                    }}>Musician{renderSortIndicator('musician')}</th>
+                                                    <th className="text-left py-3 px-2 font-medium text-sm cursor-pointer select-none" onClick={() => {
+                                                        if (sortColumn === 'genre') setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+                                                        setSortColumn('genre');
+                                                    }}>Genre{renderSortIndicator('genre')}</th>
+                                                    <th className="text-left py-3 px-2 font-medium text-sm cursor-pointer select-none" onClick={() => {
+                                                        if (sortColumn === 'location') setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+                                                        setSortColumn('location');
+                                                    }}>Location{renderSortIndicator('location')}</th>
+                                                    <th className="text-left py-3 px-2 font-medium text-sm cursor-pointer select-none" onClick={() => {
+                                                        if (sortColumn === 'rate') setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+                                                        setSortColumn('rate');
+                                                    }}>Rate{renderSortIndicator('rate')}</th>
+                                                    <th className="text-left py-3 px-2 font-medium text-sm cursor-pointer select-none" onClick={() => {
+                                                        if (sortColumn === 'status') setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+                                                        setSortColumn('status');
+                                                    }}>Status{renderSortIndicator('status')}</th>
+                                                    <th className="text-left py-3 px-2 font-medium text-sm cursor-pointer select-none" onClick={() => {
+                                                        if (sortColumn === 'applied') setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+                                                        setSortColumn('applied');
+                                                    }}>Applied{renderSortIndicator('applied')}</th>
                                                     <th className="text-left py-3 px-2 font-medium text-sm">Actions</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                {bookingsData.map((booking) => (
+                                                {sortedBookings.map((booking) => (
                                                     <tr 
                                                         key={booking.id} 
                                                         className="border-b hover:bg-gray-50 cursor-pointer"
@@ -657,40 +755,6 @@ export default function VenueEventManagementPage() {
                                                 ))}
                                             </tbody>
                                         </table>
-                                    </div>
-                                    
-                                    {/* Summary Stats */}
-                                    <div className="grid grid-cols-5 gap-4 pt-4 border-t">
-                                        <div className="text-center">
-                                            <div className="text-2xl font-bold text-blue-600">
-                                                {bookingsData.filter((b: any) => b.status === "applied").length}
-                                            </div>
-                                            <div className="text-sm text-muted-foreground">Applied</div>
-                                        </div>
-                                        <div className="text-center">
-                                            <div className="text-2xl font-bold text-yellow-600">
-                                                {bookingsData.filter((b: any) => b.status === "invited").length}
-                                            </div>
-                                            <div className="text-sm text-muted-foreground">Invited</div>
-                                        </div>
-                                        <div className="text-center">
-                                            <div className="text-2xl font-bold text-purple-600">
-                                                {bookingsData.filter((b: any) => b.status === "communicating").length}
-                                            </div>
-                                            <div className="text-sm text-muted-foreground">Communicating</div>
-                                        </div>
-                                        <div className="text-center">
-                                            <div className="text-2xl font-bold text-green-600">
-                                                {bookingsData.filter((b: any) => b.status === "confirmed").length}
-                                            </div>
-                                            <div className="text-sm text-muted-foreground">Confirmed</div>
-                                        </div>
-                                        <div className="text-center">
-                                            <div className="text-2xl font-bold text-red-600">
-                                                {bookingsData.filter((b: any) => b.status === "rejected").length}
-                                            </div>
-                                            <div className="text-sm text-muted-foreground">Rejected</div>
-                                        </div>
                                     </div>
                                 </div>
                             ) : (
