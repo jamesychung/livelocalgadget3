@@ -9,6 +9,7 @@ import { useFindMany } from "@gadgetinc/react";
 import { api } from "../api";
 import type { AuthOutletContext } from "./_app";
 import { ClickableImage } from "../components/shared/ClickableImage";
+import VenueSystemFlowchart from "../components/shared/VenueSystemFlowchart";
 
 // Helper function to render status badges
 function getStatusBadge(status: string) {
@@ -227,29 +228,31 @@ export default function VenueDashboard() {
                 </TabsList>
 
                 <TabsContent value="overview">
-                    <Card>
-                        <CardHeader><CardTitle>Upcoming Events</CardTitle></CardHeader>
-                        <CardContent>
-                            {upcomingEvents.length > 0 ? (
-                                <div className="space-y-4">
-                                    {upcomingEvents.map((event) => (
-                                        <div key={event.id} className="flex items-center justify-between p-3 border rounded-lg">
-                                            <div>
-                                                <p className="font-medium">{event.title || 'Untitled Event'}</p>
-                                                <p className="text-sm text-muted-foreground">{formatDateTime(event.date)}</p>
-                                                {event.musician && (
-                                                    <p className="text-sm text-muted-foreground">
-                                                        Featuring: {event.musician.stageName}
-                                                    </p>
-                                                )}
+                    <div className="space-y-6">
+                        <Card>
+                            <CardHeader><CardTitle>Upcoming Events</CardTitle></CardHeader>
+                            <CardContent>
+                                {upcomingEvents.length > 0 ? (
+                                    <div className="space-y-4">
+                                        {upcomingEvents.map((event) => (
+                                            <div key={event.id} className="flex items-center justify-between p-3 border rounded-lg">
+                                                <div>
+                                                    <p className="font-medium">{event.title || 'Untitled Event'}</p>
+                                                    <p className="text-sm text-muted-foreground">{formatDateTime(event.date)}</p>
+                                                    {event.musician && (
+                                                        <p className="text-sm text-muted-foreground">
+                                                            Featuring: {event.musician.stageName}
+                                                        </p>
+                                                    )}
+                                                </div>
+                                                {getStatusBadge(event.status)}
                                             </div>
-                                            {getStatusBadge(event.status)}
-                                        </div>
-                                    ))}
-                                </div>
-                            ) : <p>No upcoming events found.</p>}
-                        </CardContent>
-                    </Card>
+                                        ))}
+                                    </div>
+                                ) : <p>No upcoming events found.</p>}
+                            </CardContent>
+                        </Card>
+                    </div>
                 </TabsContent>
 
                 <TabsContent value="bookings">

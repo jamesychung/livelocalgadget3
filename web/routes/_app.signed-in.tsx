@@ -22,13 +22,13 @@ export default function () {
         // Check user type and redirect accordingly
         if (user.userType === "musician") {
           // Check if user has a musician profile, create if not
-          const musicianProfile = await api.musician.findFirst({
+          const musicianProfile = await api.musician.findMany({
             filter: {
-              user: { equals: user.id }
+              user: { id: { equals: user.id } }
             }
           });
           
-          if (!musicianProfile) {
+          if (!musicianProfile || musicianProfile.length === 0) {
             // Create musician profile
             await api.musician.create({
               user: { _link: user.id },
@@ -45,13 +45,13 @@ export default function () {
 
         if (user.userType === "venue") {
           // Check if user has a venue profile, create if not
-          const venueProfile = await api.venue.findFirst({
+          const venueProfile = await api.venue.findMany({
             filter: {
-              owner: { equals: user.id }
+              owner: { id: { equals: user.id } }
             }
           });
           
-          if (!venueProfile) {
+          if (!venueProfile || venueProfile.length === 0) {
             // Create venue profile
             await api.venue.create({
               owner: { _link: user.id },

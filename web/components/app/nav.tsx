@@ -91,6 +91,12 @@ const navigationItems: NavItem[] = [
     roles: ["venue"],
   },
   {
+    title: "How to for Venues",
+    path: "/venue-how-to",
+    icon: Star,
+    roles: ["venue"],
+  },
+  {
     title: "Venue Profile",
     path: "/venue-profile/edit",
     icon: User,
