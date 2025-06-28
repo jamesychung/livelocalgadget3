@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeft, Plus, Music, Building, Search, Calendar, Clock, MapPin, DollarSign, Users, Edit, X, CheckCircle } from "lucide-react";
+import { ArrowLeft, Plus, Music, Building, Search, Calendar, Clock, MapPin, DollarSign, Users, Edit, X, CheckCircle, User } from "lucide-react";
 import { Link, useOutletContext, useNavigate } from "react-router";
 import { useFindMany, useAction } from "@gadgetinc/react";
 import { api } from "../api";
@@ -59,7 +59,10 @@ export default function VenueEventsPage() {
             ticketPrice: true,
             musician: {
                 id: true,
-                stageName: true
+                stageName: true,
+                genre: true,
+                city: true,
+                state: true
             }
         },
         pause: !isApiReady,
@@ -69,6 +72,13 @@ export default function VenueEventsPage() {
 
     // Mock applications data (keeping this working)
     const applications: any[] = [];
+
+    // Add static proposedRate and musicianPitch to applications data
+    const applicationsWithStaticData = applications.map((app: any) => ({
+        ...app,
+        proposedRate: app.musician?.hourlyRate || 150,
+        musicianPitch: "I'm excited to perform at your venue and provide great entertainment for your event!"
+    }));
 
     // Mock musicians data (keeping this working)
     const musiciansData: any[] = [];
@@ -191,7 +201,7 @@ export default function VenueEventsPage() {
 
     // Helper functions for application management
     const getApplicationCount = (eventId: string) => {
-        return applications.filter(app => app.event?.id === eventId).length;
+        return applicationsWithStaticData.filter(app => app.event?.id === eventId).length;
     };
 
     const getEventsWithApplications = () => {
@@ -199,7 +209,7 @@ export default function VenueEventsPage() {
     };
 
     const getPendingApplications = () => {
-        return applications.filter(app => 
+        return applicationsWithStaticData.filter(app => 
             app.status === "interest_expressed" || app.status === "pending_confirmation"
         );
     };
@@ -323,7 +333,7 @@ export default function VenueEventsPage() {
             });
 
             // Update the event to have the selected musician
-            const application = applications.find(app => app.id === applicationId);
+            const application = applicationsWithStaticData.find(app => app.id === applicationId);
             if (application) {
                 await updateEvent({
                     id: eventId,
@@ -403,7 +413,7 @@ export default function VenueEventsPage() {
                             {getEventsWithApplications().length}
                         </div>
                         <p className="text-xs text-muted-foreground">
-                            {applications.length} total applications
+                            {applicationsWithStaticData.length} total applications
                         </p>
                     </CardContent>
                 </Card>
@@ -528,6 +538,43 @@ export default function VenueEventsPage() {
                                                         </div>
                                                     )}
                                                 </div>
+                                                
+                                                {/* Confirmed Musician Information */}
+                                                {event.musician && (
+                                                    <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+                                                        <div className="flex items-center gap-2 mb-2">
+                                                            <CheckCircle className="h-4 w-4 text-green-600" />
+                                                            <h4 className="font-medium text-green-800">Confirmed Musician</h4>
+                                                        </div>
+                                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                                                            <div className="flex items-center gap-2">
+                                                                <User className="h-4 w-4 text-muted-foreground" />
+                                                                <span className="font-medium">{event.musician.stageName}</span>
+                                                            </div>
+                                                            {event.musician.genre && (
+                                                                <div className="flex items-center gap-2">
+                                                                    <Music className="h-4 w-4 text-muted-foreground" />
+                                                                    <span>{event.musician.genre}</span>
+                                                                </div>
+                                                            )}
+                                                            {event.musician.city && event.musician.state && (
+                                                                <div className="flex items-center gap-2">
+                                                                    <MapPin className="h-4 w-4 text-muted-foreground" />
+                                                                    <span>{event.musician.city}, {event.musician.state}</span>
+                                                                </div>
+                                                            )}
+                                                            <div className="flex items-center gap-2">
+                                                                <Link 
+                                                                    to={`/musician/${event.musician.id}`}
+                                                                    className="text-blue-600 hover:text-blue-800 hover:underline text-sm"
+                                                                >
+                                                                    View Musician Profile →
+                                                                </Link>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                                
                                                 {event.notes && (
                                                     <div className="mt-2 text-sm text-muted-foreground">
                                                         {event.notes}
@@ -749,7 +796,7 @@ export default function VenueEventsPage() {
                             {getEventsWithApplications().length > 0 ? (
                                 <div className="space-y-4">
                                     {getEventsWithApplications().map((event) => {
-                                        const eventApplications = applications.filter(app => app.event?.id === event.id);
+                                        const eventApplications = applicationsWithStaticData.filter(app => app.event?.id === event.id);
                                         const pendingCount = eventApplications.filter(app => 
                                             app.status === "interest_expressed" || app.status === "pending_confirmation"
                                         ).length;
@@ -888,13 +935,6 @@ export default function VenueEventsPage() {
                                                                                 </div>
                                                                             </div>
                                                                             
-                                                                            {app.musicianPitch && (
-                                                                                <div className="border-t pt-3 mt-3">
-                                                                                    <strong className="text-sm">Musician's Pitch:</strong>
-                                                                                    <p className="text-sm text-muted-foreground mt-1">{app.musicianPitch}</p>
-                                                                                </div>
-                                                                            )}
-                                                                            
                                                                             {/* Messaging Component */}
                                                                             <BookingMessaging
                                                                                 bookingId={app.id}
@@ -902,6 +942,12 @@ export default function VenueEventsPage() {
                                                                                 musicianName={app.musician?.stageName}
                                                                                 bookingData={app}
                                                                             />
+                                                                            {app.musicianPitch && (
+                                                                                <div className="border-t pt-3 mt-3">
+                                                                                    <strong className="text-sm">Musician's Pitch:</strong>
+                                                                                    <p className="text-sm text-muted-foreground mt-1">{app.musicianPitch}</p>
+                                                                                </div>
+                                                                            )}
                                                                         </div>
                                                                     ))}
                                                                 </div>
