@@ -10,8 +10,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ArrowLeft, Plus, Music, Building, Search, Calendar, Clock, MapPin, DollarSign, Users, Edit, X, CheckCircle } from "lucide-react";
 import { Link, useOutletContext, useNavigate } from "react-router";
-// import { useFindMany, useAction } from "@gadgetinc/react";
-// import { api } from "../api";
+import { useFindMany, useAction } from "@gadgetinc/react";
+import { api } from "../api";
 import type { AuthOutletContext } from "./_app";
 import VenueEventCalendar from "../components/shared/VenueEventCalendar";
 import { BookingMessaging } from "../components/shared/BookingMessaging";
@@ -39,79 +39,14 @@ export default function VenueEventsPage() {
     });
 
     // Check if API is properly initialized
-    // const isApiReady = api && api.venue && api.event && api.booking && api.musician;
-    // const isUserAuthenticated = user?.id && api.isAuthenticated;
-    const isApiReady = false; // Temporarily disabled
-    const isUserAuthenticated = false; // Temporarily disabled
+    const isApiReady = api && api.venue && api.event && api.booking && api.musician;
+    const isUserAuthenticated = !!user?.id;
 
-    // Set empty/default values for UI-only mode
+    // Mock venue data (keeping this working)
     const venue: any = { id: "mock-venue-1", name: "The Grand Hall", city: "Austin", state: "TX" };
-    const allEvents: any[] = [
-        {
-            id: "event-1",
-            title: "Jazz Night",
-            date: "2024-01-15",
-            startTime: "19:00",
-            endTime: "22:00",
-            status: "confirmed",
-            musician: { id: "musician-1", name: "Sarah Johnson", stageName: "Sarah J" },
-            totalAmount: 25,
-            notes: "Capacity: 100, Available: 75"
-        },
-        {
-            id: "event-2", 
-            title: "Rock Band Show",
-            date: "2024-01-20",
-            startTime: "20:00",
-            endTime: "23:00",
-            status: "proposed",
-            musician: { id: "musician-2", name: "Mike Davis", stageName: "The Rockers" },
-            totalAmount: 30,
-            notes: "Capacity: 150, Available: 120"
-        }
-    ];
-    const applications: any[] = [
-        {
-            id: "app-1",
-            status: "interest_expressed",
-            proposedRate: 200,
-            musicianPitch: "We're an experienced jazz quartet looking for regular gigs.",
-            createdAt: "2024-01-10T10:00:00Z",
-            event: { id: "event-1", title: "Jazz Night" },
-            musician: { id: "musician-3", name: "Alex Chen", stageName: "Jazz Collective", city: "Austin", state: "TX", genre: "Jazz" }
-        }
-    ];
-    const musiciansData: any[] = [
-        { id: "musician-1", name: "Sarah Johnson", stageName: "Sarah J", genre: "Jazz", city: "Austin", state: "TX", hourlyRate: 150 },
-        { id: "musician-2", name: "Mike Davis", stageName: "The Rockers", genre: "Rock", city: "Austin", state: "TX", hourlyRate: 200 },
-        { id: "musician-3", name: "Alex Chen", stageName: "Jazz Collective", genre: "Jazz", city: "Austin", state: "TX", hourlyRate: 180 }
-    ];
 
-    // Mock action functions
-    const updateEvent = async (data: any) => { console.log("Mock updateEvent:", data); };
-    const createEvent = async (data: any) => { console.log("Mock createEvent:", data); };
-    const updateBooking = async (data: any) => { console.log("Mock updateBooking:", data); };
-
-    // TODO: Re-enable API calls once backend is configured
-    /*
-    // Fetch venue data
-    const [{ data: venueData, fetching: venueFetching, error: venueError }] = useFindMany(api.venue, {
-        filter: { owner: { id: { equals: user?.id } } },
-        select: {
-            id: true, 
-            name: true, 
-            city: true,
-            state: true
-        },
-        first: 1,
-        pause: !isUserAuthenticated || !isApiReady,
-    });
-
-    const venue: any = venueData?.[0];
-
-    // Fetch events for this venue
+    // Fetch events for this venue (real API call)
     const [{ data: eventsData, fetching: eventsFetching, error: eventsError }] = useFindMany(api.event, {
-        filter: { venue: { id: { equals: venue?.id } } },
         select: {
             id: true,
             title: true,
@@ -127,85 +62,34 @@ export default function VenueEventsPage() {
                 stageName: true
             }
         },
-        pause: !venue?.id || !isApiReady,
-    });
-
-    // Fetch applications/bookings for this venue's events
-    const [{ data: applicationsData, fetching: applicationsFetching, error: applicationsError }] = useFindMany(api.booking, {
-        select: {
-            id: true,
-            status: true,
-            proposedRate: true,
-            musicianPitch: true,
-            createdAt: true,
-            event: {
-                id: true,
-                title: true,
-                date: true,
-                status: true,
-                venue: {
-                    id: true,
-                    name: true,
-                    owner: {
-                        id: true
-                    }
-                }
-            },
-            musician: {
-                id: true,
-                stageName: true,
-                city: true,
-                state: true,
-                genre: true,
-                user: {
-                    id: true
-                }
-            }
-        },
-        pause: !venue?.id || !isApiReady,
-    });
-
-    // Fetch musicians for event creation
-    const [{ data: musiciansData, fetching: musiciansFetching }] = useFindMany(api.musician, {
-        select: {
-            id: true,
-            stageName: true,
-            genre: true,
-            city: true,
-            state: true,
-            hourlyRate: true
-        },
-        first: 50,
         pause: !isApiReady,
     });
 
-    // Only initialize useAction hooks when user is authenticated and API is ready
-    // const [updateEventResult, updateEvent] = isApiReady ? useAction(api.event.update) : [null, null];
-    // const [createEventResult, createEvent] = isApiReady ? useAction(api.event.create) : [null, null];
-    // const [updateBookingResult, updateBooking] = isApiReady ? useAction(api.booking.update) : [null, null];
+    const allEvents: any[] = eventsData || [];
 
-    // useEffect(() => {
-    //     if (venueError) console.error("Error loading venue data:", venueError);
-    //     if (eventsError) console.error("Error loading events data:", eventsError);
-    //     if (applicationsError) console.error("Error loading applications data:", applicationsError);
-    // }, [venueError, eventsError, applicationsError]);
-    */
+    // Mock applications data (keeping this working)
+    const applications: any[] = [];
 
-    // Show loading state while fetching or if API is not ready
-    // if (!isApiReady || false) { // Temporarily disabled loading check
-    //     return (
-    //         <div className="container mx-auto p-6">
-    //             <div className="flex items-center justify-center min-h-[400px]">
-    //                 <div className="text-center">
-    //                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-    //                     <p className="text-muted-foreground">
-    //                         {!isApiReady ? "Initializing..." : "Loading your venue events..."}
-    //                     </p>
-    //                 </div>
-    //             </div>
-    //         </div>
-    //     );
-    // }
+    // Mock musicians data (keeping this working)
+    const musiciansData: any[] = [];
+
+    // Mock action functions (keeping these as mock to prevent useAction errors)
+    const updateEvent = async (data: any) => { console.log("Mock updateEvent:", data); };
+    const createEvent = async (data: any) => { console.log("Mock createEvent:", data); };
+    const updateBooking = async (data: any) => { console.log("Mock updateBooking:", data); };
+
+    useEffect(() => {
+        console.log("=== VENUE EVENTS DEBUG ===");
+        console.log("User ID:", user?.id);
+        console.log("API Ready:", isApiReady);
+        console.log("User Authenticated:", isUserAuthenticated);
+        console.log("Events Data:", eventsData);
+        console.log("All Events:", allEvents);
+        console.log("Events Fetching:", eventsFetching);
+        console.log("Events Error:", eventsError);
+        
+        if (eventsError) console.error("Error loading events data:", eventsError);
+    }, [eventsError, user?.id, isApiReady, isUserAuthenticated, eventsData, allEvents, eventsFetching]);
 
     // If user is not authenticated, show authentication message
     // if (!isUserAuthenticated) {
@@ -307,15 +191,11 @@ export default function VenueEventsPage() {
 
     // Helper functions for application management
     const getApplicationCount = (eventId: string) => {
-        const count = applications.filter(app => app.event?.id === eventId).length;
-        console.log(`Application count for event ${eventId}:`, count);
-        return count;
+        return applications.filter(app => app.event?.id === eventId).length;
     };
 
     const getEventsWithApplications = () => {
-        const eventsWithApps = allEvents.filter(event => getApplicationCount(event.id) > 0);
-        console.log("Events with applications:", eventsWithApps);
-        return eventsWithApps;
+        return allEvents.filter(event => getApplicationCount(event.id) > 0);
     };
 
     const getPendingApplications = () => {
@@ -490,7 +370,7 @@ export default function VenueEventsPage() {
                     </div>
                 </div>
                 <div className="flex gap-2">
-                    {/* Removed Manage Events button */}
+                    {/* Create Event button moved to calendar section */}
                 </div>
             </div>
 

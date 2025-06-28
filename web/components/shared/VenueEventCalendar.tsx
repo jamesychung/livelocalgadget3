@@ -313,6 +313,12 @@ export default function VenueEventCalendar({
                         >
                             <ChevronRight className="h-4 w-4" />
                         </Button>
+                        <Button asChild>
+                            <Link to="/create-event">
+                                <Plus className="mr-2 h-4 w-4" />
+                                Create Event
+                            </Link>
+                        </Button>
                     </div>
                 </div>
             </CardHeader>
@@ -425,9 +431,11 @@ export default function VenueEventCalendar({
                                     </Button>
                                 </>
                             ) : (
-                                <Button onClick={onEditToggle}>
-                                    <CalendarIcon className="mr-2 h-4 w-4" />
-                                    Manage Events
+                                <Button asChild>
+                                    <Link to="/create-event">
+                                        <Plus className="mr-2 h-4 w-4" />
+                                        Create Event
+                                    </Link>
                                 </Button>
                             )}
                         </div>

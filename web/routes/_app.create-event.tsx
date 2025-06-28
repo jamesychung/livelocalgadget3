@@ -313,7 +313,7 @@ export default function CreateEventPage() {
                                     Create Venue Profile
                                 </Link>
                             </Button>
-                            <Button variant="outline" asChild>
+                            <Button asChild>
                                 <Link to="/venue-events">
                                     <ArrowLeft className="mr-2 h-4 w-4" />
                                     Back to Events
@@ -331,7 +331,7 @@ export default function CreateEventPage() {
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
-                    <Button variant="outline" asChild>
+                    <Button asChild>
                         <Link to="/venue-events">
                             <ArrowLeft className="mr-2 h-4 w-4" />
                             Back to Events
