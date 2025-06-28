@@ -223,6 +223,11 @@ export default function VenueEventsPage() {
         }
     };
 
+    // Handle event click - navigate to event management
+    const handleEventClick = (event: any) => {
+        navigate(`/venue-event/${event.id}`);
+    };
+
     // Handle edit event button click
     const handleEditEvent = (event: any) => {
         setEditingEvent(event);
@@ -450,7 +455,7 @@ export default function VenueEventsPage() {
                         events={allEvents}
                         onAddEvent={handleAddEvent}
                         onUpdateEvent={handleUpdateEvent}
-                        onEditEvent={handleEditEvent}
+                        onEditEvent={handleEventClick}
                         isEditing={isEditing}
                         onEditToggle={() => setIsEditing(!isEditing)}
                         title="Venue Events & Bookings"
@@ -472,7 +477,12 @@ export default function VenueEventsPage() {
                                             <div key={event.id} className="border rounded-lg p-4">
                                                 <div className="flex items-center justify-between mb-2">
                                                     <div className="flex items-center gap-2">
-                                                        <h3 className="font-semibold">{event.title}</h3>
+                                                        <h3 
+                                                            className="font-semibold cursor-pointer hover:text-blue-600 hover:underline"
+                                                            onClick={() => handleEventClick(event)}
+                                                        >
+                                                            {event.title}
+                                                        </h3>
                                                         {applicationCount > 0 && (
                                                             <Badge className="bg-yellow-100 text-yellow-800">
                                                                 {applicationCount} Musician{applicationCount !== 1 ? 's' : ''} Applied
@@ -750,7 +760,12 @@ export default function VenueEventsPage() {
                                                 <div className="flex items-start justify-between mb-3">
                                                     <div className="flex-1">
                                                         <div className="flex items-center gap-2 mb-2">
-                                                            <h3 className="font-semibold text-lg">{event.title}</h3>
+                                                            <h3 
+                                                                className="font-semibold text-lg cursor-pointer hover:text-blue-600 hover:underline"
+                                                                onClick={() => handleEventClick(event)}
+                                                            >
+                                                                {event.title}
+                                                            </h3>
                                                             <Badge className="bg-yellow-100 text-yellow-800">
                                                                 Musicians Applied
                                                             </Badge>
