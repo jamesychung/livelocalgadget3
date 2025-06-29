@@ -25,7 +25,6 @@ import {
 } from "lucide-react";
 import { api } from "@/api";
 import { EventHistoryViewer } from "@/components/shared/EventHistoryViewer";
-import { CreateRealEventButton } from "../components/shared/CreateRealEventButton";
 
 export default function VenueEventManagementPage() {
     const { eventId } = useParams();
@@ -51,6 +50,7 @@ export default function VenueEventManagementPage() {
     // Update editFormData when event data loads
     useEffect(() => {
         if (event) {
+            console.log("Initializing editFormData with event:", event);
             setEditFormData({
                 title: event.title || "",
                 description: event.description || "",
@@ -380,9 +380,75 @@ export default function VenueEventManagementPage() {
         setCommunicationDialogOpen(true);
     };
 
-    const handleSaveEvent = () => {
-        console.log("Saving event:", editFormData);
-        setIsEditing(false);
+    const handleSaveEvent = async () => {
+        if (!event?.id || !editFormData) {
+            console.error("No event ID or edit data available");
+            return;
+        }
+
+        try {
+            console.log("=== DEBUG: Event Update ===");
+            console.log("Event ID:", event.id);
+            console.log("Edit form data:", editFormData);
+            
+            // Prepare the data for the API call - use the same pattern as venue profile editing
+            const updateData = {
+                title: editFormData.title || "",
+                description: editFormData.description || "",
+                status: editFormData.status || "",
+                startTime: editFormData.startTime || "",
+                endTime: editFormData.endTime || "",
+                ticketPrice: editFormData.ticketPrice && editFormData.ticketPrice.trim() !== "" ? 
+                    parseFloat(editFormData.ticketPrice) : 0,
+                totalCapacity: editFormData.totalCapacity && editFormData.totalCapacity.trim() !== "" ? 
+                    parseInt(editFormData.totalCapacity) : 0,
+            };
+
+            // Handle date conversion
+            if (editFormData.date && editFormData.date.trim() !== "") {
+                const dateObj = new Date(editFormData.date);
+                if (!isNaN(dateObj.getTime())) {
+                    updateData.date = dateObj.toISOString();
+                }
+            }
+
+            console.log("=== FINAL UPDATE DATA ===");
+            console.log("UpdateData:", updateData);
+            console.log("UpdateData JSON:", JSON.stringify(updateData, null, 2));
+
+            // Call the API to update the event
+            console.log("Calling api.event.update with ID:", event.id);
+            const updatedEvent = await api.event.update(event.id, updateData);
+
+            if (updatedEvent) {
+                console.log("✅ Event updated successfully:", updatedEvent);
+                
+                // Update the local event state with the new data
+                setEvent(prevEvent => ({
+                    ...prevEvent,
+                    ...updateData
+                }));
+                
+                // Exit edit mode
+                setIsEditing(false);
+                
+                // Show success message
+                alert("✅ Event updated successfully!");
+            } else {
+                console.error("❌ Failed to update event - no result returned");
+                alert("❌ Failed to update event. Please try again.");
+            }
+            
+        } catch (error) {
+            console.error("❌ Error updating event:", error);
+            console.error("❌ Error details:", {
+                eventId: event?.id,
+                editFormData: editFormData,
+                errorMessage: error.message,
+                errorStack: error.stack
+            });
+            alert(`❌ Error updating event: ${error.message || 'Unknown error'}`);
+        }
     };
 
     const handleBookMusician = async (bookingId: string) => {
@@ -578,120 +644,6 @@ export default function VenueEventManagementPage() {
     );
     const rejectedBookings = bookingsData.filter(b => b.status === "rejected");
 
-    // Function to create a real test booking for demonstration
-    const createTestBooking = async () => {
-        try {
-            console.log("🔍 Creating test booking...");
-            
-            // Create a real booking in the database
-            const newBooking = await api.booking.create({
-                status: 'applied',
-                proposedRate: 200,
-                musicianPitch: 'Test musician for email functionality',
-                event: {
-                    _link: eventId // Link to the current event
-                },
-                musician: {
-                    _link: '1' // Link to an existing musician (you may need to adjust this ID)
-                }
-            });
-            
-            console.log("🔍 Test booking created:", newBooking);
-            alert(`✅ Test booking created with ID: ${newBooking.id}`);
-            
-            // Refresh the bookings data
-            await fetchBookingsData();
-            
-            return newBooking.id;
-        } catch (error) {
-            console.error("❌ Error creating test booking:", error);
-            alert("❌ Error creating test booking. Check console for details.");
-            return null;
-        }
-    };
-
-    // Function to create multiple test bookings for demonstration
-    const createMultipleTestBookings = async () => {
-        try {
-            console.log("🔍 Creating multiple test bookings...");
-            
-            const testBookings = [
-                {
-                    status: 'applied',
-                    proposedRate: 150,
-                    musicianPitch: 'Jazz guitarist with 10+ years experience',
-                    musicianId: '1' // You'll need to adjust these IDs
-                },
-                {
-                    status: 'applied',
-                    proposedRate: 180,
-                    musicianPitch: 'Classical pianist with formal training',
-                    musicianId: '2'
-                },
-                {
-                    status: 'applied',
-                    proposedRate: 120,
-                    musicianPitch: 'Country singer-songwriter',
-                    musicianId: '3'
-                }
-            ];
-
-            for (const bookingData of testBookings) {
-                try {
-                    const newBooking = await api.booking.create({
-                        status: bookingData.status,
-                        proposedRate: bookingData.proposedRate,
-                        musicianPitch: bookingData.musicianPitch,
-                        event: {
-                            _link: eventId
-                        },
-                        musician: {
-                            _link: bookingData.musicianId
-                        }
-                    });
-                    console.log(`✅ Created booking: ${newBooking.id}`);
-                } catch (error) {
-                    console.error(`❌ Error creating booking:`, error);
-                }
-            }
-            
-            // Refresh the bookings data
-            await fetchBookingsData();
-            alert("✅ Test bookings created! Refresh the page to see them.");
-            
-        } catch (error) {
-            console.error("❌ Error creating test bookings:", error);
-            alert("❌ Error creating test bookings. Check console for details.");
-        }
-    };
-
-    // Function to get real booking IDs from the database
-    const getRealBookingIds = async () => {
-        try {
-            console.log("🔍 Fetching real bookings from database...");
-            
-            const realBookings = await api.booking.findMany({
-                select: {
-                    id: true,
-                    status: true,
-                    musician: {
-                        select: {
-                            id: true,
-                            stageName: true,
-                            email: true
-                        }
-                    }
-                }
-            });
-            
-            console.log("🔍 Real bookings found:", realBookings);
-            return realBookings;
-        } catch (error) {
-            console.error("❌ Error fetching real bookings:", error);
-            return [];
-        }
-    };
-
     return (
         <div className="container mx-auto p-6 space-y-6">
             {/* Loading State */}
@@ -720,64 +672,6 @@ export default function VenueEventManagementPage() {
                                     Manage event details, bookings, and communications
                                 </p>
                             </div>
-                        </div>
-                        <div className="flex gap-2">
-                            {isEditing ? (
-                                <>
-                                    <Button 
-                                        variant="outline" 
-                                        onClick={() => setIsEditing(false)}
-                                        className="mr-2"
-                                    >
-                                        Cancel
-                                    </Button>
-                                    <Button onClick={handleSaveEvent}>
-                                        Save Changes
-                                    </Button>
-                                    <Button 
-                                        variant="outline" 
-                                        onClick={getRealBookingIds}
-                                        className="ml-2 bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100"
-                                    >
-                                        🔍 Check Real Bookings
-                                    </Button>
-                                    <Button 
-                                        variant="outline" 
-                                        onClick={createTestBooking}
-                                        className="ml-2 bg-green-50 text-green-700 border-green-200 hover:bg-green-100"
-                                    >
-                                        ➕ Create Test Booking
-                                    </Button>
-                                </>
-                            ) : (
-                                <>
-                                    <Button onClick={() => setIsEditing(true)}>
-                                        <Edit className="mr-2 h-4 w-4" />
-                                        Edit Event
-                                    </Button>
-                                    <Button 
-                                        variant="outline"
-                                        onClick={async () => {
-                                            try {
-                                                console.log("🚀 Creating test data...");
-                                                const response = await api.quickTestData.run();
-                                                console.log("✅ Response:", response);
-                                                if (response.success) {
-                                                    alert(`✅ Test data created!\nEvent ID: ${response.eventId}\nMusician IDs: ${response.musicianIds.join(', ')}\nVenue ID: ${response.venueId}\n\nYou can now navigate to the event to test the status system!`);
-                                                } else {
-                                                    alert(`❌ Failed: ${response.error}`);
-                                                }
-                                            } catch (error) {
-                                                console.error("❌ Error:", error);
-                                                alert(`❌ Error: ${error.message}`);
-                                            }
-                                        }}
-                                        className="bg-green-600 hover:bg-green-700 text-white"
-                                    >
-                                        🎯 Create Test Data
-                                    </Button>
-                                </>
-                            )}
                         </div>
                     </div>
 
@@ -820,16 +714,14 @@ export default function VenueEventManagementPage() {
 
                     {/* Main Content Tabs */}
                     <Tabs value={activeTab} onValueChange={setActiveTab}>
-                        <TabsList className="grid w-full grid-cols-6">
-                            <TabsTrigger value="overview">Overview</TabsTrigger>
+                        <TabsList className="grid w-full grid-cols-4">
+                            <TabsTrigger value="overview">Event Details</TabsTrigger>
                             <TabsTrigger value="bookings">History ({bookingsData?.length || 0})</TabsTrigger>
                             <TabsTrigger value="communications">Communications</TabsTrigger>
-                            <TabsTrigger value="details">Event Details</TabsTrigger>
                             <TabsTrigger value="history">Event History</TabsTrigger>
-                            <TabsTrigger value="test-data">Test Data</TabsTrigger>
                         </TabsList>
 
-                        {/* Overview Tab */}
+                        {/* Event Details Tab */}
                         <TabsContent value="overview" className="space-y-6">
                             {eventLoading ? (
                                 <div className="flex items-center justify-center p-8">
@@ -849,40 +741,113 @@ export default function VenueEventManagementPage() {
                                             <div className="grid grid-cols-2 gap-4">
                                                 <div>
                                                     <Label className="text-sm font-medium text-muted-foreground">Date</Label>
-                                                    <p className="font-medium">
-                                                        {event?.date ? new Date(event.date).toLocaleDateString('en-US', {
-                                                            weekday: 'short',
-                                                            month: 'short',
-                                                            day: 'numeric',
-                                                            year: 'numeric'
-                                                        }) : 'N/A'}
-                                                    </p>
+                                                    {isEditing ? (
+                                                        <Input
+                                                            type="date"
+                                                            value={editFormData?.date || ""}
+                                                            onChange={(e) => setEditFormData({...editFormData, date: e.target.value})}
+                                                        />
+                                                    ) : (
+                                                        <p className="font-medium">
+                                                            {event?.date ? new Date(event.date).toLocaleDateString('en-US', {
+                                                                weekday: 'short',
+                                                                month: 'short',
+                                                                day: 'numeric',
+                                                                year: 'numeric'
+                                                            }) : 'N/A'}
+                                                        </p>
+                                                    )}
                                                 </div>
                                                 <div>
                                                     <Label className="text-sm font-medium text-muted-foreground">Time</Label>
-                                                    <p className="font-medium">
-                                                        {event?.startTime || 'N/A'} - {event?.endTime || 'N/A'}
-                                                    </p>
+                                                    <div className="grid grid-cols-2 gap-2">
+                                                        {isEditing ? (
+                                                            <>
+                                                                <Input
+                                                                    value={editFormData?.startTime || ""}
+                                                                    onChange={(e) => setEditFormData({...editFormData, startTime: e.target.value})}
+                                                                    placeholder="Start Time"
+                                                                />
+                                                                <Input
+                                                                    value={editFormData?.endTime || ""}
+                                                                    onChange={(e) => setEditFormData({...editFormData, endTime: e.target.value})}
+                                                                    placeholder="End Time"
+                                                                />
+                                                            </>
+                                                        ) : (
+                                                            <p className="font-medium">
+                                                                {event?.startTime || 'N/A'} - {event?.endTime || 'N/A'}
+                                                            </p>
+                                                        )}
+                                                    </div>
                                                 </div>
                                                 <div>
                                                     <Label className="text-sm font-medium text-muted-foreground">Capacity</Label>
-                                                    <p className="font-medium">
-                                                        {event?.totalCapacity || 'N/A'} people
-                                                    </p>
+                                                    {isEditing ? (
+                                                        <Input
+                                                            type="number"
+                                                            value={editFormData?.totalCapacity || ""}
+                                                            onChange={(e) => setEditFormData({...editFormData, totalCapacity: e.target.value})}
+                                                            placeholder="Capacity"
+                                                        />
+                                                    ) : (
+                                                        <p className="font-medium">
+                                                            {event?.totalCapacity || 'N/A'} people
+                                                        </p>
+                                                    )}
                                                 </div>
                                                 <div>
                                                     <Label className="text-sm font-medium text-muted-foreground">Ticket Price</Label>
-                                                    <p className="font-medium">
-                                                        ${event?.ticketPrice || 'N/A'}
-                                                    </p>
+                                                    {isEditing ? (
+                                                        <Input
+                                                            type="number"
+                                                            step="0.01"
+                                                            value={editFormData?.ticketPrice || ""}
+                                                            onChange={(e) => setEditFormData({...editFormData, ticketPrice: e.target.value})}
+                                                            placeholder="Price"
+                                                        />
+                                                    ) : (
+                                                        <p className="font-medium">
+                                                            ${event?.ticketPrice || 'N/A'}
+                                                        </p>
+                                                    )}
                                                 </div>
                                             </div>
-                                            {event?.description && (
-                                                <div>
-                                                    <Label className="text-sm font-medium text-muted-foreground">Description</Label>
-                                                    <p className="text-sm">{event.description}</p>
-                                                </div>
-                                            )}
+                                            <div>
+                                                <Label className="text-sm font-medium text-muted-foreground">Description</Label>
+                                                {isEditing ? (
+                                                    <textarea
+                                                        value={editFormData?.description || ""}
+                                                        onChange={(e) => setEditFormData({...editFormData, description: e.target.value})}
+                                                        className="w-full border rounded p-2 min-h-[80px]"
+                                                        placeholder="Event description"
+                                                    />
+                                                ) : (
+                                                    <p className="text-sm">{event?.description || 'No description'}</p>
+                                                )}
+                                            </div>
+                                            
+                                            {/* Edit Event Button - positioned at bottom right */}
+                                            <div className="flex justify-end pt-4 border-t">
+                                                {isEditing ? (
+                                                    <div className="flex gap-2">
+                                                        <Button 
+                                                            variant="outline" 
+                                                            onClick={() => setIsEditing(false)}
+                                                        >
+                                                            Cancel
+                                                        </Button>
+                                                        <Button onClick={handleSaveEvent}>
+                                                            Save Changes
+                                                        </Button>
+                                                    </div>
+                                                ) : (
+                                                    <Button onClick={() => setIsEditing(true)}>
+                                                        <Edit className="mr-2 h-4 w-4" />
+                                                        Edit Event
+                                                    </Button>
+                                                )}
+                                            </div>
                                         </CardContent>
                                     </Card>
 
@@ -1236,17 +1201,6 @@ export default function VenueEventManagementPage() {
                                                                                 </Button>
                                                                             </>
                                                                         )}
-                                                                        <Button
-                                                                            variant="outline"
-                                                                            size="sm"
-                                                                            onClick={(e) => {
-                                                                                e.stopPropagation();
-                                                                                handleRowClick(booking);
-                                                                            }}
-                                                                            className="h-8 px-2 text-xs"
-                                                                        >
-                                                                            Message
-                                                                        </Button>
                                                                     </div>
                                                                 </td>
                                                             </tr>
@@ -1256,12 +1210,8 @@ export default function VenueEventManagementPage() {
                                             </div>
                                         </div>
                                     ) : (
-                                        <div className="text-center py-8">
-                                            <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                                            <p className="text-muted-foreground">No musician applications yet.</p>
-                                            <p className="text-sm text-muted-foreground mt-2">
-                                                Musicians will be able to apply once the event is published.
-                                            </p>
+                                        <div className="text-center text-muted-foreground">
+                                            No bookings found.
                                         </div>
                                     )}
                                 </CardContent>
@@ -1272,388 +1222,34 @@ export default function VenueEventManagementPage() {
                         <TabsContent value="communications" className="space-y-6">
                             <Card>
                                 <CardHeader>
-                                    <CardTitle>Recent Communications</CardTitle>
+                                    <CardTitle>Musician Communications</CardTitle>
                                     <p className="text-sm text-muted-foreground">
-                                        View and manage all communications with musicians
+                                        Manage communications with the booked musician
                                     </p>
                                 </CardHeader>
                                 <CardContent>
-                                    <div className="space-y-4">
-                                        {bookingsData.slice(0, 3).map((booking) => (
-                                            <div key={booking.id} className="border rounded-lg p-4">
-                                                <div className="flex items-center justify-between mb-3">
-                                                    <div className="flex items-center gap-3">
-                                                        <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
-                                                            <Music className="h-5 w-5 text-gray-500" />
-                                                        </div>
-                                                        <div>
-                                                            <h4 className="font-medium">{booking.musician.stageName}</h4>
-                                                            <p className="text-sm text-muted-foreground">
-                                                                {booking.status} • {new Date(booking.createdAt).toLocaleDateString()}
-                                                            </p>
-                                                        </div>
-                                                    </div>
-                                                    <Button
-                                                        variant="outline"
-                                                        size="sm"
-                                                        onClick={() => handleRowClick(booking)}
-                                                    >
-                                                        View Messages
-                                                    </Button>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
+                                    {/* Implementation of communications tab */}
                                 </CardContent>
                             </Card>
                         </TabsContent>
 
-                        {/* Event Details Tab */}
-                        <TabsContent value="details" className="space-y-6">
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle>Event Details</CardTitle>
-                                    <p className="text-sm text-muted-foreground">
-                                        Edit event information and settings
-                                    </p>
-                                </CardHeader>
-                                <CardContent className="space-y-6">
-                                    {/* Basic Information */}
-                                    <div className="space-y-4">
-                                        <h3 className="text-lg font-semibold">Basic Information</h3>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            <div>
-                                                <Label htmlFor="title">Event Title</Label>
-                                                {isEditing ? (
-                                                    <Input
-                                                        id="title"
-                                                        value={editFormData?.title || ""}
-                                                        onChange={(e) => setEditFormData({...editFormData, title: e.target.value})}
-                                                        placeholder="Enter event title"
-                                                    />
-                                                ) : (
-                                                    <p className="text-sm text-muted-foreground">{event.title}</p>
-                                                )}
-                                            </div>
-                                            <div>
-                                                <Label htmlFor="date">Date</Label>
-                                                {isEditing ? (
-                                                    <Input
-                                                        id="date"
-                                                        type="date"
-                                                        value={editFormData?.date || ""}
-                                                        onChange={(e) => setEditFormData({...editFormData, date: e.target.value})}
-                                                    />
-                                                ) : (
-                                                    <p className="text-sm text-muted-foreground">
-                                                        {new Date(event.date).toLocaleDateString()}
-                                                    </p>
-                                                )}
-                                            </div>
-                                            <div>
-                                                <Label htmlFor="start-time">Start Time</Label>
-                                                {isEditing ? (
-                                                    <Select 
-                                                        value={editFormData?.startTime || ""} 
-                                                        onValueChange={(value: string) => setEditFormData({...editFormData, startTime: value})}
-                                                    >
-                                                        <SelectTrigger>
-                                                            <SelectValue placeholder="Select start time" />
-                                                        </SelectTrigger>
-                                                        <SelectContent>
-                                                            {Array.from({length: 48}, (_, i) => {
-                                                                const hour = Math.floor(i / 2);
-                                                                const minute = i % 2 === 0 ? '00' : '30';
-                                                                const time = `${hour.toString().padStart(2, '0')}:${minute}`;
-                                                                return (
-                                                                    <SelectItem key={time} value={time}>
-                                                                        {time}
-                                                                    </SelectItem>
-                                                                );
-                                                            })}
-                                                        </SelectContent>
-                                                    </Select>
-                                                ) : (
-                                                    <p className="text-sm text-muted-foreground">{event.startTime}</p>
-                                                )}
-                                            </div>
-                                            <div>
-                                                <Label htmlFor="end-time">End Time</Label>
-                                                {isEditing ? (
-                                                    <Select 
-                                                        value={editFormData?.endTime || ""} 
-                                                        onValueChange={(value: string) => setEditFormData({...editFormData, endTime: value})}
-                                                    >
-                                                        <SelectTrigger>
-                                                            <SelectValue placeholder="Select end time" />
-                                                        </SelectTrigger>
-                                                        <SelectContent>
-                                                            {Array.from({length: 48}, (_, i) => {
-                                                                const hour = Math.floor(i / 2);
-                                                                const minute = i % 2 === 0 ? '00' : '30';
-                                                                const time = `${hour.toString().padStart(2, '0')}:${minute}`;
-                                                                return (
-                                                                    <SelectItem key={time} value={time}>
-                                                                        {time}
-                                                                    </SelectItem>
-                                                                );
-                                                            })}
-                                                        </SelectContent>
-                                                    </Select>
-                                                ) : (
-                                                    <p className="text-sm text-muted-foreground">{event.endTime}</p>
-                                                )}
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {/* Pricing and Capacity */}
-                                    <div className="space-y-4">
-                                        <h3 className="text-lg font-semibold">Pricing & Capacity</h3>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            <div>
-                                                <Label htmlFor="ticket-price">Ticket Price ($)</Label>
-                                                {isEditing ? (
-                                                    <Input
-                                                        id="ticket-price"
-                                                        type="number"
-                                                        min="0"
-                                                        step="0.01"
-                                                        value={editFormData?.ticketPrice || ""}
-                                                        onChange={(e) => setEditFormData({...editFormData, ticketPrice: e.target.value})}
-                                                        placeholder="0.00"
-                                                    />
-                                                ) : (
-                                                    <p className="text-sm text-muted-foreground">${event.ticketPrice}</p>
-                                                )}
-                                            </div>
-                                            <div>
-                                                <Label htmlFor="capacity">Total Capacity</Label>
-                                                {isEditing ? (
-                                                    <Input
-                                                        id="capacity"
-                                                        type="number"
-                                                        min="1"
-                                                        value={editFormData?.totalCapacity || ""}
-                                                        onChange={(e) => setEditFormData({...editFormData, totalCapacity: e.target.value})}
-                                                        placeholder="100"
-                                                    />
-                                                ) : (
-                                                    <p className="text-sm text-muted-foreground">{event.totalCapacity} people</p>
-                                                )}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        </TabsContent>
-
-                        {/* Event History Tab */}
+                        {/* History Tab */}
                         <TabsContent value="history" className="space-y-6">
                             <Card>
                                 <CardHeader>
                                     <CardTitle>Event History</CardTitle>
                                     <p className="text-sm text-muted-foreground">
-                                        View the complete event progression timeline
+                                        View event history and related activities
                                     </p>
                                 </CardHeader>
                                 <CardContent>
-                                    <EventHistoryViewer eventId={eventId} />
-                                </CardContent>
-                            </Card>
-                        </TabsContent>
-
-                        {/* Test Data Creation */}
-                        <TabsContent value="test-data" className="space-y-6">
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle>Create Real Data</CardTitle>
-                                    <p className="text-sm text-muted-foreground">
-                                        Create real event and booking data using your existing venue and musician
-                                    </p>
-                                </CardHeader>
-                                <CardContent>
-                                    <CreateRealEventButton />
-                                </CardContent>
-                            </Card>
-                            
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle>Test Data (Mock)</CardTitle>
-                                    <p className="text-sm text-muted-foreground">
-                                        Create test bookings to test the status change functionality (uses mock data)
-                                    </p>
-                                </CardHeader>
-                                <CardContent>
-                                    <div className="flex gap-2">
-                                        <Button
-                                            onClick={createTestBooking}
-                                            className="text-xs"
-                                        >
-                                            Create Single Test Booking
-                                        </Button>
-                                        <Button
-                                            onClick={createMultipleTestBookings}
-                                            className="text-xs"
-                                        >
-                                            Create Multiple Test Bookings
-                                        </Button>
-                                        <Button
-                                            onClick={fetchBookingsData}
-                                            className="text-xs"
-                                        >
-                                            Refresh Bookings
-                                        </Button>
-                                    </div>
-                                    <p className="text-xs text-muted-foreground mt-2">
-                                        Note: Mock data will cause API errors when trying to update status. 
-                                        Use the "Create Real Data" button above for proper testing.
-                                    </p>
+                                    {/* Implementation of history tab */}
                                 </CardContent>
                             </Card>
                         </TabsContent>
                     </Tabs>
-
-                    {/* Communication Dialog */}
-                    <Dialog open={communicationDialogOpen} onOpenChange={setCommunicationDialogOpen}>
-                        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-                            <DialogHeader>
-                                <DialogTitle>
-                                    Communication with {selectedMusician?.musician.stageName}
-                                </DialogTitle>
-                                <p className="text-sm text-muted-foreground">
-                                    Event: {event.title} • {new Date(event.date).toLocaleDateString()}
-                                </p>
-                            </DialogHeader>
-                            {selectedMusician && (
-                                <div className="space-y-6">
-                                    {/* Musician Info */}
-                                    <div className="flex items-start gap-4 p-4 bg-gray-50 rounded-lg">
-                                        <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center flex-shrink-0">
-                                            {selectedMusician.musician.profilePicture ? (
-                                                <img 
-                                                    src={selectedMusician.musician.profilePicture} 
-                                                    alt={selectedMusician.musician.stageName}
-                                                    className="w-16 h-16 rounded-full object-cover"
-                                                />
-                                            ) : (
-                                                <Music className="h-8 w-8 text-gray-500" />
-                                            )}
-                                        </div>
-                                        <div className="flex-1">
-                                            <h3 className="text-xl font-semibold">{selectedMusician.musician.stageName}</h3>
-                                            <div className="grid grid-cols-2 gap-4 mt-2 text-sm">
-                                                <div>
-                                                    <span className="text-muted-foreground">Genre:</span>
-                                                    <span className="ml-2 font-medium">{selectedMusician.musician.genre}</span>
-                                                </div>
-                                                <div>
-                                                    <span className="text-muted-foreground">Location:</span>
-                                                    <span className="ml-2 font-medium">
-                                                        {selectedMusician.musician.city}, {selectedMusician.musician.state}
-                                                    </span>
-                                                </div>
-                                                <div>
-                                                    <span className="text-muted-foreground">Rate:</span>
-                                                    <span className="ml-2 font-medium">${selectedMusician.proposedRate}</span>
-                                                </div>
-                                                <div>
-                                                    <span className="text-muted-foreground">Status:</span>
-                                                    <span className="ml-2">{getStatusBadge(selectedMusician.status)}</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {/* Musician's Pitch */}
-                                    {selectedMusician.musicianPitch && (
-                                        <div>
-                                            <h4 className="font-medium mb-2">Musician's Pitch</h4>
-                                            <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                                                <p className="text-sm">{selectedMusician.musicianPitch}</p>
-                                            </div>
-                                        </div>
-                                    )}
-
-                                    {/* Messages */}
-                                    <div>
-                                        <h4 className="font-medium mb-2">Messages</h4>
-                                        <div className="space-y-3 max-h-64 overflow-y-auto">
-                                            {messages.map((message) => (
-                                                <div key={message.id} className={`flex ${message.sender === 'venue' ? 'justify-end' : 'justify-start'}`}>
-                                                    <div className={`max-w-xs p-3 rounded-lg ${
-                                                        message.sender === 'venue' 
-                                                            ? 'bg-blue-500 text-white' 
-                                                            : 'bg-gray-100 text-gray-900'
-                                                    }`}>
-                                                        <p className="text-sm">{message.content}</p>
-                                                        <p className={`text-xs mt-1 ${
-                                                            message.sender === 'venue' ? 'text-blue-100' : 'text-gray-500'
-                                                        }`}>
-                                                            {new Date(message.createdAt).toLocaleString()}
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-
-                                    {/* Send Message */}
-                                    <div className="flex gap-2">
-                                        <Input
-                                            value={newMessage}
-                                            onChange={(e) => setNewMessage(e.target.value)}
-                                            placeholder="Type your message..."
-                                            onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                                        />
-                                        <Button onClick={handleSendMessage}>
-                                            <Send className="h-4 w-4" />
-                                        </Button>
-                                    </div>
-
-                                    {/* Actions */}
-                                    <div className="flex items-center gap-2 pt-4 border-t">
-                                        {selectedMusician.status === "applied" && (
-                                            <>
-                                                <Button
-                                                    onClick={() => {
-                                                        handleBookMusician(selectedMusician.id);
-                                                        setCommunicationDialogOpen(false);
-                                                    }}
-                                                    disabled={bookingsData.some(b => b.status === "confirmed")}
-                                                    className={`${
-                                                        bookingsData.some(b => b.status === "confirmed") 
-                                                            ? "opacity-50 cursor-not-allowed bg-gray-300 text-gray-500" 
-                                                            : ""
-                                                    }`}
-                                                    title={bookingsData.some(b => b.status === "confirmed") ? "Another musician is already confirmed for this event" : ""}
-                                                >
-                                                    Confirm
-                                                </Button>
-                                                <Button
-                                                    variant="outline"
-                                                    onClick={() => {
-                                                        handleRejectBooking(selectedMusician.id);
-                                                        setCommunicationDialogOpen(false);
-                                                    }}
-                                                >
-                                                    Reject Application
-                                                </Button>
-                                            </>
-                                        )}
-                                        <Button
-                                            variant="outline"
-                                            onClick={() => setCommunicationDialogOpen(false)}
-                                        >
-                                            Close
-                                        </Button>
-                                    </div>
-                                </div>
-                            )}
-                        </DialogContent>
-                    </Dialog>
                 </>
             )}
         </div>
     );
-} 
+}

@@ -1,14 +1,26 @@
-import React, { useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { useState, useEffect } from "react";
+import { useOutletContext, Link } from "react-router";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Link, useOutletContext, useNavigate } from "react-router";
-import { Edit, Clock, MapPin, CalendarDays, Star, DollarSign, AlertCircle, Music, Calendar } from "lucide-react";
-import { useFindMany } from "@gadgetinc/react";
-import { api } from "../api";
+import { 
+    Calendar, 
+    Music, 
+    Users, 
+    Star, 
+    MapPin, 
+    Phone, 
+    Mail, 
+    ExternalLink,
+    Edit,
+    Plus,
+    TrendingUp,
+    Clock,
+    DollarSign
+} from "lucide-react";
+import { api } from "@/api";
 import type { AuthOutletContext } from "./_app";
-import { DatabaseTest } from "../components/shared/DatabaseTest";
 
 // Helper function to render status badges
 function getStatusBadge(status: string) {
@@ -36,7 +48,6 @@ function formatDateTime(dateTime: string | Date | null | undefined) {
 
 export default function MusicianDashboard() {
     const { user } = useOutletContext<AuthOutletContext>();
-    const navigate = useNavigate();
 
     const [{ data: musicianData, fetching: musicianFetching, error: musicianError }] = useFindMany(api.musician, {
         filter: { user: { id: { equals: user?.id } } },
@@ -151,7 +162,7 @@ export default function MusicianDashboard() {
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-medium">Total Gigs</CardTitle>
-                        <CalendarDays className="h-4 w-4 text-muted-foreground" />
+                        <Calendar className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent><div className="text-2xl font-bold">{musician.totalGigs ?? 0}</div></CardContent>
                 </Card>
@@ -327,19 +338,6 @@ export default function MusicianDashboard() {
                                 <h4 className="font-semibold mb-2">Bio:</h4>
                                 <p className="text-sm text-muted-foreground">{musician.bio || 'No bio provided.'}</p>
                             </div>
-                        </CardContent>
-                    </Card>
-
-                    {/* Database Test Component */}
-                    <Card className="mt-6">
-                        <CardHeader>
-                            <CardTitle>Debug: Genre Test</CardTitle>
-                            <CardDescription>
-                                Test the genre saving functionality
-                            </CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            <DatabaseTest />
                         </CardContent>
                     </Card>
                 </TabsContent>

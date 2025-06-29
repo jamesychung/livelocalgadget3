@@ -5,8 +5,6 @@ import HeroSection from "../components/shared/HeroSection";
 import EventCard from "../components/public/EventCard";
 import MusicianCard from "../components/public/MusicianCard";
 import VenueCard from "../components/public/VenueCard";
-import SeedDataButton from "../components/shared/SeedDataButton";
-import { DatabaseTest } from "../components/shared/DatabaseTest";
 
 export default function HomePage() {
   const [currentTime, setCurrentTime] = useState<string>("");
@@ -205,8 +203,6 @@ export default function HomePage() {
               Current time: {currentTime}
             </p>
           </div>
-          <DatabaseTest />
-          <SeedDataButton />
         </div>
       </section>
 

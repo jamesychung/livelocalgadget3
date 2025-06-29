@@ -9,8 +9,32 @@ import type { AuthOutletContext } from "./_app";
 import AvailabilityManager from "../components/shared/AvailabilityManager";
 
 export default function AvailabilityPage() {
-    const { user } = useOutletContext<AuthOutletContext>();
-    const navigate = useNavigate();
+    // Add error boundary for context
+    let user;
+    let navigate;
+    
+    try {
+        const context = useOutletContext<AuthOutletContext>();
+        user = context?.user;
+        navigate = useNavigate();
+    } catch (error) {
+        console.error("Error accessing context:", error);
+        return (
+            <div className="container mx-auto p-6">
+                <div className="flex items-center justify-center min-h-[400px]">
+                    <div className="text-center">
+                        <h1 className="text-2xl font-bold mb-4">Error Loading Page</h1>
+                        <p className="text-muted-foreground mb-6">
+                            There was an error loading the availability page. Please try refreshing the page.
+                        </p>
+                        <Button onClick={() => window.location.reload()}>
+                            Refresh Page
+                        </Button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     const [{ data: musicianData, fetching: musicianFetching, error: musicianError }, refetch] = useFindMany(api.musician, {
         filter: { user: { id: { equals: user?.id } } },

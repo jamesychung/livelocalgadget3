@@ -9,6 +9,14 @@ import { useFindMany } from "@gadgetinc/react";
 import { api } from "../api";
 import type { AuthOutletContext } from "./_app";
 
+interface TimeSlot {
+    startTime: string;
+    endTime: string;
+    date?: string;
+    recurringDays?: string[];
+    recurringEndDate?: string;
+}
+
 export default function MusicianAvailEventsPage() {
     const { user } = useOutletContext<AuthOutletContext>();
     const [searchTerm, setSearchTerm] = useState("");
@@ -30,6 +38,7 @@ export default function MusicianAvailEventsPage() {
             status: true,
             proposedRate: true,
             musicianPitch: true,
+            genres: true,
             venue: {
                 id: true,
                 name: true,
@@ -56,23 +65,94 @@ export default function MusicianAvailEventsPage() {
 
     const events: any[] = eventsData || [];
 
-    // Calculate summary statistics
-    const totalEvents = events.length;
-    const openEvents = events.filter(event => event.status === 'open').length;
-    const invitedEvents = events.filter(event => {
+    // Helper function to check if genres match
+    const doGenresMatch = (eventGenres: string[], musicianGenres: string[]): boolean => {
+        if (!eventGenres || eventGenres.length === 0) return true; // If event has no genres, show to all
+        if (!musicianGenres || musicianGenres.length === 0) return false; // If musician has no genres, don't show
+        
+        // Check if there's any overlap between event genres and musician genres
+        return eventGenres.some(eventGenre => 
+            musicianGenres.some(musicianGenre => 
+                musicianGenre.toLowerCase().includes(eventGenre.toLowerCase()) ||
+                eventGenre.toLowerCase().includes(musicianGenre.toLowerCase())
+            )
+        );
+    };
+
+    // Helper function to check if event time matches musician availability
+    const doesTimeMatchAvailability = (eventDate: string, eventStartTime: string, eventEndTime: string, musicianAvailability: any): boolean => {
+        if (!musicianAvailability || typeof musicianAvailability !== 'object') return true; // If no availability set, show all
+        
+        // Get the day of the week for the event
+        const eventDay = new Date(eventDate).toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
+        
+        // Check if musician has availability for this day
+        const dayAvailability = musicianAvailability[eventDay] || [];
+        
+        // If no specific availability for this day, check if there are any recurring slots
+        if (dayAvailability.length === 0) {
+            // Check if there are any recurring availability slots that might match
+            const allDays = Object.keys(musicianAvailability);
+            const hasAnyAvailability = allDays.some(day => 
+                musicianAvailability[day] && musicianAvailability[day].length > 0
+            );
+            
+            // If musician has some availability set up, but not for this specific day, don't show
+            if (hasAnyAvailability) return false;
+            
+            // If musician hasn't set up any availability, show all events (default behavior)
+            return true;
+        }
+        
+        // Check if any time slot overlaps with the event time
+        return dayAvailability.some((slot: TimeSlot) => {
+            const slotStart = slot.startTime;
+            const slotEnd = slot.endTime;
+            
+            // Simple time overlap check
+            return eventStartTime <= slotEnd && eventEndTime >= slotStart;
+        });
+    };
+
+    // Filter events based on matching criteria
+    const getMatchingEvents = (allEvents: any[]): any[] => {
+        if (!user?.musician) return allEvents;
+        
+        const musicianGenres = user.musician.genres || [];
+        const musicianAvailability = user.musician.availability || {};
+        
+        return allEvents.filter(event => {
+            // Check genre matching
+            const genresMatch = doGenresMatch(event.genres || [], musicianGenres);
+            
+            // Check availability matching
+            const timeMatches = event.date ? 
+                doesTimeMatchAvailability(event.date, event.startTime || "00:00", event.endTime || "23:59", musicianAvailability) :
+                true; // If no specific date, show the event
+            
+            return genresMatch && timeMatches;
+        });
+    };
+
+    const matchingEvents = getMatchingEvents(events);
+
+    // Calculate summary statistics based on matching events
+    const totalEvents = matchingEvents.length;
+    const openEvents = matchingEvents.filter(event => event.status === 'open').length;
+    const invitedEvents = matchingEvents.filter(event => {
         // Check if this musician has been invited to this event
-        return event.bookings?.some(booking => 
+        return event.bookings?.some((booking: any) => 
             booking.musician?.id === user?.musician?.id && 
             booking.status === 'invited'
         );
     }).length;
-    const upcomingEvents = events.filter(event => {
+    const upcomingEvents = matchingEvents.filter(event => {
         if (!event.date) return false;
         return new Date(event.date) > new Date();
     }).length;
 
     // Filter events based on search and status
-    const filteredEvents = events.filter(event => {
+    const filteredEvents = matchingEvents.filter(event => {
         const matchesSearch = event.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                             event.venue?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                             event.description?.toLowerCase().includes(searchTerm.toLowerCase());
@@ -110,23 +190,41 @@ export default function MusicianAvailEventsPage() {
                     <div>
                         <h1 className="text-3xl font-bold">Available Events</h1>
                         <p className="text-muted-foreground">
-                            Browse events you can apply to perform at
+                            Events matching your genres and availability
                         </p>
                     </div>
                 </div>
             </div>
 
+            {/* Matching Info */}
+            {user?.musician && (
+                <Card className="bg-blue-50 border-blue-200">
+                    <CardContent className="pt-6">
+                        <div className="flex items-center gap-2 mb-2">
+                            <Filter className="h-4 w-4 text-blue-600" />
+                            <span className="text-sm font-medium text-blue-800">Smart Matching Active</span>
+                        </div>
+                        <p className="text-sm text-blue-700">
+                            Showing events that match your genres ({user.musician.genres?.join(", ") || "None set"}) and availability schedule.
+                        </p>
+                        <p className="text-xs text-blue-600 mt-1">
+                            {matchingEvents.length} of {events.length} total events match your criteria
+                        </p>
+                    </CardContent>
+                </Card>
+            )}
+
             {/* Summary Cards */}
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Total Events</CardTitle>
+                        <CardTitle className="text-sm font-medium">Matching Events</CardTitle>
                         <Calendar className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold">{totalEvents}</div>
                         <p className="text-xs text-muted-foreground">
-                            All available events
+                            Events for you
                         </p>
                     </CardContent>
                 </Card>
@@ -240,6 +338,11 @@ export default function MusicianAvailEventsPage() {
                                                                 {event.description}
                                                             </div>
                                                         )}
+                                                        {event.genres && event.genres.length > 0 && (
+                                                            <div className="text-xs text-blue-600 mt-1">
+                                                                <strong>Genres:</strong> {event.genres.join(", ")}
+                                                            </div>
+                                                        )}
                                                         {event.musicianPitch && (
                                                             <div className="text-xs text-blue-600 mt-1">
                                                                 <strong>Looking for:</strong> {event.musicianPitch}
@@ -332,13 +435,24 @@ export default function MusicianAvailEventsPage() {
                     ) : (
                         <div className="text-center py-12">
                             <Music className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                            <h3 className="text-lg font-medium mb-2">No events found</h3>
+                            <h3 className="text-lg font-medium mb-2">No matching events found</h3>
                             <p className="text-muted-foreground">
                                 {searchTerm || statusFilter !== "all" 
                                     ? "Try adjusting your search or filter criteria."
-                                    : "There are currently no events available. Check back later!"
+                                    : user?.musician 
+                                        ? "No events currently match your genres and availability. Update your profile or availability to see more events."
+                                        : "There are currently no events available. Check back later!"
                                 }
                             </p>
+                            {user?.musician && (
+                                <div className="mt-4">
+                                    <Button variant="outline" asChild>
+                                        <Link to="/musician-profile/edit">
+                                            Update Profile
+                                        </Link>
+                                    </Button>
+                                </div>
+                            )}
                         </div>
                     )}
                 </CardContent>
