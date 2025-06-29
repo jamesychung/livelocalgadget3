@@ -40,6 +40,7 @@
     "gadget-server": "link:.gadget/server",
     "isbot": "^5.1.0",
     "lucide-react": "^0.471.1",
+    "nodemailer": "^6.9.7",
     "postcss": "^8.5.1",
     "react": "^18.2.0",
     "react-day-picker": "^9.5.1",

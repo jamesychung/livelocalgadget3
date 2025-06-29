@@ -26,6 +26,11 @@ export const schema: GadgetModel = {
       storageKey: "booking_deposit_paid",
     },
     endTime: { type: "string", storageKey: "booking_end_time" },
+    event: {
+      type: "belongsTo",
+      parent: { model: "event" },
+      storageKey: "booking_event",
+    },
     fullPaymentPaid: {
       type: "boolean",
       storageKey: "booking_full_payment_paid",
@@ -36,7 +41,9 @@ export const schema: GadgetModel = {
       parent: { model: "musician" },
       storageKey: "booking_musician",
     },
+    musicianPitch: { type: "string", storageKey: "booking_musician_pitch" },
     notes: { type: "string", storageKey: "booking_notes" },
+    proposedRate: { type: "number", storageKey: "booking_proposed_rate" },
     specialRequirements: {
       type: "string",
       storageKey: "booking_special_requirements",

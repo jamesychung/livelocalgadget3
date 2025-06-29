@@ -61,7 +61,7 @@ const navigationItems: NavItem[] = [
   },
   {
     title: "Profile",
-    path: "/musician-dashboard",
+    path: "/musician-profile/edit",
     icon: User,
     roles: ["musician"],
   },
@@ -78,8 +78,8 @@ const navigationItems: NavItem[] = [
     roles: ["musician"],
   },
   {
-    title: "Events",
-    path: "/musician-events",
+    title: "Available Events",
+    path: "/musician-availEvents",
     icon: Star,
     roles: ["musician"],
   },
@@ -219,7 +219,21 @@ export const Navigation = ({ onLinkClick, user }: { onLinkClick?: () => void, us
 
 export const SecondaryNavigation = ({ icon }: { icon: ReactNode }) => {
   const [userMenuActive, setUserMenuActive] = useState(false);
-  const signOut = useSignOut({ redirectToPath: "/" });
+  
+  // Use a simple sign out function that doesn't require the hook
+  const handleSignOut = () => {
+    try {
+      // Try to use the API client directly if available
+      if (typeof window !== 'undefined' && (window as any).gadgetApi) {
+        (window as any).gadgetApi.signOut();
+      }
+    } catch (error) {
+      console.warn("Could not use API sign out, using fallback");
+    }
+    
+    // Always redirect to home
+    window.location.href = "/";
+  };
 
   return (
     <DropdownMenu open={userMenuActive} onOpenChange={setUserMenuActive}>
@@ -243,7 +257,7 @@ export const SecondaryNavigation = ({ icon }: { icon: ReactNode }) => {
             </DropdownMenuItem>
           ))}
           <DropdownMenuItem
-            onClick={signOut}
+            onClick={handleSignOut}
             className="flex items-center text-red-600 focus:text-red-600 cursor-pointer"
           >
             <LogOut className="mr-2 h-4 w-4" />

@@ -147,6 +147,12 @@ export const permissions: GadgetPermissions = {
           },
         },
       },
+      actions: {
+        sendEmail: true,
+        sendBookingEmails: true,
+        testAction: true,
+        simpleTest: true,
+      },
     },
     musician: {
       storageKey: "musician",
