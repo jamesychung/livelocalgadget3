@@ -2,31 +2,29 @@ import type { OperationContext } from "@urql/core";
 import { GadgetConnection, GadgetTransaction, InternalModelManager, ActionFunctionMetadata, GlobalActionFunction, BackgroundActionHandle } from "@gadgetinc/api-client-core";
 import type { ClientOptions as ApiClientOptions, AnyClient, EnqueueBackgroundActionOptions, AnyActionFunction } from '@gadgetinc/api-client-core';
 import type { DocumentNode } from 'graphql';
-import { UserManager } from "./models/User.js";
-import { SessionManager } from "./models/Session.js";
-import { CurrentSessionManager } from "./models/CurrentSession.js";
 import { BookingManager } from "./models/Booking.js";
 import { EventManager } from "./models/Event.js";
 import { MusicianManager } from "./models/Musician.js";
 import { ReviewManager } from "./models/Review.js";
 import { VenueManager } from "./models/Venue.js";
+import { UserManager } from "./models/User.js";
+import { SessionManager } from "./models/Session.js";
+import { CurrentSessionManager } from "./models/CurrentSession.js";
+import { EventHistoryManager } from "./models/EventHistory.js";
 import { SeedNamespace } from "./namespaces/seed.js";
-export { DefaultUserSelection, type UserRecord } from "./models/User.js";
-export { DefaultSessionSelection, type SessionRecord } from "./models/Session.js";
 export { DefaultBookingSelection, type BookingRecord } from "./models/Booking.js";
 export { DefaultEventSelection, type EventRecord } from "./models/Event.js";
 export { DefaultMusicianSelection, type MusicianRecord } from "./models/Musician.js";
 export { DefaultReviewSelection, type ReviewRecord } from "./models/Review.js";
 export { DefaultVenueSelection, type VenueRecord } from "./models/Venue.js";
+export { DefaultUserSelection, type UserRecord } from "./models/User.js";
+export { DefaultSessionSelection, type SessionRecord } from "./models/Session.js";
+export { DefaultEventHistorySelection, type EventHistoryRecord } from "./models/EventHistory.js";
 type ClientOptions = Omit<ApiClientOptions, "environment"> & {
     environment?: string;
 };
 type AllOptionalVariables<T> = Partial<T> extends T ? object : never;
 export type InternalModelManagers = {
-    /** The internal API model manager for the user model */
-    user: InternalModelManager;
-    /** The internal API model manager for the session model */
-    session: InternalModelManager;
     /** The internal API model manager for the booking model */
     booking: InternalModelManager;
     /** The internal API model manager for the event model */
@@ -37,6 +35,12 @@ export type InternalModelManagers = {
     review: InternalModelManager;
     /** The internal API model manager for the venue model */
     venue: InternalModelManager;
+    /** The internal API model manager for the user model */
+    user: InternalModelManager;
+    /** The internal API model manager for the session model */
+    session: InternalModelManager;
+    /** The internal API model manager for the eventHistory model */
+    eventHistory: InternalModelManager;
     seed: {};
 };
 /**
@@ -52,16 +56,39 @@ type InlineViewFunction = {
 export declare class Livelocalgadget6Client implements AnyClient {
     readonly options?: ClientOptions | undefined;
     connection: GadgetConnection;
+    /** Executes the sendBookingEmails global action. */
+    sendBookingEmails: {
+        (): Promise<any>;
+        type: "globalAction";
+        operationName: "sendBookingEmails";
+        operationReturnType: "SendBookingEmails";
+        namespace: null;
+        typesImports: [];
+        variables: {};
+        variablesType: Record<string, never>;
+    };
+    /** Executes the sendEmail global action. */
+    sendEmail: {
+        (): Promise<any>;
+        type: "globalAction";
+        operationName: "sendEmail";
+        operationReturnType: "SendEmail";
+        namespace: null;
+        typesImports: [];
+        variables: {};
+        variablesType: Record<string, never>;
+    };
     /** Executes an inline computed view. */
     view: InlineViewFunction;
-    user: UserManager;
-    session: SessionManager;
-    currentSession: CurrentSessionManager;
     booking: BookingManager;
     event: EventManager;
     musician: MusicianManager;
     review: ReviewManager;
     venue: VenueManager;
+    user: UserManager;
+    session: SessionManager;
+    currentSession: CurrentSessionManager;
+    eventHistory: EventHistoryManager;
     seed: SeedNamespace;
     /**
     * Namespaced object for accessing models via the Gadget internal APIs, which provide lower level and higher privileged operations directly against the database. Useful for maintenance operations like migrations or correcting broken data, and for implementing the high level actions.

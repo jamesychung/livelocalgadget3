@@ -66,17 +66,6 @@ export declare class SeedNamespace {
         variables: {};
         variablesType: Record<string, never>;
     };
-    /** Executes the debugSeed global action. */
-    debugSeed: {
-        (): Promise<any>;
-        type: "globalAction";
-        operationName: "debugSeed";
-        operationReturnType: "SeedDebugSeed";
-        namespace: "seed";
-        typesImports: [];
-        variables: {};
-        variablesType: Record<string, never>;
-    };
     /** Executes the quickSeed global action. */
     quickSeed: {
         (): Promise<any>;
@@ -116,17 +105,6 @@ export declare class SeedNamespace {
         type: "globalAction";
         operationName: "simpleSeed";
         operationReturnType: "SeedSimpleSeed";
-        namespace: "seed";
-        typesImports: [];
-        variables: {};
-        variablesType: Record<string, never>;
-    };
-    /** Executes the testContext global action. */
-    testContext: {
-        (): Promise<any>;
-        type: "globalAction";
-        operationName: "testContext";
-        operationReturnType: "SeedTestContext";
         namespace: "seed";
         typesImports: [];
         variables: {};

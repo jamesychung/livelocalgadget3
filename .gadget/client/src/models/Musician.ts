@@ -83,24 +83,23 @@ export const DefaultMusicianSelection = {
      city: true,
      country: true,
      createdAt: true,
-     email: true,
      experience: true,
-     genres: true,
+     genre: true,
      hourlyRate: true,
      instruments: true,
-     isVerified: true,
+     isActive: true,
      location: true,
-     name: true,
+     phone: true,
      profilePicture: true,
-     rating: true,
+     socialLinks: true,
      stageName: true,
+     totalGigs: true,
      updatedAt: true,
      state: true,
-     genre: true,
-     isActive: true,
-     phone: true,
-     socialLinks: true,
-     totalGigs: true,
+     email: true,
+     genres: true,
+     isVerified: true,
+     rating: true,
      userId: true,
      website: true,
      yearsExperience: true
@@ -356,12 +355,10 @@ export type MusicianManager = {
       *
       * @example
       * * const result = await api.musician.create({
-        *   availability: {
+        *   additionalPictures: {
         *     example: true,
         *     key: "value",
         *   },
-        *   bio: "example value for bio",
-        *   city: "example value for city",
         *   state: "example value for state",
         * });
       **/
@@ -378,12 +375,10 @@ export type MusicianManager = {
       * @example
       * * const result = await api.musician.create({
         *   musician: {
-        *     availability: {
+        *     additionalPictures: {
         *       example: true,
         *       key: "value",
         *     },
-        *     bio: "example value for bio",
-        *     city: "example value for city",
         *     state: "example value for state",
         *   },
         * });
@@ -453,12 +448,10 @@ export type MusicianManager = {
       *
       * @example
       * * const result = await api.musician.update("1", {
-        *   availability: {
+        *   additionalPictures: {
         *     example: true,
         *     key: "value",
         *   },
-        *   bio: "example value for bio",
-        *   city: "example value for city",
         *   state: "example value for state",
         * });
       **/
@@ -475,12 +468,10 @@ export type MusicianManager = {
       * @example
       * * const result = await api.musician.update("1", {
         *   musician: {
-        *     availability: {
+        *     additionalPictures: {
         *       example: true,
         *       key: "value",
         *     },
-        *     bio: "example value for bio",
-        *     city: "example value for city",
         *     state: "example value for state",
         *   },
         * });
@@ -619,11 +610,6 @@ export type MusicianManager = {
       *
       * @example
       * * const result = await api.musician.upsert({
-        *   availability: {
-        *     example: true,
-        *     key: "value",
-        *   },
-        *   bio: "example value for bio",
         *   id: "1",
         *   state: "example value for state",
         * });
@@ -641,11 +627,6 @@ export type MusicianManager = {
       * @example
       * * const result = await api.musician.upsert({
         *   musician: {
-        *     availability: {
-        *       example: true,
-        *       key: "value",
-        *     },
-        *     bio: "example value for bio",
         *     id: "1",
         *     state: "example value for state",
         *   },

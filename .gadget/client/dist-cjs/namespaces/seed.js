@@ -71,15 +71,6 @@ class SeedNamespace {
       namespace: "seed",
       variables: {}
     });
-    /** Executes the debugSeed global action. */
-    this.debugSeed = (0, import_builder.buildGlobalAction)(this, {
-      type: "globalAction",
-      functionName: "debugSeed",
-      operationName: "debugSeed",
-      operationReturnType: "SeedDebugSeed",
-      namespace: "seed",
-      variables: {}
-    });
     /** Executes the quickSeed global action. */
     this.quickSeed = (0, import_builder.buildGlobalAction)(this, {
       type: "globalAction",
@@ -113,15 +104,6 @@ class SeedNamespace {
       functionName: "simpleSeed",
       operationName: "simpleSeed",
       operationReturnType: "SeedSimpleSeed",
-      namespace: "seed",
-      variables: {}
-    });
-    /** Executes the testContext global action. */
-    this.testContext = (0, import_builder.buildGlobalAction)(this, {
-      type: "globalAction",
-      functionName: "testContext",
-      operationName: "testContext",
-      operationReturnType: "SeedTestContext",
       namespace: "seed",
       variables: {}
     });

@@ -1,5 +1,5 @@
 import { GadgetConnection, GadgetRecord, GadgetRecordList, LimitToKnownKeys, Selectable } from "@gadgetinc/api-client-core";
-import { Query, PromiseOrLiveIterator, Booking, AvailableBookingSelection, BookingSort, BookingFilter } from "../types.js";
+import { Query, IDsList, PromiseOrLiveIterator, Booking, AvailableBookingSelection, BookingSort, BookingFilter } from "../types.js";
 import { DefaultSelection, Select, DeepFilterNever } from "../utils.js";
 /**
 * A type that holds only the selected fields (and nested fields) of booking. The present fields in the result type of this are dynamic based on the options to each call that uses it.
@@ -35,10 +35,13 @@ export declare const DefaultBookingSelection: {
     readonly depositAmount: true;
     readonly depositPaid: true;
     readonly endTime: true;
+    readonly eventId: true;
     readonly fullPaymentPaid: true;
     readonly isActive: true;
     readonly musicianId: true;
+    readonly musicianPitch: true;
     readonly notes: true;
+    readonly proposedRate: true;
     readonly specialRequirements: true;
     readonly startTime: true;
     readonly status: true;
@@ -105,6 +108,15 @@ export interface MaybeFindFirstBookingOptions {
     /** Only return records matching this freeform search string */
     search?: string | null;
 }
+export interface UpdateBookingOptions {
+    /** Select fields other than the defaults of the record to return */
+    select?: AvailableBookingSelection;
+}
+/**
+ * The return value from executing update on booking
+ * Is a GadgetRecord of the model's type.
+ **/
+export type UpdateBookingResult<Options extends UpdateBookingOptions> = SelectedBookingOrDefault<Options> extends void ? void : GadgetRecord<SelectedBookingOrDefault<Options>>;
 /**
  * A manager for the booking model with all the available operations for reading and writing to it.*/
 export type BookingManager = {
@@ -212,6 +224,74 @@ export type BookingManager = {
         namespace: null;
         selectionType: AvailableBookingSelection;
         schemaType: Query["booking"];
+    };
+    update: {
+        /**
+         * Executes the update actionon one record specified by `id`.Runs the action and returns a Promise for the updated record.
+        *
+        * This is the fully qualified, nested api identifier style overload that should be used when there's an ambiguity between an action param and a model field.
+        *
+        * @example
+        * * const bookingRecord = await api.booking.update("1");
+        **/
+        <Options extends UpdateBookingOptions>(id: string, options?: LimitToKnownKeys<Options, UpdateBookingOptions>): Promise<UpdateBookingResult<Options>>;
+        type: 'action';
+        operationName: 'updateBooking';
+        operationReturnType: 'UpdateBooking';
+        namespace: null;
+        modelApiIdentifier: typeof modelApiIdentifier;
+        operatesWithRecordIdentity: true;
+        modelSelectionField: typeof modelApiIdentifier;
+        isBulk: false;
+        isDeleter: false;
+        variables: {
+            id: {
+                required: true;
+                type: 'GadgetID';
+            };
+        };
+        variablesType: ({
+            id: string;
+        });
+        hasAmbiguousIdentifier: false;
+        paramOnlyVariables: [];
+        hasReturnType: false;
+        acceptsModelInput: false;
+        hasCreateOrUpdateEffect: false;
+        imports: [];
+        optionsType: UpdateBookingOptions;
+        selectionType: AvailableBookingSelection;
+        schemaType: Query["booking"];
+        defaultSelection: typeof DefaultBookingSelection;
+    };
+    bulkUpdate: {
+        /**
+          * Executes the bulkUpdate action with the given inputs.
+          */
+        <Options extends UpdateBookingOptions>(ids: string[], options?: LimitToKnownKeys<Options, UpdateBookingOptions>): Promise<UpdateBookingResult<Options>[]>;
+        type: 'action';
+        operationName: 'bulkUpdateBookings';
+        isBulk: true;
+        isDeleter: false;
+        hasReturnType: false;
+        acceptsModelInput: false;
+        operatesWithRecordIdentity: true;
+        singleActionFunctionName: 'update';
+        modelApiIdentifier: typeof modelApiIdentifier;
+        modelSelectionField: typeof pluralModelApiIdentifier;
+        optionsType: UpdateBookingOptions;
+        namespace: null;
+        variables: {
+            ids: {
+                required: true;
+                type: '[GadgetID!]';
+            };
+        };
+        variablesType: IDsList | undefined;
+        paramOnlyVariables: [];
+        selectionType: AvailableBookingSelection;
+        schemaType: Query["booking"];
+        defaultSelection: typeof DefaultBookingSelection;
     };
     view: {
         (query: string, variables?: Record<string, unknown>): Promise<unknown>;

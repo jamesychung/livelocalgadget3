@@ -845,7 +845,32 @@
   version "0.0.0"
   uid ""
 
-"@gadgetinc/api-client-core@0.15.42", "@gadgetinc/api-client-core@^0.15.42":
+"@gadget-client/livelocalgadget6@link:.gadget/client":
+  version "0.0.0"
+  uid ""
+
+"@gadgetinc/api-client-core@0.15.43":
+  version "0.15.43"
+  resolved "https://registry.yarnpkg.com/@gadgetinc/api-client-core/-/api-client-core-0.15.43.tgz#85a2d04b9a77539fc049ae36e07857d999059faf"
+  integrity sha512-mbw3cR4IgxgJP3VPaCN3L85n8uth1EnZ8IFLZpXxl63XcfNXnQkAUHRoIZ20OuF8E837DtD51QvMNZ6D6NKcCw==
+  dependencies:
+    "@0no-co/graphql.web" "^1.0.4"
+    "@n1ru4l/graphql-live-query" "^0.10.0"
+    "@n1ru4l/json-patch-plus" "^0.2.0"
+    "@n1ru4l/push-pull-async-iterable-iterator" "^3.2.0"
+    "@urql/core" "^4.0.10"
+    cross-fetch "^4.0.0"
+    graphql "^16.8.1"
+    graphql-ws "^5.13.1"
+    isomorphic-ws "^5.0.0"
+    klona "^2.0.6"
+    tiny-graphql-query-compiler "^0.2.2"
+    tslib "^2.6.2"
+    type-fest "^3.13.1"
+    wonka "^6.3.2"
+    ws "^8.18.2"
+
+"@gadgetinc/api-client-core@^0.15.42":
   version "0.15.42"
   resolved "https://registry.yarnpkg.com/@gadgetinc/api-client-core/-/api-client-core-0.15.42.tgz#0018e3d571e7caef507885bca544dcd15f8cce83"
   integrity sha512-2yH19DKWUpjwabOwVYXGNY2IirZKgwyWDPQwZn1l3urMHwiuBuD/hCgefnSDGyiDEuuJI9ZHqFWuR+hGoMUyfg==
@@ -4371,6 +4396,11 @@ node-releases@^2.0.19:
   resolved "https://registry.yarnpkg.com/node-releases/-/node-releases-2.0.19.tgz#9e445a52950951ec4d177d843af370b411caf314"
   integrity sha512-xxOWJsBKtzAq7DY0J+DTzuz58K8e7sJbdgwkbMWQe8UYB6ekmsQ45q0M/tJDsGaZmbC+l7n57UV8Hl5tHxO9uw==
 
+nodemailer@^6.9.7:
+  version "6.10.1"
+  resolved "https://registry.yarnpkg.com/nodemailer/-/nodemailer-6.10.1.tgz#cbc434c54238f83a51c07eabd04e2b3e832da623"
+  integrity sha512-Z+iLaBGVaSjbIzQ4pX6XV41HrooLsQ10ZWPUehGmuantvzWoDVBnmsdUcOIDM1t+yPor5pDhVlDESgOMEGxhHA==
+
 normalize-package-data@^5.0.0:
   version "5.0.0"
   resolved "https://registry.yarnpkg.com/normalize-package-data/-/normalize-package-data-5.0.0.tgz#abcb8d7e724c40d88462b84982f7cbf6859b4588"
@@ -5618,6 +5648,11 @@ ws@^8.17.0:
   version "8.18.2"
   resolved "https://registry.yarnpkg.com/ws/-/ws-8.18.2.tgz#42738b2be57ced85f46154320aabb51ab003705a"
   integrity sha512-DMricUmwGZUVr++AEAe2uiVM7UoO9MAVZMDu05UQOaUII0lp+zOzLLU4Xqh/JvTqklB1T4uELaaPBKyjE1r4fQ==
+
+ws@^8.18.2:
+  version "8.18.3"
+  resolved "https://registry.yarnpkg.com/ws/-/ws-8.18.3.tgz#b56b88abffde62791c639170400c93dcb0c95472"
+  integrity sha512-PEIGCY5tSlUt50cqyMXfCzX+oOPqN0vuGqWzbcJ2xvnkzkq46oOpz7dQaTDBdfICb4N14+GARUDw2XV2N4tvzg==
 
 yallist@^3.0.2:
   version "3.1.1"

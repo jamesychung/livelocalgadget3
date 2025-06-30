@@ -1,26 +1,23 @@
 import type { GadgetPermissions } from "gadget-server";
 
 /**
- * Open permissions - no filters, just basic role-based access
- * This should eliminate any tenant filter requirements
+ * This metadata describes the access control configuration available in your application.
+ * Grants that are not defined here are set to false by default.
+ *
+ * View and edit your roles and permissions in the Gadget editor at https://livelocalgadget6.gadget.app/edit/settings/permissions
  */
 export const permissions: GadgetPermissions = {
   type: "gadget/permissions/v1",
   roles: {
     unauthenticated: {
       storageKey: "unauthenticated",
-      default: {
-        read: false,
-        action: false,
-      },
       models: {
         user: {
-          read: false,
           actions: {
+            resetPassword: true,
+            sendResetPassword: true,
             signIn: true,
             signUp: true,
-            sendResetPassword: true,
-            resetPassword: true,
             verifyEmail: true,
           },
         },
@@ -33,6 +30,35 @@ export const permissions: GadgetPermissions = {
         action: true,
       },
       models: {
+        booking: {
+          read: true,
+          actions: {
+            update: true,
+          },
+        },
+        event: {
+          read: true,
+          actions: {
+            create: true,
+            update: true,
+          },
+        },
+        eventHistory: {
+          read: true,
+          actions: {
+            create: true,
+          },
+        },
+        musician: {
+          read: true,
+          actions: {
+            create: true,
+            update: true,
+          },
+        },
+        review: {
+          read: true,
+        },
         user: {
           read: true,
           actions: {
@@ -48,12 +74,39 @@ export const permissions: GadgetPermissions = {
             verifyEmail: true,
           },
         },
+        venue: {
+          read: true,
+          actions: {
+            create: true,
+            update: true,
+          },
+        },
+      },
+    },
+    musician: {
+      storageKey: "musician",
+      default: {
+        read: true,
+        action: true,
+      },
+      models: {
+        booking: {
+          read: true,
+          actions: {
+            update: true,
+          },
+        },
         event: {
           read: true,
           actions: {
             create: true,
             update: true,
-            delete: true,
+          },
+        },
+        eventHistory: {
+          read: true,
+          actions: {
+            create: true,
           },
         },
         musician: {
@@ -61,31 +114,17 @@ export const permissions: GadgetPermissions = {
           actions: {
             create: true,
             update: true,
-            delete: true,
-          },
-        },
-        venue: {
-          read: true,
-          actions: {
-            create: true,
-            update: true,
-            delete: true,
-          },
-        },
-        booking: {
-          read: true,
-          actions: {
-            create: true,
-            update: true,
-            delete: true,
           },
         },
         review: {
           read: true,
+        },
+        user: {
+          read: true,
           actions: {
-            create: true,
+            changePassword: true,
+            signOut: true,
             update: true,
-            delete: true,
           },
         },
       },
@@ -97,6 +136,35 @@ export const permissions: GadgetPermissions = {
         action: true,
       },
       models: {
+        booking: {
+          read: true,
+          actions: {
+            update: true,
+          },
+        },
+        event: {
+          read: true,
+          actions: {
+            create: true,
+            update: true,
+          },
+        },
+        eventHistory: {
+          read: true,
+          actions: {
+            create: true,
+          },
+        },
+        musician: {
+          read: true,
+          actions: {
+            create: true,
+            update: true,
+          },
+        },
+        review: {
+          read: true,
+        },
         user: {
           read: true,
           actions: {
@@ -106,101 +174,17 @@ export const permissions: GadgetPermissions = {
             update: true,
           },
         },
-        event: {
-          read: true,
-          actions: {
-            create: true,
-            update: true,
-            delete: true,
-          },
-        },
-        musician: {
-          read: true,
-          actions: {
-            create: true,
-            update: true,
-            delete: true,
-          },
-        },
         venue: {
           read: true,
           actions: {
             create: true,
             update: true,
-            delete: true,
-          },
-        },
-        booking: {
-          read: true,
-          actions: {
-            create: true,
-            update: true,
-            delete: true,
-          },
-        },
-        review: {
-          read: true,
-          actions: {
-            create: true,
-            update: true,
-            delete: true,
           },
         },
       },
       actions: {
-        sendEmail: true,
         sendBookingEmails: true,
-        testAction: true,
-        simpleTest: true,
-      },
-    },
-    musician: {
-      storageKey: "musician",
-      default: {
-        read: true,
-        action: true,
-      },
-      models: {
-        user: {
-          read: true,
-          actions: {
-            changePassword: true,
-            signOut: true,
-            update: true,
-          },
-        },
-        musician: {
-          read: true,
-          actions: {
-            create: true,
-            update: true,
-            delete: true,
-          },
-        },
-        event: {
-          read: true,
-          actions: {
-            create: true,
-            update: true,
-            delete: true,
-          },
-        },
-        booking: {
-          read: true,
-          actions: {
-            create: true,
-            update: true,
-            delete: true,
-          },
-        },
-        review: {
-          read: true,
-          actions: {
-            create: true,
-            update: true,
-            delete: true,
-          },
-        },
+        sendEmail: true,
       },
     },
     venueOwner: {
@@ -210,6 +194,28 @@ export const permissions: GadgetPermissions = {
         action: true,
       },
       models: {
+        booking: {
+          read: true,
+          actions: {
+            update: true,
+          },
+        },
+        event: {
+          read: true,
+          actions: {
+            create: true,
+            update: true,
+          },
+        },
+        eventHistory: {
+          read: true,
+          actions: {
+            create: true,
+          },
+        },
+        review: {
+          read: true,
+        },
         user: {
           read: true,
           actions: {
@@ -223,31 +229,6 @@ export const permissions: GadgetPermissions = {
           actions: {
             create: true,
             update: true,
-            delete: true,
-          },
-        },
-        event: {
-          read: true,
-          actions: {
-            create: true,
-            update: true,
-            delete: true,
-          },
-        },
-        booking: {
-          read: true,
-          actions: {
-            create: true,
-            update: true,
-            delete: true,
-          },
-        },
-        review: {
-          read: true,
-          actions: {
-            create: true,
-            update: true,
-            delete: true,
           },
         },
       },

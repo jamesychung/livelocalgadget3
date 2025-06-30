@@ -88,7 +88,8 @@ export const DefaultUserSelection = {
      resetPasswordToken: true,
      resetPasswordTokenExpiration: true,
      roles: { key: true, name: true },
-     updatedAt: true
+     updatedAt: true,
+     userType: true
    } as const;
 const modelApiIdentifier = "user" as const;
 const pluralModelApiIdentifier = "users" as const;
@@ -766,10 +767,10 @@ export type UserManager = {
       * @example
       * * const result = await api.user.update("1", {
         *   email: "example@email.com",
-        *   emailVerificationToken: "example value for emailVerificationToken",
-        *   emailVerificationTokenExpiration: "2025-06-01T00:00:00.000+00:00",
         *   emailVerified: true,
-        *   firstName: "example value for firstName",
+        *   lastSignedIn: "2025-06-01T00:00:00.000+00:00",
+        *   password: "nohacking123%",
+        *   roles: ["signed-in"],
         * });
       **/
       <Options extends UpdateUserOptions>(
@@ -786,10 +787,10 @@ export type UserManager = {
       * * const result = await api.user.update("1", {
         *   user: {
         *     email: "example@email.com",
-        *     emailVerificationToken: "example value for emailVerificationToken",
-        *     emailVerificationTokenExpiration: "2025-06-01T00:00:00.000+00:00",
         *     emailVerified: true,
-        *     firstName: "example value for firstName",
+        *     lastSignedIn: "2025-06-01T00:00:00.000+00:00",
+        *     password: "nohacking123%",
+        *     roles: ["signed-in"],
         *   },
         * });
       **/
@@ -1358,10 +1359,9 @@ export type UserManager = {
       * @example
       * * const result = await api.user.upsert({
         *   email: "example@email.com",
-        *   emailVerificationToken: "example value for emailVerificationToken",
-        *   emailVerificationTokenExpiration: "2025-06-01T00:00:00.000+00:00",
         *   emailVerified: true,
         *   id: "1",
+        *   lastSignedIn: "2025-06-01T00:00:00.000+00:00",
         *   on: ["email"],
         *   password: "nohacking123%",
         * });
@@ -1383,10 +1383,10 @@ export type UserManager = {
         *   password: "nohacking123%",
         *   user: {
         *     email: "example@email.com",
-        *     emailVerificationToken: "example value for emailVerificationToken",
-        *     emailVerificationTokenExpiration: "2025-06-01T00:00:00.000+00:00",
         *     emailVerified: true,
         *     id: "1",
+        *     lastSignedIn: "2025-06-01T00:00:00.000+00:00",
+        *     password: "nohacking123%",
         *   },
         * });
       **/

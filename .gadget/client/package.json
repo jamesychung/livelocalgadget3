@@ -1,6 +1,6 @@
 {
   "name": "@gadget-client/livelocalgadget6",
-  "version": "1.2.0-development.42",
+  "version": "1.2.0-development.579",
   "files": [
     "dist-*/",
     "types",
@@ -41,6 +41,6 @@
   "gadget": {
     "applicationName": "livelocalgadget6",
     "environmentName": "Development",
-    "environmentVersion": "42"
+    "environmentVersion": "579"
   }
 }

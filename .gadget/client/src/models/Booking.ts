@@ -77,10 +77,13 @@ export const DefaultBookingSelection = {
      depositAmount: true,
      depositPaid: true,
      endTime: true,
+     eventId: true,
      fullPaymentPaid: true,
      isActive: true,
      musicianId: true,
+     musicianPitch: true,
      notes: true,
+     proposedRate: true,
      specialRequirements: true,
      startTime: true,
      status: true,
@@ -147,6 +150,17 @@ const pluralModelApiIdentifier = "bookings" as const;
   /** Only return records matching this freeform search string */
   search?: string | null;
 };
+export interface UpdateBookingOptions {
+  /** Select fields other than the defaults of the record to return */
+  select?: AvailableBookingSelection;
+};
+/**
+ * The return value from executing update on booking
+ * Is a GadgetRecord of the model's type.
+ **/
+export type UpdateBookingResult<Options extends UpdateBookingOptions> = SelectedBookingOrDefault<Options> extends void ?
+      void :
+      GadgetRecord<SelectedBookingOrDefault<Options>>;
 
 /**
  * A manager for the booking model with all the available operations for reading and writing to it.*/
@@ -257,6 +271,72 @@ export type BookingManager = {
       selectionType: AvailableBookingSelection;
       schemaType: Query["booking"];
     }
+  update: {
+      /**
+       * Executes the update actionon one record specified by `id`.Runs the action and returns a Promise for the updated record.
+      *
+      * This is the fully qualified, nested api identifier style overload that should be used when there's an ambiguity between an action param and a model field.
+      *
+      * @example
+      * * const bookingRecord = await api.booking.update("1");
+      **/
+      <Options extends UpdateBookingOptions>(
+        id: string,
+      
+        options?: LimitToKnownKeys<Options, UpdateBookingOptions>
+      ): Promise<UpdateBookingResult<Options>>;
+      type: 'action';
+      operationName: 'updateBooking';
+      operationReturnType: 'UpdateBooking';
+      namespace: null;
+      modelApiIdentifier: typeof modelApiIdentifier;
+      operatesWithRecordIdentity: true;
+      modelSelectionField: typeof modelApiIdentifier;
+      isBulk: false;
+      isDeleter: false;
+      variables: { id: { required: true, type: 'GadgetID' } };
+      variablesType: (
+              { id: string }
+              
+            );
+      hasAmbiguousIdentifier: false;
+      paramOnlyVariables: [];
+      hasReturnType: false;
+      acceptsModelInput: false;
+      hasCreateOrUpdateEffect: false;
+      imports: [];
+      optionsType: UpdateBookingOptions;
+      selectionType: AvailableBookingSelection;
+      schemaType: Query["booking"];
+      defaultSelection: typeof DefaultBookingSelection;
+    }
+  bulkUpdate: {
+      /**
+        * Executes the bulkUpdate action with the given inputs.
+        */
+       <Options extends UpdateBookingOptions>(
+          ids: string[],
+          options?: LimitToKnownKeys<Options, UpdateBookingOptions>
+       ): Promise<UpdateBookingResult<Options>[]>
+      type: 'action';
+      operationName: 'bulkUpdateBookings';
+      isBulk: true;
+      isDeleter: false;
+      hasReturnType: false;
+      acceptsModelInput: false;
+      operatesWithRecordIdentity: true;
+      singleActionFunctionName: 'update';
+      modelApiIdentifier: typeof modelApiIdentifier;
+      modelSelectionField: typeof pluralModelApiIdentifier;
+      optionsType: UpdateBookingOptions;
+      namespace: null;
+      variables: { ids: { required: true, type: '[GadgetID!]' } };
+      variablesType: IDsList | undefined;
+      paramOnlyVariables: [];
+      selectionType: AvailableBookingSelection;
+      schemaType: Query["booking"];
+      defaultSelection: typeof DefaultBookingSelection;
+    }
   view: {
       (query: string, variables?: Record<string, unknown>): Promise<unknown>
       type: 'computedView';
@@ -337,6 +417,42 @@ export const BookingManager = buildModelManager(
       modelApiIdentifier: modelApiIdentifier,
       defaultSelection: DefaultBookingSelection,
       namespace: null
+    },
+    {
+      type: 'action',
+      operationName: 'updateBooking',
+      operationReturnType: 'UpdateBooking',
+      functionName: 'update',
+      namespace: null,
+      modelApiIdentifier: modelApiIdentifier,
+      operatesWithRecordIdentity: true,
+      modelSelectionField: modelApiIdentifier,
+      isBulk: false,
+      isDeleter: false,
+      variables: { id: { required: true, type: 'GadgetID' } },
+      hasAmbiguousIdentifier: false,
+      paramOnlyVariables: [],
+      hasReturnType: false,
+      acceptsModelInput: false,
+      hasCreateOrUpdateEffect: false,
+      defaultSelection: DefaultBookingSelection
+    },
+    {
+      type: 'action',
+      operationName: 'bulkUpdateBookings',
+      functionName: 'bulkUpdate',
+      isBulk: true,
+      isDeleter: false,
+      hasReturnType: false,
+      acceptsModelInput: false,
+      operatesWithRecordIdentity: true,
+      singleActionFunctionName: 'update',
+      modelApiIdentifier: modelApiIdentifier,
+      modelSelectionField: pluralModelApiIdentifier,
+      namespace: null,
+      variables: { ids: { required: true, type: '[GadgetID!]' } },
+      paramOnlyVariables: [],
+      defaultSelection: DefaultBookingSelection
     },
     {
       type: 'computedView',

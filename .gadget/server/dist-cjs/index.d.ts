@@ -9,7 +9,7 @@
 *  |_|_| \_/ \___|_|\___/ \___\__,_|_|\__, |\__,_|\__,_|\__, |\___|\__|\___/ 
 *                                     |___/             |___/                
 *
-* Built for environment `Development` at version 42
+* Built for environment `Development` at version 579
 * Framework version: ^1.4.0
 * Edit this app here: https://livelocalgadget6.gadget.dev/edit
 */
@@ -39,13 +39,14 @@ export { preventCrossShopDataAccess, ShopifyBulkOperationState, ShopifySellingPl
 * @internal
 */
 import { Globals, actionContextLocalStorage } from "./globals";
-export * from "./models/User";
-export * from "./models/Session";
 export * from "./models/Booking";
 export * from "./models/Event";
 export * from "./models/Musician";
 export * from "./models/Review";
 export * from "./models/Venue";
+export * from "./models/User";
+export * from "./models/Session";
+export * from "./models/EventHistory";
 /**
 * A map of connection name to instantiated connection objects for the app.
 */

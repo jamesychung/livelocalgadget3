@@ -11,13 +11,17 @@ export type DefaultMusicianServerSelection = {
       readonly createdAt: true;
       readonly updatedAt: true;
       readonly state: true;
+      readonly reviews: false;
+      readonly bookings: false;
+      readonly events: false;
+      readonly additionalPictures: true;
+      readonly audio: true;
+      readonly audioFiles: true;
       readonly availability: true;
       readonly bio: true;
-      readonly bookings: false;
       readonly city: true;
       readonly country: true;
       readonly email: true;
-      readonly events: false;
       readonly experience: true;
       readonly genre: true;
       readonly genres: true;
@@ -26,14 +30,9 @@ export type DefaultMusicianServerSelection = {
       readonly isActive: true;
       readonly isVerified: true;
       readonly location: true;
-      readonly name: true;
       readonly phone: true;
       readonly profilePicture: true;
-      readonly reviews: false;
       readonly rating: true;
-      readonly audio: true;
-      readonly audioFiles: true;
-      readonly additionalPictures: true;
       readonly socialLinks: true;
       readonly stageName: true;
       readonly totalGigs: true;
@@ -66,7 +65,7 @@ export interface CreateMusicianActionContext extends AmbientContext {
   * An object containing the incoming data(this models fields) passed by triggers or user inputs.
   */
   params: {
-musician?: { state?: string;availability?: Scalars["JSON"];bio?: string;city?: string;country?: string;email?: string;experience?: string;genre?: string;genres?: Scalars["JSON"];hourlyRate?: number;instruments?: Scalars["JSON"];isActive?: boolean;isVerified?: boolean;location?: string;name?: string;phone?: string;profilePicture?: string;rating?: number;audio?: string;audioFiles?: Scalars["JSON"];additionalPictures?: Scalars["JSON"];socialLinks?: Scalars["JSON"];stageName?: string;totalGigs?: number;user?: { _link: string | null };website?: string;yearsExperience?: number; };
+musician?: { state?: string;additionalPictures?: Scalars["JSON"];audio?: string;audioFiles?: Scalars["JSON"];availability?: Scalars["JSON"];bio?: string;city?: string;country?: string;email?: string;experience?: string;genre?: string;genres?: Scalars["JSON"];hourlyRate?: number;instruments?: Scalars["JSON"];isActive?: boolean;isVerified?: boolean;location?: string;phone?: string;profilePicture?: string;rating?: number;socialLinks?: Scalars["JSON"];stageName?: string;totalGigs?: number;user?: { _link: string | null };website?: string;yearsExperience?: number; };
 };
   /**
   * @private The context of this action.
@@ -98,7 +97,7 @@ export interface UpdateMusicianActionContext extends AmbientContext {
   * An object containing the incoming data(this models fields) passed by triggers or user inputs.
   */
   params: {
-musician?: { state?: string;availability?: Scalars["JSON"];bio?: string;city?: string;country?: string;email?: string;experience?: string;genre?: string;genres?: Scalars["JSON"];hourlyRate?: number;instruments?: Scalars["JSON"];isActive?: boolean;isVerified?: boolean;location?: string;name?: string;phone?: string;profilePicture?: string;rating?: number;audio?: string;audioFiles?: Scalars["JSON"];additionalPictures?: Scalars["JSON"];socialLinks?: Scalars["JSON"];stageName?: string;totalGigs?: number;user?: { _link: string | null };website?: string;yearsExperience?: number; };    
+musician?: { state?: string;additionalPictures?: Scalars["JSON"];audio?: string;audioFiles?: Scalars["JSON"];availability?: Scalars["JSON"];bio?: string;city?: string;country?: string;email?: string;experience?: string;genre?: string;genres?: Scalars["JSON"];hourlyRate?: number;instruments?: Scalars["JSON"];isActive?: boolean;isVerified?: boolean;location?: string;phone?: string;profilePicture?: string;rating?: number;socialLinks?: Scalars["JSON"];stageName?: string;totalGigs?: number;user?: { _link: string | null };website?: string;yearsExperience?: number; };    
 id?: string;
 };
   /**

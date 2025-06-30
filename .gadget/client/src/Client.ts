@@ -5,31 +5,29 @@ import { assert, GadgetConnection, AuthenticationMode, GadgetTransaction, Intern
 import type { ClientOptions as ApiClientOptions, AnyClient, EnqueueBackgroundActionOptions, AnyActionFunction } from '@gadgetinc/api-client-core';
 import type { DocumentNode } from 'graphql';
 
-import { buildInlineComputedView } from "./builder.js";
-import { DefaultUserSelection, UserManager } from "./models/User.js";
-import { DefaultSessionSelection, SessionManager } from "./models/Session.js";
-import { CurrentSessionManager } from "./models/CurrentSession.js";
+import { buildGlobalAction, buildInlineComputedView } from "./builder.js";
 import { DefaultBookingSelection, BookingManager } from "./models/Booking.js";
 import { DefaultEventSelection, EventManager } from "./models/Event.js";
 import { DefaultMusicianSelection, MusicianManager } from "./models/Musician.js";
 import { DefaultReviewSelection, ReviewManager } from "./models/Review.js";
 import { DefaultVenueSelection, VenueManager } from "./models/Venue.js";
+import { DefaultUserSelection, UserManager } from "./models/User.js";
+import { DefaultSessionSelection, SessionManager } from "./models/Session.js";
+import { CurrentSessionManager } from "./models/CurrentSession.js";
+import { DefaultEventHistorySelection, EventHistoryManager } from "./models/EventHistory.js";
 import { SeedNamespace } from "./namespaces/seed.js";
-export { DefaultUserSelection, type UserRecord } from "./models/User.js";
-export { DefaultSessionSelection, type SessionRecord } from "./models/Session.js";
 export { DefaultBookingSelection, type BookingRecord } from "./models/Booking.js";
 export { DefaultEventSelection, type EventRecord } from "./models/Event.js";
 export { DefaultMusicianSelection, type MusicianRecord } from "./models/Musician.js";
 export { DefaultReviewSelection, type ReviewRecord } from "./models/Review.js";
 export { DefaultVenueSelection, type VenueRecord } from "./models/Venue.js";
+export { DefaultUserSelection, type UserRecord } from "./models/User.js";
+export { DefaultSessionSelection, type SessionRecord } from "./models/Session.js";
+export { DefaultEventHistorySelection, type EventHistoryRecord } from "./models/EventHistory.js";
 
 type ClientOptions = Omit<ApiClientOptions, "environment"> & { environment?: string };
 type AllOptionalVariables<T> = Partial<T> extends T ? object : never;
 export type InternalModelManagers = {
-   /** The internal API model manager for the user model */
-   user: InternalModelManager;
-   /** The internal API model manager for the session model */
-   session: InternalModelManager;
    /** The internal API model manager for the booking model */
    booking: InternalModelManager;
    /** The internal API model manager for the event model */
@@ -40,6 +38,12 @@ export type InternalModelManagers = {
    review: InternalModelManager;
    /** The internal API model manager for the venue model */
    venue: InternalModelManager;
+   /** The internal API model manager for the user model */
+   user: InternalModelManager;
+   /** The internal API model manager for the session model */
+   session: InternalModelManager;
+   /** The internal API model manager for the eventHistory model */
+   eventHistory: InternalModelManager;
    seed: {
    
    };
@@ -74,6 +78,42 @@ type InlineViewFunction = {
 export class Livelocalgadget6Client implements AnyClient {
   connection!: GadgetConnection;
 
+  /** Executes the sendBookingEmails global action. */
+  sendBookingEmails = buildGlobalAction(this, {
+                       type: 'globalAction',
+                       functionName: 'sendBookingEmails',
+                       operationName: 'sendBookingEmails',
+                       operationReturnType: 'SendBookingEmails',
+                       namespace: null,
+                       variables: {}
+                     } as const) as unknown as {
+                     (): Promise<any>;
+                     type: 'globalAction';
+                     operationName: 'sendBookingEmails';
+                     operationReturnType: 'SendBookingEmails';
+                     namespace: null;
+                     typesImports: [];
+                     variables: {};
+                     variablesType: Record<string, never>;
+                   };
+  /** Executes the sendEmail global action. */
+  sendEmail = buildGlobalAction(this, {
+                       type: 'globalAction',
+                       functionName: 'sendEmail',
+                       operationName: 'sendEmail',
+                       operationReturnType: 'SendEmail',
+                       namespace: null,
+                       variables: {}
+                     } as const) as unknown as {
+                     (): Promise<any>;
+                     type: 'globalAction';
+                     operationName: 'sendEmail';
+                     operationReturnType: 'SendEmail';
+                     namespace: null;
+                     typesImports: [];
+                     variables: {};
+                     variablesType: Record<string, never>;
+                   };
   /** Executes an inline computed view. */
   view: InlineViewFunction = buildInlineComputedView(this, {
                              type: 'computedView',
@@ -86,14 +126,15 @@ export class Livelocalgadget6Client implements AnyClient {
                                args: { type: 'JSONObject' }
                              }
                            } as const);
-  user!: UserManager;
-  session!: SessionManager;
-  currentSession!: CurrentSessionManager;
   booking!: BookingManager;
   event!: EventManager;
   musician!: MusicianManager;
   review!: ReviewManager;
   venue!: VenueManager;
+  user!: UserManager;
+  session!: SessionManager;
+  currentSession!: CurrentSessionManager;
+  eventHistory!: EventHistoryManager;
   seed!: SeedNamespace;
 
   /**
@@ -109,7 +150,7 @@ export class Livelocalgadget6Client implements AnyClient {
   /**
    * The list of environments with a customized API root endpoint
    */
-  apiRoots: Record<string, string> = {"development":"https://livelocalgadget6--development.gadget.app/","production":"https://livelocalgadget6.gadget.app/"};
+  apiRoots: Record<string, string> = {"production":"https://livelocalgadget6.gadget.app/","development":"https://livelocalgadget6--development.gadget.app/"};
 
 
 
@@ -197,24 +238,26 @@ export class Livelocalgadget6Client implements AnyClient {
 
 
 
-    this.user = new UserManager(this.connection);
-    this.session = new SessionManager(this.connection);
-    this.currentSession = new CurrentSessionManager(this.connection);
     this.booking = new BookingManager(this.connection);
     this.event = new EventManager(this.connection);
     this.musician = new MusicianManager(this.connection);
     this.review = new ReviewManager(this.connection);
     this.venue = new VenueManager(this.connection);
+    this.user = new UserManager(this.connection);
+    this.session = new SessionManager(this.connection);
+    this.currentSession = new CurrentSessionManager(this.connection);
+    this.eventHistory = new EventHistoryManager(this.connection);
     this.seed = new SeedNamespace(this);
 
     this.internal = {
-                      user: new InternalModelManager("user", this.connection, {"pluralApiIdentifier":"users","hasAmbiguousIdentifiers":false,"namespace":[]}),
-                      session: new InternalModelManager("session", this.connection, {"pluralApiIdentifier":"sessions","hasAmbiguousIdentifiers":false,"namespace":[]}),
                       booking: new InternalModelManager("booking", this.connection, {"pluralApiIdentifier":"bookings","hasAmbiguousIdentifiers":false,"namespace":[]}),
                       event: new InternalModelManager("event", this.connection, {"pluralApiIdentifier":"events","hasAmbiguousIdentifiers":false,"namespace":[]}),
                       musician: new InternalModelManager("musician", this.connection, {"pluralApiIdentifier":"musicians","hasAmbiguousIdentifiers":false,"namespace":[]}),
                       review: new InternalModelManager("review", this.connection, {"pluralApiIdentifier":"reviews","hasAmbiguousIdentifiers":false,"namespace":[]}),
                       venue: new InternalModelManager("venue", this.connection, {"pluralApiIdentifier":"venues","hasAmbiguousIdentifiers":false,"namespace":[]}),
+                      user: new InternalModelManager("user", this.connection, {"pluralApiIdentifier":"users","hasAmbiguousIdentifiers":false,"namespace":[]}),
+                      session: new InternalModelManager("session", this.connection, {"pluralApiIdentifier":"sessions","hasAmbiguousIdentifiers":false,"namespace":[]}),
+                      eventHistory: new InternalModelManager("eventHistory", this.connection, {"pluralApiIdentifier":"eventHistories","hasAmbiguousIdentifiers":false,"namespace":[]}),
                       seed: {
                       
                       },
@@ -476,7 +519,7 @@ export class Livelocalgadget6Client implements AnyClient {
   }
 }
 
-(Livelocalgadget6Client.prototype as any)[Symbol.for("gadget/modelRelationships")] = {"user":{},"session":{"user":{"type":"BelongsTo","model":"user"}},"booking":{"bookedBy":{"type":"BelongsTo","model":"user"},"musician":{"type":"BelongsTo","model":"musician"},"venue":{"type":"BelongsTo","model":"venue"}},"event":{"createdBy":{"type":"BelongsTo","model":"user"},"musician":{"type":"BelongsTo","model":"musician"},"venue":{"type":"BelongsTo","model":"venue"}},"musician":{"bookings":{"type":"HasMany","model":"booking"},"events":{"type":"HasMany","model":"event"},"reviews":{"type":"HasMany","model":"review"},"user":{"type":"BelongsTo","model":"user"}},"review":{"event":{"type":"BelongsTo","model":"venue"},"musician":{"type":"BelongsTo","model":"musician"},"reviewer":{"type":"BelongsTo","model":"user"},"venue":{"type":"BelongsTo","model":"venue"}},"venue":{"bookings":{"type":"HasMany","model":"booking"},"events":{"type":"HasMany","model":"event"},"owner":{"type":"BelongsTo","model":"user"},"reviews":{"type":"HasMany","model":"review"}}};
+(Livelocalgadget6Client.prototype as any)[Symbol.for("gadget/modelRelationships")] = {"booking":{"bookedBy":{"type":"BelongsTo","model":"user"},"musician":{"type":"BelongsTo","model":"musician"},"venue":{"type":"BelongsTo","model":"venue"},"event":{"type":"BelongsTo","model":"event"}},"event":{"createdBy":{"type":"BelongsTo","model":"user"},"musician":{"type":"BelongsTo","model":"musician"},"venue":{"type":"BelongsTo","model":"venue"}},"musician":{"reviews":{"type":"HasMany","model":"review"},"bookings":{"type":"HasMany","model":"booking"},"events":{"type":"HasMany","model":"event"},"user":{"type":"BelongsTo","model":"user"}},"review":{"event":{"type":"BelongsTo","model":"venue"},"musician":{"type":"BelongsTo","model":"musician"},"reviewer":{"type":"BelongsTo","model":"user"},"venue":{"type":"BelongsTo","model":"venue"}},"venue":{"events":{"type":"HasMany","model":"event"},"bookings":{"type":"HasMany","model":"booking"},"owner":{"type":"BelongsTo","model":"user"},"reviews":{"type":"HasMany","model":"review"}},"user":{},"session":{"user":{"type":"BelongsTo","model":"user"}},"eventHistory":{"booking":{"type":"BelongsTo","model":"booking"},"event":{"type":"BelongsTo","model":"event"},"changedBy":{"type":"BelongsTo","model":"user"}}};
 
 /** Legacy export under the `Client` name for backwards compatibility. */
 export const Client: typeof Livelocalgadget6Client = Livelocalgadget6Client;

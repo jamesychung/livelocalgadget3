@@ -40,7 +40,8 @@ const DefaultUserSelection = {
   resetPasswordToken: true,
   resetPasswordTokenExpiration: true,
   roles: { key: true, name: true },
-  updatedAt: true
+  updatedAt: true,
+  userType: true
 };
 const modelApiIdentifier = "user";
 const pluralModelApiIdentifier = "users";

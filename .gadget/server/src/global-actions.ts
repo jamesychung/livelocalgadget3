@@ -117,29 +117,6 @@ export interface SeedCreateVenuesGlobalActionContext extends AmbientContext {
 };
 
 
-/** Context of the `debugSeed` action. */
-export interface SeedDebugSeedGlobalActionContext extends AmbientContext {
-  /**
-  * @deprecated Use 'returnType' instead.
-  * Useful for returning data from this action by setting `scope.result`.
-  */
-  scope: ActionExecutionScope;
-  /**
-  * An object specifying the trigger to this action (e.g. API call, custom params).
-  */
-  params: {
-};
-  /**
-  * An object specifying the trigger to this action (e.g. api call, scheduler etc.)
-  */
-  trigger: TriggerWithType<"api"> | TriggerWithType<"background-action">;
-  /**
-  * @private The context of this action.
-  */
-  context: SeedDebugSeedGlobalActionContext;
-};
-
-
 /** Context of the `quickSeed` action. */
 export interface SeedQuickSeedGlobalActionContext extends AmbientContext {
   /**
@@ -232,8 +209,8 @@ export interface SeedSimpleSeedGlobalActionContext extends AmbientContext {
 };
 
 
-/** Context of the `testContext` action. */
-export interface SeedTestContextGlobalActionContext extends AmbientContext {
+/** Context of the `sendBookingEmails` action. */
+export interface SendBookingEmailsGlobalActionContext extends AmbientContext {
   /**
   * @deprecated Use 'returnType' instead.
   * Useful for returning data from this action by setting `scope.result`.
@@ -251,7 +228,30 @@ export interface SeedTestContextGlobalActionContext extends AmbientContext {
   /**
   * @private The context of this action.
   */
-  context: SeedTestContextGlobalActionContext;
+  context: SendBookingEmailsGlobalActionContext;
+};
+
+
+/** Context of the `sendEmail` action. */
+export interface SendEmailGlobalActionContext extends AmbientContext {
+  /**
+  * @deprecated Use 'returnType' instead.
+  * Useful for returning data from this action by setting `scope.result`.
+  */
+  scope: ActionExecutionScope;
+  /**
+  * An object specifying the trigger to this action (e.g. API call, custom params).
+  */
+  params: {
+};
+  /**
+  * An object specifying the trigger to this action (e.g. api call, scheduler etc.)
+  */
+  trigger: TriggerWithType<"api"> | TriggerWithType<"background-action">;
+  /**
+  * @private The context of this action.
+  */
+  context: SendEmailGlobalActionContext;
 };
 
 

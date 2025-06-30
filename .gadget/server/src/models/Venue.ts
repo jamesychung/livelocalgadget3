@@ -11,16 +11,16 @@ export type DefaultVenueServerSelection = {
       readonly createdAt: true;
       readonly updatedAt: true;
       readonly state: true;
+      readonly events: false;
+      readonly bookings: false;
+      readonly additionalPictures: true;
       readonly address: true;
       readonly amenities: true;
-      readonly additionalPictures: true;
-      readonly bookings: false;
       readonly capacity: true;
       readonly city: true;
       readonly country: true;
       readonly description: true;
       readonly email: true;
-      readonly events: false;
       readonly genres: true;
       readonly hours: true;
       readonly isActive: true;
@@ -33,10 +33,10 @@ export type DefaultVenueServerSelection = {
       readonly profilePicture: true;
       readonly rating: true;
       readonly socialLinks: true;
-      readonly reviews: false;
       readonly type: true;
       readonly website: true;
       readonly zipCode: true;
+      readonly reviews: false;
   };
 
   
@@ -62,7 +62,7 @@ export interface CreateVenueActionContext extends AmbientContext {
   * An object containing the incoming data(this models fields) passed by triggers or user inputs.
   */
   params: {
-venue?: { state?: string;address?: string;amenities?: Scalars["JSON"];additionalPictures?: Scalars["JSON"];capacity?: number;city?: string;country?: string;description?: string;email?: string;genres?: Scalars["JSON"];hours?: Scalars["JSON"];isActive?: boolean;isVerified?: boolean;name?: string;owner?: { _link: string | null };phone?: string;priceRange?: string;profilePicture?: string;rating?: number;socialLinks?: Scalars["JSON"];type?: string;website?: string;zipCode?: string; };
+venue?: { state?: string;additionalPictures?: Scalars["JSON"];address?: string;amenities?: Scalars["JSON"];capacity?: number;city?: string;country?: string;description?: string;email?: string;genres?: Scalars["JSON"];hours?: Scalars["JSON"];isActive?: boolean;isVerified?: boolean;name?: string;owner?: { _link: string | null };phone?: string;priceRange?: string;profilePicture?: string;rating?: number;socialLinks?: Scalars["JSON"];type?: string;website?: string;zipCode?: string; };
 };
   /**
   * @private The context of this action.
@@ -94,7 +94,7 @@ export interface UpdateVenueActionContext extends AmbientContext {
   * An object containing the incoming data(this models fields) passed by triggers or user inputs.
   */
   params: {
-venue?: { state?: string;address?: string;amenities?: Scalars["JSON"];additionalPictures?: Scalars["JSON"];capacity?: number;city?: string;country?: string;description?: string;email?: string;genres?: Scalars["JSON"];hours?: Scalars["JSON"];isActive?: boolean;isVerified?: boolean;name?: string;owner?: { _link: string | null };phone?: string;priceRange?: string;profilePicture?: string;rating?: number;socialLinks?: Scalars["JSON"];type?: string;website?: string;zipCode?: string; };    
+venue?: { state?: string;additionalPictures?: Scalars["JSON"];address?: string;amenities?: Scalars["JSON"];capacity?: number;city?: string;country?: string;description?: string;email?: string;genres?: Scalars["JSON"];hours?: Scalars["JSON"];isActive?: boolean;isVerified?: boolean;name?: string;owner?: { _link: string | null };phone?: string;priceRange?: string;profilePicture?: string;rating?: number;socialLinks?: Scalars["JSON"];type?: string;website?: string;zipCode?: string; };    
 id?: string;
 };
   /**

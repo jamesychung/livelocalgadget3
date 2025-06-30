@@ -43,15 +43,6 @@
   * An object specifying the trigger to this action (e.g. api call, scheduler etc.)
   */ /**
   * @private The context of this action.
-  */ /** Context of the `debugSeed` action. */ /**
-  * @deprecated Use 'returnType' instead.
-  * Useful for returning data from this action by setting `scope.result`.
-  */ /**
-  * An object specifying the trigger to this action (e.g. API call, custom params).
-  */ /**
-  * An object specifying the trigger to this action (e.g. api call, scheduler etc.)
-  */ /**
-  * @private The context of this action.
   */ /** Context of the `quickSeed` action. */ /**
   * @deprecated Use 'returnType' instead.
   * Useful for returning data from this action by setting `scope.result`.
@@ -88,7 +79,16 @@
   * An object specifying the trigger to this action (e.g. api call, scheduler etc.)
   */ /**
   * @private The context of this action.
-  */ /** Context of the `testContext` action. */ export { }; /**
+  */ /** Context of the `sendBookingEmails` action. */ /**
+  * @deprecated Use 'returnType' instead.
+  * Useful for returning data from this action by setting `scope.result`.
+  */ /**
+  * An object specifying the trigger to this action (e.g. API call, custom params).
+  */ /**
+  * An object specifying the trigger to this action (e.g. api call, scheduler etc.)
+  */ /**
+  * @private The context of this action.
+  */ /** Context of the `sendEmail` action. */ export { }; /**
   * @deprecated Use 'returnType' instead.
   * Useful for returning data from this action by setting `scope.result`.
   */  /**

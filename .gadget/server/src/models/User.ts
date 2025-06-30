@@ -10,20 +10,21 @@ export type DefaultUserServerSelection = {
       readonly id: true;
       readonly createdAt: true;
       readonly updatedAt: true;
+      readonly password: true;
+      readonly emailVerified: true;
       readonly email: true;
+      readonly lastSignedIn: true;
+      readonly roles: true;
       readonly emailVerificationToken: true;
       readonly emailVerificationTokenExpiration: true;
-      readonly emailVerified: true;
-      readonly firstName: true;
-      readonly googleImageUrl: true;
-      readonly googleProfileId: true;
-      readonly lastName: true;
-      readonly password: true;
-      readonly lastSignedIn: true;
       readonly profilePicture: true;
       readonly resetPasswordTokenExpiration: true;
       readonly resetPasswordToken: true;
-      readonly roles: true;
+      readonly userType: true;
+      readonly firstName: true;
+      readonly googleImageUrl: true;
+      readonly lastName: true;
+      readonly googleProfileId: true;
   };
 
   
@@ -44,7 +45,7 @@ export interface SignUpUserActionContext extends AmbientContext {
   /**
   * An object specifying the trigger to this action (e.g. API call, webhook events etc.).
   */
-  trigger: TriggerWithType<"user_sign_up"> | TriggerWithType<"google_oauth_signup">;
+  trigger: TriggerWithType<"user_sign_up">;
   /**
   * An object containing the incoming data(this models fields) passed by triggers or user inputs.
   */
@@ -77,7 +78,7 @@ export interface SignInUserActionContext extends AmbientContext {
   /**
   * An object specifying the trigger to this action (e.g. API call, webhook events etc.).
   */
-  trigger: TriggerWithType<"user_sign_in"> | TriggerWithType<"google_oauth_signin">;
+  trigger: TriggerWithType<"user_sign_in">;
   /**
   * An object containing the incoming data(this models fields) passed by triggers or user inputs.
   */
@@ -147,7 +148,7 @@ export interface UpdateUserActionContext extends AmbientContext {
   * An object containing the incoming data(this models fields) passed by triggers or user inputs.
   */
   params: {
-user?: { email?: string;emailVerificationToken?: string;emailVerificationTokenExpiration?: Date;emailVerified?: boolean;firstName?: string;googleImageUrl?: string;googleProfileId?: string;lastName?: string;password?: string;lastSignedIn?: Date;profilePicture?: { fileName: string; byteSize: number; mimeType: string; storageToken: string; url: string };resetPasswordTokenExpiration?: Date;resetPasswordToken?: string;roles?: string[]; };    
+user?: { password?: string;emailVerified?: boolean;email?: string;lastSignedIn?: Date;roles?: string[];emailVerificationToken?: string;emailVerificationTokenExpiration?: Date;profilePicture?: { fileName: string; byteSize: number; mimeType: string; storageToken: string; url: string };resetPasswordTokenExpiration?: Date;resetPasswordToken?: string;userType?: string;firstName?: string;googleImageUrl?: string;lastName?: string;googleProfileId?: string; };    
 id?: string;
 };
   /**

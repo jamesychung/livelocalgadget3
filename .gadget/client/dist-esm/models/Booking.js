@@ -8,10 +8,13 @@ const DefaultBookingSelection = {
   depositAmount: true,
   depositPaid: true,
   endTime: true,
+  eventId: true,
   fullPaymentPaid: true,
   isActive: true,
   musicianId: true,
+  musicianPitch: true,
   notes: true,
+  proposedRate: true,
   specialRequirements: true,
   startTime: true,
   status: true,
@@ -21,6 +24,7 @@ const DefaultBookingSelection = {
 };
 const modelApiIdentifier = "booking";
 const pluralModelApiIdentifier = "bookings";
+;
 ;
 ;
 ;
@@ -87,6 +91,42 @@ const BookingManager = buildModelManager(
       modelApiIdentifier,
       defaultSelection: DefaultBookingSelection,
       namespace: null
+    },
+    {
+      type: "action",
+      operationName: "updateBooking",
+      operationReturnType: "UpdateBooking",
+      functionName: "update",
+      namespace: null,
+      modelApiIdentifier,
+      operatesWithRecordIdentity: true,
+      modelSelectionField: modelApiIdentifier,
+      isBulk: false,
+      isDeleter: false,
+      variables: { id: { required: true, type: "GadgetID" } },
+      hasAmbiguousIdentifier: false,
+      paramOnlyVariables: [],
+      hasReturnType: false,
+      acceptsModelInput: false,
+      hasCreateOrUpdateEffect: false,
+      defaultSelection: DefaultBookingSelection
+    },
+    {
+      type: "action",
+      operationName: "bulkUpdateBookings",
+      functionName: "bulkUpdate",
+      isBulk: true,
+      isDeleter: false,
+      hasReturnType: false,
+      acceptsModelInput: false,
+      operatesWithRecordIdentity: true,
+      singleActionFunctionName: "update",
+      modelApiIdentifier,
+      modelSelectionField: pluralModelApiIdentifier,
+      namespace: null,
+      variables: { ids: { required: true, type: "[GadgetID!]" } },
+      paramOnlyVariables: [],
+      defaultSelection: DefaultBookingSelection
     },
     {
       type: "computedView",

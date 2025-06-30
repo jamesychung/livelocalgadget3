@@ -1,4 +1,4 @@
-import { applyParams, save, ActionOptions, ActionRun } from "gadget-server";
+import { applyParams, save, ActionOptions, ActionRun, createGadgetRecord } from "gadget-server";
 
 /**
  * Action to log event history when events are updated
@@ -37,6 +37,9 @@ export const run: ActionRun = async ({ params, record, logger, api, session }) =
     logger.info(`Event title: ${record.title}, Date: ${record.date}`);
     logger.info(`Event status: ${record.status}, Start time: ${record.startTime}`);
     
+    // TEST: Check if we reach this point
+    logger.info(`🔍 TEST: About to start event history creation logic`);
+    
     // Create event history entries for changed fields
     const changes = params.event || params;
     logger.info(`Changes detected: ${JSON.stringify(changes)}`);
@@ -54,30 +57,22 @@ export const run: ActionRun = async ({ params, record, logger, api, session }) =
         try {
           logger.info(`📝 Creating history entry for ${field} change`);
           
-          const historyEntry = await api.eventHistory.create({
-            event: {
-              _link: record.id
-            },
-            changedBy: {
-              _link: session?.user?.id || 'system'
-            },
+          // Create a new event history record using createGadgetRecord
+          const historyRecord = createGadgetRecord("eventHistory", {
+            eventId: record.id,
+            changedById: session?.user?.id || "28",
             changeType: `event_${field}`,
-            previousValue: previousValue ? String(previousValue) : 'none',
-            newValue: newValue ? String(newValue) : 'none',
-            description: `Event ${field} changed from "${previousValue || 'none'}" to "${newValue || 'none'}"`,
-            context: {
-              eventId: record.id,
-              venueId: record.venueId,
-              changeReason: 'venue_edit'
-            },
-            metadata: {
-              sessionId: session?.id || null,
-              userAgent: null, // We don't have access to request headers in this context
-              ipAddress: null
-            }
+            previousValue: String(previousValue || ""),
+            newValue: String(newValue || ""),
+            description: `Event ${field} updated from "${previousValue}" to "${newValue}"`
           });
-
-          logger.info(`✅ Event history entry created for ${field} change: ${historyEntry.id}`);
+          
+          logger.info(`Created history record: ${JSON.stringify(historyRecord)}`);
+          
+          // Save the history record
+          await save(historyRecord);
+          
+          logger.info(`✅ Event history entry created for ${field} change: ${historyRecord.id}`);
         } catch (error) {
           logger.error(`❌ Error creating event history entry for ${field}: ${error}`);
           logger.error(`Error details: ${JSON.stringify(error)}`);

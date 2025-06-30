@@ -357,10 +357,6 @@ export type VenueManager = {
         *     key: "value",
         *   },
         *   address: "example value for address",
-        *   amenities: {
-        *     example: true,
-        *     key: "value",
-        *   },
         *   state: "example value for state",
         * });
       **/
@@ -382,10 +378,6 @@ export type VenueManager = {
         *       key: "value",
         *     },
         *     address: "example value for address",
-        *     amenities: {
-        *       example: true,
-        *       key: "value",
-        *     },
         *     state: "example value for state",
         *   },
         * });
@@ -460,10 +452,6 @@ export type VenueManager = {
         *     key: "value",
         *   },
         *   address: "example value for address",
-        *   amenities: {
-        *     example: true,
-        *     key: "value",
-        *   },
         *   state: "example value for state",
         * });
       **/
@@ -485,10 +473,6 @@ export type VenueManager = {
         *       key: "value",
         *     },
         *     address: "example value for address",
-        *     amenities: {
-        *       example: true,
-        *       key: "value",
-        *     },
         *     state: "example value for state",
         *   },
         * });
@@ -631,11 +615,6 @@ export type VenueManager = {
         *     example: true,
         *     key: "value",
         *   },
-        *   address: "example value for address",
-        *   amenities: {
-        *     example: true,
-        *     key: "value",
-        *   },
         *   id: "1",
         *   state: "example value for state",
         * });
@@ -654,11 +633,6 @@ export type VenueManager = {
       * * const result = await api.venue.upsert({
         *   venue: {
         *     additionalPictures: {
-        *       example: true,
-        *       key: "value",
-        *     },
-        *     address: "example value for address",
-        *     amenities: {
         *       example: true,
         *       key: "value",
         *     },

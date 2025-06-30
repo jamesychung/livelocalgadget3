@@ -10,6 +10,14 @@ export interface AppConfiguration {
 	* The value for the NODE_ENV environment variable set in the Gadget Environment Variables settings section. 
 	*/
 	NODE_ENV: string | undefined;
+	/**
+	* The value for the GOOGLE_APP_PASSWORD_KEY environment variable set in the Gadget Environment Variables settings section. 
+	*/
+	GOOGLE_APP_PASSWORD_KEY: string | undefined;
+	/**
+	* The value for the GOOGLE_EMAIL_ADDRESS environment variable set in the Gadget Environment Variables settings section. 
+	*/
+	GOOGLE_EMAIL_ADDRESS: string | undefined;
 }
 declare global {
 	namespace NodeJS {

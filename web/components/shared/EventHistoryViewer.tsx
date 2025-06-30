@@ -65,7 +65,7 @@ export const EventHistoryViewer: React.FC<EventHistoryViewerProps> = ({
 
       const history = await api.eventHistory.findMany({
         filter: {
-          event: { equals: eventId }
+          event: { id: { equals: eventId } }
         },
         select: {
           id: true,
@@ -77,21 +77,16 @@ export const EventHistoryViewer: React.FC<EventHistoryViewerProps> = ({
           context: true,
           metadata: true,
           changedBy: {
-            select: {
-              id: true,
-              firstName: true,
-              lastName: true,
-              email: true
-            }
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true
           },
           booking: {
-            select: {
+            id: true,
+            musician: {
               id: true,
-              musician: {
-                select: {
-                  stageName: true
-                }
-              }
+              stageName: true
             }
           }
         },

@@ -50,10 +50,6 @@ export type GadgetFieldValidationUnion = AvailableGadgetRegexFieldValidationSele
 export type AvailableGadgetFieldValidationUnionSelection = GadgetRegexFieldValidation | GadgetRangeFieldValidation | GadgetOnlyImageFileFieldValidation | GadgetGenericFieldValidation;
 /** A sort order for a field. Can be Ascending or Descending. */
 export type SortOrder = "Ascending" | "Descending";
-/** Represents one user result record in internal api calls. Returns a JSON blob of all the record's fields. */
-export type InternalUserRecord = Scalars["JSONObject"];
-/** Represents one session result record in internal api calls. Returns a JSON blob of all the record's fields. */
-export type InternalSessionRecord = Scalars["JSONObject"];
 /** Represents one booking result record in internal api calls. Returns a JSON blob of all the record's fields. */
 export type InternalBookingRecord = Scalars["JSONObject"];
 /** Represents one event result record in internal api calls. Returns a JSON blob of all the record's fields. */
@@ -64,380 +60,16 @@ export type InternalMusicianRecord = Scalars["JSONObject"];
 export type InternalReviewRecord = Scalars["JSONObject"];
 /** Represents one venue result record in internal api calls. Returns a JSON blob of all the record's fields. */
 export type InternalVenueRecord = Scalars["JSONObject"];
+/** Represents one user result record in internal api calls. Returns a JSON blob of all the record's fields. */
+export type InternalUserRecord = Scalars["JSONObject"];
+/** Represents one session result record in internal api calls. Returns a JSON blob of all the record's fields. */
+export type InternalSessionRecord = Scalars["JSONObject"];
+/** Represents one eventHistory result record in internal api calls. Returns a JSON blob of all the record's fields. */
+export type InternalEventHistoryRecord = Scalars["JSONObject"];
 /** The `Upload` scalar type represents a file upload. */
 export type Upload = any;
-export type BackgroundActionResult = AvailableSeedCreateEventsResultSelection | AvailableSeedCreateMusiciansResultSelection | AvailableSeedCreateReviewsResultSelection | AvailableSeedCreateUsersResultSelection | AvailableSeedCreateVenuesResultSelection | AvailableSeedDebugSeedResultSelection | AvailableSeedQuickSeedResultSelection | AvailableSeedSeedAllDataResultSelection | AvailableSeedSeedDataResultSelection | AvailableSeedSimpleSeedResultSelection | AvailableSeedTestContextResultSelection | AvailableSignUpUserResultSelection | AvailableSignInUserResultSelection | AvailableSignOutUserResultSelection | AvailableUpdateUserResultSelection | AvailableDeleteUserResultSelection | AvailableSendVerifyEmailUserResultSelection | AvailableVerifyEmailUserResultSelection | AvailableSendResetPasswordUserResultSelection | AvailableResetPasswordUserResultSelection | AvailableChangePasswordUserResultSelection | AvailableCreateEventResultSelection | AvailableUpdateEventResultSelection | AvailableFindFirstEventResultSelection | AvailableCreateMusicianResultSelection | AvailableUpdateMusicianResultSelection | AvailableFindFirstMusicianResultSelection | AvailableCreateVenueResultSelection | AvailableUpdateVenueResultSelection | AvailableFindFirstVenueResultSelection;
-export type AvailableBackgroundActionResultSelection = SeedCreateEventsResult | SeedCreateMusiciansResult | SeedCreateReviewsResult | SeedCreateUsersResult | SeedCreateVenuesResult | SeedDebugSeedResult | SeedQuickSeedResult | SeedSeedAllDataResult | SeedSeedDataResult | SeedSimpleSeedResult | SeedTestContextResult | SignUpUserResult | SignInUserResult | SignOutUserResult | UpdateUserResult | DeleteUserResult | SendVerifyEmailUserResult | VerifyEmailUserResult | SendResetPasswordUserResult | ResetPasswordUserResult | ChangePasswordUserResult | CreateEventResult | UpdateEventResult | FindFirstEventResult | CreateMusicianResult | UpdateMusicianResult | FindFirstMusicianResult | CreateVenueResult | UpdateVenueResult | FindFirstVenueResult;
-export type UserSort = {
-    /** Sort the results by the id field. Defaults to ascending (smallest value first). */
-    id?: SortOrder | null;
-    /** Sort the results by the createdAt field. Defaults to ascending (smallest value first). */
-    createdAt?: SortOrder | null;
-    /** Sort the results by the updatedAt field. Defaults to ascending (smallest value first). */
-    updatedAt?: SortOrder | null;
-    /** Sort the results by the email field. Defaults to ascending (smallest value first). */
-    email?: SortOrder | null;
-    /** Sort the results by the emailVerificationToken field. Defaults to ascending (smallest value first). */
-    emailVerificationToken?: SortOrder | null;
-    /** Sort the results by the emailVerificationTokenExpiration field. Defaults to ascending (smallest value first). */
-    emailVerificationTokenExpiration?: SortOrder | null;
-    /** Sort the results by the emailVerified field. Defaults to ascending (smallest value first). */
-    emailVerified?: SortOrder | null;
-    /** Sort the results by the firstName field. Defaults to ascending (smallest value first). */
-    firstName?: SortOrder | null;
-    /** Sort the results by the googleImageUrl field. Defaults to ascending (smallest value first). */
-    googleImageUrl?: SortOrder | null;
-    /** Sort the results by the googleProfileId field. Defaults to ascending (smallest value first). */
-    googleProfileId?: SortOrder | null;
-    /** Sort the results by the lastName field. Defaults to ascending (smallest value first). */
-    lastName?: SortOrder | null;
-    /** Sort the results by the lastSignedIn field. Defaults to ascending (smallest value first). */
-    lastSignedIn?: SortOrder | null;
-    /** Sort the results by the resetPasswordTokenExpiration field. Defaults to ascending (smallest value first). */
-    resetPasswordTokenExpiration?: SortOrder | null;
-    /** Sort the results by the resetPasswordToken field. Defaults to ascending (smallest value first). */
-    resetPasswordToken?: SortOrder | null;
-};
-export type UserFilter = {
-    AND?: (UserFilter | null)[];
-    OR?: (UserFilter | null)[];
-    NOT?: (UserFilter | null)[];
-    id?: IDFilter | null;
-    createdAt?: DateTimeFilter | null;
-    updatedAt?: DateTimeFilter | null;
-    email?: StringFilter | null;
-    emailVerificationToken?: StringFilter | null;
-    emailVerificationTokenExpiration?: DateTimeFilter | null;
-    emailVerified?: BooleanFilter | null;
-    firstName?: StringFilter | null;
-    googleImageUrl?: StringFilter | null;
-    googleProfileId?: StringFilter | null;
-    lastName?: StringFilter | null;
-    lastSignedIn?: DateTimeFilter | null;
-    resetPasswordTokenExpiration?: DateTimeFilter | null;
-    resetPasswordToken?: StringFilter | null;
-    roles?: RoleAssignmentFilter | null;
-};
-export type IDFilter = {
-    equals?: (Scalars['GadgetID'] | null) | null;
-    notEquals?: (Scalars['GadgetID'] | null) | null;
-    isSet?: (Scalars['Boolean'] | null) | null;
-    in?: ((Scalars['GadgetID'] | null) | null)[];
-    notIn?: ((Scalars['GadgetID'] | null) | null)[];
-    lessThan?: (Scalars['GadgetID'] | null) | null;
-    lessThanOrEqual?: (Scalars['GadgetID'] | null) | null;
-    greaterThan?: (Scalars['GadgetID'] | null) | null;
-    greaterThanOrEqual?: (Scalars['GadgetID'] | null) | null;
-};
-export type DateTimeFilter = {
-    equals?: Date | Scalars['ISO8601DateString'] | null;
-    notEquals?: Date | Scalars['ISO8601DateString'] | null;
-    isSet?: (Scalars['Boolean'] | null) | null;
-    in?: (Date | Scalars['ISO8601DateString'] | null)[];
-    notIn?: (Date | Scalars['ISO8601DateString'] | null)[];
-    lessThan?: Date | Scalars['ISO8601DateString'] | null;
-    lessThanOrEqual?: Date | Scalars['ISO8601DateString'] | null;
-    greaterThan?: Date | Scalars['ISO8601DateString'] | null;
-    greaterThanOrEqual?: Date | Scalars['ISO8601DateString'] | null;
-    before?: Date | Scalars['ISO8601DateString'] | null;
-    after?: Date | Scalars['ISO8601DateString'] | null;
-};
-export type StringFilter = {
-    equals?: (Scalars['String'] | null) | null;
-    notEquals?: (Scalars['String'] | null) | null;
-    isSet?: (Scalars['Boolean'] | null) | null;
-    in?: ((Scalars['String'] | null) | null)[];
-    notIn?: ((Scalars['String'] | null) | null)[];
-    lessThan?: (Scalars['String'] | null) | null;
-    lessThanOrEqual?: (Scalars['String'] | null) | null;
-    greaterThan?: (Scalars['String'] | null) | null;
-    greaterThanOrEqual?: (Scalars['String'] | null) | null;
-    startsWith?: (Scalars['String'] | null) | null;
-};
-export type BooleanFilter = {
-    isSet?: (Scalars['Boolean'] | null) | null;
-    equals?: (Scalars['Boolean'] | null) | null;
-    notEquals?: (Scalars['Boolean'] | null) | null;
-};
-export type RoleAssignmentFilter = {
-    isSet?: (Scalars['Boolean'] | null) | null;
-    equals?: ((Scalars['String'] | null) | null)[];
-    notEquals?: ((Scalars['String'] | null) | null)[];
-    contains?: ((Scalars['String'] | null) | null)[];
-};
-export type SessionFilter = {
-    id?: IDEqualsFilter | null;
-    user?: IDEqualsFilter | null;
-    userId?: IDEqualsFilter | null;
-};
-export type IDEqualsFilter = {
-    equals?: (Scalars['GadgetID'] | null) | null;
-};
-export type BookingSort = {
-    /** Sort the results by the id field. Defaults to ascending (smallest value first). */
-    id?: SortOrder | null;
-    /** Sort the results by the createdAt field. Defaults to ascending (smallest value first). */
-    createdAt?: SortOrder | null;
-    /** Sort the results by the updatedAt field. Defaults to ascending (smallest value first). */
-    updatedAt?: SortOrder | null;
-    /** Sort the results by the date field. Defaults to ascending (smallest value first). */
-    date?: SortOrder | null;
-    /** Sort the results by the depositAmount field. Defaults to ascending (smallest value first). */
-    depositAmount?: SortOrder | null;
-    /** Sort the results by the depositPaid field. Defaults to ascending (smallest value first). */
-    depositPaid?: SortOrder | null;
-    /** Sort the results by the endTime field. Defaults to ascending (smallest value first). */
-    endTime?: SortOrder | null;
-    /** Sort the results by the fullPaymentPaid field. Defaults to ascending (smallest value first). */
-    fullPaymentPaid?: SortOrder | null;
-    /** Sort the results by the isActive field. Defaults to ascending (smallest value first). */
-    isActive?: SortOrder | null;
-    /** Sort the results by the notes field. Defaults to ascending (smallest value first). */
-    notes?: SortOrder | null;
-    /** Sort the results by the specialRequirements field. Defaults to ascending (smallest value first). */
-    specialRequirements?: SortOrder | null;
-    /** Sort the results by the startTime field. Defaults to ascending (smallest value first). */
-    startTime?: SortOrder | null;
-    /** Sort the results by the status field. Defaults to ascending (smallest value first). */
-    status?: SortOrder | null;
-    /** Sort the results by the totalAmount field. Defaults to ascending (smallest value first). */
-    totalAmount?: SortOrder | null;
-};
-export type BookingFilter = {
-    AND?: (BookingFilter | null)[];
-    OR?: (BookingFilter | null)[];
-    NOT?: (BookingFilter | null)[];
-    id?: IDFilter | null;
-    createdAt?: DateTimeFilter | null;
-    updatedAt?: DateTimeFilter | null;
-    bookedById?: IDFilter | null;
-    bookedBy?: UserRelationshipFilter | null;
-    date?: DateTimeFilter | null;
-    depositAmount?: FloatFilter | null;
-    depositPaid?: BooleanFilter | null;
-    endTime?: StringFilter | null;
-    fullPaymentPaid?: BooleanFilter | null;
-    isActive?: BooleanFilter | null;
-    musicianId?: IDFilter | null;
-    musician?: MusicianRelationshipFilter | null;
-    notes?: StringFilter | null;
-    specialRequirements?: StringFilter | null;
-    startTime?: StringFilter | null;
-    status?: StringFilter | null;
-    totalAmount?: FloatFilter | null;
-    venueId?: IDFilter | null;
-    venue?: VenueRelationshipFilter | null;
-};
-export type UserRelationshipFilter = {
-    AND?: (UserRelationshipFilter | null)[];
-    OR?: (UserRelationshipFilter | null)[];
-    NOT?: (UserRelationshipFilter | null)[];
-    id?: IDFilter | null;
-    createdAt?: DateTimeFilter | null;
-    updatedAt?: DateTimeFilter | null;
-    isSet?: (Scalars['Boolean'] | null) | null;
-    email?: StringFilter | null;
-    emailVerificationToken?: StringFilter | null;
-    emailVerificationTokenExpiration?: DateTimeFilter | null;
-    emailVerified?: BooleanFilter | null;
-    firstName?: StringFilter | null;
-    googleImageUrl?: StringFilter | null;
-    googleProfileId?: StringFilter | null;
-    lastName?: StringFilter | null;
-    lastSignedIn?: DateTimeFilter | null;
-    resetPasswordTokenExpiration?: DateTimeFilter | null;
-    resetPasswordToken?: StringFilter | null;
-    roles?: RoleAssignmentFilter | null;
-};
-export type FloatFilter = {
-    equals?: (Scalars['Float'] | null) | null;
-    notEquals?: (Scalars['Float'] | null) | null;
-    isSet?: (Scalars['Boolean'] | null) | null;
-    in?: ((Scalars['Float'] | null) | null)[];
-    notIn?: ((Scalars['Float'] | null) | null)[];
-    lessThan?: (Scalars['Float'] | null) | null;
-    lessThanOrEqual?: (Scalars['Float'] | null) | null;
-    greaterThan?: (Scalars['Float'] | null) | null;
-    greaterThanOrEqual?: (Scalars['Float'] | null) | null;
-};
-export type MusicianRelationshipFilter = {
-    AND?: (MusicianRelationshipFilter | null)[];
-    OR?: (MusicianRelationshipFilter | null)[];
-    NOT?: (MusicianRelationshipFilter | null)[];
-    id?: IDFilter | null;
-    createdAt?: DateTimeFilter | null;
-    updatedAt?: DateTimeFilter | null;
-    isSet?: (Scalars['Boolean'] | null) | null;
-    state?: StringFilter | null;
-    availability?: JSONFilter | null;
-    bio?: StringFilter | null;
-    bookings?: BookingsRelationshipFilter | null;
-    city?: StringFilter | null;
-    country?: StringFilter | null;
-    email?: StringFilter | null;
-    events?: EventsRelationshipFilter | null;
-    experience?: StringFilter | null;
-    genre?: StringFilter | null;
-    genres?: JSONFilter | null;
-    hourlyRate?: FloatFilter | null;
-    instruments?: JSONFilter | null;
-    isActive?: BooleanFilter | null;
-    isVerified?: BooleanFilter | null;
-    location?: StringFilter | null;
-    name?: StringFilter | null;
-    phone?: StringFilter | null;
-    profilePicture?: StringFilter | null;
-    reviews?: ReviewsRelationshipFilter | null;
-    rating?: FloatFilter | null;
-    audio?: StringFilter | null;
-    audioFiles?: JSONFilter | null;
-    additionalPictures?: JSONFilter | null;
-    socialLinks?: JSONFilter | null;
-    stageName?: StringFilter | null;
-    totalGigs?: FloatFilter | null;
-    userId?: IDFilter | null;
-    user?: UserRelationshipFilter | null;
-    website?: StringFilter | null;
-    yearsExperience?: FloatFilter | null;
-};
-export type JSONFilter = {
-    isSet?: (Scalars['Boolean'] | null) | null;
-    equals?: (Scalars['JSON'] | null) | null;
-    in?: ((Scalars['JSON'] | null) | null)[];
-    notIn?: ((Scalars['JSON'] | null) | null)[];
-    notEquals?: (Scalars['JSON'] | null) | null;
-    matches?: (Scalars['JSON'] | null) | null;
-};
-export type BookingsRelationshipFilter = {
-    some?: BookingsInnerRelationshipFilter | null;
-    every?: BookingsInnerRelationshipFilter | null;
-};
-export type BookingsInnerRelationshipFilter = {
-    AND?: (BookingsInnerRelationshipFilter | null)[];
-    OR?: (BookingsInnerRelationshipFilter | null)[];
-    NOT?: (BookingsInnerRelationshipFilter | null)[];
-    id?: IDFilter | null;
-    createdAt?: DateTimeFilter | null;
-    updatedAt?: DateTimeFilter | null;
-    bookedById?: IDFilter | null;
-    bookedBy?: UserRelationshipFilter | null;
-    date?: DateTimeFilter | null;
-    depositAmount?: FloatFilter | null;
-    depositPaid?: BooleanFilter | null;
-    endTime?: StringFilter | null;
-    fullPaymentPaid?: BooleanFilter | null;
-    isActive?: BooleanFilter | null;
-    musicianId?: IDFilter | null;
-    musician?: MusicianRelationshipFilter | null;
-    notes?: StringFilter | null;
-    specialRequirements?: StringFilter | null;
-    startTime?: StringFilter | null;
-    status?: StringFilter | null;
-    totalAmount?: FloatFilter | null;
-    venueId?: IDFilter | null;
-    venue?: VenueRelationshipFilter | null;
-};
-export type VenueRelationshipFilter = {
-    AND?: (VenueRelationshipFilter | null)[];
-    OR?: (VenueRelationshipFilter | null)[];
-    NOT?: (VenueRelationshipFilter | null)[];
-    id?: IDFilter | null;
-    createdAt?: DateTimeFilter | null;
-    updatedAt?: DateTimeFilter | null;
-    isSet?: (Scalars['Boolean'] | null) | null;
-    state?: StringFilter | null;
-    address?: StringFilter | null;
-    amenities?: JSONFilter | null;
-    additionalPictures?: JSONFilter | null;
-    bookings?: BookingsRelationshipFilter | null;
-    capacity?: FloatFilter | null;
-    city?: StringFilter | null;
-    country?: StringFilter | null;
-    description?: StringFilter | null;
-    email?: StringFilter | null;
-    events?: EventsRelationshipFilter | null;
-    genres?: JSONFilter | null;
-    hours?: JSONFilter | null;
-    isActive?: BooleanFilter | null;
-    isVerified?: BooleanFilter | null;
-    name?: StringFilter | null;
-    ownerId?: IDFilter | null;
-    owner?: UserRelationshipFilter | null;
-    phone?: StringFilter | null;
-    priceRange?: StringFilter | null;
-    profilePicture?: StringFilter | null;
-    rating?: FloatFilter | null;
-    socialLinks?: JSONFilter | null;
-    reviews?: ReviewsRelationshipFilter | null;
-    type?: StringFilter | null;
-    website?: StringFilter | null;
-    zipCode?: StringFilter | null;
-};
-export type EventsRelationshipFilter = {
-    some?: EventsInnerRelationshipFilter | null;
-    every?: EventsInnerRelationshipFilter | null;
-};
-export type EventsInnerRelationshipFilter = {
-    AND?: (EventsInnerRelationshipFilter | null)[];
-    OR?: (EventsInnerRelationshipFilter | null)[];
-    NOT?: (EventsInnerRelationshipFilter | null)[];
-    id?: IDFilter | null;
-    createdAt?: DateTimeFilter | null;
-    updatedAt?: DateTimeFilter | null;
-    availableTickets?: FloatFilter | null;
-    category?: StringFilter | null;
-    createdById?: IDFilter | null;
-    createdBy?: UserRelationshipFilter | null;
-    date?: DateTimeFilter | null;
-    description?: StringFilter | null;
-    endTime?: StringFilter | null;
-    equipment?: JSONFilter | null;
-    genres?: JSONFilter | null;
-    image?: StringFilter | null;
-    isActive?: BooleanFilter | null;
-    isPublic?: BooleanFilter | null;
-    isRecurring?: BooleanFilter | null;
-    musicianId?: IDFilter | null;
-    musician?: MusicianRelationshipFilter | null;
-    recurringDays?: JSONFilter | null;
-    recurringEndDate?: DateTimeFilter | null;
-    recurringInterval?: FloatFilter | null;
-    recurringPattern?: StringFilter | null;
-    setlist?: JSONFilter | null;
-    startTime?: StringFilter | null;
-    status?: StringFilter | null;
-    ticketPrice?: FloatFilter | null;
-    ticketType?: StringFilter | null;
-    title?: StringFilter | null;
-    totalCapacity?: FloatFilter | null;
-    venueId?: IDFilter | null;
-    venue?: VenueRelationshipFilter | null;
-};
-export type ReviewsRelationshipFilter = {
-    some?: ReviewsInnerRelationshipFilter | null;
-    every?: ReviewsInnerRelationshipFilter | null;
-};
-export type ReviewsInnerRelationshipFilter = {
-    AND?: (ReviewsInnerRelationshipFilter | null)[];
-    OR?: (ReviewsInnerRelationshipFilter | null)[];
-    NOT?: (ReviewsInnerRelationshipFilter | null)[];
-    id?: IDFilter | null;
-    createdAt?: DateTimeFilter | null;
-    updatedAt?: DateTimeFilter | null;
-    comment?: StringFilter | null;
-    eventId?: IDFilter | null;
-    event?: VenueRelationshipFilter | null;
-    isActive?: BooleanFilter | null;
-    isVerified?: BooleanFilter | null;
-    musicianId?: IDFilter | null;
-    musician?: MusicianRelationshipFilter | null;
-    rating?: FloatFilter | null;
-    reviewerId?: IDFilter | null;
-    reviewer?: UserRelationshipFilter | null;
-    reviewType?: StringFilter | null;
-    venueId?: IDFilter | null;
-    venue?: VenueRelationshipFilter | null;
-};
+export type BackgroundActionResult = AvailableSeedCreateEventsResultSelection | AvailableSeedCreateMusiciansResultSelection | AvailableSeedCreateReviewsResultSelection | AvailableSeedCreateUsersResultSelection | AvailableSeedCreateVenuesResultSelection | AvailableSeedQuickSeedResultSelection | AvailableSeedSeedAllDataResultSelection | AvailableSeedSeedDataResultSelection | AvailableSeedSimpleSeedResultSelection | AvailableSendBookingEmailsResultSelection | AvailableSendEmailResultSelection | AvailableUpdateBookingResultSelection | AvailableCreateEventResultSelection | AvailableUpdateEventResultSelection | AvailableFindFirstEventResultSelection | AvailableCreateMusicianResultSelection | AvailableUpdateMusicianResultSelection | AvailableFindFirstMusicianResultSelection | AvailableCreateVenueResultSelection | AvailableUpdateVenueResultSelection | AvailableFindFirstVenueResultSelection | AvailableSignUpUserResultSelection | AvailableSignInUserResultSelection | AvailableSignOutUserResultSelection | AvailableUpdateUserResultSelection | AvailableDeleteUserResultSelection | AvailableSendVerifyEmailUserResultSelection | AvailableVerifyEmailUserResultSelection | AvailableSendResetPasswordUserResultSelection | AvailableResetPasswordUserResultSelection | AvailableChangePasswordUserResultSelection | AvailableCreateEventHistoryResultSelection;
+export type AvailableBackgroundActionResultSelection = SeedCreateEventsResult | SeedCreateMusiciansResult | SeedCreateReviewsResult | SeedCreateUsersResult | SeedCreateVenuesResult | SeedQuickSeedResult | SeedSeedAllDataResult | SeedSeedDataResult | SeedSimpleSeedResult | SendBookingEmailsResult | SendEmailResult | UpdateBookingResult | CreateEventResult | UpdateEventResult | FindFirstEventResult | CreateMusicianResult | UpdateMusicianResult | FindFirstMusicianResult | CreateVenueResult | UpdateVenueResult | FindFirstVenueResult | SignUpUserResult | SignInUserResult | SignOutUserResult | UpdateUserResult | DeleteUserResult | SendVerifyEmailUserResult | VerifyEmailUserResult | SendResetPasswordUserResult | ResetPasswordUserResult | ChangePasswordUserResult | CreateEventHistoryResult;
 export type EventSort = {
     /** Sort the results by the id field. Defaults to ascending (smallest value first). */
     id?: SortOrder | null;
@@ -526,6 +158,367 @@ export type EventFilter = {
     venueId?: IDFilter | null;
     venue?: VenueRelationshipFilter | null;
 };
+export type IDFilter = {
+    equals?: (Scalars['GadgetID'] | null) | null;
+    notEquals?: (Scalars['GadgetID'] | null) | null;
+    isSet?: (Scalars['Boolean'] | null) | null;
+    in?: ((Scalars['GadgetID'] | null) | null)[];
+    notIn?: ((Scalars['GadgetID'] | null) | null)[];
+    lessThan?: (Scalars['GadgetID'] | null) | null;
+    lessThanOrEqual?: (Scalars['GadgetID'] | null) | null;
+    greaterThan?: (Scalars['GadgetID'] | null) | null;
+    greaterThanOrEqual?: (Scalars['GadgetID'] | null) | null;
+};
+export type DateTimeFilter = {
+    equals?: Date | Scalars['ISO8601DateString'] | null;
+    notEquals?: Date | Scalars['ISO8601DateString'] | null;
+    isSet?: (Scalars['Boolean'] | null) | null;
+    in?: (Date | Scalars['ISO8601DateString'] | null)[];
+    notIn?: (Date | Scalars['ISO8601DateString'] | null)[];
+    lessThan?: Date | Scalars['ISO8601DateString'] | null;
+    lessThanOrEqual?: Date | Scalars['ISO8601DateString'] | null;
+    greaterThan?: Date | Scalars['ISO8601DateString'] | null;
+    greaterThanOrEqual?: Date | Scalars['ISO8601DateString'] | null;
+    before?: Date | Scalars['ISO8601DateString'] | null;
+    after?: Date | Scalars['ISO8601DateString'] | null;
+};
+export type FloatFilter = {
+    equals?: (Scalars['Float'] | null) | null;
+    notEquals?: (Scalars['Float'] | null) | null;
+    isSet?: (Scalars['Boolean'] | null) | null;
+    in?: ((Scalars['Float'] | null) | null)[];
+    notIn?: ((Scalars['Float'] | null) | null)[];
+    lessThan?: (Scalars['Float'] | null) | null;
+    lessThanOrEqual?: (Scalars['Float'] | null) | null;
+    greaterThan?: (Scalars['Float'] | null) | null;
+    greaterThanOrEqual?: (Scalars['Float'] | null) | null;
+};
+export type StringFilter = {
+    equals?: (Scalars['String'] | null) | null;
+    notEquals?: (Scalars['String'] | null) | null;
+    isSet?: (Scalars['Boolean'] | null) | null;
+    in?: ((Scalars['String'] | null) | null)[];
+    notIn?: ((Scalars['String'] | null) | null)[];
+    lessThan?: (Scalars['String'] | null) | null;
+    lessThanOrEqual?: (Scalars['String'] | null) | null;
+    greaterThan?: (Scalars['String'] | null) | null;
+    greaterThanOrEqual?: (Scalars['String'] | null) | null;
+    startsWith?: (Scalars['String'] | null) | null;
+};
+export type UserRelationshipFilter = {
+    AND?: (UserRelationshipFilter | null)[];
+    OR?: (UserRelationshipFilter | null)[];
+    NOT?: (UserRelationshipFilter | null)[];
+    id?: IDFilter | null;
+    createdAt?: DateTimeFilter | null;
+    updatedAt?: DateTimeFilter | null;
+    isSet?: (Scalars['Boolean'] | null) | null;
+    emailVerified?: BooleanFilter | null;
+    email?: StringFilter | null;
+    lastSignedIn?: DateTimeFilter | null;
+    roles?: RoleAssignmentFilter | null;
+    emailVerificationToken?: StringFilter | null;
+    emailVerificationTokenExpiration?: DateTimeFilter | null;
+    resetPasswordTokenExpiration?: DateTimeFilter | null;
+    resetPasswordToken?: StringFilter | null;
+    userType?: StringFilter | null;
+    firstName?: StringFilter | null;
+    googleImageUrl?: StringFilter | null;
+    lastName?: StringFilter | null;
+    googleProfileId?: StringFilter | null;
+};
+export type BooleanFilter = {
+    isSet?: (Scalars['Boolean'] | null) | null;
+    equals?: (Scalars['Boolean'] | null) | null;
+    notEquals?: (Scalars['Boolean'] | null) | null;
+};
+export type RoleAssignmentFilter = {
+    isSet?: (Scalars['Boolean'] | null) | null;
+    equals?: ((Scalars['String'] | null) | null)[];
+    notEquals?: ((Scalars['String'] | null) | null)[];
+    contains?: ((Scalars['String'] | null) | null)[];
+};
+export type JSONFilter = {
+    isSet?: (Scalars['Boolean'] | null) | null;
+    equals?: (Scalars['JSON'] | null) | null;
+    in?: ((Scalars['JSON'] | null) | null)[];
+    notIn?: ((Scalars['JSON'] | null) | null)[];
+    notEquals?: (Scalars['JSON'] | null) | null;
+    matches?: (Scalars['JSON'] | null) | null;
+};
+export type MusicianRelationshipFilter = {
+    AND?: (MusicianRelationshipFilter | null)[];
+    OR?: (MusicianRelationshipFilter | null)[];
+    NOT?: (MusicianRelationshipFilter | null)[];
+    id?: IDFilter | null;
+    createdAt?: DateTimeFilter | null;
+    updatedAt?: DateTimeFilter | null;
+    isSet?: (Scalars['Boolean'] | null) | null;
+    state?: StringFilter | null;
+    reviews?: ReviewsRelationshipFilter | null;
+    bookings?: BookingsRelationshipFilter | null;
+    events?: EventsRelationshipFilter | null;
+    additionalPictures?: JSONFilter | null;
+    audio?: StringFilter | null;
+    audioFiles?: JSONFilter | null;
+    availability?: JSONFilter | null;
+    bio?: StringFilter | null;
+    city?: StringFilter | null;
+    country?: StringFilter | null;
+    email?: StringFilter | null;
+    experience?: StringFilter | null;
+    genre?: StringFilter | null;
+    genres?: JSONFilter | null;
+    hourlyRate?: FloatFilter | null;
+    instruments?: JSONFilter | null;
+    isActive?: BooleanFilter | null;
+    isVerified?: BooleanFilter | null;
+    location?: StringFilter | null;
+    phone?: StringFilter | null;
+    profilePicture?: StringFilter | null;
+    rating?: FloatFilter | null;
+    socialLinks?: JSONFilter | null;
+    stageName?: StringFilter | null;
+    totalGigs?: FloatFilter | null;
+    userId?: IDFilter | null;
+    user?: UserRelationshipFilter | null;
+    website?: StringFilter | null;
+    yearsExperience?: FloatFilter | null;
+};
+export type ReviewsRelationshipFilter = {
+    some?: ReviewsInnerRelationshipFilter | null;
+    every?: ReviewsInnerRelationshipFilter | null;
+};
+export type ReviewsInnerRelationshipFilter = {
+    AND?: (ReviewsInnerRelationshipFilter | null)[];
+    OR?: (ReviewsInnerRelationshipFilter | null)[];
+    NOT?: (ReviewsInnerRelationshipFilter | null)[];
+    id?: IDFilter | null;
+    createdAt?: DateTimeFilter | null;
+    updatedAt?: DateTimeFilter | null;
+    comment?: StringFilter | null;
+    eventId?: IDFilter | null;
+    event?: VenueRelationshipFilter | null;
+    isActive?: BooleanFilter | null;
+    isVerified?: BooleanFilter | null;
+    musicianId?: IDFilter | null;
+    musician?: MusicianRelationshipFilter | null;
+    rating?: FloatFilter | null;
+    reviewerId?: IDFilter | null;
+    reviewer?: UserRelationshipFilter | null;
+    reviewType?: StringFilter | null;
+    venueId?: IDFilter | null;
+    venue?: VenueRelationshipFilter | null;
+};
+export type VenueRelationshipFilter = {
+    AND?: (VenueRelationshipFilter | null)[];
+    OR?: (VenueRelationshipFilter | null)[];
+    NOT?: (VenueRelationshipFilter | null)[];
+    id?: IDFilter | null;
+    createdAt?: DateTimeFilter | null;
+    updatedAt?: DateTimeFilter | null;
+    isSet?: (Scalars['Boolean'] | null) | null;
+    state?: StringFilter | null;
+    events?: EventsRelationshipFilter | null;
+    bookings?: BookingsRelationshipFilter | null;
+    additionalPictures?: JSONFilter | null;
+    address?: StringFilter | null;
+    amenities?: JSONFilter | null;
+    capacity?: FloatFilter | null;
+    city?: StringFilter | null;
+    country?: StringFilter | null;
+    description?: StringFilter | null;
+    email?: StringFilter | null;
+    genres?: JSONFilter | null;
+    hours?: JSONFilter | null;
+    isActive?: BooleanFilter | null;
+    isVerified?: BooleanFilter | null;
+    name?: StringFilter | null;
+    ownerId?: IDFilter | null;
+    owner?: UserRelationshipFilter | null;
+    phone?: StringFilter | null;
+    priceRange?: StringFilter | null;
+    profilePicture?: StringFilter | null;
+    rating?: FloatFilter | null;
+    socialLinks?: JSONFilter | null;
+    type?: StringFilter | null;
+    website?: StringFilter | null;
+    zipCode?: StringFilter | null;
+    reviews?: ReviewsRelationshipFilter | null;
+};
+export type EventsRelationshipFilter = {
+    some?: EventsInnerRelationshipFilter | null;
+    every?: EventsInnerRelationshipFilter | null;
+};
+export type EventsInnerRelationshipFilter = {
+    AND?: (EventsInnerRelationshipFilter | null)[];
+    OR?: (EventsInnerRelationshipFilter | null)[];
+    NOT?: (EventsInnerRelationshipFilter | null)[];
+    id?: IDFilter | null;
+    createdAt?: DateTimeFilter | null;
+    updatedAt?: DateTimeFilter | null;
+    availableTickets?: FloatFilter | null;
+    category?: StringFilter | null;
+    createdById?: IDFilter | null;
+    createdBy?: UserRelationshipFilter | null;
+    date?: DateTimeFilter | null;
+    description?: StringFilter | null;
+    endTime?: StringFilter | null;
+    equipment?: JSONFilter | null;
+    genres?: JSONFilter | null;
+    image?: StringFilter | null;
+    isActive?: BooleanFilter | null;
+    isPublic?: BooleanFilter | null;
+    isRecurring?: BooleanFilter | null;
+    musicianId?: IDFilter | null;
+    musician?: MusicianRelationshipFilter | null;
+    recurringDays?: JSONFilter | null;
+    recurringEndDate?: DateTimeFilter | null;
+    recurringInterval?: FloatFilter | null;
+    recurringPattern?: StringFilter | null;
+    setlist?: JSONFilter | null;
+    startTime?: StringFilter | null;
+    status?: StringFilter | null;
+    ticketPrice?: FloatFilter | null;
+    ticketType?: StringFilter | null;
+    title?: StringFilter | null;
+    totalCapacity?: FloatFilter | null;
+    venueId?: IDFilter | null;
+    venue?: VenueRelationshipFilter | null;
+};
+export type BookingsRelationshipFilter = {
+    some?: BookingsInnerRelationshipFilter | null;
+    every?: BookingsInnerRelationshipFilter | null;
+};
+export type BookingsInnerRelationshipFilter = {
+    AND?: (BookingsInnerRelationshipFilter | null)[];
+    OR?: (BookingsInnerRelationshipFilter | null)[];
+    NOT?: (BookingsInnerRelationshipFilter | null)[];
+    id?: IDFilter | null;
+    createdAt?: DateTimeFilter | null;
+    updatedAt?: DateTimeFilter | null;
+    bookedById?: IDFilter | null;
+    bookedBy?: UserRelationshipFilter | null;
+    date?: DateTimeFilter | null;
+    depositAmount?: FloatFilter | null;
+    depositPaid?: BooleanFilter | null;
+    endTime?: StringFilter | null;
+    fullPaymentPaid?: BooleanFilter | null;
+    isActive?: BooleanFilter | null;
+    musicianId?: IDFilter | null;
+    musician?: MusicianRelationshipFilter | null;
+    notes?: StringFilter | null;
+    specialRequirements?: StringFilter | null;
+    startTime?: StringFilter | null;
+    status?: StringFilter | null;
+    totalAmount?: FloatFilter | null;
+    venueId?: IDFilter | null;
+    venue?: VenueRelationshipFilter | null;
+    musicianPitch?: StringFilter | null;
+    proposedRate?: FloatFilter | null;
+    eventId?: IDFilter | null;
+    event?: EventRelationshipFilter | null;
+};
+export type EventRelationshipFilter = {
+    AND?: (EventRelationshipFilter | null)[];
+    OR?: (EventRelationshipFilter | null)[];
+    NOT?: (EventRelationshipFilter | null)[];
+    id?: IDFilter | null;
+    createdAt?: DateTimeFilter | null;
+    updatedAt?: DateTimeFilter | null;
+    isSet?: (Scalars['Boolean'] | null) | null;
+    availableTickets?: FloatFilter | null;
+    category?: StringFilter | null;
+    createdById?: IDFilter | null;
+    createdBy?: UserRelationshipFilter | null;
+    date?: DateTimeFilter | null;
+    description?: StringFilter | null;
+    endTime?: StringFilter | null;
+    equipment?: JSONFilter | null;
+    genres?: JSONFilter | null;
+    image?: StringFilter | null;
+    isActive?: BooleanFilter | null;
+    isPublic?: BooleanFilter | null;
+    isRecurring?: BooleanFilter | null;
+    musicianId?: IDFilter | null;
+    musician?: MusicianRelationshipFilter | null;
+    recurringDays?: JSONFilter | null;
+    recurringEndDate?: DateTimeFilter | null;
+    recurringInterval?: FloatFilter | null;
+    recurringPattern?: StringFilter | null;
+    setlist?: JSONFilter | null;
+    startTime?: StringFilter | null;
+    status?: StringFilter | null;
+    ticketPrice?: FloatFilter | null;
+    ticketType?: StringFilter | null;
+    title?: StringFilter | null;
+    totalCapacity?: FloatFilter | null;
+    venueId?: IDFilter | null;
+    venue?: VenueRelationshipFilter | null;
+};
+export type BookingSort = {
+    /** Sort the results by the id field. Defaults to ascending (smallest value first). */
+    id?: SortOrder | null;
+    /** Sort the results by the createdAt field. Defaults to ascending (smallest value first). */
+    createdAt?: SortOrder | null;
+    /** Sort the results by the updatedAt field. Defaults to ascending (smallest value first). */
+    updatedAt?: SortOrder | null;
+    /** Sort the results by the date field. Defaults to ascending (smallest value first). */
+    date?: SortOrder | null;
+    /** Sort the results by the depositAmount field. Defaults to ascending (smallest value first). */
+    depositAmount?: SortOrder | null;
+    /** Sort the results by the depositPaid field. Defaults to ascending (smallest value first). */
+    depositPaid?: SortOrder | null;
+    /** Sort the results by the endTime field. Defaults to ascending (smallest value first). */
+    endTime?: SortOrder | null;
+    /** Sort the results by the fullPaymentPaid field. Defaults to ascending (smallest value first). */
+    fullPaymentPaid?: SortOrder | null;
+    /** Sort the results by the isActive field. Defaults to ascending (smallest value first). */
+    isActive?: SortOrder | null;
+    /** Sort the results by the notes field. Defaults to ascending (smallest value first). */
+    notes?: SortOrder | null;
+    /** Sort the results by the specialRequirements field. Defaults to ascending (smallest value first). */
+    specialRequirements?: SortOrder | null;
+    /** Sort the results by the startTime field. Defaults to ascending (smallest value first). */
+    startTime?: SortOrder | null;
+    /** Sort the results by the status field. Defaults to ascending (smallest value first). */
+    status?: SortOrder | null;
+    /** Sort the results by the totalAmount field. Defaults to ascending (smallest value first). */
+    totalAmount?: SortOrder | null;
+    /** Sort the results by the musicianPitch field. Defaults to ascending (smallest value first). */
+    musicianPitch?: SortOrder | null;
+    /** Sort the results by the proposedRate field. Defaults to ascending (smallest value first). */
+    proposedRate?: SortOrder | null;
+};
+export type BookingFilter = {
+    AND?: (BookingFilter | null)[];
+    OR?: (BookingFilter | null)[];
+    NOT?: (BookingFilter | null)[];
+    id?: IDFilter | null;
+    createdAt?: DateTimeFilter | null;
+    updatedAt?: DateTimeFilter | null;
+    bookedById?: IDFilter | null;
+    bookedBy?: UserRelationshipFilter | null;
+    date?: DateTimeFilter | null;
+    depositAmount?: FloatFilter | null;
+    depositPaid?: BooleanFilter | null;
+    endTime?: StringFilter | null;
+    fullPaymentPaid?: BooleanFilter | null;
+    isActive?: BooleanFilter | null;
+    musicianId?: IDFilter | null;
+    musician?: MusicianRelationshipFilter | null;
+    notes?: StringFilter | null;
+    specialRequirements?: StringFilter | null;
+    startTime?: StringFilter | null;
+    status?: StringFilter | null;
+    totalAmount?: FloatFilter | null;
+    venueId?: IDFilter | null;
+    venue?: VenueRelationshipFilter | null;
+    musicianPitch?: StringFilter | null;
+    proposedRate?: FloatFilter | null;
+    eventId?: IDFilter | null;
+    event?: EventRelationshipFilter | null;
+};
 export type ReviewSort = {
     /** Sort the results by the id field. Defaults to ascending (smallest value first). */
     id?: SortOrder | null;
@@ -574,6 +567,12 @@ export type MusicianSort = {
     updatedAt?: SortOrder | null;
     /** Sort the results by the state field. Defaults to ascending (smallest value first). */
     state?: SortOrder | null;
+    /** Sort the results by the additionalPictures field. Defaults to ascending (smallest value first). */
+    additionalPictures?: SortOrder | null;
+    /** Sort the results by the audio field. Defaults to ascending (smallest value first). */
+    audio?: SortOrder | null;
+    /** Sort the results by the audioFiles field. Defaults to ascending (smallest value first). */
+    audioFiles?: SortOrder | null;
     /** Sort the results by the availability field. Defaults to ascending (smallest value first). */
     availability?: SortOrder | null;
     /** Sort the results by the bio field. Defaults to ascending (smallest value first). */
@@ -600,20 +599,12 @@ export type MusicianSort = {
     isVerified?: SortOrder | null;
     /** Sort the results by the location field. Defaults to ascending (smallest value first). */
     location?: SortOrder | null;
-    /** Sort the results by the name field. Defaults to ascending (smallest value first). */
-    name?: SortOrder | null;
     /** Sort the results by the phone field. Defaults to ascending (smallest value first). */
     phone?: SortOrder | null;
     /** Sort the results by the profilePicture field. Defaults to ascending (smallest value first). */
     profilePicture?: SortOrder | null;
     /** Sort the results by the rating field. Defaults to ascending (smallest value first). */
     rating?: SortOrder | null;
-    /** Sort the results by the audio field. Defaults to ascending (smallest value first). */
-    audio?: SortOrder | null;
-    /** Sort the results by the audioFiles field. Defaults to ascending (smallest value first). */
-    audioFiles?: SortOrder | null;
-    /** Sort the results by the additionalPictures field. Defaults to ascending (smallest value first). */
-    additionalPictures?: SortOrder | null;
     /** Sort the results by the socialLinks field. Defaults to ascending (smallest value first). */
     socialLinks?: SortOrder | null;
     /** Sort the results by the stageName field. Defaults to ascending (smallest value first). */
@@ -633,13 +624,17 @@ export type MusicianFilter = {
     createdAt?: DateTimeFilter | null;
     updatedAt?: DateTimeFilter | null;
     state?: StringFilter | null;
+    reviews?: ReviewsRelationshipFilter | null;
+    bookings?: BookingsRelationshipFilter | null;
+    events?: EventsRelationshipFilter | null;
+    additionalPictures?: JSONFilter | null;
+    audio?: StringFilter | null;
+    audioFiles?: JSONFilter | null;
     availability?: JSONFilter | null;
     bio?: StringFilter | null;
-    bookings?: BookingsRelationshipFilter | null;
     city?: StringFilter | null;
     country?: StringFilter | null;
     email?: StringFilter | null;
-    events?: EventsRelationshipFilter | null;
     experience?: StringFilter | null;
     genre?: StringFilter | null;
     genres?: JSONFilter | null;
@@ -648,14 +643,9 @@ export type MusicianFilter = {
     isActive?: BooleanFilter | null;
     isVerified?: BooleanFilter | null;
     location?: StringFilter | null;
-    name?: StringFilter | null;
     phone?: StringFilter | null;
     profilePicture?: StringFilter | null;
-    reviews?: ReviewsRelationshipFilter | null;
     rating?: FloatFilter | null;
-    audio?: StringFilter | null;
-    audioFiles?: JSONFilter | null;
-    additionalPictures?: JSONFilter | null;
     socialLinks?: JSONFilter | null;
     stageName?: StringFilter | null;
     totalGigs?: FloatFilter | null;
@@ -673,12 +663,12 @@ export type VenueSort = {
     updatedAt?: SortOrder | null;
     /** Sort the results by the state field. Defaults to ascending (smallest value first). */
     state?: SortOrder | null;
+    /** Sort the results by the additionalPictures field. Defaults to ascending (smallest value first). */
+    additionalPictures?: SortOrder | null;
     /** Sort the results by the address field. Defaults to ascending (smallest value first). */
     address?: SortOrder | null;
     /** Sort the results by the amenities field. Defaults to ascending (smallest value first). */
     amenities?: SortOrder | null;
-    /** Sort the results by the additionalPictures field. Defaults to ascending (smallest value first). */
-    additionalPictures?: SortOrder | null;
     /** Sort the results by the capacity field. Defaults to ascending (smallest value first). */
     capacity?: SortOrder | null;
     /** Sort the results by the city field. Defaults to ascending (smallest value first). */
@@ -724,16 +714,16 @@ export type VenueFilter = {
     createdAt?: DateTimeFilter | null;
     updatedAt?: DateTimeFilter | null;
     state?: StringFilter | null;
+    events?: EventsRelationshipFilter | null;
+    bookings?: BookingsRelationshipFilter | null;
+    additionalPictures?: JSONFilter | null;
     address?: StringFilter | null;
     amenities?: JSONFilter | null;
-    additionalPictures?: JSONFilter | null;
-    bookings?: BookingsRelationshipFilter | null;
     capacity?: FloatFilter | null;
     city?: StringFilter | null;
     country?: StringFilter | null;
     description?: StringFilter | null;
     email?: StringFilter | null;
-    events?: EventsRelationshipFilter | null;
     genres?: JSONFilter | null;
     hours?: JSONFilter | null;
     isActive?: BooleanFilter | null;
@@ -746,94 +736,141 @@ export type VenueFilter = {
     profilePicture?: StringFilter | null;
     rating?: FloatFilter | null;
     socialLinks?: JSONFilter | null;
-    reviews?: ReviewsRelationshipFilter | null;
     type?: StringFilter | null;
     website?: StringFilter | null;
     zipCode?: StringFilter | null;
+    reviews?: ReviewsRelationshipFilter | null;
 };
-export type BulkSignUpUsersInput = {
-    email?: (Scalars['String'] | null) | null;
-    password?: (Scalars['String'] | null) | null;
+export type UserSort = {
+    /** Sort the results by the id field. Defaults to ascending (smallest value first). */
+    id?: SortOrder | null;
+    /** Sort the results by the createdAt field. Defaults to ascending (smallest value first). */
+    createdAt?: SortOrder | null;
+    /** Sort the results by the updatedAt field. Defaults to ascending (smallest value first). */
+    updatedAt?: SortOrder | null;
+    /** Sort the results by the emailVerified field. Defaults to ascending (smallest value first). */
+    emailVerified?: SortOrder | null;
+    /** Sort the results by the email field. Defaults to ascending (smallest value first). */
+    email?: SortOrder | null;
+    /** Sort the results by the lastSignedIn field. Defaults to ascending (smallest value first). */
+    lastSignedIn?: SortOrder | null;
+    /** Sort the results by the emailVerificationToken field. Defaults to ascending (smallest value first). */
+    emailVerificationToken?: SortOrder | null;
+    /** Sort the results by the emailVerificationTokenExpiration field. Defaults to ascending (smallest value first). */
+    emailVerificationTokenExpiration?: SortOrder | null;
+    /** Sort the results by the resetPasswordTokenExpiration field. Defaults to ascending (smallest value first). */
+    resetPasswordTokenExpiration?: SortOrder | null;
+    /** Sort the results by the resetPasswordToken field. Defaults to ascending (smallest value first). */
+    resetPasswordToken?: SortOrder | null;
+    /** Sort the results by the userType field. Defaults to ascending (smallest value first). */
+    userType?: SortOrder | null;
+    /** Sort the results by the firstName field. Defaults to ascending (smallest value first). */
+    firstName?: SortOrder | null;
+    /** Sort the results by the googleImageUrl field. Defaults to ascending (smallest value first). */
+    googleImageUrl?: SortOrder | null;
+    /** Sort the results by the lastName field. Defaults to ascending (smallest value first). */
+    lastName?: SortOrder | null;
+    /** Sort the results by the googleProfileId field. Defaults to ascending (smallest value first). */
+    googleProfileId?: SortOrder | null;
 };
-export type BulkSignInUsersInput = {
-    email?: (Scalars['String'] | null) | null;
-    password?: (Scalars['String'] | null) | null;
+export type UserFilter = {
+    AND?: (UserFilter | null)[];
+    OR?: (UserFilter | null)[];
+    NOT?: (UserFilter | null)[];
+    id?: IDFilter | null;
+    createdAt?: DateTimeFilter | null;
+    updatedAt?: DateTimeFilter | null;
+    emailVerified?: BooleanFilter | null;
+    email?: StringFilter | null;
+    lastSignedIn?: DateTimeFilter | null;
+    roles?: RoleAssignmentFilter | null;
+    emailVerificationToken?: StringFilter | null;
+    emailVerificationTokenExpiration?: DateTimeFilter | null;
+    resetPasswordTokenExpiration?: DateTimeFilter | null;
+    resetPasswordToken?: StringFilter | null;
+    userType?: StringFilter | null;
+    firstName?: StringFilter | null;
+    googleImageUrl?: StringFilter | null;
+    lastName?: StringFilter | null;
+    googleProfileId?: StringFilter | null;
 };
-export type UpdateUserInput = {
-    email?: (Scalars['String'] | null) | null;
-    emailVerificationToken?: (Scalars['String'] | null) | null;
-    emailVerificationTokenExpiration?: Date | Scalars['ISO8601DateString'] | null;
-    emailVerified?: (Scalars['Boolean'] | null) | null;
-    firstName?: (Scalars['String'] | null) | null;
-    googleImageUrl?: (Scalars['String'] | null) | null;
-    googleProfileId?: (Scalars['String'] | null) | null;
-    lastName?: (Scalars['String'] | null) | null;
-    password?: (Scalars['String'] | null) | null;
-    lastSignedIn?: Date | Scalars['ISO8601DateString'] | null;
-    profilePicture?: StoredFileInput | null;
-    resetPasswordTokenExpiration?: Date | Scalars['ISO8601DateString'] | null;
-    resetPasswordToken?: (Scalars['String'] | null) | null;
+export type SessionFilter = {
+    id?: IDEqualsFilter | null;
+    user?: IDEqualsFilter | null;
+    userId?: IDEqualsFilter | null;
 };
-export type StoredFileInput = {
-    /** Sets the file contents using this string, interpreting the string as base64 encoded bytes. This is useful for creating files quickly and easily if you have the file contents available already, but, it doesn't support files larger than 10MB, and is slower to process for the backend. Using multipart file uploads or direct-to-storage file uploads is preferable. */
-    base64?: (Scalars['String'] | null) | null;
-    /** Sets the file contents using binary bytes sent along side a GraphQL mutation as a multipart POST request. Gadget expects this multipart POST request to be formatted according to the GraphQL multipart request spec defined at https://github.com/jaydenseric/graphql-multipart-request-spec. Sending files as a multipart POST requests is supported natively by the generated Gadget JS client using File objects as variables in API calls. This method supports files up to 100MB. */
-    file?: (Scalars['Upload'] | null) | null;
-    /** Sets the file contents by fetching a remote URL and saving a copy to cloud storage. File downloads happen as the request is processed so they can be validated, which means large files can take some time to download from the existing URL. If the file can't be fetched from this URL, the action will fail. */
-    copyURL?: (Scalars['URL'] | null) | null;
-    /** Sets the file contents using a token from a separate upload request made with the Gadget storage service. Uploading files while a user is completing the rest of a form gives a great user experience and supports much larger files, but requires client side code to complete the upload, and then pass the returned token for this field. */
-    directUploadToken?: (Scalars['String'] | null) | null;
-    /** Sets this file's mime type, which will then be used when serving the file during read requests as the `Content-Type` HTTP header. If not set, Gadget will infer a content type based on the file's contents. */
-    mimeType?: (Scalars['String'] | null) | null;
-    /** Sets this file's stored name, which will then be used as the file name when serving the file during read requests. If not set, Gadget will infer a filename if possible. */
-    fileName?: (Scalars['String'] | null) | null;
+export type IDEqualsFilter = {
+    equals?: (Scalars['GadgetID'] | null) | null;
 };
-export type BulkUpdateUsersInput = {
-    user?: UpdateUserInput | null;
-    id: (Scalars['GadgetID'] | null);
+export type EventHistorySort = {
+    /** Sort the results by the id field. Defaults to ascending (smallest value first). */
+    id?: SortOrder | null;
+    /** Sort the results by the createdAt field. Defaults to ascending (smallest value first). */
+    createdAt?: SortOrder | null;
+    /** Sort the results by the updatedAt field. Defaults to ascending (smallest value first). */
+    updatedAt?: SortOrder | null;
+    /** Sort the results by the changeType field. Defaults to ascending (smallest value first). */
+    changeType?: SortOrder | null;
+    /** Sort the results by the previousValue field. Defaults to ascending (smallest value first). */
+    previousValue?: SortOrder | null;
+    /** Sort the results by the description field. Defaults to ascending (smallest value first). */
+    description?: SortOrder | null;
+    /** Sort the results by the newValue field. Defaults to ascending (smallest value first). */
+    newValue?: SortOrder | null;
+    /** Sort the results by the context field. Defaults to ascending (smallest value first). */
+    context?: SortOrder | null;
+    /** Sort the results by the metadata field. Defaults to ascending (smallest value first). */
+    metadata?: SortOrder | null;
 };
-export type BulkSendVerifyEmailUsersInput = {
-    email?: (Scalars['String'] | null) | null;
+export type EventHistoryFilter = {
+    AND?: (EventHistoryFilter | null)[];
+    OR?: (EventHistoryFilter | null)[];
+    NOT?: (EventHistoryFilter | null)[];
+    id?: IDFilter | null;
+    createdAt?: DateTimeFilter | null;
+    updatedAt?: DateTimeFilter | null;
+    bookingId?: IDFilter | null;
+    booking?: BookingRelationshipFilter | null;
+    eventId?: IDFilter | null;
+    event?: EventRelationshipFilter | null;
+    changedById?: IDFilter | null;
+    changedBy?: UserRelationshipFilter | null;
+    changeType?: StringFilter | null;
+    previousValue?: StringFilter | null;
+    description?: StringFilter | null;
+    newValue?: StringFilter | null;
+    context?: JSONFilter | null;
+    metadata?: JSONFilter | null;
 };
-export type BulkVerifyEmailUsersInput = {
-    code?: (Scalars['String'] | null) | null;
-};
-export type BulkSendResetPasswordUsersInput = {
-    email?: (Scalars['String'] | null) | null;
-};
-export type BulkResetPasswordUsersInput = {
-    password?: (Scalars['String'] | null) | null;
-    code?: (Scalars['String'] | null) | null;
-};
-export type BulkChangePasswordUsersInput = {
-    id: (Scalars['GadgetID'] | null);
-    currentPassword?: (Scalars['String'] | null) | null;
-    newPassword?: (Scalars['String'] | null) | null;
-};
-export type UpsertUserInput = {
-    id?: (Scalars['GadgetID'] | null) | null;
-    email?: (Scalars['String'] | null) | null;
-    emailVerificationToken?: (Scalars['String'] | null) | null;
-    emailVerificationTokenExpiration?: Date | Scalars['ISO8601DateString'] | null;
-    emailVerified?: (Scalars['Boolean'] | null) | null;
-    firstName?: (Scalars['String'] | null) | null;
-    googleImageUrl?: (Scalars['String'] | null) | null;
-    googleProfileId?: (Scalars['String'] | null) | null;
-    lastName?: (Scalars['String'] | null) | null;
-    password?: (Scalars['String'] | null) | null;
-    lastSignedIn?: Date | Scalars['ISO8601DateString'] | null;
-    profilePicture?: StoredFileInput | null;
-    resetPasswordTokenExpiration?: Date | Scalars['ISO8601DateString'] | null;
-    resetPasswordToken?: (Scalars['String'] | null) | null;
-    /** A string list of Gadget platform Role keys to assign to this record */
-    roles?: ((Scalars['String'] | null))[];
-};
-export type BulkUpsertUsersInput = {
-    /** An array of Strings */
-    on?: ((Scalars['String'] | null))[];
-    user?: UpsertUserInput | null;
-    email?: (Scalars['String'] | null) | null;
-    password?: (Scalars['String'] | null) | null;
+export type BookingRelationshipFilter = {
+    AND?: (BookingRelationshipFilter | null)[];
+    OR?: (BookingRelationshipFilter | null)[];
+    NOT?: (BookingRelationshipFilter | null)[];
+    id?: IDFilter | null;
+    createdAt?: DateTimeFilter | null;
+    updatedAt?: DateTimeFilter | null;
+    isSet?: (Scalars['Boolean'] | null) | null;
+    bookedById?: IDFilter | null;
+    bookedBy?: UserRelationshipFilter | null;
+    date?: DateTimeFilter | null;
+    depositAmount?: FloatFilter | null;
+    depositPaid?: BooleanFilter | null;
+    endTime?: StringFilter | null;
+    fullPaymentPaid?: BooleanFilter | null;
+    isActive?: BooleanFilter | null;
+    musicianId?: IDFilter | null;
+    musician?: MusicianRelationshipFilter | null;
+    notes?: StringFilter | null;
+    specialRequirements?: StringFilter | null;
+    startTime?: StringFilter | null;
+    status?: StringFilter | null;
+    totalAmount?: FloatFilter | null;
+    venueId?: IDFilter | null;
+    venue?: VenueRelationshipFilter | null;
+    musicianPitch?: StringFilter | null;
+    proposedRate?: FloatFilter | null;
+    eventId?: IDFilter | null;
+    event?: EventRelationshipFilter | null;
 };
 export type CreateEventInput = {
     availableTickets?: (Scalars['Float'] | null) | null;
@@ -888,20 +925,35 @@ export type NestedSignOutUserInput = {
     id: (Scalars['GadgetID'] | null);
 };
 export type NestedUpdateUserInput = {
+    password?: (Scalars['String'] | null) | null;
+    emailVerified?: (Scalars['Boolean'] | null) | null;
     email?: (Scalars['String'] | null) | null;
+    lastSignedIn?: Date | Scalars['ISO8601DateString'] | null;
     emailVerificationToken?: (Scalars['String'] | null) | null;
     emailVerificationTokenExpiration?: Date | Scalars['ISO8601DateString'] | null;
-    emailVerified?: (Scalars['Boolean'] | null) | null;
-    firstName?: (Scalars['String'] | null) | null;
-    googleImageUrl?: (Scalars['String'] | null) | null;
-    googleProfileId?: (Scalars['String'] | null) | null;
-    lastName?: (Scalars['String'] | null) | null;
-    password?: (Scalars['String'] | null) | null;
-    lastSignedIn?: Date | Scalars['ISO8601DateString'] | null;
     profilePicture?: StoredFileInput | null;
     resetPasswordTokenExpiration?: Date | Scalars['ISO8601DateString'] | null;
     resetPasswordToken?: (Scalars['String'] | null) | null;
+    userType?: (Scalars['String'] | null) | null;
+    firstName?: (Scalars['String'] | null) | null;
+    googleImageUrl?: (Scalars['String'] | null) | null;
+    lastName?: (Scalars['String'] | null) | null;
+    googleProfileId?: (Scalars['String'] | null) | null;
     id: (Scalars['GadgetID'] | null);
+};
+export type StoredFileInput = {
+    /** Sets the file contents using this string, interpreting the string as base64 encoded bytes. This is useful for creating files quickly and easily if you have the file contents available already, but, it doesn't support files larger than 10MB, and is slower to process for the backend. Using multipart file uploads or direct-to-storage file uploads is preferable. */
+    base64?: (Scalars['String'] | null) | null;
+    /** Sets the file contents using binary bytes sent along side a GraphQL mutation as a multipart POST request. Gadget expects this multipart POST request to be formatted according to the GraphQL multipart request spec defined at https://github.com/jaydenseric/graphql-multipart-request-spec. Sending files as a multipart POST requests is supported natively by the generated Gadget JS client using File objects as variables in API calls. This method supports files up to 100MB. */
+    file?: (Scalars['Upload'] | null) | null;
+    /** Sets the file contents by fetching a remote URL and saving a copy to cloud storage. File downloads happen as the request is processed so they can be validated, which means large files can take some time to download from the existing URL. If the file can't be fetched from this URL, the action will fail. */
+    copyURL?: (Scalars['URL'] | null) | null;
+    /** Sets the file contents using a token from a separate upload request made with the Gadget storage service. Uploading files while a user is completing the rest of a form gives a great user experience and supports much larger files, but requires client side code to complete the upload, and then pass the returned token for this field. */
+    directUploadToken?: (Scalars['String'] | null) | null;
+    /** Sets this file's mime type, which will then be used when serving the file during read requests as the `Content-Type` HTTP header. If not set, Gadget will infer a content type based on the file's contents. */
+    mimeType?: (Scalars['String'] | null) | null;
+    /** Sets this file's stored name, which will then be used as the file name when serving the file during read requests. If not set, Gadget will infer a filename if possible. */
+    fileName?: (Scalars['String'] | null) | null;
 };
 export type NestedDeleteUserInput = {
     id: (Scalars['GadgetID'] | null);
@@ -933,12 +985,16 @@ export type MusicianBelongsToInput = {
 };
 export type NestedCreateMusicianInput = {
     state?: (Scalars['String'] | null) | null;
+    bookings?: (BookingHasManyInput | null)[];
+    events?: (EventHasManyInput | null)[];
+    additionalPictures?: (Scalars['JSON'] | null) | null;
+    audio?: (Scalars['String'] | null) | null;
+    audioFiles?: (Scalars['JSON'] | null) | null;
     availability?: (Scalars['JSON'] | null) | null;
     bio?: (Scalars['String'] | null) | null;
     city?: (Scalars['String'] | null) | null;
     country?: (Scalars['String'] | null) | null;
     email?: (Scalars['String'] | null) | null;
-    events?: (EventHasManyInput | null)[];
     experience?: (Scalars['String'] | null) | null;
     genre?: (Scalars['String'] | null) | null;
     genres?: (Scalars['JSON'] | null) | null;
@@ -947,19 +1003,83 @@ export type NestedCreateMusicianInput = {
     isActive?: (Scalars['Boolean'] | null) | null;
     isVerified?: (Scalars['Boolean'] | null) | null;
     location?: (Scalars['String'] | null) | null;
-    name?: (Scalars['String'] | null) | null;
     phone?: (Scalars['String'] | null) | null;
     profilePicture?: (Scalars['String'] | null) | null;
     rating?: (Scalars['Float'] | null) | null;
-    audio?: (Scalars['String'] | null) | null;
-    audioFiles?: (Scalars['JSON'] | null) | null;
-    additionalPictures?: (Scalars['JSON'] | null) | null;
     socialLinks?: (Scalars['JSON'] | null) | null;
     stageName?: (Scalars['String'] | null) | null;
     totalGigs?: (Scalars['Float'] | null) | null;
     user?: UserBelongsToInput | null;
     website?: (Scalars['String'] | null) | null;
     yearsExperience?: (Scalars['Float'] | null) | null;
+};
+export type BookingHasManyInput = {
+    update?: NestedUpdateBookingInput | null;
+    /** Creates, updates, or deletes existing records in the database as needed to arrive at the list of records specified. */
+    _converge?: ConvergeBookingInput | null;
+};
+export type NestedUpdateBookingInput = {
+    id: (Scalars['GadgetID'] | null);
+};
+export type ConvergeBookingInput = {
+    /** The new list of records to converge to */
+    values: (ConvergeBookingValues | null)[];
+    /** An optional partial set of action api identifiers to use when creating, updating, and deleting records to converge to the new list. */
+    actions?: ConvergeActionMap | null;
+};
+export type ConvergeBookingValues = {
+    id?: (Scalars['GadgetID'] | null) | null;
+    bookedBy?: UserBelongsToInput | null;
+    date?: Date | Scalars['ISO8601DateString'] | null;
+    depositAmount?: (Scalars['Float'] | null) | null;
+    depositPaid?: (Scalars['Boolean'] | null) | null;
+    endTime?: (Scalars['String'] | null) | null;
+    fullPaymentPaid?: (Scalars['Boolean'] | null) | null;
+    isActive?: (Scalars['Boolean'] | null) | null;
+    musician?: MusicianBelongsToInput | null;
+    notes?: (Scalars['String'] | null) | null;
+    specialRequirements?: (Scalars['String'] | null) | null;
+    startTime?: (Scalars['String'] | null) | null;
+    status?: (Scalars['String'] | null) | null;
+    totalAmount?: (Scalars['Float'] | null) | null;
+    venue?: VenueBelongsToInput | null;
+    musicianPitch?: (Scalars['String'] | null) | null;
+    proposedRate?: (Scalars['Float'] | null) | null;
+    event?: EventBelongsToInput | null;
+};
+export type VenueBelongsToInput = {
+    create?: NestedCreateVenueInput | null;
+    update?: NestedUpdateVenueInput | null;
+    findFirst?: NestedFindFirstVenueInput | null;
+    /** Existing ID of another record, which you would like to associate this record with */
+    _link?: (Scalars['GadgetID'] | null) | null;
+};
+export type NestedCreateVenueInput = {
+    state?: (Scalars['String'] | null) | null;
+    events?: (EventHasManyInput | null)[];
+    bookings?: (BookingHasManyInput | null)[];
+    additionalPictures?: (Scalars['JSON'] | null) | null;
+    address?: (Scalars['String'] | null) | null;
+    amenities?: (Scalars['JSON'] | null) | null;
+    capacity?: (Scalars['Float'] | null) | null;
+    city?: (Scalars['String'] | null) | null;
+    country?: (Scalars['String'] | null) | null;
+    description?: (Scalars['String'] | null) | null;
+    email?: (Scalars['String'] | null) | null;
+    genres?: (Scalars['JSON'] | null) | null;
+    hours?: (Scalars['JSON'] | null) | null;
+    isActive?: (Scalars['Boolean'] | null) | null;
+    isVerified?: (Scalars['Boolean'] | null) | null;
+    name?: (Scalars['String'] | null) | null;
+    owner?: UserBelongsToInput | null;
+    phone?: (Scalars['String'] | null) | null;
+    priceRange?: (Scalars['String'] | null) | null;
+    profilePicture?: (Scalars['String'] | null) | null;
+    rating?: (Scalars['Float'] | null) | null;
+    socialLinks?: (Scalars['JSON'] | null) | null;
+    type?: (Scalars['String'] | null) | null;
+    website?: (Scalars['String'] | null) | null;
+    zipCode?: (Scalars['String'] | null) | null;
 };
 export type EventHasManyInput = {
     create?: NestedCreateEventInput | null;
@@ -994,69 +1114,6 @@ export type NestedCreateEventInput = {
     title?: (Scalars['String'] | null) | null;
     totalCapacity?: (Scalars['Float'] | null) | null;
     venue?: VenueBelongsToInput | null;
-};
-export type VenueBelongsToInput = {
-    create?: NestedCreateVenueInput | null;
-    update?: NestedUpdateVenueInput | null;
-    findFirst?: NestedFindFirstVenueInput | null;
-    /** Existing ID of another record, which you would like to associate this record with */
-    _link?: (Scalars['GadgetID'] | null) | null;
-};
-export type NestedCreateVenueInput = {
-    state?: (Scalars['String'] | null) | null;
-    address?: (Scalars['String'] | null) | null;
-    amenities?: (Scalars['JSON'] | null) | null;
-    additionalPictures?: (Scalars['JSON'] | null) | null;
-    capacity?: (Scalars['Float'] | null) | null;
-    city?: (Scalars['String'] | null) | null;
-    country?: (Scalars['String'] | null) | null;
-    description?: (Scalars['String'] | null) | null;
-    email?: (Scalars['String'] | null) | null;
-    events?: (EventHasManyInput | null)[];
-    genres?: (Scalars['JSON'] | null) | null;
-    hours?: (Scalars['JSON'] | null) | null;
-    isActive?: (Scalars['Boolean'] | null) | null;
-    isVerified?: (Scalars['Boolean'] | null) | null;
-    name?: (Scalars['String'] | null) | null;
-    owner?: UserBelongsToInput | null;
-    phone?: (Scalars['String'] | null) | null;
-    priceRange?: (Scalars['String'] | null) | null;
-    profilePicture?: (Scalars['String'] | null) | null;
-    rating?: (Scalars['Float'] | null) | null;
-    socialLinks?: (Scalars['JSON'] | null) | null;
-    type?: (Scalars['String'] | null) | null;
-    website?: (Scalars['String'] | null) | null;
-    zipCode?: (Scalars['String'] | null) | null;
-};
-export type NestedUpdateVenueInput = {
-    state?: (Scalars['String'] | null) | null;
-    address?: (Scalars['String'] | null) | null;
-    amenities?: (Scalars['JSON'] | null) | null;
-    additionalPictures?: (Scalars['JSON'] | null) | null;
-    capacity?: (Scalars['Float'] | null) | null;
-    city?: (Scalars['String'] | null) | null;
-    country?: (Scalars['String'] | null) | null;
-    description?: (Scalars['String'] | null) | null;
-    email?: (Scalars['String'] | null) | null;
-    events?: (EventHasManyInput | null)[];
-    genres?: (Scalars['JSON'] | null) | null;
-    hours?: (Scalars['JSON'] | null) | null;
-    isActive?: (Scalars['Boolean'] | null) | null;
-    isVerified?: (Scalars['Boolean'] | null) | null;
-    name?: (Scalars['String'] | null) | null;
-    owner?: UserBelongsToInput | null;
-    phone?: (Scalars['String'] | null) | null;
-    priceRange?: (Scalars['String'] | null) | null;
-    profilePicture?: (Scalars['String'] | null) | null;
-    rating?: (Scalars['Float'] | null) | null;
-    socialLinks?: (Scalars['JSON'] | null) | null;
-    type?: (Scalars['String'] | null) | null;
-    website?: (Scalars['String'] | null) | null;
-    zipCode?: (Scalars['String'] | null) | null;
-    id: (Scalars['GadgetID'] | null);
-};
-export type NestedFindFirstVenueInput = {
-    id: (Scalars['GadgetID'] | null);
 };
 export type NestedUpdateEventInput = {
     availableTickets?: (Scalars['Float'] | null) | null;
@@ -1131,14 +1188,56 @@ export type ConvergeActionMap = {
     /** One of the model action's API identifiers. Specifies which action to use to delete records that are not in the set of specified records but exist in the database. Defaults to the action named `delete` if it exists. */
     delete?: (Scalars['String'] | null) | null;
 };
+export type NestedUpdateVenueInput = {
+    state?: (Scalars['String'] | null) | null;
+    events?: (EventHasManyInput | null)[];
+    bookings?: (BookingHasManyInput | null)[];
+    additionalPictures?: (Scalars['JSON'] | null) | null;
+    address?: (Scalars['String'] | null) | null;
+    amenities?: (Scalars['JSON'] | null) | null;
+    capacity?: (Scalars['Float'] | null) | null;
+    city?: (Scalars['String'] | null) | null;
+    country?: (Scalars['String'] | null) | null;
+    description?: (Scalars['String'] | null) | null;
+    email?: (Scalars['String'] | null) | null;
+    genres?: (Scalars['JSON'] | null) | null;
+    hours?: (Scalars['JSON'] | null) | null;
+    isActive?: (Scalars['Boolean'] | null) | null;
+    isVerified?: (Scalars['Boolean'] | null) | null;
+    name?: (Scalars['String'] | null) | null;
+    owner?: UserBelongsToInput | null;
+    phone?: (Scalars['String'] | null) | null;
+    priceRange?: (Scalars['String'] | null) | null;
+    profilePicture?: (Scalars['String'] | null) | null;
+    rating?: (Scalars['Float'] | null) | null;
+    socialLinks?: (Scalars['JSON'] | null) | null;
+    type?: (Scalars['String'] | null) | null;
+    website?: (Scalars['String'] | null) | null;
+    zipCode?: (Scalars['String'] | null) | null;
+    id: (Scalars['GadgetID'] | null);
+};
+export type NestedFindFirstVenueInput = {
+    id: (Scalars['GadgetID'] | null);
+};
+export type EventBelongsToInput = {
+    create?: NestedCreateEventInput | null;
+    update?: NestedUpdateEventInput | null;
+    findFirst?: NestedFindFirstEventInput | null;
+    /** Existing ID of another record, which you would like to associate this record with */
+    _link?: (Scalars['GadgetID'] | null) | null;
+};
 export type NestedUpdateMusicianInput = {
     state?: (Scalars['String'] | null) | null;
+    bookings?: (BookingHasManyInput | null)[];
+    events?: (EventHasManyInput | null)[];
+    additionalPictures?: (Scalars['JSON'] | null) | null;
+    audio?: (Scalars['String'] | null) | null;
+    audioFiles?: (Scalars['JSON'] | null) | null;
     availability?: (Scalars['JSON'] | null) | null;
     bio?: (Scalars['String'] | null) | null;
     city?: (Scalars['String'] | null) | null;
     country?: (Scalars['String'] | null) | null;
     email?: (Scalars['String'] | null) | null;
-    events?: (EventHasManyInput | null)[];
     experience?: (Scalars['String'] | null) | null;
     genre?: (Scalars['String'] | null) | null;
     genres?: (Scalars['JSON'] | null) | null;
@@ -1147,13 +1246,9 @@ export type NestedUpdateMusicianInput = {
     isActive?: (Scalars['Boolean'] | null) | null;
     isVerified?: (Scalars['Boolean'] | null) | null;
     location?: (Scalars['String'] | null) | null;
-    name?: (Scalars['String'] | null) | null;
     phone?: (Scalars['String'] | null) | null;
     profilePicture?: (Scalars['String'] | null) | null;
     rating?: (Scalars['Float'] | null) | null;
-    audio?: (Scalars['String'] | null) | null;
-    audioFiles?: (Scalars['JSON'] | null) | null;
-    additionalPictures?: (Scalars['JSON'] | null) | null;
     socialLinks?: (Scalars['JSON'] | null) | null;
     stageName?: (Scalars['String'] | null) | null;
     totalGigs?: (Scalars['Float'] | null) | null;
@@ -1234,12 +1329,16 @@ export type BulkUpsertEventsInput = {
 };
 export type CreateMusicianInput = {
     state?: (Scalars['String'] | null) | null;
+    bookings?: (BookingHasManyInput | null)[];
+    events?: (EventHasManyInput | null)[];
+    additionalPictures?: (Scalars['JSON'] | null) | null;
+    audio?: (Scalars['String'] | null) | null;
+    audioFiles?: (Scalars['JSON'] | null) | null;
     availability?: (Scalars['JSON'] | null) | null;
     bio?: (Scalars['String'] | null) | null;
     city?: (Scalars['String'] | null) | null;
     country?: (Scalars['String'] | null) | null;
     email?: (Scalars['String'] | null) | null;
-    events?: (EventHasManyInput | null)[];
     experience?: (Scalars['String'] | null) | null;
     genre?: (Scalars['String'] | null) | null;
     genres?: (Scalars['JSON'] | null) | null;
@@ -1248,13 +1347,9 @@ export type CreateMusicianInput = {
     isActive?: (Scalars['Boolean'] | null) | null;
     isVerified?: (Scalars['Boolean'] | null) | null;
     location?: (Scalars['String'] | null) | null;
-    name?: (Scalars['String'] | null) | null;
     phone?: (Scalars['String'] | null) | null;
     profilePicture?: (Scalars['String'] | null) | null;
     rating?: (Scalars['Float'] | null) | null;
-    audio?: (Scalars['String'] | null) | null;
-    audioFiles?: (Scalars['JSON'] | null) | null;
-    additionalPictures?: (Scalars['JSON'] | null) | null;
     socialLinks?: (Scalars['JSON'] | null) | null;
     stageName?: (Scalars['String'] | null) | null;
     totalGigs?: (Scalars['Float'] | null) | null;
@@ -1267,12 +1362,16 @@ export type BulkCreateMusiciansInput = {
 };
 export type UpdateMusicianInput = {
     state?: (Scalars['String'] | null) | null;
+    bookings?: (BookingHasManyInput | null)[];
+    events?: (EventHasManyInput | null)[];
+    additionalPictures?: (Scalars['JSON'] | null) | null;
+    audio?: (Scalars['String'] | null) | null;
+    audioFiles?: (Scalars['JSON'] | null) | null;
     availability?: (Scalars['JSON'] | null) | null;
     bio?: (Scalars['String'] | null) | null;
     city?: (Scalars['String'] | null) | null;
     country?: (Scalars['String'] | null) | null;
     email?: (Scalars['String'] | null) | null;
-    events?: (EventHasManyInput | null)[];
     experience?: (Scalars['String'] | null) | null;
     genre?: (Scalars['String'] | null) | null;
     genres?: (Scalars['JSON'] | null) | null;
@@ -1281,13 +1380,9 @@ export type UpdateMusicianInput = {
     isActive?: (Scalars['Boolean'] | null) | null;
     isVerified?: (Scalars['Boolean'] | null) | null;
     location?: (Scalars['String'] | null) | null;
-    name?: (Scalars['String'] | null) | null;
     phone?: (Scalars['String'] | null) | null;
     profilePicture?: (Scalars['String'] | null) | null;
     rating?: (Scalars['Float'] | null) | null;
-    audio?: (Scalars['String'] | null) | null;
-    audioFiles?: (Scalars['JSON'] | null) | null;
-    additionalPictures?: (Scalars['JSON'] | null) | null;
     socialLinks?: (Scalars['JSON'] | null) | null;
     stageName?: (Scalars['String'] | null) | null;
     totalGigs?: (Scalars['Float'] | null) | null;
@@ -1302,12 +1397,16 @@ export type BulkUpdateMusiciansInput = {
 export type UpsertMusicianInput = {
     id?: (Scalars['GadgetID'] | null) | null;
     state?: (Scalars['String'] | null) | null;
+    bookings?: (BookingHasManyInput | null)[];
+    events?: (EventHasManyInput | null)[];
+    additionalPictures?: (Scalars['JSON'] | null) | null;
+    audio?: (Scalars['String'] | null) | null;
+    audioFiles?: (Scalars['JSON'] | null) | null;
     availability?: (Scalars['JSON'] | null) | null;
     bio?: (Scalars['String'] | null) | null;
     city?: (Scalars['String'] | null) | null;
     country?: (Scalars['String'] | null) | null;
     email?: (Scalars['String'] | null) | null;
-    events?: (EventHasManyInput | null)[];
     experience?: (Scalars['String'] | null) | null;
     genre?: (Scalars['String'] | null) | null;
     genres?: (Scalars['JSON'] | null) | null;
@@ -1316,13 +1415,9 @@ export type UpsertMusicianInput = {
     isActive?: (Scalars['Boolean'] | null) | null;
     isVerified?: (Scalars['Boolean'] | null) | null;
     location?: (Scalars['String'] | null) | null;
-    name?: (Scalars['String'] | null) | null;
     phone?: (Scalars['String'] | null) | null;
     profilePicture?: (Scalars['String'] | null) | null;
     rating?: (Scalars['Float'] | null) | null;
-    audio?: (Scalars['String'] | null) | null;
-    audioFiles?: (Scalars['JSON'] | null) | null;
-    additionalPictures?: (Scalars['JSON'] | null) | null;
     socialLinks?: (Scalars['JSON'] | null) | null;
     stageName?: (Scalars['String'] | null) | null;
     totalGigs?: (Scalars['Float'] | null) | null;
@@ -1337,15 +1432,16 @@ export type BulkUpsertMusiciansInput = {
 };
 export type CreateVenueInput = {
     state?: (Scalars['String'] | null) | null;
+    events?: (EventHasManyInput | null)[];
+    bookings?: (BookingHasManyInput | null)[];
+    additionalPictures?: (Scalars['JSON'] | null) | null;
     address?: (Scalars['String'] | null) | null;
     amenities?: (Scalars['JSON'] | null) | null;
-    additionalPictures?: (Scalars['JSON'] | null) | null;
     capacity?: (Scalars['Float'] | null) | null;
     city?: (Scalars['String'] | null) | null;
     country?: (Scalars['String'] | null) | null;
     description?: (Scalars['String'] | null) | null;
     email?: (Scalars['String'] | null) | null;
-    events?: (EventHasManyInput | null)[];
     genres?: (Scalars['JSON'] | null) | null;
     hours?: (Scalars['JSON'] | null) | null;
     isActive?: (Scalars['Boolean'] | null) | null;
@@ -1366,15 +1462,16 @@ export type BulkCreateVenuesInput = {
 };
 export type UpdateVenueInput = {
     state?: (Scalars['String'] | null) | null;
+    events?: (EventHasManyInput | null)[];
+    bookings?: (BookingHasManyInput | null)[];
+    additionalPictures?: (Scalars['JSON'] | null) | null;
     address?: (Scalars['String'] | null) | null;
     amenities?: (Scalars['JSON'] | null) | null;
-    additionalPictures?: (Scalars['JSON'] | null) | null;
     capacity?: (Scalars['Float'] | null) | null;
     city?: (Scalars['String'] | null) | null;
     country?: (Scalars['String'] | null) | null;
     description?: (Scalars['String'] | null) | null;
     email?: (Scalars['String'] | null) | null;
-    events?: (EventHasManyInput | null)[];
     genres?: (Scalars['JSON'] | null) | null;
     hours?: (Scalars['JSON'] | null) | null;
     isActive?: (Scalars['Boolean'] | null) | null;
@@ -1397,15 +1494,16 @@ export type BulkUpdateVenuesInput = {
 export type UpsertVenueInput = {
     id?: (Scalars['GadgetID'] | null) | null;
     state?: (Scalars['String'] | null) | null;
+    events?: (EventHasManyInput | null)[];
+    bookings?: (BookingHasManyInput | null)[];
+    additionalPictures?: (Scalars['JSON'] | null) | null;
     address?: (Scalars['String'] | null) | null;
     amenities?: (Scalars['JSON'] | null) | null;
-    additionalPictures?: (Scalars['JSON'] | null) | null;
     capacity?: (Scalars['Float'] | null) | null;
     city?: (Scalars['String'] | null) | null;
     country?: (Scalars['String'] | null) | null;
     description?: (Scalars['String'] | null) | null;
     email?: (Scalars['String'] | null) | null;
-    events?: (EventHasManyInput | null)[];
     genres?: (Scalars['JSON'] | null) | null;
     hours?: (Scalars['JSON'] | null) | null;
     isActive?: (Scalars['Boolean'] | null) | null;
@@ -1425,6 +1523,78 @@ export type BulkUpsertVenuesInput = {
     /** An array of Strings */
     on?: ((Scalars['String'] | null))[];
     venue?: UpsertVenueInput | null;
+};
+export type BulkSignUpUsersInput = {
+    email?: (Scalars['String'] | null) | null;
+    password?: (Scalars['String'] | null) | null;
+};
+export type BulkSignInUsersInput = {
+    email?: (Scalars['String'] | null) | null;
+    password?: (Scalars['String'] | null) | null;
+};
+export type UpdateUserInput = {
+    password?: (Scalars['String'] | null) | null;
+    emailVerified?: (Scalars['Boolean'] | null) | null;
+    email?: (Scalars['String'] | null) | null;
+    lastSignedIn?: Date | Scalars['ISO8601DateString'] | null;
+    emailVerificationToken?: (Scalars['String'] | null) | null;
+    emailVerificationTokenExpiration?: Date | Scalars['ISO8601DateString'] | null;
+    profilePicture?: StoredFileInput | null;
+    resetPasswordTokenExpiration?: Date | Scalars['ISO8601DateString'] | null;
+    resetPasswordToken?: (Scalars['String'] | null) | null;
+    userType?: (Scalars['String'] | null) | null;
+    firstName?: (Scalars['String'] | null) | null;
+    googleImageUrl?: (Scalars['String'] | null) | null;
+    lastName?: (Scalars['String'] | null) | null;
+    googleProfileId?: (Scalars['String'] | null) | null;
+};
+export type BulkUpdateUsersInput = {
+    user?: UpdateUserInput | null;
+    id: (Scalars['GadgetID'] | null);
+};
+export type BulkSendVerifyEmailUsersInput = {
+    email?: (Scalars['String'] | null) | null;
+};
+export type BulkVerifyEmailUsersInput = {
+    code?: (Scalars['String'] | null) | null;
+};
+export type BulkSendResetPasswordUsersInput = {
+    email?: (Scalars['String'] | null) | null;
+};
+export type BulkResetPasswordUsersInput = {
+    password?: (Scalars['String'] | null) | null;
+    code?: (Scalars['String'] | null) | null;
+};
+export type BulkChangePasswordUsersInput = {
+    id: (Scalars['GadgetID'] | null);
+    currentPassword?: (Scalars['String'] | null) | null;
+    newPassword?: (Scalars['String'] | null) | null;
+};
+export type UpsertUserInput = {
+    id?: (Scalars['GadgetID'] | null) | null;
+    password?: (Scalars['String'] | null) | null;
+    emailVerified?: (Scalars['Boolean'] | null) | null;
+    email?: (Scalars['String'] | null) | null;
+    lastSignedIn?: Date | Scalars['ISO8601DateString'] | null;
+    /** A string list of Gadget platform Role keys to assign to this record */
+    roles?: ((Scalars['String'] | null))[];
+    emailVerificationToken?: (Scalars['String'] | null) | null;
+    emailVerificationTokenExpiration?: Date | Scalars['ISO8601DateString'] | null;
+    profilePicture?: StoredFileInput | null;
+    resetPasswordTokenExpiration?: Date | Scalars['ISO8601DateString'] | null;
+    resetPasswordToken?: (Scalars['String'] | null) | null;
+    userType?: (Scalars['String'] | null) | null;
+    firstName?: (Scalars['String'] | null) | null;
+    googleImageUrl?: (Scalars['String'] | null) | null;
+    lastName?: (Scalars['String'] | null) | null;
+    googleProfileId?: (Scalars['String'] | null) | null;
+};
+export type BulkUpsertUsersInput = {
+    /** An array of Strings */
+    on?: ((Scalars['String'] | null))[];
+    user?: UpsertUserInput | null;
+    email?: (Scalars['String'] | null) | null;
+    password?: (Scalars['String'] | null) | null;
 };
 export type EnqueueBackgroundActionOptions = {
     /** A fixed ID to assign to this background action. If not passed, a random ID will be generated and assigned. */
@@ -1456,56 +1626,6 @@ export type BackgroundActionRetryPolicy = {
     /** If true, the retry interval will be randomized by a small amount to avoid all retries happening at the same time. Default is false. */
     randomizeInterval?: (Scalars['Boolean'] | null) | null;
 };
-export type InternalUserInput = {
-    state?: (Scalars['RecordState'] | null) | null;
-    stateHistory?: (Scalars['RecordState'] | null) | null;
-    id?: (Scalars['GadgetID'] | null) | null;
-    createdAt?: Date | Scalars['ISO8601DateString'] | null;
-    updatedAt?: Date | Scalars['ISO8601DateString'] | null;
-    email?: (Scalars['String'] | null) | null;
-    emailVerificationToken?: (Scalars['String'] | null) | null;
-    emailVerificationTokenExpiration?: Date | Scalars['ISO8601DateString'] | null;
-    emailVerified?: (Scalars['Boolean'] | null) | null;
-    firstName?: (Scalars['String'] | null) | null;
-    googleImageUrl?: (Scalars['String'] | null) | null;
-    googleProfileId?: (Scalars['String'] | null) | null;
-    lastName?: (Scalars['String'] | null) | null;
-    password?: (Scalars['String'] | null) | null;
-    lastSignedIn?: Date | Scalars['ISO8601DateString'] | null;
-    profilePicture?: InternalStoredFileInput | null;
-    resetPasswordTokenExpiration?: Date | Scalars['ISO8601DateString'] | null;
-    resetPasswordToken?: (Scalars['String'] | null) | null;
-    /** A string list of Gadget platform Role keys to assign to this record */
-    roles?: ((Scalars['String'] | null))[];
-};
-export type InternalStoredFileInput = {
-    /** An opaque identifier used by Gadget internally to uniquely identify this stored file */
-    storageToken: (Scalars['String'] | null);
-    /** Byte size to report in API calls */
-    byteSize: (Scalars['Int'] | null);
-    /** File mime type to use when serving the file or making resize operations available */
-    mimeType: (Scalars['String'] | null);
-    /** Sets this file's stored name, which will then be used when serving the file during read requests. If not set, Gadget will infer a filename if possible. */
-    fileName: (Scalars['String'] | null);
-    /** Has no effect. Convenience property to allow sending an internal metadata blob back to the Internal API, but doesn't do anything. URLs generated by Gadget expire and are not stored. */
-    url?: (Scalars['String'] | null) | null;
-};
-export type AppGraphQLTriggerMutationContext = {
-    /** The ID of the session that triggered this mutation. Will be the session that's loaded in the mutation context. */
-    sessionID?: (Scalars['GadgetID'] | null) | null;
-};
-export type InternalSessionInput = {
-    state?: (Scalars['RecordState'] | null) | null;
-    stateHistory?: (Scalars['RecordState'] | null) | null;
-    id?: (Scalars['GadgetID'] | null) | null;
-    createdAt?: Date | Scalars['ISO8601DateString'] | null;
-    updatedAt?: Date | Scalars['ISO8601DateString'] | null;
-    user?: InternalBelongsToInput | null;
-};
-export type InternalBelongsToInput = {
-    /** Existing ID of another record, which you would like to associate this record with */
-    _link?: (Scalars['GadgetID'] | null) | null;
-};
 export type InternalBookingInput = {
     state?: (Scalars['RecordState'] | null) | null;
     stateHistory?: (Scalars['RecordState'] | null) | null;
@@ -1526,20 +1646,33 @@ export type InternalBookingInput = {
     status?: (Scalars['String'] | null) | null;
     totalAmount?: (Scalars['Float'] | null) | null;
     venue?: InternalBelongsToInput | null;
+    musicianPitch?: (Scalars['String'] | null) | null;
+    proposedRate?: (Scalars['Float'] | null) | null;
+    event?: InternalBelongsToInput | null;
     /** An optional list of atomically applied commands for race-safe mutations of the record */
     _atomics?: InternalBookingAtomicsInput | null;
+};
+export type InternalBelongsToInput = {
+    /** Existing ID of another record, which you would like to associate this record with */
+    _link?: (Scalars['GadgetID'] | null) | null;
 };
 export type InternalBookingAtomicsInput = {
     /** Numeric atomic commands for operating on depositAmount. */
     depositAmount?: (NumericAtomicFieldUpdateInput)[];
     /** Numeric atomic commands for operating on totalAmount. */
     totalAmount?: (NumericAtomicFieldUpdateInput)[];
+    /** Numeric atomic commands for operating on proposedRate. */
+    proposedRate?: (NumericAtomicFieldUpdateInput)[];
 };
 export type NumericAtomicFieldUpdateInput = {
     /** A number to atomically increment the field value by. Can only be used on numeric fields. */
     increment?: (Scalars['Float'] | null) | null;
     /** A number to atomically decrement the field value by. Can only be used on numeric fields. */
     decrement?: (Scalars['Float'] | null) | null;
+};
+export type AppGraphQLTriggerMutationContext = {
+    /** The ID of the session that triggered this mutation. Will be the session that's loaded in the mutation context. */
+    sessionID?: (Scalars['GadgetID'] | null) | null;
 };
 export type InternalEventInput = {
     state?: (Scalars['RecordState'] | null) | null;
@@ -1591,6 +1724,9 @@ export type InternalMusicianInput = {
     id?: (Scalars['GadgetID'] | null) | null;
     createdAt?: Date | Scalars['ISO8601DateString'] | null;
     updatedAt?: Date | Scalars['ISO8601DateString'] | null;
+    additionalPictures?: (Scalars['JSON'] | null) | null;
+    audio?: (Scalars['String'] | null) | null;
+    audioFiles?: (Scalars['JSON'] | null) | null;
     availability?: (Scalars['JSON'] | null) | null;
     bio?: (Scalars['String'] | null) | null;
     city?: (Scalars['String'] | null) | null;
@@ -1604,13 +1740,9 @@ export type InternalMusicianInput = {
     isActive?: (Scalars['Boolean'] | null) | null;
     isVerified?: (Scalars['Boolean'] | null) | null;
     location?: (Scalars['String'] | null) | null;
-    name?: (Scalars['String'] | null) | null;
     phone?: (Scalars['String'] | null) | null;
     profilePicture?: (Scalars['String'] | null) | null;
     rating?: (Scalars['Float'] | null) | null;
-    audio?: (Scalars['String'] | null) | null;
-    audioFiles?: (Scalars['JSON'] | null) | null;
-    additionalPictures?: (Scalars['JSON'] | null) | null;
     socialLinks?: (Scalars['JSON'] | null) | null;
     stageName?: (Scalars['String'] | null) | null;
     totalGigs?: (Scalars['Float'] | null) | null;
@@ -1658,9 +1790,9 @@ export type InternalVenueInput = {
     id?: (Scalars['GadgetID'] | null) | null;
     createdAt?: Date | Scalars['ISO8601DateString'] | null;
     updatedAt?: Date | Scalars['ISO8601DateString'] | null;
+    additionalPictures?: (Scalars['JSON'] | null) | null;
     address?: (Scalars['String'] | null) | null;
     amenities?: (Scalars['JSON'] | null) | null;
-    additionalPictures?: (Scalars['JSON'] | null) | null;
     capacity?: (Scalars['Float'] | null) | null;
     city?: (Scalars['String'] | null) | null;
     country?: (Scalars['String'] | null) | null;
@@ -1688,6 +1820,65 @@ export type InternalVenueAtomicsInput = {
     capacity?: (NumericAtomicFieldUpdateInput)[];
     /** Numeric atomic commands for operating on rating. */
     rating?: (NumericAtomicFieldUpdateInput)[];
+};
+export type InternalUserInput = {
+    state?: (Scalars['RecordState'] | null) | null;
+    stateHistory?: (Scalars['RecordState'] | null) | null;
+    id?: (Scalars['GadgetID'] | null) | null;
+    createdAt?: Date | Scalars['ISO8601DateString'] | null;
+    updatedAt?: Date | Scalars['ISO8601DateString'] | null;
+    password?: (Scalars['String'] | null) | null;
+    emailVerified?: (Scalars['Boolean'] | null) | null;
+    email?: (Scalars['String'] | null) | null;
+    lastSignedIn?: Date | Scalars['ISO8601DateString'] | null;
+    /** A string list of Gadget platform Role keys to assign to this record */
+    roles?: ((Scalars['String'] | null))[];
+    emailVerificationToken?: (Scalars['String'] | null) | null;
+    emailVerificationTokenExpiration?: Date | Scalars['ISO8601DateString'] | null;
+    profilePicture?: InternalStoredFileInput | null;
+    resetPasswordTokenExpiration?: Date | Scalars['ISO8601DateString'] | null;
+    resetPasswordToken?: (Scalars['String'] | null) | null;
+    userType?: (Scalars['String'] | null) | null;
+    firstName?: (Scalars['String'] | null) | null;
+    googleImageUrl?: (Scalars['String'] | null) | null;
+    lastName?: (Scalars['String'] | null) | null;
+    googleProfileId?: (Scalars['String'] | null) | null;
+};
+export type InternalStoredFileInput = {
+    /** An opaque identifier used by Gadget internally to uniquely identify this stored file */
+    storageToken: (Scalars['String'] | null);
+    /** Byte size to report in API calls */
+    byteSize: (Scalars['Int'] | null);
+    /** File mime type to use when serving the file or making resize operations available */
+    mimeType: (Scalars['String'] | null);
+    /** Sets this file's stored name, which will then be used when serving the file during read requests. If not set, Gadget will infer a filename if possible. */
+    fileName: (Scalars['String'] | null);
+    /** Has no effect. Convenience property to allow sending an internal metadata blob back to the Internal API, but doesn't do anything. URLs generated by Gadget expire and are not stored. */
+    url?: (Scalars['String'] | null) | null;
+};
+export type InternalSessionInput = {
+    state?: (Scalars['RecordState'] | null) | null;
+    stateHistory?: (Scalars['RecordState'] | null) | null;
+    id?: (Scalars['GadgetID'] | null) | null;
+    createdAt?: Date | Scalars['ISO8601DateString'] | null;
+    updatedAt?: Date | Scalars['ISO8601DateString'] | null;
+    user?: InternalBelongsToInput | null;
+};
+export type InternalEventHistoryInput = {
+    state?: (Scalars['RecordState'] | null) | null;
+    stateHistory?: (Scalars['RecordState'] | null) | null;
+    id?: (Scalars['GadgetID'] | null) | null;
+    createdAt?: Date | Scalars['ISO8601DateString'] | null;
+    updatedAt?: Date | Scalars['ISO8601DateString'] | null;
+    booking?: InternalBelongsToInput | null;
+    event?: InternalBelongsToInput | null;
+    changedBy?: InternalBelongsToInput | null;
+    changeType?: (Scalars['String'] | null) | null;
+    previousValue?: (Scalars['String'] | null) | null;
+    description?: (Scalars['String'] | null) | null;
+    newValue?: (Scalars['String'] | null) | null;
+    context?: (Scalars['JSON'] | null) | null;
+    metadata?: (Scalars['JSON'] | null) | null;
 };
 /** All built-in and custom scalars, mapped to their actual values */
 export interface Scalars {
@@ -2281,25 +2472,13 @@ export type AvailableGadgetGenericFieldValidationSelection = {
     name?: boolean | null | undefined;
     specID?: boolean | null | undefined;
 };
-export interface UpsertError extends UpsertUserResult, UpsertEventResult, UpsertMusicianResult, UpsertVenueResult {
+export interface UpsertError extends UpsertEventResult, UpsertMusicianResult, UpsertVenueResult, UpsertUserResult {
     __typename: 'UpsertError';
     success: Scalars['Boolean'];
     errors: ExecutionError[];
     actionRun: (Scalars['String'] | null);
 }
 export type AvailableUpsertErrorSelection = {
-    __typename?: boolean | null | undefined;
-    success?: boolean | null | undefined;
-    errors?: AvailableExecutionErrorSelection;
-    actionRun?: boolean | null | undefined;
-};
-export type UpsertUserResult = {
-    __typename: 'UpsertError' | 'SignUpUserResult' | 'UpdateUserResult';
-    success: Scalars['Boolean'];
-    errors: ExecutionError[];
-    actionRun: (Scalars['String'] | null);
-};
-export type AvailableUpsertUserResultSelection = {
     __typename?: boolean | null | undefined;
     success?: boolean | null | undefined;
     errors?: AvailableExecutionErrorSelection;
@@ -2341,14 +2520,20 @@ export type AvailableUpsertVenueResultSelection = {
     errors?: AvailableExecutionErrorSelection;
     actionRun?: boolean | null | undefined;
 };
+export type UpsertUserResult = {
+    __typename: 'UpsertError' | 'SignUpUserResult' | 'UpdateUserResult';
+    success: Scalars['Boolean'];
+    errors: ExecutionError[];
+    actionRun: (Scalars['String'] | null);
+};
+export type AvailableUpsertUserResultSelection = {
+    __typename?: boolean | null | undefined;
+    success?: boolean | null | undefined;
+    errors?: AvailableExecutionErrorSelection;
+    actionRun?: boolean | null | undefined;
+};
 export type Query = {
     __typename: 'Query';
-    user: (User | null);
-    users: UserConnection;
-    userGellyView: (Scalars['JSON'] | null);
-    session: (Session | null);
-    sessions: SessionConnection;
-    sessionGellyView: (Scalars['JSON'] | null);
     booking: (Booking | null);
     bookings: BookingConnection;
     bookingGellyView: (Scalars['JSON'] | null);
@@ -2364,18 +2549,21 @@ export type Query = {
     venue: (Venue | null);
     venues: VenueConnection;
     venueGellyView: (Scalars['JSON'] | null);
+    user: (User | null);
+    users: UserConnection;
+    userGellyView: (Scalars['JSON'] | null);
+    session: (Session | null);
+    sessions: SessionConnection;
+    sessionGellyView: (Scalars['JSON'] | null);
+    eventHistory: (EventHistory | null);
+    eventHistories: EventHistoryConnection;
+    eventHistoryGellyView: (Scalars['JSON'] | null);
     gellyView: (Scalars['JSON'] | null);
     currentSession: (Session | null);
     internal: InternalQueries;
 };
 export type AvailableQuerySelection = {
     __typename?: boolean | null | undefined;
-    user?: AvailableUserSelection;
-    users?: AvailableUserConnectionSelection;
-    userGellyView?: boolean | null | undefined;
-    session?: AvailableSessionSelection;
-    sessions?: AvailableSessionConnectionSelection;
-    sessionGellyView?: boolean | null | undefined;
     booking?: AvailableBookingSelection;
     bookings?: AvailableBookingConnectionSelection;
     bookingGellyView?: boolean | null | undefined;
@@ -2391,208 +2579,18 @@ export type AvailableQuerySelection = {
     venue?: AvailableVenueSelection;
     venues?: AvailableVenueConnectionSelection;
     venueGellyView?: boolean | null | undefined;
+    user?: AvailableUserSelection;
+    users?: AvailableUserConnectionSelection;
+    userGellyView?: boolean | null | undefined;
+    session?: AvailableSessionSelection;
+    sessions?: AvailableSessionConnectionSelection;
+    sessionGellyView?: boolean | null | undefined;
+    eventHistory?: AvailableEventHistorySelection;
+    eventHistories?: AvailableEventHistoryConnectionSelection;
+    eventHistoryGellyView?: boolean | null | undefined;
     gellyView?: boolean | null | undefined;
     currentSession?: AvailableSessionSelection;
     internal?: AvailableInternalQueriesSelection;
-};
-export type User = {
-    __typename: 'User';
-    /** The globally unique, unchanging identifier for this record. Assigned and managed by Gadget. */
-    id: Scalars['GadgetID'];
-    /** The time at which this record was first created. Set once upon record creation and never changed. Managed by Gadget. */
-    createdAt: Scalars['DateTime'];
-    /** The time at which this record was last changed. Set each time the record is successfully acted upon by an action. Managed by Gadget. */
-    updatedAt: Scalars['DateTime'];
-    email: Scalars['String'];
-    emailVerificationToken: (Scalars['String'] | null);
-    emailVerificationTokenExpiration: (Scalars['DateTime'] | null);
-    emailVerified: (Scalars['Boolean'] | null);
-    firstName: (Scalars['String'] | null);
-    googleImageUrl: (Scalars['String'] | null);
-    googleProfileId: (Scalars['String'] | null);
-    lastName: (Scalars['String'] | null);
-    lastSignedIn: (Scalars['DateTime'] | null);
-    profilePicture: (StoredFile | null);
-    resetPasswordTokenExpiration: (Scalars['DateTime'] | null);
-    resetPasswordToken: (Scalars['String'] | null);
-    roles: Role[];
-    /** Get all the fields for this record. Useful for not having to list out all the fields you want to retrieve, but slower. */
-    _all: Scalars['JSONObject'];
-};
-export type AvailableUserSelection = {
-    __typename?: boolean | null | undefined;
-    /** The globally unique, unchanging identifier for this record. Assigned and managed by Gadget. */
-    id?: boolean | null | undefined;
-    /** The time at which this record was first created. Set once upon record creation and never changed. Managed by Gadget. */
-    createdAt?: boolean | null | undefined;
-    /** The time at which this record was last changed. Set each time the record is successfully acted upon by an action. Managed by Gadget. */
-    updatedAt?: boolean | null | undefined;
-    email?: boolean | null | undefined;
-    emailVerificationToken?: boolean | null | undefined;
-    emailVerificationTokenExpiration?: boolean | null | undefined;
-    emailVerified?: boolean | null | undefined;
-    firstName?: boolean | null | undefined;
-    googleImageUrl?: boolean | null | undefined;
-    googleProfileId?: boolean | null | undefined;
-    lastName?: boolean | null | undefined;
-    lastSignedIn?: boolean | null | undefined;
-    profilePicture?: AvailableStoredFileSelection;
-    resetPasswordTokenExpiration?: boolean | null | undefined;
-    resetPasswordToken?: boolean | null | undefined;
-    roles?: AvailableRoleSelection;
-    /** Get all the fields for this record. Useful for not having to list out all the fields you want to retrieve, but slower. */
-    _all?: boolean | null | undefined;
-};
-/** One file that has been stored and attached to a record */
-export type StoredFile = {
-    __typename: 'StoredFile';
-    /** The URL to retrieve the attached file. Gets the original, unmodified file. */
-    url: Scalars['String'];
-    /** The content type of the file. */
-    mimeType: Scalars['String'];
-    /** The size of this file in bytes. */
-    byteSize: Scalars['Int'];
-    /** The size of this file in bytes. */
-    humanSize: Scalars['String'];
-    /** The file name of this file. */
-    fileName: Scalars['String'];
-};
-export type AvailableStoredFileSelection = {
-    __typename?: boolean | null | undefined;
-    /** The URL to retrieve the attached file. Gets the original, unmodified file. */
-    url?: boolean | null | undefined;
-    /** The content type of the file. */
-    mimeType?: boolean | null | undefined;
-    /** The size of this file in bytes. */
-    byteSize?: boolean | null | undefined;
-    /** The size of this file in bytes. */
-    humanSize?: boolean | null | undefined;
-    /** The file name of this file. */
-    fileName?: boolean | null | undefined;
-};
-/** A named group of permissions granted to a particular actor in the system. Managed in the Gadget editor. */
-export type Role = {
-    __typename: 'Role';
-    /** The stable identifier for this role. Null if the role has since been deleted. */
-    key: Scalars['String'];
-    /** The human readable name for this role. Can be changed. */
-    name: Scalars['String'];
-};
-export type AvailableRoleSelection = {
-    __typename?: boolean | null | undefined;
-    /** The stable identifier for this role. Null if the role has since been deleted. */
-    key?: boolean | null | undefined;
-    /** The human readable name for this role. Can be changed. */
-    name?: boolean | null | undefined;
-};
-/** A connection to a list of User items. */
-export type UserConnection = {
-    __typename: 'UserConnection';
-    /** A list of edges. */
-    edges: UserEdge[];
-    /** Information to aid in pagination. */
-    pageInfo: PageInfo;
-};
-export type AvailableUserConnectionSelection = {
-    __typename?: boolean | null | undefined;
-    /** A list of edges. */
-    edges?: AvailableUserEdgeSelection;
-    /** Information to aid in pagination. */
-    pageInfo?: AvailablePageInfoSelection;
-};
-/** An edge in a User connection. */
-export type UserEdge = {
-    __typename: 'UserEdge';
-    /** The item at the end of the edge */
-    node: User;
-    /** A cursor for use in pagination */
-    cursor: Scalars['String'];
-};
-export type AvailableUserEdgeSelection = {
-    __typename?: boolean | null | undefined;
-    /** The item at the end of the edge */
-    node?: AvailableUserSelection;
-    /** A cursor for use in pagination */
-    cursor?: boolean | null | undefined;
-};
-/** Information about pagination in a connection. */
-export type PageInfo = {
-    __typename: 'PageInfo';
-    /** When paginating forwards, are there more items? */
-    hasNextPage: Scalars['Boolean'];
-    /** When paginating backwards, are there more items? */
-    hasPreviousPage: Scalars['Boolean'];
-    /** When paginating backwards, the cursor to continue. */
-    startCursor: (Scalars['String'] | null);
-    /** When paginating forwards, the cursor to continue. */
-    endCursor: (Scalars['String'] | null);
-};
-export type AvailablePageInfoSelection = {
-    __typename?: boolean | null | undefined;
-    /** When paginating forwards, are there more items? */
-    hasNextPage?: boolean | null | undefined;
-    /** When paginating backwards, are there more items? */
-    hasPreviousPage?: boolean | null | undefined;
-    /** When paginating backwards, the cursor to continue. */
-    startCursor?: boolean | null | undefined;
-    /** When paginating forwards, the cursor to continue. */
-    endCursor?: boolean | null | undefined;
-};
-export type Session = {
-    __typename: 'Session';
-    /** The globally unique, unchanging identifier for this record. Assigned and managed by Gadget. */
-    id: (Scalars['GadgetID'] | null);
-    /** The time at which this record was first created. Set once upon record creation and never changed. Managed by Gadget. */
-    createdAt: Scalars['DateTime'];
-    /** The time at which this record was last changed. Set each time the record is successfully acted upon by an action. Managed by Gadget. */
-    updatedAt: Scalars['DateTime'];
-    user: (User | null);
-    userId: (Scalars['GadgetID'] | null);
-    /** Get all the fields for this record. Useful for not having to list out all the fields you want to retrieve, but slower. */
-    _all: Scalars['JSONObject'];
-};
-export type AvailableSessionSelection = {
-    __typename?: boolean | null | undefined;
-    /** The globally unique, unchanging identifier for this record. Assigned and managed by Gadget. */
-    id?: boolean | null | undefined;
-    /** The time at which this record was first created. Set once upon record creation and never changed. Managed by Gadget. */
-    createdAt?: boolean | null | undefined;
-    /** The time at which this record was last changed. Set each time the record is successfully acted upon by an action. Managed by Gadget. */
-    updatedAt?: boolean | null | undefined;
-    user?: AvailableUserSelection;
-    userId?: boolean | null | undefined;
-    /** Get all the fields for this record. Useful for not having to list out all the fields you want to retrieve, but slower. */
-    _all?: boolean | null | undefined;
-};
-/** A connection to a list of Session items. */
-export type SessionConnection = {
-    __typename: 'SessionConnection';
-    /** A list of edges. */
-    edges: SessionEdge[];
-    /** Information to aid in pagination. */
-    pageInfo: PageInfo;
-};
-export type AvailableSessionConnectionSelection = {
-    __typename?: boolean | null | undefined;
-    /** A list of edges. */
-    edges?: AvailableSessionEdgeSelection;
-    /** Information to aid in pagination. */
-    pageInfo?: AvailablePageInfoSelection;
-};
-/** An edge in a Session connection. */
-export type SessionEdge = {
-    __typename: 'SessionEdge';
-    /** The item at the end of the edge */
-    node: Session;
-    /** A cursor for use in pagination */
-    cursor: Scalars['String'];
-};
-export type AvailableSessionEdgeSelection = {
-    __typename?: boolean | null | undefined;
-    /** The item at the end of the edge */
-    node?: AvailableSessionSelection;
-    /** A cursor for use in pagination */
-    cursor?: boolean | null | undefined;
 };
 export type Booking = {
     __typename: 'Booking';
@@ -2619,6 +2617,10 @@ export type Booking = {
     totalAmount: (Scalars['Float'] | null);
     venue: (Venue | null);
     venueId: (Scalars['GadgetID'] | null);
+    musicianPitch: (Scalars['String'] | null);
+    proposedRate: (Scalars['Float'] | null);
+    event: (Event | null);
+    eventId: (Scalars['GadgetID'] | null);
     /** Get all the fields for this record. Useful for not having to list out all the fields you want to retrieve, but slower. */
     _all: Scalars['JSONObject'];
 };
@@ -2647,8 +2649,104 @@ export type AvailableBookingSelection = {
     totalAmount?: boolean | null | undefined;
     venue?: AvailableVenueSelection;
     venueId?: boolean | null | undefined;
+    musicianPitch?: boolean | null | undefined;
+    proposedRate?: boolean | null | undefined;
+    event?: AvailableEventSelection;
+    eventId?: boolean | null | undefined;
     /** Get all the fields for this record. Useful for not having to list out all the fields you want to retrieve, but slower. */
     _all?: boolean | null | undefined;
+};
+export type User = {
+    __typename: 'User';
+    /** The globally unique, unchanging identifier for this record. Assigned and managed by Gadget. */
+    id: Scalars['GadgetID'];
+    /** The time at which this record was first created. Set once upon record creation and never changed. Managed by Gadget. */
+    createdAt: Scalars['DateTime'];
+    /** The time at which this record was last changed. Set each time the record is successfully acted upon by an action. Managed by Gadget. */
+    updatedAt: Scalars['DateTime'];
+    emailVerified: (Scalars['Boolean'] | null);
+    email: Scalars['String'];
+    lastSignedIn: (Scalars['DateTime'] | null);
+    roles: Role[];
+    emailVerificationToken: (Scalars['String'] | null);
+    emailVerificationTokenExpiration: (Scalars['DateTime'] | null);
+    profilePicture: (StoredFile | null);
+    resetPasswordTokenExpiration: (Scalars['DateTime'] | null);
+    resetPasswordToken: (Scalars['String'] | null);
+    userType: (Scalars['String'] | null);
+    firstName: (Scalars['String'] | null);
+    googleImageUrl: (Scalars['String'] | null);
+    lastName: (Scalars['String'] | null);
+    googleProfileId: (Scalars['String'] | null);
+    /** Get all the fields for this record. Useful for not having to list out all the fields you want to retrieve, but slower. */
+    _all: Scalars['JSONObject'];
+};
+export type AvailableUserSelection = {
+    __typename?: boolean | null | undefined;
+    /** The globally unique, unchanging identifier for this record. Assigned and managed by Gadget. */
+    id?: boolean | null | undefined;
+    /** The time at which this record was first created. Set once upon record creation and never changed. Managed by Gadget. */
+    createdAt?: boolean | null | undefined;
+    /** The time at which this record was last changed. Set each time the record is successfully acted upon by an action. Managed by Gadget. */
+    updatedAt?: boolean | null | undefined;
+    emailVerified?: boolean | null | undefined;
+    email?: boolean | null | undefined;
+    lastSignedIn?: boolean | null | undefined;
+    roles?: AvailableRoleSelection;
+    emailVerificationToken?: boolean | null | undefined;
+    emailVerificationTokenExpiration?: boolean | null | undefined;
+    profilePicture?: AvailableStoredFileSelection;
+    resetPasswordTokenExpiration?: boolean | null | undefined;
+    resetPasswordToken?: boolean | null | undefined;
+    userType?: boolean | null | undefined;
+    firstName?: boolean | null | undefined;
+    googleImageUrl?: boolean | null | undefined;
+    lastName?: boolean | null | undefined;
+    googleProfileId?: boolean | null | undefined;
+    /** Get all the fields for this record. Useful for not having to list out all the fields you want to retrieve, but slower. */
+    _all?: boolean | null | undefined;
+};
+/** A named group of permissions granted to a particular actor in the system. Managed in the Gadget editor. */
+export type Role = {
+    __typename: 'Role';
+    /** The stable identifier for this role. Null if the role has since been deleted. */
+    key: Scalars['String'];
+    /** The human readable name for this role. Can be changed. */
+    name: Scalars['String'];
+};
+export type AvailableRoleSelection = {
+    __typename?: boolean | null | undefined;
+    /** The stable identifier for this role. Null if the role has since been deleted. */
+    key?: boolean | null | undefined;
+    /** The human readable name for this role. Can be changed. */
+    name?: boolean | null | undefined;
+};
+/** One file that has been stored and attached to a record */
+export type StoredFile = {
+    __typename: 'StoredFile';
+    /** The URL to retrieve the attached file. Gets the original, unmodified file. */
+    url: Scalars['String'];
+    /** The content type of the file. */
+    mimeType: Scalars['String'];
+    /** The size of this file in bytes. */
+    byteSize: Scalars['Int'];
+    /** The size of this file in bytes. */
+    humanSize: Scalars['String'];
+    /** The file name of this file. */
+    fileName: Scalars['String'];
+};
+export type AvailableStoredFileSelection = {
+    __typename?: boolean | null | undefined;
+    /** The URL to retrieve the attached file. Gets the original, unmodified file. */
+    url?: boolean | null | undefined;
+    /** The content type of the file. */
+    mimeType?: boolean | null | undefined;
+    /** The size of this file in bytes. */
+    byteSize?: boolean | null | undefined;
+    /** The size of this file in bytes. */
+    humanSize?: boolean | null | undefined;
+    /** The file name of this file. */
+    fileName?: boolean | null | undefined;
 };
 export type Musician = {
     __typename: 'Musician';
@@ -2659,13 +2757,17 @@ export type Musician = {
     /** The time at which this record was last changed. Set each time the record is successfully acted upon by an action. Managed by Gadget. */
     updatedAt: Scalars['DateTime'];
     state: (Scalars['String'] | null);
+    reviews: ReviewConnection;
+    bookings: BookingConnection;
+    events: EventConnection;
+    additionalPictures: (Scalars['JSON'] | null);
+    audio: (Scalars['String'] | null);
+    audioFiles: (Scalars['JSON'] | null);
     availability: (Scalars['JSON'] | null);
     bio: (Scalars['String'] | null);
-    bookings: BookingConnection;
     city: (Scalars['String'] | null);
     country: (Scalars['String'] | null);
     email: (Scalars['String'] | null);
-    events: EventConnection;
     experience: (Scalars['String'] | null);
     genre: (Scalars['String'] | null);
     genres: (Scalars['JSON'] | null);
@@ -2674,14 +2776,9 @@ export type Musician = {
     isActive: (Scalars['Boolean'] | null);
     isVerified: (Scalars['Boolean'] | null);
     location: (Scalars['String'] | null);
-    name: (Scalars['String'] | null);
     phone: (Scalars['String'] | null);
     profilePicture: (Scalars['String'] | null);
-    reviews: ReviewConnection;
     rating: (Scalars['Float'] | null);
-    audio: (Scalars['String'] | null);
-    audioFiles: (Scalars['JSON'] | null);
-    additionalPictures: (Scalars['JSON'] | null);
     socialLinks: (Scalars['JSON'] | null);
     stageName: (Scalars['String'] | null);
     totalGigs: (Scalars['Float'] | null);
@@ -2701,13 +2798,17 @@ export type AvailableMusicianSelection = {
     /** The time at which this record was last changed. Set each time the record is successfully acted upon by an action. Managed by Gadget. */
     updatedAt?: boolean | null | undefined;
     state?: boolean | null | undefined;
+    reviews?: AvailableReviewConnectionSelection;
+    bookings?: AvailableBookingConnectionSelection;
+    events?: AvailableEventConnectionSelection;
+    additionalPictures?: boolean | null | undefined;
+    audio?: boolean | null | undefined;
+    audioFiles?: boolean | null | undefined;
     availability?: boolean | null | undefined;
     bio?: boolean | null | undefined;
-    bookings?: AvailableBookingConnectionSelection;
     city?: boolean | null | undefined;
     country?: boolean | null | undefined;
     email?: boolean | null | undefined;
-    events?: AvailableEventConnectionSelection;
     experience?: boolean | null | undefined;
     genre?: boolean | null | undefined;
     genres?: boolean | null | undefined;
@@ -2716,14 +2817,9 @@ export type AvailableMusicianSelection = {
     isActive?: boolean | null | undefined;
     isVerified?: boolean | null | undefined;
     location?: boolean | null | undefined;
-    name?: boolean | null | undefined;
     phone?: boolean | null | undefined;
     profilePicture?: boolean | null | undefined;
-    reviews?: AvailableReviewConnectionSelection;
     rating?: boolean | null | undefined;
-    audio?: boolean | null | undefined;
-    audioFiles?: boolean | null | undefined;
-    additionalPictures?: boolean | null | undefined;
     socialLinks?: boolean | null | undefined;
     stageName?: boolean | null | undefined;
     totalGigs?: boolean | null | undefined;
@@ -2734,35 +2830,159 @@ export type AvailableMusicianSelection = {
     /** Get all the fields for this record. Useful for not having to list out all the fields you want to retrieve, but slower. */
     _all?: boolean | null | undefined;
 };
-/** A connection to a list of Booking items. */
-export type BookingConnection = {
-    __typename: 'BookingConnection';
+/** A connection to a list of Review items. */
+export type ReviewConnection = {
+    __typename: 'ReviewConnection';
     /** A list of edges. */
-    edges: BookingEdge[];
+    edges: ReviewEdge[];
     /** Information to aid in pagination. */
     pageInfo: PageInfo;
 };
-export type AvailableBookingConnectionSelection = {
+export type AvailableReviewConnectionSelection = {
     __typename?: boolean | null | undefined;
     /** A list of edges. */
-    edges?: AvailableBookingEdgeSelection;
+    edges?: AvailableReviewEdgeSelection;
     /** Information to aid in pagination. */
     pageInfo?: AvailablePageInfoSelection;
 };
-/** An edge in a Booking connection. */
-export type BookingEdge = {
-    __typename: 'BookingEdge';
+/** An edge in a Review connection. */
+export type ReviewEdge = {
+    __typename: 'ReviewEdge';
     /** The item at the end of the edge */
-    node: Booking;
+    node: Review;
     /** A cursor for use in pagination */
     cursor: Scalars['String'];
 };
-export type AvailableBookingEdgeSelection = {
+export type AvailableReviewEdgeSelection = {
     __typename?: boolean | null | undefined;
     /** The item at the end of the edge */
-    node?: AvailableBookingSelection;
+    node?: AvailableReviewSelection;
     /** A cursor for use in pagination */
     cursor?: boolean | null | undefined;
+};
+export type Review = {
+    __typename: 'Review';
+    /** The globally unique, unchanging identifier for this record. Assigned and managed by Gadget. */
+    id: Scalars['GadgetID'];
+    /** The time at which this record was first created. Set once upon record creation and never changed. Managed by Gadget. */
+    createdAt: Scalars['DateTime'];
+    /** The time at which this record was last changed. Set each time the record is successfully acted upon by an action. Managed by Gadget. */
+    updatedAt: Scalars['DateTime'];
+    comment: (Scalars['String'] | null);
+    event: (Venue | null);
+    eventId: (Scalars['GadgetID'] | null);
+    isActive: (Scalars['Boolean'] | null);
+    isVerified: (Scalars['Boolean'] | null);
+    musician: (Musician | null);
+    musicianId: (Scalars['GadgetID'] | null);
+    rating: (Scalars['Float'] | null);
+    reviewer: (User | null);
+    reviewerId: (Scalars['GadgetID'] | null);
+    reviewType: (Scalars['String'] | null);
+    venue: (Venue | null);
+    venueId: (Scalars['GadgetID'] | null);
+    /** Get all the fields for this record. Useful for not having to list out all the fields you want to retrieve, but slower. */
+    _all: Scalars['JSONObject'];
+};
+export type AvailableReviewSelection = {
+    __typename?: boolean | null | undefined;
+    /** The globally unique, unchanging identifier for this record. Assigned and managed by Gadget. */
+    id?: boolean | null | undefined;
+    /** The time at which this record was first created. Set once upon record creation and never changed. Managed by Gadget. */
+    createdAt?: boolean | null | undefined;
+    /** The time at which this record was last changed. Set each time the record is successfully acted upon by an action. Managed by Gadget. */
+    updatedAt?: boolean | null | undefined;
+    comment?: boolean | null | undefined;
+    event?: AvailableVenueSelection;
+    eventId?: boolean | null | undefined;
+    isActive?: boolean | null | undefined;
+    isVerified?: boolean | null | undefined;
+    musician?: AvailableMusicianSelection;
+    musicianId?: boolean | null | undefined;
+    rating?: boolean | null | undefined;
+    reviewer?: AvailableUserSelection;
+    reviewerId?: boolean | null | undefined;
+    reviewType?: boolean | null | undefined;
+    venue?: AvailableVenueSelection;
+    venueId?: boolean | null | undefined;
+    /** Get all the fields for this record. Useful for not having to list out all the fields you want to retrieve, but slower. */
+    _all?: boolean | null | undefined;
+};
+export type Venue = {
+    __typename: 'Venue';
+    /** The globally unique, unchanging identifier for this record. Assigned and managed by Gadget. */
+    id: Scalars['GadgetID'];
+    /** The time at which this record was first created. Set once upon record creation and never changed. Managed by Gadget. */
+    createdAt: Scalars['DateTime'];
+    /** The time at which this record was last changed. Set each time the record is successfully acted upon by an action. Managed by Gadget. */
+    updatedAt: Scalars['DateTime'];
+    state: (Scalars['String'] | null);
+    events: EventConnection;
+    bookings: BookingConnection;
+    additionalPictures: (Scalars['JSON'] | null);
+    address: (Scalars['String'] | null);
+    amenities: (Scalars['JSON'] | null);
+    capacity: (Scalars['Float'] | null);
+    city: (Scalars['String'] | null);
+    country: (Scalars['String'] | null);
+    description: (Scalars['String'] | null);
+    email: (Scalars['String'] | null);
+    genres: (Scalars['JSON'] | null);
+    hours: (Scalars['JSON'] | null);
+    isActive: (Scalars['Boolean'] | null);
+    isVerified: (Scalars['Boolean'] | null);
+    name: (Scalars['String'] | null);
+    owner: (User | null);
+    ownerId: (Scalars['GadgetID'] | null);
+    phone: (Scalars['String'] | null);
+    priceRange: (Scalars['String'] | null);
+    profilePicture: (Scalars['String'] | null);
+    rating: (Scalars['Float'] | null);
+    socialLinks: (Scalars['JSON'] | null);
+    type: (Scalars['String'] | null);
+    website: (Scalars['String'] | null);
+    zipCode: (Scalars['String'] | null);
+    reviews: ReviewConnection;
+    /** Get all the fields for this record. Useful for not having to list out all the fields you want to retrieve, but slower. */
+    _all: Scalars['JSONObject'];
+};
+export type AvailableVenueSelection = {
+    __typename?: boolean | null | undefined;
+    /** The globally unique, unchanging identifier for this record. Assigned and managed by Gadget. */
+    id?: boolean | null | undefined;
+    /** The time at which this record was first created. Set once upon record creation and never changed. Managed by Gadget. */
+    createdAt?: boolean | null | undefined;
+    /** The time at which this record was last changed. Set each time the record is successfully acted upon by an action. Managed by Gadget. */
+    updatedAt?: boolean | null | undefined;
+    state?: boolean | null | undefined;
+    events?: AvailableEventConnectionSelection;
+    bookings?: AvailableBookingConnectionSelection;
+    additionalPictures?: boolean | null | undefined;
+    address?: boolean | null | undefined;
+    amenities?: boolean | null | undefined;
+    capacity?: boolean | null | undefined;
+    city?: boolean | null | undefined;
+    country?: boolean | null | undefined;
+    description?: boolean | null | undefined;
+    email?: boolean | null | undefined;
+    genres?: boolean | null | undefined;
+    hours?: boolean | null | undefined;
+    isActive?: boolean | null | undefined;
+    isVerified?: boolean | null | undefined;
+    name?: boolean | null | undefined;
+    owner?: AvailableUserSelection;
+    ownerId?: boolean | null | undefined;
+    phone?: boolean | null | undefined;
+    priceRange?: boolean | null | undefined;
+    profilePicture?: boolean | null | undefined;
+    rating?: boolean | null | undefined;
+    socialLinks?: boolean | null | undefined;
+    type?: boolean | null | undefined;
+    website?: boolean | null | undefined;
+    zipCode?: boolean | null | undefined;
+    reviews?: AvailableReviewConnectionSelection;
+    /** Get all the fields for this record. Useful for not having to list out all the fields you want to retrieve, but slower. */
+    _all?: boolean | null | undefined;
 };
 /** A connection to a list of Event items. */
 export type EventConnection = {
@@ -2872,159 +3092,58 @@ export type AvailableEventSelection = {
     /** Get all the fields for this record. Useful for not having to list out all the fields you want to retrieve, but slower. */
     _all?: boolean | null | undefined;
 };
-export type Venue = {
-    __typename: 'Venue';
-    /** The globally unique, unchanging identifier for this record. Assigned and managed by Gadget. */
-    id: Scalars['GadgetID'];
-    /** The time at which this record was first created. Set once upon record creation and never changed. Managed by Gadget. */
-    createdAt: Scalars['DateTime'];
-    /** The time at which this record was last changed. Set each time the record is successfully acted upon by an action. Managed by Gadget. */
-    updatedAt: Scalars['DateTime'];
-    state: (Scalars['String'] | null);
-    address: (Scalars['String'] | null);
-    amenities: (Scalars['JSON'] | null);
-    additionalPictures: (Scalars['JSON'] | null);
-    bookings: BookingConnection;
-    capacity: (Scalars['Float'] | null);
-    city: (Scalars['String'] | null);
-    country: (Scalars['String'] | null);
-    description: (Scalars['String'] | null);
-    email: (Scalars['String'] | null);
-    events: EventConnection;
-    genres: (Scalars['JSON'] | null);
-    hours: (Scalars['JSON'] | null);
-    isActive: (Scalars['Boolean'] | null);
-    isVerified: (Scalars['Boolean'] | null);
-    name: (Scalars['String'] | null);
-    owner: (User | null);
-    ownerId: (Scalars['GadgetID'] | null);
-    phone: (Scalars['String'] | null);
-    priceRange: (Scalars['String'] | null);
-    profilePicture: (Scalars['String'] | null);
-    rating: (Scalars['Float'] | null);
-    socialLinks: (Scalars['JSON'] | null);
-    reviews: ReviewConnection;
-    type: (Scalars['String'] | null);
-    website: (Scalars['String'] | null);
-    zipCode: (Scalars['String'] | null);
-    /** Get all the fields for this record. Useful for not having to list out all the fields you want to retrieve, but slower. */
-    _all: Scalars['JSONObject'];
+/** Information about pagination in a connection. */
+export type PageInfo = {
+    __typename: 'PageInfo';
+    /** When paginating forwards, are there more items? */
+    hasNextPage: Scalars['Boolean'];
+    /** When paginating backwards, are there more items? */
+    hasPreviousPage: Scalars['Boolean'];
+    /** When paginating backwards, the cursor to continue. */
+    startCursor: (Scalars['String'] | null);
+    /** When paginating forwards, the cursor to continue. */
+    endCursor: (Scalars['String'] | null);
 };
-export type AvailableVenueSelection = {
+export type AvailablePageInfoSelection = {
     __typename?: boolean | null | undefined;
-    /** The globally unique, unchanging identifier for this record. Assigned and managed by Gadget. */
-    id?: boolean | null | undefined;
-    /** The time at which this record was first created. Set once upon record creation and never changed. Managed by Gadget. */
-    createdAt?: boolean | null | undefined;
-    /** The time at which this record was last changed. Set each time the record is successfully acted upon by an action. Managed by Gadget. */
-    updatedAt?: boolean | null | undefined;
-    state?: boolean | null | undefined;
-    address?: boolean | null | undefined;
-    amenities?: boolean | null | undefined;
-    additionalPictures?: boolean | null | undefined;
-    bookings?: AvailableBookingConnectionSelection;
-    capacity?: boolean | null | undefined;
-    city?: boolean | null | undefined;
-    country?: boolean | null | undefined;
-    description?: boolean | null | undefined;
-    email?: boolean | null | undefined;
-    events?: AvailableEventConnectionSelection;
-    genres?: boolean | null | undefined;
-    hours?: boolean | null | undefined;
-    isActive?: boolean | null | undefined;
-    isVerified?: boolean | null | undefined;
-    name?: boolean | null | undefined;
-    owner?: AvailableUserSelection;
-    ownerId?: boolean | null | undefined;
-    phone?: boolean | null | undefined;
-    priceRange?: boolean | null | undefined;
-    profilePicture?: boolean | null | undefined;
-    rating?: boolean | null | undefined;
-    socialLinks?: boolean | null | undefined;
-    reviews?: AvailableReviewConnectionSelection;
-    type?: boolean | null | undefined;
-    website?: boolean | null | undefined;
-    zipCode?: boolean | null | undefined;
-    /** Get all the fields for this record. Useful for not having to list out all the fields you want to retrieve, but slower. */
-    _all?: boolean | null | undefined;
+    /** When paginating forwards, are there more items? */
+    hasNextPage?: boolean | null | undefined;
+    /** When paginating backwards, are there more items? */
+    hasPreviousPage?: boolean | null | undefined;
+    /** When paginating backwards, the cursor to continue. */
+    startCursor?: boolean | null | undefined;
+    /** When paginating forwards, the cursor to continue. */
+    endCursor?: boolean | null | undefined;
 };
-/** A connection to a list of Review items. */
-export type ReviewConnection = {
-    __typename: 'ReviewConnection';
+/** A connection to a list of Booking items. */
+export type BookingConnection = {
+    __typename: 'BookingConnection';
     /** A list of edges. */
-    edges: ReviewEdge[];
+    edges: BookingEdge[];
     /** Information to aid in pagination. */
     pageInfo: PageInfo;
 };
-export type AvailableReviewConnectionSelection = {
+export type AvailableBookingConnectionSelection = {
     __typename?: boolean | null | undefined;
     /** A list of edges. */
-    edges?: AvailableReviewEdgeSelection;
+    edges?: AvailableBookingEdgeSelection;
     /** Information to aid in pagination. */
     pageInfo?: AvailablePageInfoSelection;
 };
-/** An edge in a Review connection. */
-export type ReviewEdge = {
-    __typename: 'ReviewEdge';
+/** An edge in a Booking connection. */
+export type BookingEdge = {
+    __typename: 'BookingEdge';
     /** The item at the end of the edge */
-    node: Review;
+    node: Booking;
     /** A cursor for use in pagination */
     cursor: Scalars['String'];
 };
-export type AvailableReviewEdgeSelection = {
+export type AvailableBookingEdgeSelection = {
     __typename?: boolean | null | undefined;
     /** The item at the end of the edge */
-    node?: AvailableReviewSelection;
+    node?: AvailableBookingSelection;
     /** A cursor for use in pagination */
     cursor?: boolean | null | undefined;
-};
-export type Review = {
-    __typename: 'Review';
-    /** The globally unique, unchanging identifier for this record. Assigned and managed by Gadget. */
-    id: Scalars['GadgetID'];
-    /** The time at which this record was first created. Set once upon record creation and never changed. Managed by Gadget. */
-    createdAt: Scalars['DateTime'];
-    /** The time at which this record was last changed. Set each time the record is successfully acted upon by an action. Managed by Gadget. */
-    updatedAt: Scalars['DateTime'];
-    comment: (Scalars['String'] | null);
-    event: (Venue | null);
-    eventId: (Scalars['GadgetID'] | null);
-    isActive: (Scalars['Boolean'] | null);
-    isVerified: (Scalars['Boolean'] | null);
-    musician: (Musician | null);
-    musicianId: (Scalars['GadgetID'] | null);
-    rating: (Scalars['Float'] | null);
-    reviewer: (User | null);
-    reviewerId: (Scalars['GadgetID'] | null);
-    reviewType: (Scalars['String'] | null);
-    venue: (Venue | null);
-    venueId: (Scalars['GadgetID'] | null);
-    /** Get all the fields for this record. Useful for not having to list out all the fields you want to retrieve, but slower. */
-    _all: Scalars['JSONObject'];
-};
-export type AvailableReviewSelection = {
-    __typename?: boolean | null | undefined;
-    /** The globally unique, unchanging identifier for this record. Assigned and managed by Gadget. */
-    id?: boolean | null | undefined;
-    /** The time at which this record was first created. Set once upon record creation and never changed. Managed by Gadget. */
-    createdAt?: boolean | null | undefined;
-    /** The time at which this record was last changed. Set each time the record is successfully acted upon by an action. Managed by Gadget. */
-    updatedAt?: boolean | null | undefined;
-    comment?: boolean | null | undefined;
-    event?: AvailableVenueSelection;
-    eventId?: boolean | null | undefined;
-    isActive?: boolean | null | undefined;
-    isVerified?: boolean | null | undefined;
-    musician?: AvailableMusicianSelection;
-    musicianId?: boolean | null | undefined;
-    rating?: boolean | null | undefined;
-    reviewer?: AvailableUserSelection;
-    reviewerId?: boolean | null | undefined;
-    reviewType?: boolean | null | undefined;
-    venue?: AvailableVenueSelection;
-    venueId?: boolean | null | undefined;
-    /** Get all the fields for this record. Useful for not having to list out all the fields you want to retrieve, but slower. */
-    _all?: boolean | null | undefined;
 };
 /** A connection to a list of Musician items. */
 export type MusicianConnection = {
@@ -3083,6 +3202,168 @@ export type AvailableVenueEdgeSelection = {
     __typename?: boolean | null | undefined;
     /** The item at the end of the edge */
     node?: AvailableVenueSelection;
+    /** A cursor for use in pagination */
+    cursor?: boolean | null | undefined;
+};
+/** A connection to a list of User items. */
+export type UserConnection = {
+    __typename: 'UserConnection';
+    /** A list of edges. */
+    edges: UserEdge[];
+    /** Information to aid in pagination. */
+    pageInfo: PageInfo;
+};
+export type AvailableUserConnectionSelection = {
+    __typename?: boolean | null | undefined;
+    /** A list of edges. */
+    edges?: AvailableUserEdgeSelection;
+    /** Information to aid in pagination. */
+    pageInfo?: AvailablePageInfoSelection;
+};
+/** An edge in a User connection. */
+export type UserEdge = {
+    __typename: 'UserEdge';
+    /** The item at the end of the edge */
+    node: User;
+    /** A cursor for use in pagination */
+    cursor: Scalars['String'];
+};
+export type AvailableUserEdgeSelection = {
+    __typename?: boolean | null | undefined;
+    /** The item at the end of the edge */
+    node?: AvailableUserSelection;
+    /** A cursor for use in pagination */
+    cursor?: boolean | null | undefined;
+};
+export type Session = {
+    __typename: 'Session';
+    /** The globally unique, unchanging identifier for this record. Assigned and managed by Gadget. */
+    id: (Scalars['GadgetID'] | null);
+    /** The time at which this record was first created. Set once upon record creation and never changed. Managed by Gadget. */
+    createdAt: Scalars['DateTime'];
+    /** The time at which this record was last changed. Set each time the record is successfully acted upon by an action. Managed by Gadget. */
+    updatedAt: Scalars['DateTime'];
+    user: (User | null);
+    userId: (Scalars['GadgetID'] | null);
+    /** Get all the fields for this record. Useful for not having to list out all the fields you want to retrieve, but slower. */
+    _all: Scalars['JSONObject'];
+};
+export type AvailableSessionSelection = {
+    __typename?: boolean | null | undefined;
+    /** The globally unique, unchanging identifier for this record. Assigned and managed by Gadget. */
+    id?: boolean | null | undefined;
+    /** The time at which this record was first created. Set once upon record creation and never changed. Managed by Gadget. */
+    createdAt?: boolean | null | undefined;
+    /** The time at which this record was last changed. Set each time the record is successfully acted upon by an action. Managed by Gadget. */
+    updatedAt?: boolean | null | undefined;
+    user?: AvailableUserSelection;
+    userId?: boolean | null | undefined;
+    /** Get all the fields for this record. Useful for not having to list out all the fields you want to retrieve, but slower. */
+    _all?: boolean | null | undefined;
+};
+/** A connection to a list of Session items. */
+export type SessionConnection = {
+    __typename: 'SessionConnection';
+    /** A list of edges. */
+    edges: SessionEdge[];
+    /** Information to aid in pagination. */
+    pageInfo: PageInfo;
+};
+export type AvailableSessionConnectionSelection = {
+    __typename?: boolean | null | undefined;
+    /** A list of edges. */
+    edges?: AvailableSessionEdgeSelection;
+    /** Information to aid in pagination. */
+    pageInfo?: AvailablePageInfoSelection;
+};
+/** An edge in a Session connection. */
+export type SessionEdge = {
+    __typename: 'SessionEdge';
+    /** The item at the end of the edge */
+    node: Session;
+    /** A cursor for use in pagination */
+    cursor: Scalars['String'];
+};
+export type AvailableSessionEdgeSelection = {
+    __typename?: boolean | null | undefined;
+    /** The item at the end of the edge */
+    node?: AvailableSessionSelection;
+    /** A cursor for use in pagination */
+    cursor?: boolean | null | undefined;
+};
+export type EventHistory = {
+    __typename: 'EventHistory';
+    /** The globally unique, unchanging identifier for this record. Assigned and managed by Gadget. */
+    id: Scalars['GadgetID'];
+    /** The time at which this record was first created. Set once upon record creation and never changed. Managed by Gadget. */
+    createdAt: Scalars['DateTime'];
+    /** The time at which this record was last changed. Set each time the record is successfully acted upon by an action. Managed by Gadget. */
+    updatedAt: Scalars['DateTime'];
+    booking: (Booking | null);
+    bookingId: (Scalars['GadgetID'] | null);
+    event: (Event | null);
+    eventId: (Scalars['GadgetID'] | null);
+    changedBy: (User | null);
+    changedById: (Scalars['GadgetID'] | null);
+    changeType: (Scalars['String'] | null);
+    previousValue: (Scalars['String'] | null);
+    description: (Scalars['String'] | null);
+    newValue: (Scalars['String'] | null);
+    context: (Scalars['JSON'] | null);
+    metadata: (Scalars['JSON'] | null);
+    /** Get all the fields for this record. Useful for not having to list out all the fields you want to retrieve, but slower. */
+    _all: Scalars['JSONObject'];
+};
+export type AvailableEventHistorySelection = {
+    __typename?: boolean | null | undefined;
+    /** The globally unique, unchanging identifier for this record. Assigned and managed by Gadget. */
+    id?: boolean | null | undefined;
+    /** The time at which this record was first created. Set once upon record creation and never changed. Managed by Gadget. */
+    createdAt?: boolean | null | undefined;
+    /** The time at which this record was last changed. Set each time the record is successfully acted upon by an action. Managed by Gadget. */
+    updatedAt?: boolean | null | undefined;
+    booking?: AvailableBookingSelection;
+    bookingId?: boolean | null | undefined;
+    event?: AvailableEventSelection;
+    eventId?: boolean | null | undefined;
+    changedBy?: AvailableUserSelection;
+    changedById?: boolean | null | undefined;
+    changeType?: boolean | null | undefined;
+    previousValue?: boolean | null | undefined;
+    description?: boolean | null | undefined;
+    newValue?: boolean | null | undefined;
+    context?: boolean | null | undefined;
+    metadata?: boolean | null | undefined;
+    /** Get all the fields for this record. Useful for not having to list out all the fields you want to retrieve, but slower. */
+    _all?: boolean | null | undefined;
+};
+/** A connection to a list of EventHistory items. */
+export type EventHistoryConnection = {
+    __typename: 'EventHistoryConnection';
+    /** A list of edges. */
+    edges: EventHistoryEdge[];
+    /** Information to aid in pagination. */
+    pageInfo: PageInfo;
+};
+export type AvailableEventHistoryConnectionSelection = {
+    __typename?: boolean | null | undefined;
+    /** A list of edges. */
+    edges?: AvailableEventHistoryEdgeSelection;
+    /** Information to aid in pagination. */
+    pageInfo?: AvailablePageInfoSelection;
+};
+/** An edge in a EventHistory connection. */
+export type EventHistoryEdge = {
+    __typename: 'EventHistoryEdge';
+    /** The item at the end of the edge */
+    node: EventHistory;
+    /** A cursor for use in pagination */
+    cursor: Scalars['String'];
+};
+export type AvailableEventHistoryEdgeSelection = {
+    __typename?: boolean | null | undefined;
+    /** The item at the end of the edge */
+    node?: AvailableEventHistorySelection;
     /** A cursor for use in pagination */
     cursor?: boolean | null | undefined;
 };
@@ -3168,14 +3449,10 @@ export type AvailableDirectUploadTokenSelection = {
 };
 export type InternalQueries = {
     __typename: 'InternalQueries';
-    user: (InternalUserRecord | null);
-    listUser: InternalUserRecordConnection;
-    /** Currently open platform transaction details, or null if no transaction is open */
-    currentTransactionDetails: (Scalars['JSONObject'] | null);
-    session: (InternalSessionRecord | null);
-    listSession: InternalSessionRecordConnection;
     booking: (InternalBookingRecord | null);
     listBooking: InternalBookingRecordConnection;
+    /** Currently open platform transaction details, or null if no transaction is open */
+    currentTransactionDetails: (Scalars['JSONObject'] | null);
     event: (InternalEventRecord | null);
     listEvent: InternalEventRecordConnection;
     musician: (InternalMusicianRecord | null);
@@ -3184,18 +3461,20 @@ export type InternalQueries = {
     listReview: InternalReviewRecordConnection;
     venue: (InternalVenueRecord | null);
     listVenue: InternalVenueRecordConnection;
+    user: (InternalUserRecord | null);
+    listUser: InternalUserRecordConnection;
+    session: (InternalSessionRecord | null);
+    listSession: InternalSessionRecordConnection;
+    eventHistory: (InternalEventHistoryRecord | null);
+    listEventHistory: InternalEventHistoryRecordConnection;
     gellyView: (Scalars['JSON'] | null);
 };
 export type AvailableInternalQueriesSelection = {
     __typename?: boolean | null | undefined;
-    user?: boolean | null | undefined;
-    listUser?: AvailableInternalUserRecordConnectionSelection;
-    /** Currently open platform transaction details, or null if no transaction is open */
-    currentTransactionDetails?: boolean | null | undefined;
-    session?: boolean | null | undefined;
-    listSession?: AvailableInternalSessionRecordConnectionSelection;
     booking?: boolean | null | undefined;
     listBooking?: AvailableInternalBookingRecordConnectionSelection;
+    /** Currently open platform transaction details, or null if no transaction is open */
+    currentTransactionDetails?: boolean | null | undefined;
     event?: boolean | null | undefined;
     listEvent?: AvailableInternalEventRecordConnectionSelection;
     musician?: boolean | null | undefined;
@@ -3204,67 +3483,13 @@ export type AvailableInternalQueriesSelection = {
     listReview?: AvailableInternalReviewRecordConnectionSelection;
     venue?: boolean | null | undefined;
     listVenue?: AvailableInternalVenueRecordConnectionSelection;
+    user?: boolean | null | undefined;
+    listUser?: AvailableInternalUserRecordConnectionSelection;
+    session?: boolean | null | undefined;
+    listSession?: AvailableInternalSessionRecordConnectionSelection;
+    eventHistory?: boolean | null | undefined;
+    listEventHistory?: AvailableInternalEventHistoryRecordConnectionSelection;
     gellyView?: boolean | null | undefined;
-};
-/** A connection to a list of InternalUserRecord items. */
-export type InternalUserRecordConnection = {
-    __typename: 'InternalUserRecordConnection';
-    /** A list of edges. */
-    edges: InternalUserRecordEdge[];
-    /** Information to aid in pagination. */
-    pageInfo: PageInfo;
-};
-export type AvailableInternalUserRecordConnectionSelection = {
-    __typename?: boolean | null | undefined;
-    /** A list of edges. */
-    edges?: AvailableInternalUserRecordEdgeSelection;
-    /** Information to aid in pagination. */
-    pageInfo?: AvailablePageInfoSelection;
-};
-/** An edge in a InternalUserRecord connection. */
-export type InternalUserRecordEdge = {
-    __typename: 'InternalUserRecordEdge';
-    /** The item at the end of the edge */
-    node: InternalUserRecord;
-    /** A cursor for use in pagination */
-    cursor: Scalars['String'];
-};
-export type AvailableInternalUserRecordEdgeSelection = {
-    __typename?: boolean | null | undefined;
-    /** The item at the end of the edge */
-    node?: boolean | null | undefined;
-    /** A cursor for use in pagination */
-    cursor?: boolean | null | undefined;
-};
-/** A connection to a list of InternalSessionRecord items. */
-export type InternalSessionRecordConnection = {
-    __typename: 'InternalSessionRecordConnection';
-    /** A list of edges. */
-    edges: InternalSessionRecordEdge[];
-    /** Information to aid in pagination. */
-    pageInfo: PageInfo;
-};
-export type AvailableInternalSessionRecordConnectionSelection = {
-    __typename?: boolean | null | undefined;
-    /** A list of edges. */
-    edges?: AvailableInternalSessionRecordEdgeSelection;
-    /** Information to aid in pagination. */
-    pageInfo?: AvailablePageInfoSelection;
-};
-/** An edge in a InternalSessionRecord connection. */
-export type InternalSessionRecordEdge = {
-    __typename: 'InternalSessionRecordEdge';
-    /** The item at the end of the edge */
-    node: InternalSessionRecord;
-    /** A cursor for use in pagination */
-    cursor: Scalars['String'];
-};
-export type AvailableInternalSessionRecordEdgeSelection = {
-    __typename?: boolean | null | undefined;
-    /** The item at the end of the edge */
-    node?: boolean | null | undefined;
-    /** A cursor for use in pagination */
-    cursor?: boolean | null | undefined;
 };
 /** A connection to a list of InternalBookingRecord items. */
 export type InternalBookingRecordConnection = {
@@ -3416,30 +3641,100 @@ export type AvailableInternalVenueRecordEdgeSelection = {
     /** A cursor for use in pagination */
     cursor?: boolean | null | undefined;
 };
+/** A connection to a list of InternalUserRecord items. */
+export type InternalUserRecordConnection = {
+    __typename: 'InternalUserRecordConnection';
+    /** A list of edges. */
+    edges: InternalUserRecordEdge[];
+    /** Information to aid in pagination. */
+    pageInfo: PageInfo;
+};
+export type AvailableInternalUserRecordConnectionSelection = {
+    __typename?: boolean | null | undefined;
+    /** A list of edges. */
+    edges?: AvailableInternalUserRecordEdgeSelection;
+    /** Information to aid in pagination. */
+    pageInfo?: AvailablePageInfoSelection;
+};
+/** An edge in a InternalUserRecord connection. */
+export type InternalUserRecordEdge = {
+    __typename: 'InternalUserRecordEdge';
+    /** The item at the end of the edge */
+    node: InternalUserRecord;
+    /** A cursor for use in pagination */
+    cursor: Scalars['String'];
+};
+export type AvailableInternalUserRecordEdgeSelection = {
+    __typename?: boolean | null | undefined;
+    /** The item at the end of the edge */
+    node?: boolean | null | undefined;
+    /** A cursor for use in pagination */
+    cursor?: boolean | null | undefined;
+};
+/** A connection to a list of InternalSessionRecord items. */
+export type InternalSessionRecordConnection = {
+    __typename: 'InternalSessionRecordConnection';
+    /** A list of edges. */
+    edges: InternalSessionRecordEdge[];
+    /** Information to aid in pagination. */
+    pageInfo: PageInfo;
+};
+export type AvailableInternalSessionRecordConnectionSelection = {
+    __typename?: boolean | null | undefined;
+    /** A list of edges. */
+    edges?: AvailableInternalSessionRecordEdgeSelection;
+    /** Information to aid in pagination. */
+    pageInfo?: AvailablePageInfoSelection;
+};
+/** An edge in a InternalSessionRecord connection. */
+export type InternalSessionRecordEdge = {
+    __typename: 'InternalSessionRecordEdge';
+    /** The item at the end of the edge */
+    node: InternalSessionRecord;
+    /** A cursor for use in pagination */
+    cursor: Scalars['String'];
+};
+export type AvailableInternalSessionRecordEdgeSelection = {
+    __typename?: boolean | null | undefined;
+    /** The item at the end of the edge */
+    node?: boolean | null | undefined;
+    /** A cursor for use in pagination */
+    cursor?: boolean | null | undefined;
+};
+/** A connection to a list of InternalEventHistoryRecord items. */
+export type InternalEventHistoryRecordConnection = {
+    __typename: 'InternalEventHistoryRecordConnection';
+    /** A list of edges. */
+    edges: InternalEventHistoryRecordEdge[];
+    /** Information to aid in pagination. */
+    pageInfo: PageInfo;
+};
+export type AvailableInternalEventHistoryRecordConnectionSelection = {
+    __typename?: boolean | null | undefined;
+    /** A list of edges. */
+    edges?: AvailableInternalEventHistoryRecordEdgeSelection;
+    /** Information to aid in pagination. */
+    pageInfo?: AvailablePageInfoSelection;
+};
+/** An edge in a InternalEventHistoryRecord connection. */
+export type InternalEventHistoryRecordEdge = {
+    __typename: 'InternalEventHistoryRecordEdge';
+    /** The item at the end of the edge */
+    node: InternalEventHistoryRecord;
+    /** A cursor for use in pagination */
+    cursor: Scalars['String'];
+};
+export type AvailableInternalEventHistoryRecordEdgeSelection = {
+    __typename?: boolean | null | undefined;
+    /** The item at the end of the edge */
+    node?: boolean | null | undefined;
+    /** A cursor for use in pagination */
+    cursor?: boolean | null | undefined;
+};
 export type Mutation = {
     __typename: 'Mutation';
-    signUpUser: (SignUpUserResult | null);
-    bulkSignUpUsers: (BulkSignUpUsersResult | null);
-    signInUser: (SignInUserResult | null);
-    bulkSignInUsers: (BulkSignInUsersResult | null);
-    signOutUser: (SignOutUserResult | null);
-    bulkSignOutUsers: (BulkSignOutUsersResult | null);
-    updateUser: (UpdateUserResult | null);
-    bulkUpdateUsers: (BulkUpdateUsersResult | null);
-    deleteUser: (DeleteUserResult | null);
-    bulkDeleteUsers: (BulkDeleteUsersResult | null);
-    sendVerifyEmailUser: (SendVerifyEmailUserResult | null);
-    bulkSendVerifyEmailUsers: (BulkSendVerifyEmailUsersResult | null);
-    verifyEmailUser: (VerifyEmailUserResult | null);
-    bulkVerifyEmailUsers: (BulkVerifyEmailUsersResult | null);
-    sendResetPasswordUser: (SendResetPasswordUserResult | null);
-    bulkSendResetPasswordUsers: (BulkSendResetPasswordUsersResult | null);
-    resetPasswordUser: (ResetPasswordUserResult | null);
-    bulkResetPasswordUsers: (BulkResetPasswordUsersResult | null);
-    changePasswordUser: (ChangePasswordUserResult | null);
-    bulkChangePasswordUsers: (BulkChangePasswordUsersResult | null);
-    upsertUser: (UpsertUserResult | null);
-    bulkUpsertUsers: BulkUpsertUsersResult;
+    updateBooking: (UpdateBookingResult | null);
+    bulkUpdateBookings: (BulkUpdateBookingsResult | null);
     createEvent: (CreateEventResult | null);
     bulkCreateEvents: (BulkCreateEventsResult | null);
     updateEvent: (UpdateEventResult | null);
@@ -3464,34 +3759,40 @@ export type Mutation = {
     bulkFindFirstVenues: (BulkFindFirstVenuesResult | null);
     upsertVenue: (UpsertVenueResult | null);
     bulkUpsertVenues: BulkUpsertVenuesResult;
+    signUpUser: (SignUpUserResult | null);
+    bulkSignUpUsers: (BulkSignUpUsersResult | null);
+    signInUser: (SignInUserResult | null);
+    bulkSignInUsers: (BulkSignInUsersResult | null);
+    signOutUser: (SignOutUserResult | null);
+    bulkSignOutUsers: (BulkSignOutUsersResult | null);
+    updateUser: (UpdateUserResult | null);
+    bulkUpdateUsers: (BulkUpdateUsersResult | null);
+    deleteUser: (DeleteUserResult | null);
+    bulkDeleteUsers: (BulkDeleteUsersResult | null);
+    sendVerifyEmailUser: (SendVerifyEmailUserResult | null);
+    bulkSendVerifyEmailUsers: (BulkSendVerifyEmailUsersResult | null);
+    verifyEmailUser: (VerifyEmailUserResult | null);
+    bulkVerifyEmailUsers: (BulkVerifyEmailUsersResult | null);
+    sendResetPasswordUser: (SendResetPasswordUserResult | null);
+    bulkSendResetPasswordUsers: (BulkSendResetPasswordUsersResult | null);
+    resetPasswordUser: (ResetPasswordUserResult | null);
+    bulkResetPasswordUsers: (BulkResetPasswordUsersResult | null);
+    changePasswordUser: (ChangePasswordUserResult | null);
+    bulkChangePasswordUsers: (BulkChangePasswordUsersResult | null);
+    upsertUser: (UpsertUserResult | null);
+    bulkUpsertUsers: BulkUpsertUsersResult;
+    createEventHistory: (CreateEventHistoryResult | null);
+    bulkCreateEventHistories: (BulkCreateEventHistoriesResult | null);
+    sendBookingEmails: (SendBookingEmailsResult | null);
+    sendEmail: (SendEmailResult | null);
     background: BackgroundMutations;
     internal: InternalMutations;
     seed: SeedMutations;
 };
 export type AvailableMutationSelection = {
     __typename?: boolean | null | undefined;
-    signUpUser?: AvailableSignUpUserResultSelection;
-    bulkSignUpUsers?: AvailableBulkSignUpUsersResultSelection;
-    signInUser?: AvailableSignInUserResultSelection;
-    bulkSignInUsers?: AvailableBulkSignInUsersResultSelection;
-    signOutUser?: AvailableSignOutUserResultSelection;
-    bulkSignOutUsers?: AvailableBulkSignOutUsersResultSelection;
-    updateUser?: AvailableUpdateUserResultSelection;
-    bulkUpdateUsers?: AvailableBulkUpdateUsersResultSelection;
-    deleteUser?: AvailableDeleteUserResultSelection;
-    bulkDeleteUsers?: AvailableBulkDeleteUsersResultSelection;
-    sendVerifyEmailUser?: AvailableSendVerifyEmailUserResultSelection;
-    bulkSendVerifyEmailUsers?: AvailableBulkSendVerifyEmailUsersResultSelection;
-    verifyEmailUser?: AvailableVerifyEmailUserResultSelection;
-    bulkVerifyEmailUsers?: AvailableBulkVerifyEmailUsersResultSelection;
-    sendResetPasswordUser?: AvailableSendResetPasswordUserResultSelection;
-    bulkSendResetPasswordUsers?: AvailableBulkSendResetPasswordUsersResultSelection;
-    resetPasswordUser?: AvailableResetPasswordUserResultSelection;
-    bulkResetPasswordUsers?: AvailableBulkResetPasswordUsersResultSelection;
-    changePasswordUser?: AvailableChangePasswordUserResultSelection;
-    bulkChangePasswordUsers?: AvailableBulkChangePasswordUsersResultSelection;
-    upsertUser?: AvailableUpsertUserResultSelection;
-    bulkUpsertUsers?: AvailableBulkUpsertUsersResultSelection;
+    updateBooking?: AvailableUpdateBookingResultSelection;
+    bulkUpdateBookings?: AvailableBulkUpdateBookingsResultSelection;
     createEvent?: AvailableCreateEventResultSelection;
     bulkCreateEvents?: AvailableBulkCreateEventsResultSelection;
     updateEvent?: AvailableUpdateEventResultSelection;
@@ -3516,360 +3817,68 @@ export type AvailableMutationSelection = {
     bulkFindFirstVenues?: AvailableBulkFindFirstVenuesResultSelection;
     upsertVenue?: AvailableUpsertVenueResultSelection;
     bulkUpsertVenues?: AvailableBulkUpsertVenuesResultSelection;
+    signUpUser?: AvailableSignUpUserResultSelection;
+    bulkSignUpUsers?: AvailableBulkSignUpUsersResultSelection;
+    signInUser?: AvailableSignInUserResultSelection;
+    bulkSignInUsers?: AvailableBulkSignInUsersResultSelection;
+    signOutUser?: AvailableSignOutUserResultSelection;
+    bulkSignOutUsers?: AvailableBulkSignOutUsersResultSelection;
+    updateUser?: AvailableUpdateUserResultSelection;
+    bulkUpdateUsers?: AvailableBulkUpdateUsersResultSelection;
+    deleteUser?: AvailableDeleteUserResultSelection;
+    bulkDeleteUsers?: AvailableBulkDeleteUsersResultSelection;
+    sendVerifyEmailUser?: AvailableSendVerifyEmailUserResultSelection;
+    bulkSendVerifyEmailUsers?: AvailableBulkSendVerifyEmailUsersResultSelection;
+    verifyEmailUser?: AvailableVerifyEmailUserResultSelection;
+    bulkVerifyEmailUsers?: AvailableBulkVerifyEmailUsersResultSelection;
+    sendResetPasswordUser?: AvailableSendResetPasswordUserResultSelection;
+    bulkSendResetPasswordUsers?: AvailableBulkSendResetPasswordUsersResultSelection;
+    resetPasswordUser?: AvailableResetPasswordUserResultSelection;
+    bulkResetPasswordUsers?: AvailableBulkResetPasswordUsersResultSelection;
+    changePasswordUser?: AvailableChangePasswordUserResultSelection;
+    bulkChangePasswordUsers?: AvailableBulkChangePasswordUsersResultSelection;
+    upsertUser?: AvailableUpsertUserResultSelection;
+    bulkUpsertUsers?: AvailableBulkUpsertUsersResultSelection;
+    createEventHistory?: AvailableCreateEventHistoryResultSelection;
+    bulkCreateEventHistories?: AvailableBulkCreateEventHistoriesResultSelection;
+    sendBookingEmails?: AvailableSendBookingEmailsResultSelection;
+    sendEmail?: AvailableSendEmailResultSelection;
     background?: AvailableBackgroundMutationsSelection;
     internal?: AvailableInternalMutationsSelection;
     seed?: AvailableSeedMutationsSelection;
 };
-export interface SignUpUserResult extends UpsertUserResult {
-    __typename: 'SignUpUserResult';
+export type UpdateBookingResult = {
+    __typename: 'UpdateBookingResult';
     success: Scalars['Boolean'];
     errors: ExecutionError[];
     actionRun: (Scalars['String'] | null);
-    result: (Scalars['JSON'] | null);
-}
-export type AvailableSignUpUserResultSelection = {
+    booking: (Booking | null);
+};
+export type AvailableUpdateBookingResultSelection = {
     __typename?: boolean | null | undefined;
     success?: boolean | null | undefined;
     errors?: AvailableExecutionErrorSelection;
     actionRun?: boolean | null | undefined;
-    result?: boolean | null | undefined;
+    booking?: AvailableBookingSelection;
 };
-/** The output when running the signUp on the user model in bulk. */
-export type BulkSignUpUsersResult = {
-    __typename: 'BulkSignUpUsersResult';
+/** The output when running the update on the booking model in bulk. */
+export type BulkUpdateBookingsResult = {
+    __typename: 'BulkUpdateBookingsResult';
     /** Boolean describing if all the bulk actions succeeded or not */
     success: Scalars['Boolean'];
     /** Aggregated list of errors that any bulk action encountered while processing */
     errors: ExecutionError[];
-    /** The list of returned values for each action executed in the set of bulk actions. Returned in the same order as the input bulk action params. */
-    results: (Scalars['JSON'] | null)[];
+    /** The list of all changed booking records by each sent bulk action. Returned in the same order as the input bulk action params. */
+    bookings: (Booking | null)[];
 };
-export type AvailableBulkSignUpUsersResultSelection = {
+export type AvailableBulkUpdateBookingsResultSelection = {
     __typename?: boolean | null | undefined;
     /** Boolean describing if all the bulk actions succeeded or not */
     success?: boolean | null | undefined;
     /** Aggregated list of errors that any bulk action encountered while processing */
     errors?: AvailableExecutionErrorSelection;
-    /** The list of returned values for each action executed in the set of bulk actions. Returned in the same order as the input bulk action params. */
-    results?: boolean | null | undefined;
-};
-export type SignInUserResult = {
-    __typename: 'SignInUserResult';
-    success: Scalars['Boolean'];
-    errors: ExecutionError[];
-    actionRun: (Scalars['String'] | null);
-    user: (User | null);
-};
-export type AvailableSignInUserResultSelection = {
-    __typename?: boolean | null | undefined;
-    success?: boolean | null | undefined;
-    errors?: AvailableExecutionErrorSelection;
-    actionRun?: boolean | null | undefined;
-    user?: AvailableUserSelection;
-};
-/** The output when running the signIn on the user model in bulk. */
-export type BulkSignInUsersResult = {
-    __typename: 'BulkSignInUsersResult';
-    /** Boolean describing if all the bulk actions succeeded or not */
-    success: Scalars['Boolean'];
-    /** Aggregated list of errors that any bulk action encountered while processing */
-    errors: ExecutionError[];
-    /** The list of all changed user records by each sent bulk action. Returned in the same order as the input bulk action params. */
-    users: (User | null)[];
-};
-export type AvailableBulkSignInUsersResultSelection = {
-    __typename?: boolean | null | undefined;
-    /** Boolean describing if all the bulk actions succeeded or not */
-    success?: boolean | null | undefined;
-    /** Aggregated list of errors that any bulk action encountered while processing */
-    errors?: AvailableExecutionErrorSelection;
-    /** The list of all changed user records by each sent bulk action. Returned in the same order as the input bulk action params. */
-    users?: AvailableUserSelection;
-};
-export type SignOutUserResult = {
-    __typename: 'SignOutUserResult';
-    success: Scalars['Boolean'];
-    errors: ExecutionError[];
-    actionRun: (Scalars['String'] | null);
-    user: (User | null);
-};
-export type AvailableSignOutUserResultSelection = {
-    __typename?: boolean | null | undefined;
-    success?: boolean | null | undefined;
-    errors?: AvailableExecutionErrorSelection;
-    actionRun?: boolean | null | undefined;
-    user?: AvailableUserSelection;
-};
-/** The output when running the signOut on the user model in bulk. */
-export type BulkSignOutUsersResult = {
-    __typename: 'BulkSignOutUsersResult';
-    /** Boolean describing if all the bulk actions succeeded or not */
-    success: Scalars['Boolean'];
-    /** Aggregated list of errors that any bulk action encountered while processing */
-    errors: ExecutionError[];
-    /** The list of all changed user records by each sent bulk action. Returned in the same order as the input bulk action params. */
-    users: (User | null)[];
-};
-export type AvailableBulkSignOutUsersResultSelection = {
-    __typename?: boolean | null | undefined;
-    /** Boolean describing if all the bulk actions succeeded or not */
-    success?: boolean | null | undefined;
-    /** Aggregated list of errors that any bulk action encountered while processing */
-    errors?: AvailableExecutionErrorSelection;
-    /** The list of all changed user records by each sent bulk action. Returned in the same order as the input bulk action params. */
-    users?: AvailableUserSelection;
-};
-export interface UpdateUserResult extends UpsertUserResult {
-    __typename: 'UpdateUserResult';
-    success: Scalars['Boolean'];
-    errors: ExecutionError[];
-    actionRun: (Scalars['String'] | null);
-    result: (Scalars['JSON'] | null);
-}
-export type AvailableUpdateUserResultSelection = {
-    __typename?: boolean | null | undefined;
-    success?: boolean | null | undefined;
-    errors?: AvailableExecutionErrorSelection;
-    actionRun?: boolean | null | undefined;
-    result?: boolean | null | undefined;
-};
-/** The output when running the update on the user model in bulk. */
-export type BulkUpdateUsersResult = {
-    __typename: 'BulkUpdateUsersResult';
-    /** Boolean describing if all the bulk actions succeeded or not */
-    success: Scalars['Boolean'];
-    /** Aggregated list of errors that any bulk action encountered while processing */
-    errors: ExecutionError[];
-    /** The list of returned values for each action executed in the set of bulk actions. Returned in the same order as the input bulk action params. */
-    results: (Scalars['JSON'] | null)[];
-};
-export type AvailableBulkUpdateUsersResultSelection = {
-    __typename?: boolean | null | undefined;
-    /** Boolean describing if all the bulk actions succeeded or not */
-    success?: boolean | null | undefined;
-    /** Aggregated list of errors that any bulk action encountered while processing */
-    errors?: AvailableExecutionErrorSelection;
-    /** The list of returned values for each action executed in the set of bulk actions. Returned in the same order as the input bulk action params. */
-    results?: boolean | null | undefined;
-};
-export type DeleteUserResult = {
-    __typename: 'DeleteUserResult';
-    success: Scalars['Boolean'];
-    errors: ExecutionError[];
-    actionRun: (Scalars['String'] | null);
-};
-export type AvailableDeleteUserResultSelection = {
-    __typename?: boolean | null | undefined;
-    success?: boolean | null | undefined;
-    errors?: AvailableExecutionErrorSelection;
-    actionRun?: boolean | null | undefined;
-};
-/** The output when running the delete on the user model in bulk. */
-export type BulkDeleteUsersResult = {
-    __typename: 'BulkDeleteUsersResult';
-    /** Boolean describing if all the bulk actions succeeded or not */
-    success: Scalars['Boolean'];
-    /** Aggregated list of errors that any bulk action encountered while processing */
-    errors: ExecutionError[];
-};
-export type AvailableBulkDeleteUsersResultSelection = {
-    __typename?: boolean | null | undefined;
-    /** Boolean describing if all the bulk actions succeeded or not */
-    success?: boolean | null | undefined;
-    /** Aggregated list of errors that any bulk action encountered while processing */
-    errors?: AvailableExecutionErrorSelection;
-};
-export type SendVerifyEmailUserResult = {
-    __typename: 'SendVerifyEmailUserResult';
-    success: Scalars['Boolean'];
-    errors: ExecutionError[];
-    actionRun: (Scalars['String'] | null);
-    result: (Scalars['JSON'] | null);
-};
-export type AvailableSendVerifyEmailUserResultSelection = {
-    __typename?: boolean | null | undefined;
-    success?: boolean | null | undefined;
-    errors?: AvailableExecutionErrorSelection;
-    actionRun?: boolean | null | undefined;
-    result?: boolean | null | undefined;
-};
-/** The output when running the sendVerifyEmail on the user model in bulk. */
-export type BulkSendVerifyEmailUsersResult = {
-    __typename: 'BulkSendVerifyEmailUsersResult';
-    /** Boolean describing if all the bulk actions succeeded or not */
-    success: Scalars['Boolean'];
-    /** Aggregated list of errors that any bulk action encountered while processing */
-    errors: ExecutionError[];
-    /** The list of returned values for each action executed in the set of bulk actions. Returned in the same order as the input bulk action params. */
-    results: (Scalars['JSON'] | null)[];
-};
-export type AvailableBulkSendVerifyEmailUsersResultSelection = {
-    __typename?: boolean | null | undefined;
-    /** Boolean describing if all the bulk actions succeeded or not */
-    success?: boolean | null | undefined;
-    /** Aggregated list of errors that any bulk action encountered while processing */
-    errors?: AvailableExecutionErrorSelection;
-    /** The list of returned values for each action executed in the set of bulk actions. Returned in the same order as the input bulk action params. */
-    results?: boolean | null | undefined;
-};
-export type VerifyEmailUserResult = {
-    __typename: 'VerifyEmailUserResult';
-    success: Scalars['Boolean'];
-    errors: ExecutionError[];
-    actionRun: (Scalars['String'] | null);
-    result: (Scalars['JSON'] | null);
-};
-export type AvailableVerifyEmailUserResultSelection = {
-    __typename?: boolean | null | undefined;
-    success?: boolean | null | undefined;
-    errors?: AvailableExecutionErrorSelection;
-    actionRun?: boolean | null | undefined;
-    result?: boolean | null | undefined;
-};
-/** The output when running the verifyEmail on the user model in bulk. */
-export type BulkVerifyEmailUsersResult = {
-    __typename: 'BulkVerifyEmailUsersResult';
-    /** Boolean describing if all the bulk actions succeeded or not */
-    success: Scalars['Boolean'];
-    /** Aggregated list of errors that any bulk action encountered while processing */
-    errors: ExecutionError[];
-    /** The list of returned values for each action executed in the set of bulk actions. Returned in the same order as the input bulk action params. */
-    results: (Scalars['JSON'] | null)[];
-};
-export type AvailableBulkVerifyEmailUsersResultSelection = {
-    __typename?: boolean | null | undefined;
-    /** Boolean describing if all the bulk actions succeeded or not */
-    success?: boolean | null | undefined;
-    /** Aggregated list of errors that any bulk action encountered while processing */
-    errors?: AvailableExecutionErrorSelection;
-    /** The list of returned values for each action executed in the set of bulk actions. Returned in the same order as the input bulk action params. */
-    results?: boolean | null | undefined;
-};
-export type SendResetPasswordUserResult = {
-    __typename: 'SendResetPasswordUserResult';
-    success: Scalars['Boolean'];
-    errors: ExecutionError[];
-    actionRun: (Scalars['String'] | null);
-    result: (Scalars['JSON'] | null);
-};
-export type AvailableSendResetPasswordUserResultSelection = {
-    __typename?: boolean | null | undefined;
-    success?: boolean | null | undefined;
-    errors?: AvailableExecutionErrorSelection;
-    actionRun?: boolean | null | undefined;
-    result?: boolean | null | undefined;
-};
-/** The output when running the sendResetPassword on the user model in bulk. */
-export type BulkSendResetPasswordUsersResult = {
-    __typename: 'BulkSendResetPasswordUsersResult';
-    /** Boolean describing if all the bulk actions succeeded or not */
-    success: Scalars['Boolean'];
-    /** Aggregated list of errors that any bulk action encountered while processing */
-    errors: ExecutionError[];
-    /** The list of returned values for each action executed in the set of bulk actions. Returned in the same order as the input bulk action params. */
-    results: (Scalars['JSON'] | null)[];
-};
-export type AvailableBulkSendResetPasswordUsersResultSelection = {
-    __typename?: boolean | null | undefined;
-    /** Boolean describing if all the bulk actions succeeded or not */
-    success?: boolean | null | undefined;
-    /** Aggregated list of errors that any bulk action encountered while processing */
-    errors?: AvailableExecutionErrorSelection;
-    /** The list of returned values for each action executed in the set of bulk actions. Returned in the same order as the input bulk action params. */
-    results?: boolean | null | undefined;
-};
-export type ResetPasswordUserResult = {
-    __typename: 'ResetPasswordUserResult';
-    success: Scalars['Boolean'];
-    errors: ExecutionError[];
-    actionRun: (Scalars['String'] | null);
-    result: (Scalars['JSON'] | null);
-};
-export type AvailableResetPasswordUserResultSelection = {
-    __typename?: boolean | null | undefined;
-    success?: boolean | null | undefined;
-    errors?: AvailableExecutionErrorSelection;
-    actionRun?: boolean | null | undefined;
-    result?: boolean | null | undefined;
-};
-/** The output when running the resetPassword on the user model in bulk. */
-export type BulkResetPasswordUsersResult = {
-    __typename: 'BulkResetPasswordUsersResult';
-    /** Boolean describing if all the bulk actions succeeded or not */
-    success: Scalars['Boolean'];
-    /** Aggregated list of errors that any bulk action encountered while processing */
-    errors: ExecutionError[];
-    /** The list of returned values for each action executed in the set of bulk actions. Returned in the same order as the input bulk action params. */
-    results: (Scalars['JSON'] | null)[];
-};
-export type AvailableBulkResetPasswordUsersResultSelection = {
-    __typename?: boolean | null | undefined;
-    /** Boolean describing if all the bulk actions succeeded or not */
-    success?: boolean | null | undefined;
-    /** Aggregated list of errors that any bulk action encountered while processing */
-    errors?: AvailableExecutionErrorSelection;
-    /** The list of returned values for each action executed in the set of bulk actions. Returned in the same order as the input bulk action params. */
-    results?: boolean | null | undefined;
-};
-export type ChangePasswordUserResult = {
-    __typename: 'ChangePasswordUserResult';
-    success: Scalars['Boolean'];
-    errors: ExecutionError[];
-    actionRun: (Scalars['String'] | null);
-    user: (User | null);
-};
-export type AvailableChangePasswordUserResultSelection = {
-    __typename?: boolean | null | undefined;
-    success?: boolean | null | undefined;
-    errors?: AvailableExecutionErrorSelection;
-    actionRun?: boolean | null | undefined;
-    user?: AvailableUserSelection;
-};
-/** The output when running the changePassword on the user model in bulk. */
-export type BulkChangePasswordUsersResult = {
-    __typename: 'BulkChangePasswordUsersResult';
-    /** Boolean describing if all the bulk actions succeeded or not */
-    success: Scalars['Boolean'];
-    /** Aggregated list of errors that any bulk action encountered while processing */
-    errors: ExecutionError[];
-    /** The list of all changed user records by each sent bulk action. Returned in the same order as the input bulk action params. */
-    users: (User | null)[];
-};
-export type AvailableBulkChangePasswordUsersResultSelection = {
-    __typename?: boolean | null | undefined;
-    /** Boolean describing if all the bulk actions succeeded or not */
-    success?: boolean | null | undefined;
-    /** Aggregated list of errors that any bulk action encountered while processing */
-    errors?: AvailableExecutionErrorSelection;
-    /** The list of all changed user records by each sent bulk action. Returned in the same order as the input bulk action params. */
-    users?: AvailableUserSelection;
-};
-/** The result of a bulk upsert operation for the user model */
-export type BulkUpsertUsersResult = {
-    __typename: 'BulkUpsertUsersResult';
-    /** Boolean describing if all the bulk actions succeeded or not */
-    success: Scalars['Boolean'];
-    /** Aggregated list of errors that any bulk action encountered while processing */
-    errors: ExecutionError[];
-    /** The results of each upsert action in the bulk operation */
-    users: (UpsertUserReturnType | null)[];
-};
-export type AvailableBulkUpsertUsersResultSelection = {
-    __typename?: boolean | null | undefined;
-    /** Boolean describing if all the bulk actions succeeded or not */
-    success?: boolean | null | undefined;
-    /** Aggregated list of errors that any bulk action encountered while processing */
-    errors?: AvailableExecutionErrorSelection;
-    /** The results of each upsert action in the bulk operation */
-    users?: AvailableUpsertUserReturnTypeSelection;
-};
-export type UpsertUserReturnType = {
-    __typename: 'UpsertUserReturnType';
-    result: (Scalars['JSON'] | null);
-};
-export type AvailableUpsertUserReturnTypeSelection = {
-    __typename?: boolean | null | undefined;
-    result?: boolean | null | undefined;
+    /** The list of all changed booking records by each sent bulk action. Returned in the same order as the input bulk action params. */
+    bookings?: AvailableBookingSelection;
 };
 export interface CreateEventResult extends UpsertEventResult {
     __typename: 'CreateEventResult';
@@ -4249,30 +4258,418 @@ export type AvailableUpsertVenueReturnTypeSelection = {
     __typename?: boolean | null | undefined;
     result?: boolean | null | undefined;
 };
+export interface SignUpUserResult extends UpsertUserResult {
+    __typename: 'SignUpUserResult';
+    success: Scalars['Boolean'];
+    errors: ExecutionError[];
+    actionRun: (Scalars['String'] | null);
+    result: (Scalars['JSON'] | null);
+}
+export type AvailableSignUpUserResultSelection = {
+    __typename?: boolean | null | undefined;
+    success?: boolean | null | undefined;
+    errors?: AvailableExecutionErrorSelection;
+    actionRun?: boolean | null | undefined;
+    result?: boolean | null | undefined;
+};
+/** The output when running the signUp on the user model in bulk. */
+export type BulkSignUpUsersResult = {
+    __typename: 'BulkSignUpUsersResult';
+    /** Boolean describing if all the bulk actions succeeded or not */
+    success: Scalars['Boolean'];
+    /** Aggregated list of errors that any bulk action encountered while processing */
+    errors: ExecutionError[];
+    /** The list of returned values for each action executed in the set of bulk actions. Returned in the same order as the input bulk action params. */
+    results: (Scalars['JSON'] | null)[];
+};
+export type AvailableBulkSignUpUsersResultSelection = {
+    __typename?: boolean | null | undefined;
+    /** Boolean describing if all the bulk actions succeeded or not */
+    success?: boolean | null | undefined;
+    /** Aggregated list of errors that any bulk action encountered while processing */
+    errors?: AvailableExecutionErrorSelection;
+    /** The list of returned values for each action executed in the set of bulk actions. Returned in the same order as the input bulk action params. */
+    results?: boolean | null | undefined;
+};
+export type SignInUserResult = {
+    __typename: 'SignInUserResult';
+    success: Scalars['Boolean'];
+    errors: ExecutionError[];
+    actionRun: (Scalars['String'] | null);
+    user: (User | null);
+};
+export type AvailableSignInUserResultSelection = {
+    __typename?: boolean | null | undefined;
+    success?: boolean | null | undefined;
+    errors?: AvailableExecutionErrorSelection;
+    actionRun?: boolean | null | undefined;
+    user?: AvailableUserSelection;
+};
+/** The output when running the signIn on the user model in bulk. */
+export type BulkSignInUsersResult = {
+    __typename: 'BulkSignInUsersResult';
+    /** Boolean describing if all the bulk actions succeeded or not */
+    success: Scalars['Boolean'];
+    /** Aggregated list of errors that any bulk action encountered while processing */
+    errors: ExecutionError[];
+    /** The list of all changed user records by each sent bulk action. Returned in the same order as the input bulk action params. */
+    users: (User | null)[];
+};
+export type AvailableBulkSignInUsersResultSelection = {
+    __typename?: boolean | null | undefined;
+    /** Boolean describing if all the bulk actions succeeded or not */
+    success?: boolean | null | undefined;
+    /** Aggregated list of errors that any bulk action encountered while processing */
+    errors?: AvailableExecutionErrorSelection;
+    /** The list of all changed user records by each sent bulk action. Returned in the same order as the input bulk action params. */
+    users?: AvailableUserSelection;
+};
+export type SignOutUserResult = {
+    __typename: 'SignOutUserResult';
+    success: Scalars['Boolean'];
+    errors: ExecutionError[];
+    actionRun: (Scalars['String'] | null);
+    user: (User | null);
+};
+export type AvailableSignOutUserResultSelection = {
+    __typename?: boolean | null | undefined;
+    success?: boolean | null | undefined;
+    errors?: AvailableExecutionErrorSelection;
+    actionRun?: boolean | null | undefined;
+    user?: AvailableUserSelection;
+};
+/** The output when running the signOut on the user model in bulk. */
+export type BulkSignOutUsersResult = {
+    __typename: 'BulkSignOutUsersResult';
+    /** Boolean describing if all the bulk actions succeeded or not */
+    success: Scalars['Boolean'];
+    /** Aggregated list of errors that any bulk action encountered while processing */
+    errors: ExecutionError[];
+    /** The list of all changed user records by each sent bulk action. Returned in the same order as the input bulk action params. */
+    users: (User | null)[];
+};
+export type AvailableBulkSignOutUsersResultSelection = {
+    __typename?: boolean | null | undefined;
+    /** Boolean describing if all the bulk actions succeeded or not */
+    success?: boolean | null | undefined;
+    /** Aggregated list of errors that any bulk action encountered while processing */
+    errors?: AvailableExecutionErrorSelection;
+    /** The list of all changed user records by each sent bulk action. Returned in the same order as the input bulk action params. */
+    users?: AvailableUserSelection;
+};
+export interface UpdateUserResult extends UpsertUserResult {
+    __typename: 'UpdateUserResult';
+    success: Scalars['Boolean'];
+    errors: ExecutionError[];
+    actionRun: (Scalars['String'] | null);
+    result: (Scalars['JSON'] | null);
+}
+export type AvailableUpdateUserResultSelection = {
+    __typename?: boolean | null | undefined;
+    success?: boolean | null | undefined;
+    errors?: AvailableExecutionErrorSelection;
+    actionRun?: boolean | null | undefined;
+    result?: boolean | null | undefined;
+};
+/** The output when running the update on the user model in bulk. */
+export type BulkUpdateUsersResult = {
+    __typename: 'BulkUpdateUsersResult';
+    /** Boolean describing if all the bulk actions succeeded or not */
+    success: Scalars['Boolean'];
+    /** Aggregated list of errors that any bulk action encountered while processing */
+    errors: ExecutionError[];
+    /** The list of returned values for each action executed in the set of bulk actions. Returned in the same order as the input bulk action params. */
+    results: (Scalars['JSON'] | null)[];
+};
+export type AvailableBulkUpdateUsersResultSelection = {
+    __typename?: boolean | null | undefined;
+    /** Boolean describing if all the bulk actions succeeded or not */
+    success?: boolean | null | undefined;
+    /** Aggregated list of errors that any bulk action encountered while processing */
+    errors?: AvailableExecutionErrorSelection;
+    /** The list of returned values for each action executed in the set of bulk actions. Returned in the same order as the input bulk action params. */
+    results?: boolean | null | undefined;
+};
+export type DeleteUserResult = {
+    __typename: 'DeleteUserResult';
+    success: Scalars['Boolean'];
+    errors: ExecutionError[];
+    actionRun: (Scalars['String'] | null);
+};
+export type AvailableDeleteUserResultSelection = {
+    __typename?: boolean | null | undefined;
+    success?: boolean | null | undefined;
+    errors?: AvailableExecutionErrorSelection;
+    actionRun?: boolean | null | undefined;
+};
+/** The output when running the delete on the user model in bulk. */
+export type BulkDeleteUsersResult = {
+    __typename: 'BulkDeleteUsersResult';
+    /** Boolean describing if all the bulk actions succeeded or not */
+    success: Scalars['Boolean'];
+    /** Aggregated list of errors that any bulk action encountered while processing */
+    errors: ExecutionError[];
+};
+export type AvailableBulkDeleteUsersResultSelection = {
+    __typename?: boolean | null | undefined;
+    /** Boolean describing if all the bulk actions succeeded or not */
+    success?: boolean | null | undefined;
+    /** Aggregated list of errors that any bulk action encountered while processing */
+    errors?: AvailableExecutionErrorSelection;
+};
+export type SendVerifyEmailUserResult = {
+    __typename: 'SendVerifyEmailUserResult';
+    success: Scalars['Boolean'];
+    errors: ExecutionError[];
+    actionRun: (Scalars['String'] | null);
+    result: (Scalars['JSON'] | null);
+};
+export type AvailableSendVerifyEmailUserResultSelection = {
+    __typename?: boolean | null | undefined;
+    success?: boolean | null | undefined;
+    errors?: AvailableExecutionErrorSelection;
+    actionRun?: boolean | null | undefined;
+    result?: boolean | null | undefined;
+};
+/** The output when running the sendVerifyEmail on the user model in bulk. */
+export type BulkSendVerifyEmailUsersResult = {
+    __typename: 'BulkSendVerifyEmailUsersResult';
+    /** Boolean describing if all the bulk actions succeeded or not */
+    success: Scalars['Boolean'];
+    /** Aggregated list of errors that any bulk action encountered while processing */
+    errors: ExecutionError[];
+    /** The list of returned values for each action executed in the set of bulk actions. Returned in the same order as the input bulk action params. */
+    results: (Scalars['JSON'] | null)[];
+};
+export type AvailableBulkSendVerifyEmailUsersResultSelection = {
+    __typename?: boolean | null | undefined;
+    /** Boolean describing if all the bulk actions succeeded or not */
+    success?: boolean | null | undefined;
+    /** Aggregated list of errors that any bulk action encountered while processing */
+    errors?: AvailableExecutionErrorSelection;
+    /** The list of returned values for each action executed in the set of bulk actions. Returned in the same order as the input bulk action params. */
+    results?: boolean | null | undefined;
+};
+export type VerifyEmailUserResult = {
+    __typename: 'VerifyEmailUserResult';
+    success: Scalars['Boolean'];
+    errors: ExecutionError[];
+    actionRun: (Scalars['String'] | null);
+    result: (Scalars['JSON'] | null);
+};
+export type AvailableVerifyEmailUserResultSelection = {
+    __typename?: boolean | null | undefined;
+    success?: boolean | null | undefined;
+    errors?: AvailableExecutionErrorSelection;
+    actionRun?: boolean | null | undefined;
+    result?: boolean | null | undefined;
+};
+/** The output when running the verifyEmail on the user model in bulk. */
+export type BulkVerifyEmailUsersResult = {
+    __typename: 'BulkVerifyEmailUsersResult';
+    /** Boolean describing if all the bulk actions succeeded or not */
+    success: Scalars['Boolean'];
+    /** Aggregated list of errors that any bulk action encountered while processing */
+    errors: ExecutionError[];
+    /** The list of returned values for each action executed in the set of bulk actions. Returned in the same order as the input bulk action params. */
+    results: (Scalars['JSON'] | null)[];
+};
+export type AvailableBulkVerifyEmailUsersResultSelection = {
+    __typename?: boolean | null | undefined;
+    /** Boolean describing if all the bulk actions succeeded or not */
+    success?: boolean | null | undefined;
+    /** Aggregated list of errors that any bulk action encountered while processing */
+    errors?: AvailableExecutionErrorSelection;
+    /** The list of returned values for each action executed in the set of bulk actions. Returned in the same order as the input bulk action params. */
+    results?: boolean | null | undefined;
+};
+export type SendResetPasswordUserResult = {
+    __typename: 'SendResetPasswordUserResult';
+    success: Scalars['Boolean'];
+    errors: ExecutionError[];
+    actionRun: (Scalars['String'] | null);
+    result: (Scalars['JSON'] | null);
+};
+export type AvailableSendResetPasswordUserResultSelection = {
+    __typename?: boolean | null | undefined;
+    success?: boolean | null | undefined;
+    errors?: AvailableExecutionErrorSelection;
+    actionRun?: boolean | null | undefined;
+    result?: boolean | null | undefined;
+};
+/** The output when running the sendResetPassword on the user model in bulk. */
+export type BulkSendResetPasswordUsersResult = {
+    __typename: 'BulkSendResetPasswordUsersResult';
+    /** Boolean describing if all the bulk actions succeeded or not */
+    success: Scalars['Boolean'];
+    /** Aggregated list of errors that any bulk action encountered while processing */
+    errors: ExecutionError[];
+    /** The list of returned values for each action executed in the set of bulk actions. Returned in the same order as the input bulk action params. */
+    results: (Scalars['JSON'] | null)[];
+};
+export type AvailableBulkSendResetPasswordUsersResultSelection = {
+    __typename?: boolean | null | undefined;
+    /** Boolean describing if all the bulk actions succeeded or not */
+    success?: boolean | null | undefined;
+    /** Aggregated list of errors that any bulk action encountered while processing */
+    errors?: AvailableExecutionErrorSelection;
+    /** The list of returned values for each action executed in the set of bulk actions. Returned in the same order as the input bulk action params. */
+    results?: boolean | null | undefined;
+};
+export type ResetPasswordUserResult = {
+    __typename: 'ResetPasswordUserResult';
+    success: Scalars['Boolean'];
+    errors: ExecutionError[];
+    actionRun: (Scalars['String'] | null);
+    result: (Scalars['JSON'] | null);
+};
+export type AvailableResetPasswordUserResultSelection = {
+    __typename?: boolean | null | undefined;
+    success?: boolean | null | undefined;
+    errors?: AvailableExecutionErrorSelection;
+    actionRun?: boolean | null | undefined;
+    result?: boolean | null | undefined;
+};
+/** The output when running the resetPassword on the user model in bulk. */
+export type BulkResetPasswordUsersResult = {
+    __typename: 'BulkResetPasswordUsersResult';
+    /** Boolean describing if all the bulk actions succeeded or not */
+    success: Scalars['Boolean'];
+    /** Aggregated list of errors that any bulk action encountered while processing */
+    errors: ExecutionError[];
+    /** The list of returned values for each action executed in the set of bulk actions. Returned in the same order as the input bulk action params. */
+    results: (Scalars['JSON'] | null)[];
+};
+export type AvailableBulkResetPasswordUsersResultSelection = {
+    __typename?: boolean | null | undefined;
+    /** Boolean describing if all the bulk actions succeeded or not */
+    success?: boolean | null | undefined;
+    /** Aggregated list of errors that any bulk action encountered while processing */
+    errors?: AvailableExecutionErrorSelection;
+    /** The list of returned values for each action executed in the set of bulk actions. Returned in the same order as the input bulk action params. */
+    results?: boolean | null | undefined;
+};
+export type ChangePasswordUserResult = {
+    __typename: 'ChangePasswordUserResult';
+    success: Scalars['Boolean'];
+    errors: ExecutionError[];
+    actionRun: (Scalars['String'] | null);
+    user: (User | null);
+};
+export type AvailableChangePasswordUserResultSelection = {
+    __typename?: boolean | null | undefined;
+    success?: boolean | null | undefined;
+    errors?: AvailableExecutionErrorSelection;
+    actionRun?: boolean | null | undefined;
+    user?: AvailableUserSelection;
+};
+/** The output when running the changePassword on the user model in bulk. */
+export type BulkChangePasswordUsersResult = {
+    __typename: 'BulkChangePasswordUsersResult';
+    /** Boolean describing if all the bulk actions succeeded or not */
+    success: Scalars['Boolean'];
+    /** Aggregated list of errors that any bulk action encountered while processing */
+    errors: ExecutionError[];
+    /** The list of all changed user records by each sent bulk action. Returned in the same order as the input bulk action params. */
+    users: (User | null)[];
+};
+export type AvailableBulkChangePasswordUsersResultSelection = {
+    __typename?: boolean | null | undefined;
+    /** Boolean describing if all the bulk actions succeeded or not */
+    success?: boolean | null | undefined;
+    /** Aggregated list of errors that any bulk action encountered while processing */
+    errors?: AvailableExecutionErrorSelection;
+    /** The list of all changed user records by each sent bulk action. Returned in the same order as the input bulk action params. */
+    users?: AvailableUserSelection;
+};
+/** The result of a bulk upsert operation for the user model */
+export type BulkUpsertUsersResult = {
+    __typename: 'BulkUpsertUsersResult';
+    /** Boolean describing if all the bulk actions succeeded or not */
+    success: Scalars['Boolean'];
+    /** Aggregated list of errors that any bulk action encountered while processing */
+    errors: ExecutionError[];
+    /** The results of each upsert action in the bulk operation */
+    users: (UpsertUserReturnType | null)[];
+};
+export type AvailableBulkUpsertUsersResultSelection = {
+    __typename?: boolean | null | undefined;
+    /** Boolean describing if all the bulk actions succeeded or not */
+    success?: boolean | null | undefined;
+    /** Aggregated list of errors that any bulk action encountered while processing */
+    errors?: AvailableExecutionErrorSelection;
+    /** The results of each upsert action in the bulk operation */
+    users?: AvailableUpsertUserReturnTypeSelection;
+};
+export type UpsertUserReturnType = {
+    __typename: 'UpsertUserReturnType';
+    result: (Scalars['JSON'] | null);
+};
+export type AvailableUpsertUserReturnTypeSelection = {
+    __typename?: boolean | null | undefined;
+    result?: boolean | null | undefined;
+};
+export type CreateEventHistoryResult = {
+    __typename: 'CreateEventHistoryResult';
+    success: Scalars['Boolean'];
+    errors: ExecutionError[];
+    actionRun: (Scalars['String'] | null);
+    eventHistory: (EventHistory | null);
+};
+export type AvailableCreateEventHistoryResultSelection = {
+    __typename?: boolean | null | undefined;
+    success?: boolean | null | undefined;
+    errors?: AvailableExecutionErrorSelection;
+    actionRun?: boolean | null | undefined;
+    eventHistory?: AvailableEventHistorySelection;
+};
+/** The output when running the create on the eventHistory model in bulk. */
+export type BulkCreateEventHistoriesResult = {
+    __typename: 'BulkCreateEventHistoriesResult';
+    /** Boolean describing if all the bulk actions succeeded or not */
+    success: Scalars['Boolean'];
+    /** Aggregated list of errors that any bulk action encountered while processing */
+    errors: ExecutionError[];
+    /** The list of all changed eventHistory records by each sent bulk action. Returned in the same order as the input bulk action params. */
+    eventHistories: (EventHistory | null)[];
+};
+export type AvailableBulkCreateEventHistoriesResultSelection = {
+    __typename?: boolean | null | undefined;
+    /** Boolean describing if all the bulk actions succeeded or not */
+    success?: boolean | null | undefined;
+    /** Aggregated list of errors that any bulk action encountered while processing */
+    errors?: AvailableExecutionErrorSelection;
+    /** The list of all changed eventHistory records by each sent bulk action. Returned in the same order as the input bulk action params. */
+    eventHistories?: AvailableEventHistorySelection;
+};
+export type SendBookingEmailsResult = {
+    __typename: 'SendBookingEmailsResult';
+    success: Scalars['Boolean'];
+    errors: ExecutionError[];
+    result: (Scalars['JSON'] | null);
+};
+export type AvailableSendBookingEmailsResultSelection = {
+    __typename?: boolean | null | undefined;
+    success?: boolean | null | undefined;
+    errors?: AvailableExecutionErrorSelection;
+    result?: boolean | null | undefined;
+};
+export type SendEmailResult = {
+    __typename: 'SendEmailResult';
+    success: Scalars['Boolean'];
+    errors: ExecutionError[];
+    result: (Scalars['JSON'] | null);
+};
+export type AvailableSendEmailResultSelection = {
+    __typename?: boolean | null | undefined;
+    success?: boolean | null | undefined;
+    errors?: AvailableExecutionErrorSelection;
+    result?: boolean | null | undefined;
+};
 export type BackgroundMutations = {
     __typename: 'BackgroundMutations';
-    signUpUser: EnqueueBackgroundActionResult;
-    bulkSignUpUsers: BulkEnqueueBackgroundActionResult;
-    signInUser: EnqueueBackgroundActionResult;
-    bulkSignInUsers: BulkEnqueueBackgroundActionResult;
-    signOutUser: EnqueueBackgroundActionResult;
-    bulkSignOutUsers: BulkEnqueueBackgroundActionResult;
-    updateUser: EnqueueBackgroundActionResult;
-    bulkUpdateUsers: BulkEnqueueBackgroundActionResult;
-    deleteUser: EnqueueBackgroundActionResult;
-    bulkDeleteUsers: BulkEnqueueBackgroundActionResult;
-    sendVerifyEmailUser: EnqueueBackgroundActionResult;
-    bulkSendVerifyEmailUsers: BulkEnqueueBackgroundActionResult;
-    verifyEmailUser: EnqueueBackgroundActionResult;
-    bulkVerifyEmailUsers: BulkEnqueueBackgroundActionResult;
-    sendResetPasswordUser: EnqueueBackgroundActionResult;
-    bulkSendResetPasswordUsers: BulkEnqueueBackgroundActionResult;
-    resetPasswordUser: EnqueueBackgroundActionResult;
-    bulkResetPasswordUsers: BulkEnqueueBackgroundActionResult;
-    changePasswordUser: EnqueueBackgroundActionResult;
-    bulkChangePasswordUsers: BulkEnqueueBackgroundActionResult;
-    upsertUser: EnqueueBackgroundActionResult;
-    bulkUpsertUsers: BulkEnqueueBackgroundActionResult;
+    updateBooking: EnqueueBackgroundActionResult;
+    bulkUpdateBookings: BulkEnqueueBackgroundActionResult;
     createEvent: EnqueueBackgroundActionResult;
     bulkCreateEvents: BulkEnqueueBackgroundActionResult;
     updateEvent: EnqueueBackgroundActionResult;
@@ -4297,32 +4694,38 @@ export type BackgroundMutations = {
     bulkFindFirstVenues: BulkEnqueueBackgroundActionResult;
     upsertVenue: EnqueueBackgroundActionResult;
     bulkUpsertVenues: BulkEnqueueBackgroundActionResult;
+    signUpUser: EnqueueBackgroundActionResult;
+    bulkSignUpUsers: BulkEnqueueBackgroundActionResult;
+    signInUser: EnqueueBackgroundActionResult;
+    bulkSignInUsers: BulkEnqueueBackgroundActionResult;
+    signOutUser: EnqueueBackgroundActionResult;
+    bulkSignOutUsers: BulkEnqueueBackgroundActionResult;
+    updateUser: EnqueueBackgroundActionResult;
+    bulkUpdateUsers: BulkEnqueueBackgroundActionResult;
+    deleteUser: EnqueueBackgroundActionResult;
+    bulkDeleteUsers: BulkEnqueueBackgroundActionResult;
+    sendVerifyEmailUser: EnqueueBackgroundActionResult;
+    bulkSendVerifyEmailUsers: BulkEnqueueBackgroundActionResult;
+    verifyEmailUser: EnqueueBackgroundActionResult;
+    bulkVerifyEmailUsers: BulkEnqueueBackgroundActionResult;
+    sendResetPasswordUser: EnqueueBackgroundActionResult;
+    bulkSendResetPasswordUsers: BulkEnqueueBackgroundActionResult;
+    resetPasswordUser: EnqueueBackgroundActionResult;
+    bulkResetPasswordUsers: BulkEnqueueBackgroundActionResult;
+    changePasswordUser: EnqueueBackgroundActionResult;
+    bulkChangePasswordUsers: BulkEnqueueBackgroundActionResult;
+    upsertUser: EnqueueBackgroundActionResult;
+    bulkUpsertUsers: BulkEnqueueBackgroundActionResult;
+    createEventHistory: EnqueueBackgroundActionResult;
+    bulkCreateEventHistories: BulkEnqueueBackgroundActionResult;
+    sendBookingEmails: EnqueueBackgroundActionResult;
+    sendEmail: EnqueueBackgroundActionResult;
     seed: BackgroundSeedMutations;
 };
 export type AvailableBackgroundMutationsSelection = {
     __typename?: boolean | null | undefined;
-    signUpUser?: AvailableEnqueueBackgroundActionResultSelection;
-    bulkSignUpUsers?: AvailableBulkEnqueueBackgroundActionResultSelection;
-    signInUser?: AvailableEnqueueBackgroundActionResultSelection;
-    bulkSignInUsers?: AvailableBulkEnqueueBackgroundActionResultSelection;
-    signOutUser?: AvailableEnqueueBackgroundActionResultSelection;
-    bulkSignOutUsers?: AvailableBulkEnqueueBackgroundActionResultSelection;
-    updateUser?: AvailableEnqueueBackgroundActionResultSelection;
-    bulkUpdateUsers?: AvailableBulkEnqueueBackgroundActionResultSelection;
-    deleteUser?: AvailableEnqueueBackgroundActionResultSelection;
-    bulkDeleteUsers?: AvailableBulkEnqueueBackgroundActionResultSelection;
-    sendVerifyEmailUser?: AvailableEnqueueBackgroundActionResultSelection;
-    bulkSendVerifyEmailUsers?: AvailableBulkEnqueueBackgroundActionResultSelection;
-    verifyEmailUser?: AvailableEnqueueBackgroundActionResultSelection;
-    bulkVerifyEmailUsers?: AvailableBulkEnqueueBackgroundActionResultSelection;
-    sendResetPasswordUser?: AvailableEnqueueBackgroundActionResultSelection;
-    bulkSendResetPasswordUsers?: AvailableBulkEnqueueBackgroundActionResultSelection;
-    resetPasswordUser?: AvailableEnqueueBackgroundActionResultSelection;
-    bulkResetPasswordUsers?: AvailableBulkEnqueueBackgroundActionResultSelection;
-    changePasswordUser?: AvailableEnqueueBackgroundActionResultSelection;
-    bulkChangePasswordUsers?: AvailableBulkEnqueueBackgroundActionResultSelection;
-    upsertUser?: AvailableEnqueueBackgroundActionResultSelection;
-    bulkUpsertUsers?: AvailableBulkEnqueueBackgroundActionResultSelection;
+    updateBooking?: AvailableEnqueueBackgroundActionResultSelection;
+    bulkUpdateBookings?: AvailableBulkEnqueueBackgroundActionResultSelection;
     createEvent?: AvailableEnqueueBackgroundActionResultSelection;
     bulkCreateEvents?: AvailableBulkEnqueueBackgroundActionResultSelection;
     updateEvent?: AvailableEnqueueBackgroundActionResultSelection;
@@ -4347,6 +4750,32 @@ export type AvailableBackgroundMutationsSelection = {
     bulkFindFirstVenues?: AvailableBulkEnqueueBackgroundActionResultSelection;
     upsertVenue?: AvailableEnqueueBackgroundActionResultSelection;
     bulkUpsertVenues?: AvailableBulkEnqueueBackgroundActionResultSelection;
+    signUpUser?: AvailableEnqueueBackgroundActionResultSelection;
+    bulkSignUpUsers?: AvailableBulkEnqueueBackgroundActionResultSelection;
+    signInUser?: AvailableEnqueueBackgroundActionResultSelection;
+    bulkSignInUsers?: AvailableBulkEnqueueBackgroundActionResultSelection;
+    signOutUser?: AvailableEnqueueBackgroundActionResultSelection;
+    bulkSignOutUsers?: AvailableBulkEnqueueBackgroundActionResultSelection;
+    updateUser?: AvailableEnqueueBackgroundActionResultSelection;
+    bulkUpdateUsers?: AvailableBulkEnqueueBackgroundActionResultSelection;
+    deleteUser?: AvailableEnqueueBackgroundActionResultSelection;
+    bulkDeleteUsers?: AvailableBulkEnqueueBackgroundActionResultSelection;
+    sendVerifyEmailUser?: AvailableEnqueueBackgroundActionResultSelection;
+    bulkSendVerifyEmailUsers?: AvailableBulkEnqueueBackgroundActionResultSelection;
+    verifyEmailUser?: AvailableEnqueueBackgroundActionResultSelection;
+    bulkVerifyEmailUsers?: AvailableBulkEnqueueBackgroundActionResultSelection;
+    sendResetPasswordUser?: AvailableEnqueueBackgroundActionResultSelection;
+    bulkSendResetPasswordUsers?: AvailableBulkEnqueueBackgroundActionResultSelection;
+    resetPasswordUser?: AvailableEnqueueBackgroundActionResultSelection;
+    bulkResetPasswordUsers?: AvailableBulkEnqueueBackgroundActionResultSelection;
+    changePasswordUser?: AvailableEnqueueBackgroundActionResultSelection;
+    bulkChangePasswordUsers?: AvailableBulkEnqueueBackgroundActionResultSelection;
+    upsertUser?: AvailableEnqueueBackgroundActionResultSelection;
+    bulkUpsertUsers?: AvailableBulkEnqueueBackgroundActionResultSelection;
+    createEventHistory?: AvailableEnqueueBackgroundActionResultSelection;
+    bulkCreateEventHistories?: AvailableBulkEnqueueBackgroundActionResultSelection;
+    sendBookingEmails?: AvailableEnqueueBackgroundActionResultSelection;
+    sendEmail?: AvailableEnqueueBackgroundActionResultSelection;
     seed?: AvailableBackgroundSeedMutationsSelection;
 };
 /** The value returned from enqueuing an action to run in the background */
@@ -4393,12 +4822,10 @@ export type BackgroundSeedMutations = {
     createReviews: EnqueueBackgroundActionResult;
     createUsers: EnqueueBackgroundActionResult;
     createVenues: EnqueueBackgroundActionResult;
-    debugSeed: EnqueueBackgroundActionResult;
     quickSeed: EnqueueBackgroundActionResult;
     seedAllData: EnqueueBackgroundActionResult;
     seedData: EnqueueBackgroundActionResult;
     simpleSeed: EnqueueBackgroundActionResult;
-    testContext: EnqueueBackgroundActionResult;
 };
 export type AvailableBackgroundSeedMutationsSelection = {
     __typename?: boolean | null | undefined;
@@ -4407,12 +4834,10 @@ export type AvailableBackgroundSeedMutationsSelection = {
     createReviews?: AvailableEnqueueBackgroundActionResultSelection;
     createUsers?: AvailableEnqueueBackgroundActionResultSelection;
     createVenues?: AvailableEnqueueBackgroundActionResultSelection;
-    debugSeed?: AvailableEnqueueBackgroundActionResultSelection;
     quickSeed?: AvailableEnqueueBackgroundActionResultSelection;
     seedAllData?: AvailableEnqueueBackgroundActionResultSelection;
     seedData?: AvailableEnqueueBackgroundActionResultSelection;
     simpleSeed?: AvailableEnqueueBackgroundActionResultSelection;
-    testContext?: AvailableEnqueueBackgroundActionResultSelection;
 };
 export type InternalMutations = {
     __typename: 'InternalMutations';
@@ -4421,34 +4846,13 @@ export type InternalMutations = {
     rollbackTransaction: Scalars['String'];
     /** Acquire a backend lock, returning only once the lock has been acquired */
     acquireLock: LockOperationResult;
-    createUser: (InternalCreateUserResult | null);
-    updateUser: (InternalUpdateUserResult | null);
-    deleteUser: (InternalDeleteUserResult | null);
-    deleteManyUser: (InternalDeleteManyUserResult | null);
-    bulkCreateUsers: (InternalBulkCreateUsersResult | null);
-    upsertUser: (InternalUpsertUserResult | null);
-    triggerSignUpUser: (SignUpUserResult | null);
-    triggerSignInUser: (SignInUserResult | null);
-    triggerSignOutUser: (SignOutUserResult | null);
-    triggerUpdateUser: (UpdateUserResult | null);
-    triggerDeleteUser: (DeleteUserResult | null);
-    triggerSendVerifyEmailUser: (SendVerifyEmailUserResult | null);
-    triggerVerifyEmailUser: (VerifyEmailUserResult | null);
-    triggerSendResetPasswordUser: (SendResetPasswordUserResult | null);
-    triggerResetPasswordUser: (ResetPasswordUserResult | null);
-    triggerChangePasswordUser: (ChangePasswordUserResult | null);
-    createSession: (InternalCreateSessionResult | null);
-    updateSession: (InternalUpdateSessionResult | null);
-    deleteSession: (InternalDeleteSessionResult | null);
-    deleteManySession: (InternalDeleteManySessionResult | null);
-    bulkCreateSessions: (InternalBulkCreateSessionsResult | null);
-    upsertSession: (InternalUpsertSessionResult | null);
     createBooking: (InternalCreateBookingResult | null);
     updateBooking: (InternalUpdateBookingResult | null);
     deleteBooking: (InternalDeleteBookingResult | null);
     deleteManyBooking: (InternalDeleteManyBookingResult | null);
     bulkCreateBookings: (InternalBulkCreateBookingsResult | null);
     upsertBooking: (InternalUpsertBookingResult | null);
+    triggerUpdateBooking: (UpdateBookingResult | null);
     createEvent: (InternalCreateEventResult | null);
     updateEvent: (InternalUpdateEventResult | null);
     deleteEvent: (InternalDeleteEventResult | null);
@@ -4482,6 +4886,37 @@ export type InternalMutations = {
     triggerCreateVenue: (CreateVenueResult | null);
     triggerUpdateVenue: (UpdateVenueResult | null);
     triggerFindFirstVenue: (FindFirstVenueResult | null);
+    createUser: (InternalCreateUserResult | null);
+    updateUser: (InternalUpdateUserResult | null);
+    deleteUser: (InternalDeleteUserResult | null);
+    deleteManyUser: (InternalDeleteManyUserResult | null);
+    bulkCreateUsers: (InternalBulkCreateUsersResult | null);
+    upsertUser: (InternalUpsertUserResult | null);
+    triggerSignUpUser: (SignUpUserResult | null);
+    triggerSignInUser: (SignInUserResult | null);
+    triggerSignOutUser: (SignOutUserResult | null);
+    triggerUpdateUser: (UpdateUserResult | null);
+    triggerDeleteUser: (DeleteUserResult | null);
+    triggerSendVerifyEmailUser: (SendVerifyEmailUserResult | null);
+    triggerVerifyEmailUser: (VerifyEmailUserResult | null);
+    triggerSendResetPasswordUser: (SendResetPasswordUserResult | null);
+    triggerResetPasswordUser: (ResetPasswordUserResult | null);
+    triggerChangePasswordUser: (ChangePasswordUserResult | null);
+    createSession: (InternalCreateSessionResult | null);
+    updateSession: (InternalUpdateSessionResult | null);
+    deleteSession: (InternalDeleteSessionResult | null);
+    deleteManySession: (InternalDeleteManySessionResult | null);
+    bulkCreateSessions: (InternalBulkCreateSessionsResult | null);
+    upsertSession: (InternalUpsertSessionResult | null);
+    createEventHistory: (InternalCreateEventHistoryResult | null);
+    updateEventHistory: (InternalUpdateEventHistoryResult | null);
+    deleteEventHistory: (InternalDeleteEventHistoryResult | null);
+    deleteManyEventHistory: (InternalDeleteManyEventHistoryResult | null);
+    bulkCreateEventHistories: (InternalBulkCreateEventHistoriesResult | null);
+    upsertEventHistory: (InternalUpsertEventHistoryResult | null);
+    triggerCreateEventHistory: (CreateEventHistoryResult | null);
+    triggerSendBookingEmails: (SendBookingEmailsResult | null);
+    triggerSendEmail: (SendEmailResult | null);
     cancelBackgroundAction: CancelBackgroundActionResult;
     bulkCancelBackgroundActions: BulkCancelBackgroundActionResult;
     seed: InternalSeedMutations;
@@ -4493,34 +4928,13 @@ export type AvailableInternalMutationsSelection = {
     rollbackTransaction?: boolean | null | undefined;
     /** Acquire a backend lock, returning only once the lock has been acquired */
     acquireLock?: AvailableLockOperationResultSelection;
-    createUser?: AvailableInternalCreateUserResultSelection;
-    updateUser?: AvailableInternalUpdateUserResultSelection;
-    deleteUser?: AvailableInternalDeleteUserResultSelection;
-    deleteManyUser?: AvailableInternalDeleteManyUserResultSelection;
-    bulkCreateUsers?: AvailableInternalBulkCreateUsersResultSelection;
-    upsertUser?: AvailableInternalUpsertUserResultSelection;
-    triggerSignUpUser?: AvailableSignUpUserResultSelection;
-    triggerSignInUser?: AvailableSignInUserResultSelection;
-    triggerSignOutUser?: AvailableSignOutUserResultSelection;
-    triggerUpdateUser?: AvailableUpdateUserResultSelection;
-    triggerDeleteUser?: AvailableDeleteUserResultSelection;
-    triggerSendVerifyEmailUser?: AvailableSendVerifyEmailUserResultSelection;
-    triggerVerifyEmailUser?: AvailableVerifyEmailUserResultSelection;
-    triggerSendResetPasswordUser?: AvailableSendResetPasswordUserResultSelection;
-    triggerResetPasswordUser?: AvailableResetPasswordUserResultSelection;
-    triggerChangePasswordUser?: AvailableChangePasswordUserResultSelection;
-    createSession?: AvailableInternalCreateSessionResultSelection;
-    updateSession?: AvailableInternalUpdateSessionResultSelection;
-    deleteSession?: AvailableInternalDeleteSessionResultSelection;
-    deleteManySession?: AvailableInternalDeleteManySessionResultSelection;
-    bulkCreateSessions?: AvailableInternalBulkCreateSessionsResultSelection;
-    upsertSession?: AvailableInternalUpsertSessionResultSelection;
     createBooking?: AvailableInternalCreateBookingResultSelection;
     updateBooking?: AvailableInternalUpdateBookingResultSelection;
     deleteBooking?: AvailableInternalDeleteBookingResultSelection;
     deleteManyBooking?: AvailableInternalDeleteManyBookingResultSelection;
     bulkCreateBookings?: AvailableInternalBulkCreateBookingsResultSelection;
     upsertBooking?: AvailableInternalUpsertBookingResultSelection;
+    triggerUpdateBooking?: AvailableUpdateBookingResultSelection;
     createEvent?: AvailableInternalCreateEventResultSelection;
     updateEvent?: AvailableInternalUpdateEventResultSelection;
     deleteEvent?: AvailableInternalDeleteEventResultSelection;
@@ -4554,6 +4968,37 @@ export type AvailableInternalMutationsSelection = {
     triggerCreateVenue?: AvailableCreateVenueResultSelection;
     triggerUpdateVenue?: AvailableUpdateVenueResultSelection;
     triggerFindFirstVenue?: AvailableFindFirstVenueResultSelection;
+    createUser?: AvailableInternalCreateUserResultSelection;
+    updateUser?: AvailableInternalUpdateUserResultSelection;
+    deleteUser?: AvailableInternalDeleteUserResultSelection;
+    deleteManyUser?: AvailableInternalDeleteManyUserResultSelection;
+    bulkCreateUsers?: AvailableInternalBulkCreateUsersResultSelection;
+    upsertUser?: AvailableInternalUpsertUserResultSelection;
+    triggerSignUpUser?: AvailableSignUpUserResultSelection;
+    triggerSignInUser?: AvailableSignInUserResultSelection;
+    triggerSignOutUser?: AvailableSignOutUserResultSelection;
+    triggerUpdateUser?: AvailableUpdateUserResultSelection;
+    triggerDeleteUser?: AvailableDeleteUserResultSelection;
+    triggerSendVerifyEmailUser?: AvailableSendVerifyEmailUserResultSelection;
+    triggerVerifyEmailUser?: AvailableVerifyEmailUserResultSelection;
+    triggerSendResetPasswordUser?: AvailableSendResetPasswordUserResultSelection;
+    triggerResetPasswordUser?: AvailableResetPasswordUserResultSelection;
+    triggerChangePasswordUser?: AvailableChangePasswordUserResultSelection;
+    createSession?: AvailableInternalCreateSessionResultSelection;
+    updateSession?: AvailableInternalUpdateSessionResultSelection;
+    deleteSession?: AvailableInternalDeleteSessionResultSelection;
+    deleteManySession?: AvailableInternalDeleteManySessionResultSelection;
+    bulkCreateSessions?: AvailableInternalBulkCreateSessionsResultSelection;
+    upsertSession?: AvailableInternalUpsertSessionResultSelection;
+    createEventHistory?: AvailableInternalCreateEventHistoryResultSelection;
+    updateEventHistory?: AvailableInternalUpdateEventHistoryResultSelection;
+    deleteEventHistory?: AvailableInternalDeleteEventHistoryResultSelection;
+    deleteManyEventHistory?: AvailableInternalDeleteManyEventHistoryResultSelection;
+    bulkCreateEventHistories?: AvailableInternalBulkCreateEventHistoriesResultSelection;
+    upsertEventHistory?: AvailableInternalUpsertEventHistoryResultSelection;
+    triggerCreateEventHistory?: AvailableCreateEventHistoryResultSelection;
+    triggerSendBookingEmails?: AvailableSendBookingEmailsResultSelection;
+    triggerSendEmail?: AvailableSendEmailResultSelection;
     cancelBackgroundAction?: AvailableCancelBackgroundActionResultSelection;
     bulkCancelBackgroundActions?: AvailableBulkCancelBackgroundActionResultSelection;
     seed?: AvailableInternalSeedMutationsSelection;
@@ -4571,178 +5016,6 @@ export type AvailableLockOperationResultSelection = {
     success?: boolean | null | undefined;
     /** Any errors encountered during the locking/unlocking operation */
     errors?: AvailableExecutionErrorSelection;
-};
-export type InternalCreateUserResult = {
-    __typename: 'InternalCreateUserResult';
-    success: Scalars['Boolean'];
-    errors: ExecutionError[];
-    /** Whether the record was created by this upsert operation */
-    created: Scalars['Boolean'];
-    user: (InternalUserRecord | null);
-};
-export type AvailableInternalCreateUserResultSelection = {
-    __typename?: boolean | null | undefined;
-    success?: boolean | null | undefined;
-    errors?: AvailableExecutionErrorSelection;
-    /** Whether the record was created by this upsert operation */
-    created?: boolean | null | undefined;
-    user?: boolean | null | undefined;
-};
-export type InternalUpdateUserResult = {
-    __typename: 'InternalUpdateUserResult';
-    success: Scalars['Boolean'];
-    errors: ExecutionError[];
-    /** Whether the record was created by this upsert operation */
-    created: Scalars['Boolean'];
-    user: (InternalUserRecord | null);
-};
-export type AvailableInternalUpdateUserResultSelection = {
-    __typename?: boolean | null | undefined;
-    success?: boolean | null | undefined;
-    errors?: AvailableExecutionErrorSelection;
-    /** Whether the record was created by this upsert operation */
-    created?: boolean | null | undefined;
-    user?: boolean | null | undefined;
-};
-export type InternalDeleteUserResult = {
-    __typename: 'InternalDeleteUserResult';
-    success: Scalars['Boolean'];
-    errors: ExecutionError[];
-    /** Whether the record was created by this upsert operation */
-    created: Scalars['Boolean'];
-    user: (InternalUserRecord | null);
-};
-export type AvailableInternalDeleteUserResultSelection = {
-    __typename?: boolean | null | undefined;
-    success?: boolean | null | undefined;
-    errors?: AvailableExecutionErrorSelection;
-    /** Whether the record was created by this upsert operation */
-    created?: boolean | null | undefined;
-    user?: boolean | null | undefined;
-};
-export type InternalDeleteManyUserResult = {
-    __typename: 'InternalDeleteManyUserResult';
-    success: Scalars['Boolean'];
-    errors: ExecutionError[];
-};
-export type AvailableInternalDeleteManyUserResultSelection = {
-    __typename?: boolean | null | undefined;
-    success?: boolean | null | undefined;
-    errors?: AvailableExecutionErrorSelection;
-};
-export type InternalBulkCreateUsersResult = {
-    __typename: 'InternalBulkCreateUsersResult';
-    success: Scalars['Boolean'];
-    errors: ExecutionError[];
-    users: (InternalUserRecord | null)[];
-};
-export type AvailableInternalBulkCreateUsersResultSelection = {
-    __typename?: boolean | null | undefined;
-    success?: boolean | null | undefined;
-    errors?: AvailableExecutionErrorSelection;
-    users?: boolean | null | undefined;
-};
-export type InternalUpsertUserResult = {
-    __typename: 'InternalUpsertUserResult';
-    success: Scalars['Boolean'];
-    errors: ExecutionError[];
-    /** Whether the record was created by this upsert operation */
-    created: Scalars['Boolean'];
-    user: (InternalUserRecord | null);
-};
-export type AvailableInternalUpsertUserResultSelection = {
-    __typename?: boolean | null | undefined;
-    success?: boolean | null | undefined;
-    errors?: AvailableExecutionErrorSelection;
-    /** Whether the record was created by this upsert operation */
-    created?: boolean | null | undefined;
-    user?: boolean | null | undefined;
-};
-export type InternalCreateSessionResult = {
-    __typename: 'InternalCreateSessionResult';
-    success: Scalars['Boolean'];
-    errors: ExecutionError[];
-    /** Whether the record was created by this upsert operation */
-    created: Scalars['Boolean'];
-    session: (InternalSessionRecord | null);
-};
-export type AvailableInternalCreateSessionResultSelection = {
-    __typename?: boolean | null | undefined;
-    success?: boolean | null | undefined;
-    errors?: AvailableExecutionErrorSelection;
-    /** Whether the record was created by this upsert operation */
-    created?: boolean | null | undefined;
-    session?: boolean | null | undefined;
-};
-export type InternalUpdateSessionResult = {
-    __typename: 'InternalUpdateSessionResult';
-    success: Scalars['Boolean'];
-    errors: ExecutionError[];
-    /** Whether the record was created by this upsert operation */
-    created: Scalars['Boolean'];
-    session: (InternalSessionRecord | null);
-};
-export type AvailableInternalUpdateSessionResultSelection = {
-    __typename?: boolean | null | undefined;
-    success?: boolean | null | undefined;
-    errors?: AvailableExecutionErrorSelection;
-    /** Whether the record was created by this upsert operation */
-    created?: boolean | null | undefined;
-    session?: boolean | null | undefined;
-};
-export type InternalDeleteSessionResult = {
-    __typename: 'InternalDeleteSessionResult';
-    success: Scalars['Boolean'];
-    errors: ExecutionError[];
-    /** Whether the record was created by this upsert operation */
-    created: Scalars['Boolean'];
-    session: (InternalSessionRecord | null);
-};
-export type AvailableInternalDeleteSessionResultSelection = {
-    __typename?: boolean | null | undefined;
-    success?: boolean | null | undefined;
-    errors?: AvailableExecutionErrorSelection;
-    /** Whether the record was created by this upsert operation */
-    created?: boolean | null | undefined;
-    session?: boolean | null | undefined;
-};
-export type InternalDeleteManySessionResult = {
-    __typename: 'InternalDeleteManySessionResult';
-    success: Scalars['Boolean'];
-    errors: ExecutionError[];
-};
-export type AvailableInternalDeleteManySessionResultSelection = {
-    __typename?: boolean | null | undefined;
-    success?: boolean | null | undefined;
-    errors?: AvailableExecutionErrorSelection;
-};
-export type InternalBulkCreateSessionsResult = {
-    __typename: 'InternalBulkCreateSessionsResult';
-    success: Scalars['Boolean'];
-    errors: ExecutionError[];
-    sessions: (InternalSessionRecord | null)[];
-};
-export type AvailableInternalBulkCreateSessionsResultSelection = {
-    __typename?: boolean | null | undefined;
-    success?: boolean | null | undefined;
-    errors?: AvailableExecutionErrorSelection;
-    sessions?: boolean | null | undefined;
-};
-export type InternalUpsertSessionResult = {
-    __typename: 'InternalUpsertSessionResult';
-    success: Scalars['Boolean'];
-    errors: ExecutionError[];
-    /** Whether the record was created by this upsert operation */
-    created: Scalars['Boolean'];
-    session: (InternalSessionRecord | null);
-};
-export type AvailableInternalUpsertSessionResultSelection = {
-    __typename?: boolean | null | undefined;
-    success?: boolean | null | undefined;
-    errors?: AvailableExecutionErrorSelection;
-    /** Whether the record was created by this upsert operation */
-    created?: boolean | null | undefined;
-    session?: boolean | null | undefined;
 };
 export type InternalCreateBookingResult = {
     __typename: 'InternalCreateBookingResult';
@@ -5174,6 +5447,264 @@ export type AvailableInternalUpsertVenueResultSelection = {
     created?: boolean | null | undefined;
     venue?: boolean | null | undefined;
 };
+export type InternalCreateUserResult = {
+    __typename: 'InternalCreateUserResult';
+    success: Scalars['Boolean'];
+    errors: ExecutionError[];
+    /** Whether the record was created by this upsert operation */
+    created: Scalars['Boolean'];
+    user: (InternalUserRecord | null);
+};
+export type AvailableInternalCreateUserResultSelection = {
+    __typename?: boolean | null | undefined;
+    success?: boolean | null | undefined;
+    errors?: AvailableExecutionErrorSelection;
+    /** Whether the record was created by this upsert operation */
+    created?: boolean | null | undefined;
+    user?: boolean | null | undefined;
+};
+export type InternalUpdateUserResult = {
+    __typename: 'InternalUpdateUserResult';
+    success: Scalars['Boolean'];
+    errors: ExecutionError[];
+    /** Whether the record was created by this upsert operation */
+    created: Scalars['Boolean'];
+    user: (InternalUserRecord | null);
+};
+export type AvailableInternalUpdateUserResultSelection = {
+    __typename?: boolean | null | undefined;
+    success?: boolean | null | undefined;
+    errors?: AvailableExecutionErrorSelection;
+    /** Whether the record was created by this upsert operation */
+    created?: boolean | null | undefined;
+    user?: boolean | null | undefined;
+};
+export type InternalDeleteUserResult = {
+    __typename: 'InternalDeleteUserResult';
+    success: Scalars['Boolean'];
+    errors: ExecutionError[];
+    /** Whether the record was created by this upsert operation */
+    created: Scalars['Boolean'];
+    user: (InternalUserRecord | null);
+};
+export type AvailableInternalDeleteUserResultSelection = {
+    __typename?: boolean | null | undefined;
+    success?: boolean | null | undefined;
+    errors?: AvailableExecutionErrorSelection;
+    /** Whether the record was created by this upsert operation */
+    created?: boolean | null | undefined;
+    user?: boolean | null | undefined;
+};
+export type InternalDeleteManyUserResult = {
+    __typename: 'InternalDeleteManyUserResult';
+    success: Scalars['Boolean'];
+    errors: ExecutionError[];
+};
+export type AvailableInternalDeleteManyUserResultSelection = {
+    __typename?: boolean | null | undefined;
+    success?: boolean | null | undefined;
+    errors?: AvailableExecutionErrorSelection;
+};
+export type InternalBulkCreateUsersResult = {
+    __typename: 'InternalBulkCreateUsersResult';
+    success: Scalars['Boolean'];
+    errors: ExecutionError[];
+    users: (InternalUserRecord | null)[];
+};
+export type AvailableInternalBulkCreateUsersResultSelection = {
+    __typename?: boolean | null | undefined;
+    success?: boolean | null | undefined;
+    errors?: AvailableExecutionErrorSelection;
+    users?: boolean | null | undefined;
+};
+export type InternalUpsertUserResult = {
+    __typename: 'InternalUpsertUserResult';
+    success: Scalars['Boolean'];
+    errors: ExecutionError[];
+    /** Whether the record was created by this upsert operation */
+    created: Scalars['Boolean'];
+    user: (InternalUserRecord | null);
+};
+export type AvailableInternalUpsertUserResultSelection = {
+    __typename?: boolean | null | undefined;
+    success?: boolean | null | undefined;
+    errors?: AvailableExecutionErrorSelection;
+    /** Whether the record was created by this upsert operation */
+    created?: boolean | null | undefined;
+    user?: boolean | null | undefined;
+};
+export type InternalCreateSessionResult = {
+    __typename: 'InternalCreateSessionResult';
+    success: Scalars['Boolean'];
+    errors: ExecutionError[];
+    /** Whether the record was created by this upsert operation */
+    created: Scalars['Boolean'];
+    session: (InternalSessionRecord | null);
+};
+export type AvailableInternalCreateSessionResultSelection = {
+    __typename?: boolean | null | undefined;
+    success?: boolean | null | undefined;
+    errors?: AvailableExecutionErrorSelection;
+    /** Whether the record was created by this upsert operation */
+    created?: boolean | null | undefined;
+    session?: boolean | null | undefined;
+};
+export type InternalUpdateSessionResult = {
+    __typename: 'InternalUpdateSessionResult';
+    success: Scalars['Boolean'];
+    errors: ExecutionError[];
+    /** Whether the record was created by this upsert operation */
+    created: Scalars['Boolean'];
+    session: (InternalSessionRecord | null);
+};
+export type AvailableInternalUpdateSessionResultSelection = {
+    __typename?: boolean | null | undefined;
+    success?: boolean | null | undefined;
+    errors?: AvailableExecutionErrorSelection;
+    /** Whether the record was created by this upsert operation */
+    created?: boolean | null | undefined;
+    session?: boolean | null | undefined;
+};
+export type InternalDeleteSessionResult = {
+    __typename: 'InternalDeleteSessionResult';
+    success: Scalars['Boolean'];
+    errors: ExecutionError[];
+    /** Whether the record was created by this upsert operation */
+    created: Scalars['Boolean'];
+    session: (InternalSessionRecord | null);
+};
+export type AvailableInternalDeleteSessionResultSelection = {
+    __typename?: boolean | null | undefined;
+    success?: boolean | null | undefined;
+    errors?: AvailableExecutionErrorSelection;
+    /** Whether the record was created by this upsert operation */
+    created?: boolean | null | undefined;
+    session?: boolean | null | undefined;
+};
+export type InternalDeleteManySessionResult = {
+    __typename: 'InternalDeleteManySessionResult';
+    success: Scalars['Boolean'];
+    errors: ExecutionError[];
+};
+export type AvailableInternalDeleteManySessionResultSelection = {
+    __typename?: boolean | null | undefined;
+    success?: boolean | null | undefined;
+    errors?: AvailableExecutionErrorSelection;
+};
+export type InternalBulkCreateSessionsResult = {
+    __typename: 'InternalBulkCreateSessionsResult';
+    success: Scalars['Boolean'];
+    errors: ExecutionError[];
+    sessions: (InternalSessionRecord | null)[];
+};
+export type AvailableInternalBulkCreateSessionsResultSelection = {
+    __typename?: boolean | null | undefined;
+    success?: boolean | null | undefined;
+    errors?: AvailableExecutionErrorSelection;
+    sessions?: boolean | null | undefined;
+};
+export type InternalUpsertSessionResult = {
+    __typename: 'InternalUpsertSessionResult';
+    success: Scalars['Boolean'];
+    errors: ExecutionError[];
+    /** Whether the record was created by this upsert operation */
+    created: Scalars['Boolean'];
+    session: (InternalSessionRecord | null);
+};
+export type AvailableInternalUpsertSessionResultSelection = {
+    __typename?: boolean | null | undefined;
+    success?: boolean | null | undefined;
+    errors?: AvailableExecutionErrorSelection;
+    /** Whether the record was created by this upsert operation */
+    created?: boolean | null | undefined;
+    session?: boolean | null | undefined;
+};
+export type InternalCreateEventHistoryResult = {
+    __typename: 'InternalCreateEventHistoryResult';
+    success: Scalars['Boolean'];
+    errors: ExecutionError[];
+    /** Whether the record was created by this upsert operation */
+    created: Scalars['Boolean'];
+    eventHistory: (InternalEventHistoryRecord | null);
+};
+export type AvailableInternalCreateEventHistoryResultSelection = {
+    __typename?: boolean | null | undefined;
+    success?: boolean | null | undefined;
+    errors?: AvailableExecutionErrorSelection;
+    /** Whether the record was created by this upsert operation */
+    created?: boolean | null | undefined;
+    eventHistory?: boolean | null | undefined;
+};
+export type InternalUpdateEventHistoryResult = {
+    __typename: 'InternalUpdateEventHistoryResult';
+    success: Scalars['Boolean'];
+    errors: ExecutionError[];
+    /** Whether the record was created by this upsert operation */
+    created: Scalars['Boolean'];
+    eventHistory: (InternalEventHistoryRecord | null);
+};
+export type AvailableInternalUpdateEventHistoryResultSelection = {
+    __typename?: boolean | null | undefined;
+    success?: boolean | null | undefined;
+    errors?: AvailableExecutionErrorSelection;
+    /** Whether the record was created by this upsert operation */
+    created?: boolean | null | undefined;
+    eventHistory?: boolean | null | undefined;
+};
+export type InternalDeleteEventHistoryResult = {
+    __typename: 'InternalDeleteEventHistoryResult';
+    success: Scalars['Boolean'];
+    errors: ExecutionError[];
+    /** Whether the record was created by this upsert operation */
+    created: Scalars['Boolean'];
+    eventHistory: (InternalEventHistoryRecord | null);
+};
+export type AvailableInternalDeleteEventHistoryResultSelection = {
+    __typename?: boolean | null | undefined;
+    success?: boolean | null | undefined;
+    errors?: AvailableExecutionErrorSelection;
+    /** Whether the record was created by this upsert operation */
+    created?: boolean | null | undefined;
+    eventHistory?: boolean | null | undefined;
+};
+export type InternalDeleteManyEventHistoryResult = {
+    __typename: 'InternalDeleteManyEventHistoryResult';
+    success: Scalars['Boolean'];
+    errors: ExecutionError[];
+};
+export type AvailableInternalDeleteManyEventHistoryResultSelection = {
+    __typename?: boolean | null | undefined;
+    success?: boolean | null | undefined;
+    errors?: AvailableExecutionErrorSelection;
+};
+export type InternalBulkCreateEventHistoriesResult = {
+    __typename: 'InternalBulkCreateEventHistoriesResult';
+    success: Scalars['Boolean'];
+    errors: ExecutionError[];
+    eventHistories: (InternalEventHistoryRecord | null)[];
+};
+export type AvailableInternalBulkCreateEventHistoriesResultSelection = {
+    __typename?: boolean | null | undefined;
+    success?: boolean | null | undefined;
+    errors?: AvailableExecutionErrorSelection;
+    eventHistories?: boolean | null | undefined;
+};
+export type InternalUpsertEventHistoryResult = {
+    __typename: 'InternalUpsertEventHistoryResult';
+    success: Scalars['Boolean'];
+    errors: ExecutionError[];
+    /** Whether the record was created by this upsert operation */
+    created: Scalars['Boolean'];
+    eventHistory: (InternalEventHistoryRecord | null);
+};
+export type AvailableInternalUpsertEventHistoryResultSelection = {
+    __typename?: boolean | null | undefined;
+    success?: boolean | null | undefined;
+    errors?: AvailableExecutionErrorSelection;
+    /** Whether the record was created by this upsert operation */
+    created?: boolean | null | undefined;
+    eventHistory?: boolean | null | undefined;
+};
 /** The value returned from cancelling a background action */
 export type CancelBackgroundActionResult = {
     __typename: 'CancelBackgroundActionResult';
@@ -5205,12 +5736,10 @@ export type InternalSeedMutations = {
     triggerCreateReviews: (SeedCreateReviewsResult | null);
     triggerCreateUsers: (SeedCreateUsersResult | null);
     triggerCreateVenues: (SeedCreateVenuesResult | null);
-    triggerDebugSeed: (SeedDebugSeedResult | null);
     triggerQuickSeed: (SeedQuickSeedResult | null);
     triggerSeedAllData: (SeedSeedAllDataResult | null);
     triggerSeedData: (SeedSeedDataResult | null);
     triggerSimpleSeed: (SeedSimpleSeedResult | null);
-    triggerTestContext: (SeedTestContextResult | null);
 };
 export type AvailableInternalSeedMutationsSelection = {
     __typename?: boolean | null | undefined;
@@ -5219,12 +5748,10 @@ export type AvailableInternalSeedMutationsSelection = {
     triggerCreateReviews?: AvailableSeedCreateReviewsResultSelection;
     triggerCreateUsers?: AvailableSeedCreateUsersResultSelection;
     triggerCreateVenues?: AvailableSeedCreateVenuesResultSelection;
-    triggerDebugSeed?: AvailableSeedDebugSeedResultSelection;
     triggerQuickSeed?: AvailableSeedQuickSeedResultSelection;
     triggerSeedAllData?: AvailableSeedSeedAllDataResultSelection;
     triggerSeedData?: AvailableSeedSeedDataResultSelection;
     triggerSimpleSeed?: AvailableSeedSimpleSeedResultSelection;
-    triggerTestContext?: AvailableSeedTestContextResultSelection;
 };
 export type SeedCreateEventsResult = {
     __typename: 'SeedCreateEventsResult';
@@ -5286,18 +5813,6 @@ export type AvailableSeedCreateVenuesResultSelection = {
     errors?: AvailableExecutionErrorSelection;
     result?: boolean | null | undefined;
 };
-export type SeedDebugSeedResult = {
-    __typename: 'SeedDebugSeedResult';
-    success: Scalars['Boolean'];
-    errors: ExecutionError[];
-    result: (Scalars['JSON'] | null);
-};
-export type AvailableSeedDebugSeedResultSelection = {
-    __typename?: boolean | null | undefined;
-    success?: boolean | null | undefined;
-    errors?: AvailableExecutionErrorSelection;
-    result?: boolean | null | undefined;
-};
 export type SeedQuickSeedResult = {
     __typename: 'SeedQuickSeedResult';
     success: Scalars['Boolean'];
@@ -5346,18 +5861,6 @@ export type AvailableSeedSimpleSeedResultSelection = {
     errors?: AvailableExecutionErrorSelection;
     result?: boolean | null | undefined;
 };
-export type SeedTestContextResult = {
-    __typename: 'SeedTestContextResult';
-    success: Scalars['Boolean'];
-    errors: ExecutionError[];
-    result: (Scalars['JSON'] | null);
-};
-export type AvailableSeedTestContextResultSelection = {
-    __typename?: boolean | null | undefined;
-    success?: boolean | null | undefined;
-    errors?: AvailableExecutionErrorSelection;
-    result?: boolean | null | undefined;
-};
 export type SeedMutations = {
     __typename: 'SeedMutations';
     createEvents: (SeedCreateEventsResult | null);
@@ -5365,12 +5868,10 @@ export type SeedMutations = {
     createReviews: (SeedCreateReviewsResult | null);
     createUsers: (SeedCreateUsersResult | null);
     createVenues: (SeedCreateVenuesResult | null);
-    debugSeed: (SeedDebugSeedResult | null);
     quickSeed: (SeedQuickSeedResult | null);
     seedAllData: (SeedSeedAllDataResult | null);
     seedData: (SeedSeedDataResult | null);
     simpleSeed: (SeedSimpleSeedResult | null);
-    testContext: (SeedTestContextResult | null);
 };
 export type AvailableSeedMutationsSelection = {
     __typename?: boolean | null | undefined;
@@ -5379,12 +5880,10 @@ export type AvailableSeedMutationsSelection = {
     createReviews?: AvailableSeedCreateReviewsResultSelection;
     createUsers?: AvailableSeedCreateUsersResultSelection;
     createVenues?: AvailableSeedCreateVenuesResultSelection;
-    debugSeed?: AvailableSeedDebugSeedResultSelection;
     quickSeed?: AvailableSeedQuickSeedResultSelection;
     seedAllData?: AvailableSeedSeedAllDataResultSelection;
     seedData?: AvailableSeedSeedDataResultSelection;
     simpleSeed?: AvailableSeedSimpleSeedResultSelection;
-    testContext?: AvailableSeedTestContextResultSelection;
 };
 export type Subscription = {
     __typename: 'Subscription';

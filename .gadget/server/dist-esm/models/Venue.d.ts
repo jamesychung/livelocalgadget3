@@ -10,16 +10,16 @@ export type DefaultVenueServerSelection = {
 	readonly createdAt: true
 	readonly updatedAt: true
 	readonly state: true
+	readonly events: false
+	readonly bookings: false
+	readonly additionalPictures: true
 	readonly address: true
 	readonly amenities: true
-	readonly additionalPictures: true
-	readonly bookings: false
 	readonly capacity: true
 	readonly city: true
 	readonly country: true
 	readonly description: true
 	readonly email: true
-	readonly events: false
 	readonly genres: true
 	readonly hours: true
 	readonly isActive: true
@@ -32,10 +32,10 @@ export type DefaultVenueServerSelection = {
 	readonly profilePicture: true
 	readonly rating: true
 	readonly socialLinks: true
-	readonly reviews: false
 	readonly type: true
 	readonly website: true
 	readonly zipCode: true
+	readonly reviews: false
 };
 /** Context of the `create` action on the `venue` model. */
 export interface CreateVenueActionContext extends AmbientContext {
@@ -61,9 +61,9 @@ export interface CreateVenueActionContext extends AmbientContext {
 	params: {
 		venue?: {
 			state?: string
+			additionalPictures?: Scalars["JSON"]
 			address?: string
 			amenities?: Scalars["JSON"]
-			additionalPictures?: Scalars["JSON"]
 			capacity?: number
 			city?: string
 			country?: string
@@ -116,9 +116,9 @@ export interface UpdateVenueActionContext extends AmbientContext {
 	params: {
 		venue?: {
 			state?: string
+			additionalPictures?: Scalars["JSON"]
 			address?: string
 			amenities?: Scalars["JSON"]
-			additionalPictures?: Scalars["JSON"]
 			capacity?: number
 			city?: string
 			country?: string

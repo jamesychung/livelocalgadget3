@@ -1187,43 +1187,7 @@ export default function VenueEventManagementPage() {
 
                         {/* History Tab */}
                         <TabsContent value="history" className="space-y-6">
-                            <div className="space-y-4">
-                                <Card>
-                                    <CardHeader>
-                                        <CardTitle>Test Event History</CardTitle>
-                                        <p className="text-sm text-muted-foreground">
-                                            Test if event history API is working
-                                        </p>
-                                    </CardHeader>
-                                    <CardContent>
-                                        <Button 
-                                            onClick={async () => {
-                                                try {
-                                                    console.log("Testing event history API...");
-                                                    const testEntry = await api.eventHistory.create({
-                                                        event: { _link: eventId },
-                                                        changedBy: { _link: api.currentUser?.id || 'system' },
-                                                        changeType: 'test_entry',
-                                                        previousValue: 'test_previous',
-                                                        newValue: 'test_new',
-                                                        description: 'Test event history entry',
-                                                        context: { test: true },
-                                                        metadata: { test: true }
-                                                    });
-                                                    console.log("✅ Test event history entry created:", testEntry);
-                                                    alert("✅ Test event history entry created successfully!");
-                                                } catch (error) {
-                                                    console.error("❌ Error creating test event history entry:", error);
-                                                    alert(`❌ Error: ${error.message}`);
-                                                }
-                                            }}
-                                        >
-                                            Create Test History Entry
-                                        </Button>
-                                    </CardContent>
-                                </Card>
-                                <EventHistoryViewer eventId={eventId} />
-                            </div>
+                            <EventHistoryViewer eventId={eventId} />
                         </TabsContent>
                     </Tabs>
                 </>

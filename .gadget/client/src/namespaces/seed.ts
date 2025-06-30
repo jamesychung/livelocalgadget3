@@ -102,24 +102,6 @@ export class SeedNamespace {
                      variables: {};
                      variablesType: Record<string, never>;
                    };
-  /** Executes the debugSeed global action. */
-  debugSeed = buildGlobalAction(this, {
-                       type: 'globalAction',
-                       functionName: 'debugSeed',
-                       operationName: 'debugSeed',
-                       operationReturnType: 'SeedDebugSeed',
-                       namespace: 'seed',
-                       variables: {}
-                     } as const) as unknown as {
-                     (): Promise<any>;
-                     type: 'globalAction';
-                     operationName: 'debugSeed';
-                     operationReturnType: 'SeedDebugSeed';
-                     namespace: 'seed';
-                     typesImports: [];
-                     variables: {};
-                     variablesType: Record<string, never>;
-                   };
   /** Executes the quickSeed global action. */
   quickSeed = buildGlobalAction(this, {
                        type: 'globalAction',
@@ -187,24 +169,6 @@ export class SeedNamespace {
                      type: 'globalAction';
                      operationName: 'simpleSeed';
                      operationReturnType: 'SeedSimpleSeed';
-                     namespace: 'seed';
-                     typesImports: [];
-                     variables: {};
-                     variablesType: Record<string, never>;
-                   };
-  /** Executes the testContext global action. */
-  testContext = buildGlobalAction(this, {
-                       type: 'globalAction',
-                       functionName: 'testContext',
-                       operationName: 'testContext',
-                       operationReturnType: 'SeedTestContext',
-                       namespace: 'seed',
-                       variables: {}
-                     } as const) as unknown as {
-                     (): Promise<any>;
-                     type: 'globalAction';
-                     operationName: 'testContext';
-                     operationReturnType: 'SeedTestContext';
                      namespace: 'seed';
                      typesImports: [];
                      variables: {};

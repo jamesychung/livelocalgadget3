@@ -10,13 +10,17 @@ export type DefaultMusicianServerSelection = {
 	readonly createdAt: true
 	readonly updatedAt: true
 	readonly state: true
+	readonly reviews: false
+	readonly bookings: false
+	readonly events: false
+	readonly additionalPictures: true
+	readonly audio: true
+	readonly audioFiles: true
 	readonly availability: true
 	readonly bio: true
-	readonly bookings: false
 	readonly city: true
 	readonly country: true
 	readonly email: true
-	readonly events: false
 	readonly experience: true
 	readonly genre: true
 	readonly genres: true
@@ -25,14 +29,9 @@ export type DefaultMusicianServerSelection = {
 	readonly isActive: true
 	readonly isVerified: true
 	readonly location: true
-	readonly name: true
 	readonly phone: true
 	readonly profilePicture: true
-	readonly reviews: false
 	readonly rating: true
-	readonly audio: true
-	readonly audioFiles: true
-	readonly additionalPictures: true
 	readonly socialLinks: true
 	readonly stageName: true
 	readonly totalGigs: true
@@ -65,6 +64,9 @@ export interface CreateMusicianActionContext extends AmbientContext {
 	params: {
 		musician?: {
 			state?: string
+			additionalPictures?: Scalars["JSON"]
+			audio?: string
+			audioFiles?: Scalars["JSON"]
 			availability?: Scalars["JSON"]
 			bio?: string
 			city?: string
@@ -78,13 +80,9 @@ export interface CreateMusicianActionContext extends AmbientContext {
 			isActive?: boolean
 			isVerified?: boolean
 			location?: string
-			name?: string
 			phone?: string
 			profilePicture?: string
 			rating?: number
-			audio?: string
-			audioFiles?: Scalars["JSON"]
-			additionalPictures?: Scalars["JSON"]
 			socialLinks?: Scalars["JSON"]
 			stageName?: string
 			totalGigs?: number
@@ -124,6 +122,9 @@ export interface UpdateMusicianActionContext extends AmbientContext {
 	params: {
 		musician?: {
 			state?: string
+			additionalPictures?: Scalars["JSON"]
+			audio?: string
+			audioFiles?: Scalars["JSON"]
 			availability?: Scalars["JSON"]
 			bio?: string
 			city?: string
@@ -137,13 +138,9 @@ export interface UpdateMusicianActionContext extends AmbientContext {
 			isActive?: boolean
 			isVerified?: boolean
 			location?: string
-			name?: string
 			phone?: string
 			profilePicture?: string
 			rating?: number
-			audio?: string
-			audioFiles?: Scalars["JSON"]
-			additionalPictures?: Scalars["JSON"]
 			socialLinks?: Scalars["JSON"]
 			stageName?: string
 			totalGigs?: number
