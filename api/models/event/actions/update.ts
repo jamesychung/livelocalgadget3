@@ -1,61 +1,108 @@
-import { applyParams, save, ActionOptions, ActionRun, UpdateEventActionContext } from "gadget-server";
+import { applyParams, save, ActionOptions, ActionRun } from "gadget-server";
 
 /**
  * Action to log event history when events are updated
  */
-export const run = async (ctx: UpdateEventActionContext) => {
-  console.log('=== EVENT UPDATE ACTION DEBUG ===');
-  console.log('Record:', ctx.record);
-  console.log('Previous record:', ctx.previousRecord);
-  console.log('Changes:', ctx.changes);
-  console.log('=== END DEBUG ===');
-
-  // Log all changes to event history
-  const changes = ctx.changes;
-  const previousRecord = ctx.previousRecord;
+export const run: ActionRun = async ({ params, record, logger, api, session }) => {
+  // Debug: Log the parameters being received
+  logger.info(`=== EVENT UPDATE ACTION START ===`);
+  logger.info(`Event ID: ${record.id}`);
+  logger.info(`Event update parameters: ${JSON.stringify(params)}`);
+  logger.info(`Record before applyParams: ${JSON.stringify(record)}`);
   
-  for (const [field, newValue] of Object.entries(changes)) {
-    if (field === 'updatedAt' || field === 'id') continue; // Skip system fields
+  // Store the previous values for history logging
+  const previousValues = {
+    title: record.title,
+    description: record.description,
+    date: record.date,
+    startTime: record.startTime,
+    endTime: record.endTime,
+    status: record.status,
+    ticketPrice: record.ticketPrice,
+    totalCapacity: record.totalCapacity
+  };
+  
+  // Apply the parameters to the record
+  applyParams(params, record);
+  
+  logger.info(`Record after applyParams: ${JSON.stringify(record)}`);
+  logger.info(`About to save record with ID: ${record.id}`);
+  
+  try {
+    // Save the record to the database
+    await save(record);
     
-    const previousValue = previousRecord?.[field];
+    logger.info(`✅ Save operation completed successfully`);
+    logger.info(`Updated event with ID: ${record.id}`);
+    logger.info(`Event title: ${record.title}, Date: ${record.date}`);
+    logger.info(`Event status: ${record.status}, Start time: ${record.startTime}`);
     
-    // Only log if the value actually changed
-    if (previousValue !== newValue) {
-      try {
-        await ctx.api.eventHistory.create({
-          event: {
-            _link: ctx.record.id
-          },
-          changedBy: {
-            _link: ctx.session?.user?.id || 'system'
-          },
-          changeType: `event_${field}`,
-          previousValue: previousValue ? String(previousValue) : 'none',
-          newValue: newValue ? String(newValue) : 'none',
-          description: `Event ${field} changed from "${previousValue || 'none'}" to "${newValue || 'none'}"`,
-          context: {
-            eventId: ctx.record.id,
-            venueId: ctx.record.venueId,
-            changeReason: 'venue_edit'
-          },
-          metadata: {
-            sessionId: ctx.session?.id,
-            userAgent: ctx.request?.headers?.['user-agent'],
-            ipAddress: ctx.request?.headers?.['x-forwarded-for'] || ctx.request?.headers?.['x-real-ip']
-          }
-        });
+    // Create event history entries for changed fields
+    const changes = params.event || params;
+    logger.info(`Changes detected: ${JSON.stringify(changes)}`);
+    logger.info(`Previous values: ${JSON.stringify(previousValues)}`);
+    
+    for (const [field, newValue] of Object.entries(changes)) {
+      if (field === 'updatedAt' || field === 'id') continue; // Skip system fields
+      
+      const previousValue = previousValues[field];
+      logger.info(`Checking field ${field}: previous=${previousValue}, new=${newValue}`);
+      
+      // Only log if the value actually changed
+      if (previousValue !== newValue) {
+        logger.info(`📝 Field ${field} changed from "${previousValue}" to "${newValue}"`);
+        try {
+          logger.info(`📝 Creating history entry for ${field} change`);
+          
+          const historyEntry = await api.eventHistory.create({
+            event: {
+              _link: record.id
+            },
+            changedBy: {
+              _link: session?.user?.id || 'system'
+            },
+            changeType: `event_${field}`,
+            previousValue: previousValue ? String(previousValue) : 'none',
+            newValue: newValue ? String(newValue) : 'none',
+            description: `Event ${field} changed from "${previousValue || 'none'}" to "${newValue || 'none'}"`,
+            context: {
+              eventId: record.id,
+              venueId: record.venueId,
+              changeReason: 'venue_edit'
+            },
+            metadata: {
+              sessionId: session?.id || null,
+              userAgent: null, // We don't have access to request headers in this context
+              ipAddress: null
+            }
+          });
 
-        console.log(`✅ Event history entry created for ${field} change`);
-      } catch (error) {
-        console.error(`❌ Error creating event history entry for ${field}:`, error);
+          logger.info(`✅ Event history entry created for ${field} change: ${historyEntry.id}`);
+        } catch (error) {
+          logger.error(`❌ Error creating event history entry for ${field}: ${error}`);
+          logger.error(`Error details: ${JSON.stringify(error)}`);
+          // Don't throw the error - let the update continue
+        }
+      } else {
+        logger.info(`Field ${field} unchanged: ${previousValue}`);
       }
     }
+    
+    // Verify the record was actually saved by fetching it again
+    const savedEvent = await api.event.findOne(record.id);
+    logger.info(`Verification - fetched saved event: ${JSON.stringify(savedEvent)}`);
+    
+    // Return the updated record
+    return record;
+    
+  } catch (error) {
+    logger.error(`❌ Error saving event: ${error}`);
+    logger.error(`Error details: ${JSON.stringify(error)}`);
+    throw error;
   }
 };
 
-export const options = {
+export const options: ActionOptions = {
   actionType: "update",
-  triggers: {
-    onSuccess: true
-  }
-} satisfies ActionOptions; 
+  returnType: true,
+}; 

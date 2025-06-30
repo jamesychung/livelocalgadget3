@@ -112,40 +112,7 @@ export default function VenueEventManagementPage() {
             setEvent(eventData);
         } catch (error) {
             console.error("Error fetching event:", error);
-            // Fallback to mock data if real data fails
-            setEvent({
-                id: eventId,
-                title: "Jazz Night at The Grand Hall",
-                description: "An evening of smooth jazz featuring local and regional talent. Perfect for date night or corporate events.",
-                date: "2024-02-15T19:00:00Z",
-                startTime: "19:00",
-                endTime: "23:00",
-                ticketPrice: 45,
-                totalCapacity: 200,
-                availableTickets: 150,
-                status: "confirmed",
-                venue: {
-                    name: "The Grand Hall",
-                    address: "123 Main Street",
-                    city: "Austin",
-                    state: "TX",
-                    zipCode: "78701",
-                    phone: "(512) 555-0123",
-                    email: "info@grandhall.com",
-                    website: "https://grandhall.com"
-                },
-                musician: {
-                    id: "musician-2",
-                    stageName: "Sarah Keys",
-                    genre: "Classical",
-                    city: "Houston",
-                    state: "TX",
-                    phone: "(713) 555-0202",
-                    email: "sarah@sarahkeys.com",
-                    hourlyRate: 175,
-                    profilePicture: null
-                }
-            });
+            setEvent(null);
         } finally {
             setEventLoading(false);
         }
@@ -218,99 +185,7 @@ export default function VenueEventManagementPage() {
             setBookingsData(bookings);
         } catch (error) {
             console.error("Error fetching bookings:", error);
-            // Fallback to mock data if real data fails
-            setBookingsData([
-                {
-                    id: "booking-1",
-                    status: "applied",
-                    proposedRate: 150,
-                    musicianPitch: "I'm a versatile jazz guitarist with 10+ years of experience performing at venues like yours. I can adapt my set to match your audience perfectly.",
-                    createdAt: "2024-01-15T10:30:00Z",
-                    musician: {
-                        id: "musician-1",
-                        stageName: "Jazz Master Mike",
-                        genre: "Jazz",
-                        city: "Austin",
-                        state: "TX",
-                        phone: "(512) 555-0101",
-                        email: "sangyong007@gmail.com",
-                        hourlyRate: 140,
-                        profilePicture: null
-                    }
-                },
-                {
-                    id: "booking-2", 
-                    status: "applied",
-                    proposedRate: 180,
-                    musicianPitch: "Classical pianist with formal training. Perfect for elegant events and sophisticated audiences.",
-                    createdAt: "2024-01-14T14:20:00Z",
-                    musician: {
-                        id: "musician-2",
-                        stageName: "Sarah Keys",
-                        genre: "Classical",
-                        city: "Houston",
-                        state: "TX", 
-                        phone: "(713) 555-0202",
-                        email: "sangyong007@gmail.com",
-                        hourlyRate: 175,
-                        profilePicture: null
-                    }
-                },
-                {
-                    id: "booking-3",
-                    status: "applied", 
-                    proposedRate: 120,
-                    musicianPitch: "Country singer-songwriter with original material and covers. Great for casual, fun atmosphere.",
-                    createdAt: "2024-01-16T09:15:00Z",
-                    musician: {
-                        id: "musician-3",
-                        stageName: "Cowboy Chris",
-                        genre: "Country",
-                        city: "Dallas",
-                        state: "TX",
-                        phone: "(214) 555-0303", 
-                        email: "sangyong007@gmail.com",
-                        hourlyRate: 110,
-                        profilePicture: null
-                    }
-                },
-                {
-                    id: "booking-4",
-                    status: "applied",
-                    proposedRate: 200,
-                    musicianPitch: "Rock band looking for high-energy performances. We bring our own equipment.",
-                    createdAt: "2024-01-13T16:45:00Z", 
-                    musician: {
-                        id: "musician-4",
-                        stageName: "The Rockers",
-                        genre: "Rock",
-                        city: "San Antonio",
-                        state: "TX",
-                        phone: "(210) 555-0404",
-                        email: "sangyong007@gmail.com", 
-                        hourlyRate: 190,
-                        profilePicture: null
-                    }
-                },
-                {
-                    id: "booking-5",
-                    status: "applied",
-                    proposedRate: 95,
-                    musicianPitch: "Acoustic folk singer with warm vocals. Perfect for intimate settings and background music.",
-                    createdAt: "2024-01-17T11:00:00Z",
-                    musician: {
-                        id: "musician-5", 
-                        stageName: "Folk Emma",
-                        genre: "Folk",
-                        city: "Austin",
-                        state: "TX",
-                        phone: "(512) 555-0505",
-                        email: "sangyong007@gmail.com",
-                        hourlyRate: 90,
-                        profilePicture: null
-                    }
-                }
-            ]);
+            setBookingsData([]);
         } finally {
             setBookingsLoading(false);
         }
@@ -391,43 +266,104 @@ export default function VenueEventManagementPage() {
             console.log("Event ID:", event.id);
             console.log("Edit form data:", editFormData);
             
-            // Prepare the data for the API call - use the same pattern as venue profile editing
-            const updateData = {
-                title: editFormData.title || "",
-                description: editFormData.description || "",
-                status: editFormData.status || "",
-                startTime: editFormData.startTime || "",
-                endTime: editFormData.endTime || "",
-                ticketPrice: editFormData.ticketPrice && editFormData.ticketPrice.trim() !== "" ? 
-                    parseFloat(editFormData.ticketPrice) : 0,
-                totalCapacity: editFormData.totalCapacity && editFormData.totalCapacity.trim() !== "" ? 
-                    parseInt(editFormData.totalCapacity) : 0,
-            };
+            // Prepare all the form data for update (temporarily excluding date)
+            const updateData: any = {};
 
-            // Handle date conversion
-            if (editFormData.date && editFormData.date.trim() !== "") {
-                const dateObj = new Date(editFormData.date);
-                if (!isNaN(dateObj.getTime())) {
-                    updateData.date = dateObj.toISOString();
+            // Only add fields that have actual values (not empty strings)
+            if (editFormData.title && editFormData.title.trim() !== "") {
+                updateData.title = editFormData.title.trim();
+            }
+            
+            if (editFormData.description && editFormData.description.trim() !== "") {
+                updateData.description = editFormData.description.trim();
+            }
+            
+            if (editFormData.status && editFormData.status.trim() !== "") {
+                updateData.status = editFormData.status.trim();
+            }
+            
+            if (editFormData.startTime && editFormData.startTime.trim() !== "") {
+                updateData.startTime = editFormData.startTime.trim();
+            }
+            
+            if (editFormData.endTime && editFormData.endTime.trim() !== "") {
+                updateData.endTime = editFormData.endTime.trim();
+            }
+
+            // Handle numeric fields
+            if (editFormData.ticketPrice && editFormData.ticketPrice.trim() !== "") {
+                const ticketPrice = parseFloat(editFormData.ticketPrice);
+                if (!isNaN(ticketPrice)) {
+                    updateData.ticketPrice = ticketPrice;
                 }
+            }
+            
+            if (editFormData.totalCapacity && editFormData.totalCapacity.trim() !== "") {
+                const totalCapacity = parseInt(editFormData.totalCapacity);
+                if (!isNaN(totalCapacity)) {
+                    updateData.totalCapacity = totalCapacity;
+                }
+            }
+
+            // Handle date conversion with proper timezone handling
+            if (editFormData.date && editFormData.date.trim() !== "") {
+                // Create a proper ISO DateTime string for the selected date at midnight local time
+                const dateObj = new Date(editFormData.date + 'T00:00:00');
+                updateData.date = dateObj.toISOString();
+                
+                console.log("Date conversion:", {
+                    input: editFormData.date,
+                    dateObj: dateObj,
+                    output: updateData.date,
+                    localTime: dateObj.toLocaleString()
+                });
             }
 
             console.log("=== FINAL UPDATE DATA ===");
             console.log("UpdateData:", updateData);
             console.log("UpdateData JSON:", JSON.stringify(updateData, null, 2));
+            console.log("UpdateData keys:", Object.keys(updateData));
+            console.log("UpdateData values:", Object.values(updateData));
+            
+            // Check for undefined/null values
+            for (const [key, value] of Object.entries(updateData)) {
+                console.log(`Field ${key}:`, {
+                    value: value,
+                    type: typeof value,
+                    isUndefined: value === undefined,
+                    isNull: value === null,
+                    isString: typeof value === 'string',
+                    isEmptyString: value === '',
+                    isNaN: typeof value === 'number' && isNaN(value)
+                });
+            }
+
+            // Test if the API object exists and has the update method
+            console.log("=== API DEBUG ===");
+            console.log("API object:", api);
+            console.log("API.event:", api.event);
+            console.log("API.event.update:", typeof api.event.update);
+            
+            if (!api.event || typeof api.event.update !== 'function') {
+                throw new Error("API event update method not available");
+            }
 
             // Call the API to update the event
             console.log("Calling api.event.update with ID:", event.id);
+            console.log("Calling api.event.update with data:", updateData);
+            
+            // Send the data directly, not nested under 'event'
             const updatedEvent = await api.event.update(event.id, updateData);
+
+            console.log("=== API RESPONSE ===");
+            console.log("Updated event result:", updatedEvent);
+            console.log("Updated event type:", typeof updatedEvent);
 
             if (updatedEvent) {
                 console.log("✅ Event updated successfully:", updatedEvent);
                 
-                // Update the local event state with the new data
-                setEvent(prevEvent => ({
-                    ...prevEvent,
-                    ...updateData
-                }));
+                // Refresh the event data from the database to ensure we have the latest values
+                await fetchEventData();
                 
                 // Exit edit mode
                 setIsEditing(false);
@@ -445,9 +381,25 @@ export default function VenueEventManagementPage() {
                 eventId: event?.id,
                 editFormData: editFormData,
                 errorMessage: error.message,
-                errorStack: error.stack
+                errorStack: error.stack,
+                errorName: error.name,
+                errorCode: error.code
             });
-            alert(`❌ Error updating event: ${error.message || 'Unknown error'}`);
+            
+            // More specific error handling
+            if (error.message && error.message.includes("Cannot convert undefined or null to object")) {
+                alert("❌ Error: The API is receiving undefined or null values. This might be a field type mismatch.");
+            } else if (error.message && error.message.includes("Network")) {
+                alert("❌ Network error: Please check your internet connection.");
+            } else if (error.message && error.message.includes("401")) {
+                alert("❌ Authentication error: Please log in again.");
+            } else if (error.message && error.message.includes("403")) {
+                alert("❌ Permission error: You don't have permission to update this event.");
+            } else if (error.message && error.message.includes("404")) {
+                alert("❌ Event not found: The event may have been deleted.");
+            } else {
+                alert(`❌ Error updating event: ${error.message || 'Unknown error'}`);
+            }
         }
     };
 
@@ -1235,17 +1187,43 @@ export default function VenueEventManagementPage() {
 
                         {/* History Tab */}
                         <TabsContent value="history" className="space-y-6">
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle>Event History</CardTitle>
-                                    <p className="text-sm text-muted-foreground">
-                                        View event history and related activities
-                                    </p>
-                                </CardHeader>
-                                <CardContent>
-                                    {/* Implementation of history tab */}
-                                </CardContent>
-                            </Card>
+                            <div className="space-y-4">
+                                <Card>
+                                    <CardHeader>
+                                        <CardTitle>Test Event History</CardTitle>
+                                        <p className="text-sm text-muted-foreground">
+                                            Test if event history API is working
+                                        </p>
+                                    </CardHeader>
+                                    <CardContent>
+                                        <Button 
+                                            onClick={async () => {
+                                                try {
+                                                    console.log("Testing event history API...");
+                                                    const testEntry = await api.eventHistory.create({
+                                                        event: { _link: eventId },
+                                                        changedBy: { _link: api.currentUser?.id || 'system' },
+                                                        changeType: 'test_entry',
+                                                        previousValue: 'test_previous',
+                                                        newValue: 'test_new',
+                                                        description: 'Test event history entry',
+                                                        context: { test: true },
+                                                        metadata: { test: true }
+                                                    });
+                                                    console.log("✅ Test event history entry created:", testEntry);
+                                                    alert("✅ Test event history entry created successfully!");
+                                                } catch (error) {
+                                                    console.error("❌ Error creating test event history entry:", error);
+                                                    alert(`❌ Error: ${error.message}`);
+                                                }
+                                            }}
+                                        >
+                                            Create Test History Entry
+                                        </Button>
+                                    </CardContent>
+                                </Card>
+                                <EventHistoryViewer eventId={eventId} />
+                            </div>
                         </TabsContent>
                     </Tabs>
                 </>
