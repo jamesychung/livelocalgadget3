@@ -6,7 +6,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { ArrowLeft, Calendar, Music, MapPin, Clock, DollarSign, Users, Search, Filter, Eye, Send, MessageSquare, X, Check } from "lucide-react";
 import { Link, useOutletContext } from "react-router";
-import { useFindMany } from "@gadgetinc/react";
+import { useFindMany, useAction } from "@gadgetinc/react";
 import { api } from "../api";
 import type { AuthOutletContext } from "./_app";
 
@@ -18,7 +18,7 @@ interface TimeSlot {
     recurringEndDate?: string;
 }
 
-type SortField = 'date' | 'venue' | 'rate';
+type SortField = 'date' | 'venue' | 'rate' | 'musicianStatus';
 type SortDirection = 'asc' | 'desc';
 
 export default function MusicianAvailEventsPage() {
@@ -30,6 +30,9 @@ export default function MusicianAvailEventsPage() {
     const [selectedEvent, setSelectedEvent] = useState<any>(null);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
 
+    // Check if API is properly initialized
+    const isApiReady = api && api.event && api.musician && api.booking;
+
     // Debug user context
     console.log("👤 Musician Available Events - User context:", {
         user,
@@ -39,13 +42,8 @@ export default function MusicianAvailEventsPage() {
         stageName: user?.musician?.stageName
     });
 
-    // Fetch public events that musicians can apply to
+    // Fetch all events
     const [{ data: eventsData, fetching: eventsFetching, error: eventsError }] = useFindMany(api.event, {
-        filter: { 
-            isPublic: { equals: true },
-            venue: { isSet: true }, // Only events created by venues
-            status: { in: ['open', 'invited'] } // Only events that are available for applications
-        },
         select: {
             id: true,
             title: true,
@@ -53,20 +51,20 @@ export default function MusicianAvailEventsPage() {
             date: true,
             startTime: true,
             endTime: true,
-            ticketPrice: true,
+            eventStatus: true,
             rate: true,
-            status: true,
             genres: true,
             venue: {
                 id: true,
                 name: true,
                 city: true,
-                state: true,
-                type: true
+                state: true
             }
         },
-        first: 50,
-        sort: { date: "Ascending" }
+        filter: {
+            eventStatus: { in: ["open", "invited"] }
+        },
+        pause: !isApiReady,
     });
 
     // Fetch all musicians for matching
@@ -86,8 +84,52 @@ export default function MusicianAvailEventsPage() {
         first: 100
     });
 
+    // Fetch bookings to check application status
+    const [{ data: bookingsData }] = useFindMany(api.booking, {
+        select: {
+            id: true,
+            status: true,
+            event: {
+                id: true
+            },
+            musician: {
+                id: true
+            }
+        },
+        pause: !isApiReady || !user?.musician?.id,
+    });
+
+    // Create booking action
+    const [createBookingResult, createBooking] = useAction(api.booking.create);
+
     const events: any[] = eventsData || [];
     const musicians: any[] = musiciansData || [];
+    const bookings: any[] = bookingsData || [];
+
+    // Helper function to get musician's application status for an event
+    const getMusicianApplicationStatus = (eventId: string): string => {
+        if (!user?.musician?.id) return "available";
+        
+        const booking = bookings.find(booking => 
+            booking.event?.id === eventId && 
+            booking.musician?.id === user.musician.id
+        );
+        
+        if (!booking) return "available";
+        
+        switch (booking.status) {
+            case "applied":
+                return "applied";
+            case "confirmed":
+                return "confirmed";
+            case "rejected":
+                return "rejected";
+            case "cancelled":
+                return "cancelled";
+            default:
+                return "available";
+        }
+    };
 
     // Debug: Log what we're getting from the queries
     console.log("🔍 Debug - Events query result:", {
@@ -210,6 +252,10 @@ export default function MusicianAvailEventsPage() {
                     aValue = a.rate || 0;
                     bValue = b.rate || 0;
                     break;
+                case 'musicianStatus':
+                    aValue = getMusicianApplicationStatus(a.id);
+                    bValue = getMusicianApplicationStatus(b.id);
+                    break;
                 default:
                     return 0;
             }
@@ -234,8 +280,8 @@ export default function MusicianAvailEventsPage() {
 
     // Calculate summary statistics
     const totalEvents = events.length;
-    const openEvents = events.filter(event => event.status === 'open').length;
-    const invitedEvents = events.filter(event => event.status === 'invited').length;
+    const openEvents = events.filter(event => event.eventStatus === 'open').length;
+    const invitedEvents = events.filter(event => event.eventStatus === 'invited').length;
 
     // Filter events based on search and status
     const filteredEvents = events.filter(event => {
@@ -243,7 +289,7 @@ export default function MusicianAvailEventsPage() {
                             event.venue?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                             event.description?.toLowerCase().includes(searchTerm.toLowerCase());
         
-        const matchesStatus = statusFilter === "all" || event.status === statusFilter;
+        const matchesStatus = statusFilter === "all" || event.eventStatus === statusFilter;
         
         return matchesSearch && matchesStatus;
     });
@@ -258,10 +304,53 @@ export default function MusicianAvailEventsPage() {
     };
 
     // Handle dialog actions
-    const handleApply = () => {
-        // TODO: Implement apply logic
-        console.log("Apply to event:", selectedEvent?.id);
-        setIsDialogOpen(false);
+    const handleApply = async () => {
+        console.log("🎵 handleApply called with:", {
+            selectedEvent,
+            user,
+            musicianId: user?.musician?.id
+        });
+
+        if (!selectedEvent || !user?.musician?.id) {
+            console.log("❌ Cannot apply - missing data:", {
+                hasSelectedEvent: !!selectedEvent,
+                hasUser: !!user,
+                hasMusicianId: !!user?.musician?.id
+            });
+            alert("Unable to apply. Please ensure you have a musician profile.");
+            return;
+        }
+
+        try {
+            console.log("🎵 Creating booking with data:", {
+                eventId: selectedEvent.id,
+                musicianId: user.musician.id,
+                userId: user.id,
+                proposedRate: user.musician.hourlyRate || 0,
+                pitch: `I'm excited to perform at ${selectedEvent.venue?.name || 'your venue'}! I have experience in ${user.musician.genres?.join(', ') || 'various genres'} and would love to contribute to your event.`
+            });
+
+            // Create a booking record
+            const result = await createBooking({
+                event: { _link: selectedEvent.id },
+                musician: { _link: user.musician.id },
+                bookedBy: { _link: user.id },
+                status: "applied",
+                proposedRate: user.musician.hourlyRate || 0,
+                musicianPitch: `I'm excited to perform at ${selectedEvent.venue?.name || 'your venue'}! I have experience in ${user.musician.genres?.join(', ') || 'various genres'} and would love to contribute to your event.`
+            });
+
+            console.log("✅ Booking created successfully:", result);
+
+            alert("Application submitted successfully! The venue will review your application.");
+            setIsDialogOpen(false);
+            
+            // Refresh the page to update the musician status
+            window.location.reload();
+        } catch (error) {
+            console.error("❌ Error applying to event:", error);
+            alert("Failed to submit application. Please try again.");
+        }
     };
 
     const handleNotInterested = () => {
@@ -460,7 +549,20 @@ export default function MusicianAvailEventsPage() {
                                                 )}
                                             </div>
                                         </TableHead>
-                                        <TableHead>Status</TableHead>
+                                        <TableHead>Event Status</TableHead>
+                                        <TableHead 
+                                            className="cursor-pointer hover:bg-gray-50"
+                                            onClick={() => handleSort('musicianStatus')}
+                                        >
+                                            <div className="flex items-center gap-2">
+                                                Musician Status
+                                                {sortField === 'musicianStatus' && (
+                                                    <span className="text-xs">
+                                                        {sortDirection === 'asc' ? '↑' : '↓'}
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
@@ -511,14 +613,56 @@ export default function MusicianAvailEventsPage() {
                                                 </TableCell>
                                                 <TableCell>
                                                     <Badge 
-                                                        variant={event.status === 'open' ? 'default' : 'secondary'}
+                                                        variant={event.eventStatus === 'open' ? 'default' : 'secondary'}
                                                         className={
-                                                            event.status === 'open' ? 'bg-green-100 text-green-800' :
+                                                            event.eventStatus === 'open' ? 'bg-green-100 text-green-800' :
                                                             'bg-gray-100 text-gray-800'
                                                         }
                                                     >
-                                                        {event.status?.charAt(0).toUpperCase() + event.status?.slice(1) || 'Unknown'}
+                                                        {event.eventStatus?.charAt(0).toUpperCase() + event.eventStatus?.slice(1) || 'Unknown'}
                                                     </Badge>
+                                                </TableCell>
+                                                <TableCell>
+                                                    {(() => {
+                                                        const status = getMusicianApplicationStatus(event.id);
+                                                        let badgeVariant = "secondary";
+                                                        let className = "bg-gray-100 text-gray-800";
+                                                        
+                                                        switch (status) {
+                                                            case "available":
+                                                                badgeVariant = "default";
+                                                                className = "bg-green-100 text-green-800";
+                                                                break;
+                                                            case "applied":
+                                                                badgeVariant = "default";
+                                                                className = "bg-blue-100 text-blue-800";
+                                                                break;
+                                                            case "confirmed":
+                                                                badgeVariant = "default";
+                                                                className = "bg-green-100 text-green-800";
+                                                                break;
+                                                            case "rejected":
+                                                                badgeVariant = "default";
+                                                                className = "bg-red-100 text-red-800";
+                                                                break;
+                                                            case "cancelled":
+                                                                badgeVariant = "default";
+                                                                className = "bg-gray-100 text-gray-800";
+                                                                break;
+                                                            default:
+                                                                badgeVariant = "secondary";
+                                                                className = "bg-gray-100 text-gray-800";
+                                                        }
+                                                        
+                                                        return (
+                                                            <Badge 
+                                                                variant={badgeVariant}
+                                                                className={className}
+                                                            >
+                                                                {status.charAt(0).toUpperCase() + status.slice(1)}
+                                                            </Badge>
+                                                        );
+                                                    })()}
                                                 </TableCell>
                                             </TableRow>
                                         );
@@ -561,7 +705,7 @@ export default function MusicianAvailEventsPage() {
                                         <div><span className="font-medium">Date:</span> {selectedEvent.date ? new Date(selectedEvent.date).toLocaleDateString() : 'TBD'}</div>
                                         <div><span className="font-medium">Time:</span> {selectedEvent.startTime} - {selectedEvent.endTime}</div>
                                         <div><span className="font-medium">Rate:</span> {selectedEvent.rate ? `$${selectedEvent.rate}` : 'TBD'}</div>
-                                        <div><span className="font-medium">Status:</span> {selectedEvent.status}</div>
+                                        <div><span className="font-medium">Status:</span> {selectedEvent.eventStatus}</div>
                                     </div>
                                 </div>
                                 
