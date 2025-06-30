@@ -27,8 +27,54 @@ export const loader = async ({ context }: Route.LoaderArgs) => {
     return redirect(gadgetConfig.authentication!.signInPath);
   }
 
+  // Fetch musician profile if it exists
+  let musician = undefined;
+  try {
+    console.log("🔍 Looking for musician profile for user ID:", userId);
+    
+    // Use findMany with filter and take the first result
+    const musicianRecords = await context.api.musician.findMany({
+      filter: { userId: { equals: userId } },
+      first: 1
+    });
+    
+    let musicianRecord = musicianRecords[0];
+    
+    if (!musicianRecord) {
+      console.log("🎵 Trying alternative query...");
+      // Try using the user relationship
+      const musicianRecords2 = await context.api.musician.findMany({
+        filter: { user: { id: { equals: userId } } },
+        first: 1
+      });
+      musicianRecord = musicianRecords2[0];
+    }
+    
+    if (!musicianRecord) {
+      console.log("🎵 Trying to find by email...");
+      // Try finding by email as a fallback
+      const userEmail = user.email;
+      const musicianRecords3 = await context.api.musician.findMany({
+        filter: { email: { equals: userEmail } },
+        first: 1
+      });
+      musicianRecord = musicianRecords3[0];
+    }
+    
+    musician = musicianRecord || undefined;
+    console.log("🎵 Musician profile found:", musician ? musician.id : "None");
+    if (musician) {
+      console.log("🎵 Musician stage name:", musician.stageName);
+    }
+  } catch (error) {
+    console.log("❌ Error finding musician profile:", error);
+  }
+
   return {
-    user,
+    user: {
+      ...user,
+      musician
+    },
   };
 };
 

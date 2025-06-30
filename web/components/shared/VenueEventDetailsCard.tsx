@@ -207,6 +207,135 @@ export const VenueEventDetailsCard: React.FC<VenueEventDetailsCardProps> = ({
             <p className="text-sm">{event?.description || 'No description'}</p>
           )}
         </div>
+
+        {/* Status Field */}
+        <div>
+          <Label className="text-sm font-medium text-muted-foreground">Event Status</Label>
+          {isEditing ? (
+            <div className="space-y-3">
+              {event?.status === 'confirmed' ? (
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 p-2 bg-purple-50 border border-purple-200 rounded">
+                    <Badge className="bg-purple-100 text-purple-800">Confirmed</Badge>
+                    <span className="text-sm text-purple-700">Status automatically set when musician was accepted</span>
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium">Change status to:</Label>
+                    <div className="space-y-2">
+                      <label className="flex items-center space-x-2">
+                        <input
+                          type="radio"
+                          name="status"
+                          value="open"
+                          checked={editFormData?.status === 'open'}
+                          onChange={(e) => setEditFormData({...editFormData, status: e.target.value})}
+                          className="text-blue-600"
+                        />
+                        <span className="text-sm">Open - Reopen for applications</span>
+                      </label>
+                      <label className="flex items-center space-x-2">
+                        <input
+                          type="radio"
+                          name="status"
+                          value="cancelled"
+                          checked={editFormData?.status === 'cancelled'}
+                          onChange={(e) => setEditFormData({...editFormData, status: e.target.value})}
+                          className="text-blue-600"
+                        />
+                        <span className="text-sm">Cancelled - Event cancelled</span>
+                      </label>
+                      <label className="flex items-center space-x-2">
+                        <input
+                          type="radio"
+                          name="status"
+                          value="completed"
+                          checked={editFormData?.status === 'completed'}
+                          onChange={(e) => setEditFormData({...editFormData, status: e.target.value})}
+                          className="text-blue-600"
+                        />
+                        <span className="text-sm">Completed - Event finished</span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">Select status:</Label>
+                  <div className="space-y-2">
+                    <label className="flex items-center space-x-2">
+                      <input
+                        type="radio"
+                        name="status"
+                        value="open"
+                        checked={editFormData?.status === 'open'}
+                        onChange={(e) => setEditFormData({...editFormData, status: e.target.value})}
+                        className="text-blue-600"
+                      />
+                      <span className="text-sm">Open - Accepting applications</span>
+                    </label>
+                    <label className="flex items-center space-x-2">
+                      <input
+                        type="radio"
+                        name="status"
+                        value="invited"
+                        checked={editFormData?.status === 'invited'}
+                        onChange={(e) => setEditFormData({...editFormData, status: e.target.value})}
+                        className="text-blue-600"
+                      />
+                      <span className="text-sm">Invited - Musicians invited</span>
+                    </label>
+                    <label className="flex items-center space-x-2">
+                      <input
+                        type="radio"
+                        name="status"
+                        value="cancelled"
+                        checked={editFormData?.status === 'cancelled'}
+                        onChange={(e) => setEditFormData({...editFormData, status: e.target.value})}
+                        className="text-blue-600"
+                      />
+                      <span className="text-sm">Cancelled - Event cancelled</span>
+                    </label>
+                    <label className="flex items-center space-x-2">
+                      <input
+                        type="radio"
+                        name="status"
+                        value="completed"
+                        checked={editFormData?.status === 'completed'}
+                        onChange={(e) => setEditFormData({...editFormData, status: e.target.value})}
+                        className="text-blue-600"
+                      />
+                      <span className="text-sm">Completed - Event finished</span>
+                    </label>
+                  </div>
+                </div>
+              )}
+              <p className="text-xs text-muted-foreground">
+                Note: Status will automatically change to "Confirmed" when you accept a musician's application.
+              </p>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2">
+              <Badge 
+                variant={
+                  event?.status === 'open' ? 'default' :
+                  event?.status === 'invited' ? 'secondary' :
+                  event?.status === 'confirmed' ? 'default' :
+                  event?.status === 'cancelled' ? 'destructive' :
+                  'outline'
+                }
+                className={
+                  event?.status === 'open' ? 'bg-green-100 text-green-800' :
+                  event?.status === 'invited' ? 'bg-blue-100 text-blue-800' :
+                  event?.status === 'confirmed' ? 'bg-purple-100 text-purple-800' :
+                  event?.status === 'cancelled' ? 'bg-red-100 text-red-800' :
+                  'bg-gray-100 text-gray-800'
+                }
+              >
+                {event?.status || 'No status'}
+              </Badge>
+            </div>
+          )}
+        </div>
         
         {/* Edit Event Button - positioned at bottom right */}
         <div className="flex justify-end pt-4 border-t">

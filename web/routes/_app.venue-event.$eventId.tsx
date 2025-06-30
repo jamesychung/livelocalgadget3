@@ -102,7 +102,7 @@ export default function VenueEventManagementPage() {
                     availableTickets: true,
                     status: true,
                     genres: true,
-                    venue: {
+        venue: {
                         id: true,
                         name: true,
                         address: true,
@@ -112,8 +112,8 @@ export default function VenueEventManagementPage() {
                         phone: true,
                         email: true,
                         website: true
-                    },
-                    musician: {
+        },
+        musician: {
                         id: true,
                         stageName: true,
                         genre: true,
@@ -154,7 +154,7 @@ export default function VenueEventManagementPage() {
                         proposedRate: true,
                         musicianPitch: true,
                         createdAt: true,
-                        musician: {
+            musician: {
                             id: true,
                             stageName: true,
                             genre: true,
@@ -182,7 +182,7 @@ export default function VenueEventManagementPage() {
                         event: {
                             id: true
                         },
-                        musician: {
+            musician: {
                             id: true,
                             stageName: true,
                             genre: true,
@@ -249,7 +249,7 @@ export default function VenueEventManagementPage() {
         if (event?.musician) return "confirmed";
         if (bookingsData.some(b => b.status === "communicating")) return "communicating";
         if (bookingsData.some(b => b.status === "applied")) return "pending";
-        return "open";
+            return "open";
     };
 
     const handleRowClick = (booking: any) => {
@@ -301,6 +301,26 @@ export default function VenueEventManagementPage() {
                 updateData.genres = editFormData.genres;
             }
 
+            // Special handling for status changes
+            if (updateData.status) {
+                // If changing from confirmed to another status, automatically set to "open"
+                // This handles cases where a musician cancels or venue wants to reopen applications
+                if (event?.status === 'confirmed' && updateData.status !== 'confirmed') {
+                    updateData.status = 'open';
+                    console.log("Event status automatically changed to 'open' (was confirmed)");
+                }
+            }
+
+            // Debug: Log the status change logic
+            console.log("Status change debug:", {
+                currentEventStatus: event?.status,
+                newStatus: updateData.status,
+                editFormDataStatus: editFormData?.status,
+                shouldChangeToOpen: event?.status === 'confirmed' && updateData.status && updateData.status !== 'confirmed',
+                editFormDataKeys: Object.keys(editFormData || {}),
+                editFormDataFull: editFormData
+            });
+
             console.log("Final update data:", updateData);
 
             if (Object.keys(updateData).length === 0) {
@@ -323,6 +343,11 @@ export default function VenueEventManagementPage() {
     };
 
     const handleBookMusician = async (bookingId: string) => {
+        if (!eventId) {
+            console.error("No event ID available");
+            return;
+        }
+
         try {
             console.log("Confirming booking:", bookingId);
             
@@ -331,10 +356,16 @@ export default function VenueEventManagementPage() {
                 status: "confirmed"
             } as any);
             
-            // Refresh bookings data
+            // Update event status to confirmed
+            await api.event.update(eventId, {
+                status: "confirmed"
+            } as any);
+            
+            // Refresh data
+            await fetchEventData();
             await fetchBookingsData();
             
-            console.log("Booking confirmed successfully");
+            console.log("Booking confirmed and event status updated successfully");
             
         } catch (error) {
             console.error("Error confirming booking:", error);
@@ -416,79 +447,79 @@ export default function VenueEventManagementPage() {
                 </div>
             ) : (
                 <>
-                    {/* Header */}
+            {/* Header */}
+            <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                    <Button asChild>
+                        <Link to="/venue-events">
+                            <ArrowLeft className="mr-2 h-4 w-4" />
+                            Back to Events
+                        </Link>
+                    </Button>
+                    <div>
+                        <h1 className="text-3xl font-bold">Event Management</h1>
+                        <p className="text-muted-foreground">
+                            Manage event details, bookings, and communications
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            {/* Event Title and Status */}
+            <Card>
+                <CardHeader>
                     <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                            <Button asChild>
-                                <Link to="/venue-events">
-                                    <ArrowLeft className="mr-2 h-4 w-4" />
-                                    Back to Events
-                                </Link>
-                            </Button>
-                            <div>
-                                <h1 className="text-3xl font-bold">Event Management</h1>
-                                <p className="text-muted-foreground">
-                                    Manage event details, bookings, and communications
-                                </p>
-                            </div>
+                        <div>
+                            {isEditing ? (
+                                <Input
+                                            value={editFormData?.title || ""}
+                                    onChange={(e) => setEditFormData({...editFormData, title: e.target.value})}
+                                    className="text-2xl font-bold border-0 p-0 h-auto"
+                                    placeholder="Event Title"
+                                />
+                            ) : (
+                                <CardTitle className="text-2xl">{event.title}</CardTitle>
+                            )}
+                            <p className="text-muted-foreground mt-2">
+                                {event.venue?.name} • {new Date(event.date).toLocaleDateString('en-US', {
+                                    weekday: 'long',
+                                    year: 'numeric',
+                                    month: 'long',
+                                    day: 'numeric'
+                                })}
+                            </p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            {getStatusBadge(getEventStatus())}
+                            {event.musician && (
+                                <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                                    <Music className="mr-1 h-3 w-3" />
+                                    Musician Booked
+                                </Badge>
+                            )}
                         </div>
                     </div>
+                </CardHeader>
+            </Card>
 
-                    {/* Event Title and Status */}
-                    <Card>
-                        <CardHeader>
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    {isEditing ? (
-                                        <Input
-                                            value={editFormData?.title || ""}
-                                            onChange={(e) => setEditFormData({...editFormData, title: e.target.value})}
-                                            className="text-2xl font-bold border-0 p-0 h-auto"
-                                            placeholder="Event Title"
-                                        />
-                                    ) : (
-                                        <CardTitle className="text-2xl">{event.title}</CardTitle>
-                                    )}
-                                    <p className="text-muted-foreground mt-2">
-                                        {event.venue?.name} • {new Date(event.date).toLocaleDateString('en-US', {
-                                            weekday: 'long',
-                                            year: 'numeric',
-                                            month: 'long',
-                                            day: 'numeric'
-                                        })}
-                                    </p>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    {getStatusBadge(getEventStatus())}
-                                    {event.musician && (
-                                        <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
-                                            <Music className="mr-1 h-3 w-3" />
-                                            Musician Booked
-                                        </Badge>
-                                    )}
-                                </div>
-                            </div>
-                        </CardHeader>
-                    </Card>
-
-                    {/* Main Content Tabs */}
-                    <Tabs value={activeTab} onValueChange={setActiveTab}>
-                        <TabsList className="grid w-full grid-cols-4">
+            {/* Main Content Tabs */}
+            <Tabs value={activeTab} onValueChange={setActiveTab}>
+                <TabsList className="grid w-full grid-cols-4">
                             <TabsTrigger value="overview">Event Details</TabsTrigger>
                             <TabsTrigger value="bookings">Event Activity ({bookingsData?.length || 0})</TabsTrigger>
-                            <TabsTrigger value="communications">Communications</TabsTrigger>
+                    <TabsTrigger value="communications">Communications</TabsTrigger>
                             <TabsTrigger value="history">Event History</TabsTrigger>
-                        </TabsList>
+                </TabsList>
 
                         {/* Event Details Tab */}
-                        <TabsContent value="overview" className="space-y-6">
+                <TabsContent value="overview" className="space-y-6">
                             {eventLoading ? (
                                 <div className="flex items-center justify-center p-8">
                                     <div className="text-center">
                                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-4"></div>
                                         <p>Loading event data...</p>
                                     </div>
-                                </div>
+                                    </div>
                             ) : (
                                 <div className="grid gap-6 md:grid-cols-2">
                                     {/* Event Information */}
@@ -501,19 +532,19 @@ export default function VenueEventManagementPage() {
                                         handleSaveEvent={handleSaveEvent}
                                     />
 
-                                    {/* Venue Information */}
+                        {/* Venue Information */}
                                     <VenueInfoCard venue={event.venue} />
-                                </div>
-                            )}
+                                    </div>
+                                )}
 
-                            {/* Musician Information */}
+                    {/* Musician Information */}
                             {event?.musician && (
                                 <VenueBookedMusicianCard musician={event.musician} />
                             )}
-                        </TabsContent>
+                </TabsContent>
 
-                        {/* Bookings Tab */}
-                        <TabsContent value="bookings" className="space-y-6">
+                {/* Bookings Tab */}
+                <TabsContent value="bookings" className="space-y-6">
                             <VenueEventActivity
                                 bookingsData={bookingsData}
                                 bookingsLoading={bookingsLoading}
@@ -527,25 +558,25 @@ export default function VenueEventManagementPage() {
                                 handleCommunicateBooking={handleCommunicateBooking}
                                 eventGenres={event?.genres}
                             />
-                        </TabsContent>
+                </TabsContent>
 
-                        {/* Communications Tab */}
-                        <TabsContent value="communications" className="space-y-6">
+                {/* Communications Tab */}
+                <TabsContent value="communications" className="space-y-6">
                             <VenueCommunicationsCard
                                 messages={messages}
                                 newMessage={newMessage}
                                 setNewMessage={setNewMessage}
                                 handleSendMessage={handleSendMessage}
                             />
-                        </TabsContent>
+                </TabsContent>
 
                         {/* History Tab */}
                         <TabsContent value="history" className="space-y-6">
                             <VenueEventHistoryTab eventId={eventId} />
-                        </TabsContent>
-                    </Tabs>
-                </>
-            )}
+                </TabsContent>
+            </Tabs>
+                                    </>
+                                )}
         </div>
     );
-}
+} 

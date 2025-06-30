@@ -66,6 +66,11 @@ export const schema: GadgetModel = {
       storageKey: "event_recurring_pattern",
       default: "weekly",
     },
+    rate: { 
+      type: "number", 
+      storageKey: "event_rate",
+      description: "How much the venue is willing to pay musicians"
+    },
     setlist: { type: "json", storageKey: "event_setlist" },
     startTime: { type: "string", storageKey: "event_start_time" },
     status: { type: "string", storageKey: "event_status" },

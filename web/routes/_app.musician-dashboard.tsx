@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { useOutletContext, Link } from "react-router";
+import { useFindMany } from "@gadgetinc/react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
@@ -17,7 +18,8 @@ import {
     Plus,
     TrendingUp,
     Clock,
-    DollarSign
+    DollarSign,
+    AlertCircle
 } from "lucide-react";
 import { api } from "@/api";
 import type { AuthOutletContext } from "./_app";

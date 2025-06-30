@@ -100,12 +100,13 @@ export default function CreateEventPage() {
         startTime: "19:00", // Default to 7:00 PM
         endTime: "22:00", // Default to 10:00 PM
         ticketPrice: "",
+        rate: "", // How much venue pays musicians
         totalCapacity: "",
         category: "live-music", // Default to Live Music
         ticketType: "general",
         isPublic: true,
         isActive: true,
-        status: "confirmed",
+        status: "open", // Changed from "confirmed" to "open" - events should be open for applications
         musicianId: "none",
         genres: [] as string[],
         equipment: equipmentData.map(item => ({
@@ -191,6 +192,7 @@ export default function CreateEventPage() {
                 startTime: startTimeString, // Keep as HH:MM format
                 endTime: endTimeString, // Keep as HH:MM format
                 ticketPrice: parseFloat(eventForm.ticketPrice) || 0,
+                rate: parseFloat(eventForm.rate) || 0,
                 totalCapacity: parseInt(eventForm.totalCapacity) || 0,
                 category: eventForm.category,
                 ticketType: eventForm.ticketType,
