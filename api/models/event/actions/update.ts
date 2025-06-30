@@ -19,7 +19,8 @@ export const run: ActionRun = async ({ params, record, logger, api, session }) =
     endTime: record.endTime,
     status: record.status,
     ticketPrice: record.ticketPrice,
-    totalCapacity: record.totalCapacity
+    totalCapacity: record.totalCapacity,
+    genres: record.genres
   };
   
   // Apply the parameters to the record

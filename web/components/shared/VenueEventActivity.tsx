@@ -15,6 +15,7 @@ interface VenueEventActivityProps {
   handleBookMusician: (bookingId: string) => void;
   handleRejectBooking: (bookingId: string) => void;
   handleCommunicateBooking: (bookingId: string) => void;
+  eventGenres?: string[];
 }
 
 export const VenueEventActivity: React.FC<VenueEventActivityProps> = ({
@@ -27,7 +28,8 @@ export const VenueEventActivity: React.FC<VenueEventActivityProps> = ({
   handleRowClick,
   handleBookMusician,
   handleRejectBooking,
-  handleCommunicateBooking
+  handleCommunicateBooking,
+  eventGenres
 }) => {
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -116,10 +118,35 @@ export const VenueEventActivity: React.FC<VenueEventActivityProps> = ({
     communicating: bookingsData.filter(b => b.status === "communicating").length,
     confirmed: bookingsData.filter(b => b.status === "confirmed").length,
     rejected: bookingsData.filter(b => b.status === "rejected").length,
-    total: bookingsData.length
+    total: bookingsData.length,
+    genreMatches: eventGenres && eventGenres.length > 0 
+      ? bookingsData.filter(b => eventGenres.includes(b.musician.genre)).length 
+      : 0
   };
 
   const hasConfirmedBooking = stats.confirmed > 0;
+
+  // Function to check if musician genre matches event genres
+  const getGenreMatch = (musicianGenre: string) => {
+    if (!eventGenres || eventGenres.length === 0) return null;
+    return eventGenres.includes(musicianGenre);
+  };
+
+  const getGenreDisplay = (musicianGenre: string) => {
+    const isMatch = getGenreMatch(musicianGenre);
+    return (
+      <div className="flex items-center gap-1">
+        <span className={`text-sm font-medium ${isMatch ? 'text-green-600' : ''}`}>
+          {musicianGenre || 'N/A'}
+        </span>
+        {isMatch && (
+          <Badge className="bg-green-100 text-green-800 border-green-200 text-xs">
+            Match
+          </Badge>
+        )}
+      </div>
+    );
+  };
 
   if (bookingsLoading) {
     return (
@@ -152,7 +179,7 @@ export const VenueEventActivity: React.FC<VenueEventActivityProps> = ({
       </CardHeader>
       <CardContent>
         {/* Summary Statistics */}
-        <div className="grid grid-cols-6 gap-4 mb-6 p-4 bg-gray-50 rounded-lg">
+        <div className="grid grid-cols-7 gap-4 mb-6 p-4 bg-gray-50 rounded-lg">
           <div className="text-center">
             <div className="text-2xl font-bold text-blue-600">{stats.applied}</div>
             <div className="text-sm text-muted-foreground">Applied</div>
@@ -172,6 +199,10 @@ export const VenueEventActivity: React.FC<VenueEventActivityProps> = ({
           <div className="text-center">
             <div className="text-2xl font-bold text-red-600">{stats.rejected}</div>
             <div className="text-sm text-muted-foreground">Rejected</div>
+          </div>
+          <div className="text-center">
+            <div className="text-2xl font-bold text-emerald-600">{stats.genreMatches}</div>
+            <div className="text-sm text-muted-foreground">Genre Matches</div>
           </div>
           <div className="text-center">
             <div className="text-2xl font-bold text-gray-600">{stats.total}</div>
@@ -272,7 +303,7 @@ export const VenueEventActivity: React.FC<VenueEventActivityProps> = ({
                       </div>
                     </td>
                     <td className="py-4 px-3">
-                      <div className="text-sm font-medium">{booking.musician.genre || 'N/A'}</div>
+                      {getGenreDisplay(booking.musician.genre)}
                     </td>
                     <td className="py-4 px-3">
                       <div className="text-sm">

@@ -141,6 +141,8 @@ export const EventHistoryViewer: React.FC<EventHistoryViewerProps> = ({
         return 'Event Date';
       case 'event_ticketPrice':
         return 'Ticket Price';
+      case 'event_genres':
+        return 'Genres';
       default:
         return changeType.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
     }
@@ -167,6 +169,26 @@ export const EventHistoryViewer: React.FC<EventHistoryViewerProps> = ({
 
   const formatValue = (value: string, field: string) => {
     if (!value || value === 'none' || value === 'null') return '—';
+    
+    // Handle genres field specifically
+    if (field === 'genres') {
+      try {
+        // Try to parse as JSON array
+        const genresArray = JSON.parse(value);
+        if (Array.isArray(genresArray)) {
+          return genresArray.length > 0 ? genresArray.join(', ') : 'None';
+        }
+      } catch {
+        // If not valid JSON, try to parse as string array
+        if (value.startsWith('[') && value.endsWith(']')) {
+          const cleanValue = value.slice(1, -1).replace(/"/g, '');
+          const genres = cleanValue.split(',').map(g => g.trim()).filter(g => g);
+          return genres.length > 0 ? genres.join(', ') : 'None';
+        }
+      }
+      // Fallback to original value
+      return value;
+    }
     
     // Handle date fields
     if (field.includes('date') || field.includes('Date')) {

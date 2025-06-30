@@ -70,7 +70,8 @@ export default function VenueEventManagementPage() {
                 endTime: event.endTime || "",
                 ticketPrice: event.ticketPrice ? event.ticketPrice.toString() : "",
                 totalCapacity: event.totalCapacity ? event.totalCapacity.toString() : "",
-                status: event.status || ""
+                status: event.status || "",
+                genres: event.genres || []
             });
         }
     }, [event]);
@@ -100,6 +101,7 @@ export default function VenueEventManagementPage() {
                     totalCapacity: true,
                     availableTickets: true,
                     status: true,
+                    genres: true,
                     venue: {
                         id: true,
                         name: true,
@@ -294,6 +296,9 @@ export default function VenueEventManagementPage() {
             }
             if (editFormData.status && editFormData.status.trim()) {
                 updateData.status = editFormData.status.trim();
+            }
+            if (editFormData.genres && Array.isArray(editFormData.genres)) {
+                updateData.genres = editFormData.genres;
             }
 
             console.log("Final update data:", updateData);
@@ -520,6 +525,7 @@ export default function VenueEventManagementPage() {
                                 handleBookMusician={handleBookMusician}
                                 handleRejectBooking={handleRejectBooking}
                                 handleCommunicateBooking={handleCommunicateBooking}
+                                eventGenres={event?.genres}
                             />
                         </TabsContent>
 
