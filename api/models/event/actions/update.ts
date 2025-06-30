@@ -59,20 +59,22 @@ export const run: ActionRun = async ({ params, record, logger, api, session }) =
           
           // Create a new event history record using createGadgetRecord
           const historyRecord = createGadgetRecord("eventHistory", {
-            eventId: record.id,
-            changedById: session?.user?.id || "28",
+            event: { _link: record.id },
+            changedBy: { _link: session?.user?.id || "28" },
             changeType: `event_${field}`,
             previousValue: String(previousValue || ""),
             newValue: String(newValue || ""),
             description: `Event ${field} updated from "${previousValue}" to "${newValue}"`
           });
           
+          logger.info(`📝 Creating history record with eventId: ${record.id} (type: ${typeof record.id})`);
           logger.info(`Created history record: ${JSON.stringify(historyRecord)}`);
           
           // Save the history record
           await save(historyRecord);
           
           logger.info(`✅ Event history entry created for ${field} change: ${historyRecord.id}`);
+          logger.info(`✅ Saved history record eventId: ${historyRecord.eventId}`);
         } catch (error) {
           logger.error(`❌ Error creating event history entry for ${field}: ${error}`);
           logger.error(`Error details: ${JSON.stringify(error)}`);
@@ -100,4 +102,4 @@ export const run: ActionRun = async ({ params, record, logger, api, session }) =
 export const options: ActionOptions = {
   actionType: "update",
   returnType: true,
-}; 
+};

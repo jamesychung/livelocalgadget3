@@ -93,7 +93,13 @@ export const EventHistoryViewer: React.FC<EventHistoryViewerProps> = ({
         sort: { createdAt: "Descending" }
       });
 
-      setHistoryData(history);
+      // Map GadgetRecordList to EventHistoryEntry[]
+      const mappedHistory = history.map((entry: any) => ({
+        ...entry,
+        createdAt: entry.createdAt instanceof Date ? entry.createdAt.toISOString() : String(entry.createdAt)
+      }));
+
+      setHistoryData(mappedHistory);
     } catch (err) {
       console.error("Error fetching event history:", err);
       setError("Failed to load event history");
@@ -159,6 +165,48 @@ export const EventHistoryViewer: React.FC<EventHistoryViewerProps> = ({
     );
   };
 
+  const formatValue = (value: string, field: string) => {
+    if (!value || value === 'none' || value === 'null') return '—';
+    
+    // Handle date fields
+    if (field.includes('date') || field.includes('Date')) {
+      try {
+        const date = new Date(value);
+        return date.toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric'
+        });
+      } catch {
+        return value;
+      }
+    }
+    
+    // Handle time fields
+    if (field.includes('time') || field.includes('Time')) {
+      return value;
+    }
+    
+    // Handle price fields
+    if (field.includes('price') || field.includes('Price')) {
+      const num = parseFloat(value);
+      return isNaN(num) ? value : `$${num.toFixed(2)}`;
+    }
+    
+    // Handle capacity fields
+    if (field.includes('capacity') || field.includes('Capacity')) {
+      const num = parseInt(value);
+      return isNaN(num) ? value : num.toString();
+    }
+    
+    // Default: truncate long strings
+    if (value.length > 50) {
+      return value.substring(0, 50) + '...';
+    }
+    
+    return value;
+  };
+
   const filteredHistory = historyData.filter(entry => {
     const matchesTab = activeTab === "all" || entry.changeType.includes(activeTab);
     const matchesSearch = entry.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -167,15 +215,6 @@ export const EventHistoryViewer: React.FC<EventHistoryViewerProps> = ({
     
     return matchesTab && matchesSearch;
   });
-
-  const groupedHistory = filteredHistory.reduce((groups, entry) => {
-    const date = new Date(entry.createdAt).toLocaleDateString();
-    if (!groups[date]) {
-      groups[date] = [];
-    }
-    groups[date].push(entry);
-    return groups;
-  }, {} as Record<string, EventHistoryEntry[]>);
 
   if (loading) {
     return (
@@ -268,74 +307,93 @@ export const EventHistoryViewer: React.FC<EventHistoryViewerProps> = ({
 
         {/* History Timeline */}
         <div className="space-y-6">
-          {Object.keys(groupedHistory).length === 0 ? (
+          {filteredHistory.length === 0 ? (
             <div className="text-center py-8">
               <Clock className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
               <p className="text-muted-foreground">No history entries found</p>
             </div>
           ) : (
-            Object.entries(groupedHistory).map(([date, entries]) => (
-              <div key={date} className="space-y-3">
-                <h3 className="text-sm font-medium text-muted-foreground border-b pb-2">
-                  {new Date(date).toLocaleDateString('en-US', { 
-                    weekday: 'long', 
-                    year: 'numeric', 
-                    month: 'long', 
-                    day: 'numeric' 
-                  })}
-                </h3>
-                
-                {entries.map((entry) => (
-                  <div key={entry.id} className="flex gap-3 p-3 border rounded-lg hover:bg-gray-50">
-                    <div className="flex-shrink-0">
-                      <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                        {getChangeTypeIcon(entry.changeType)}
-                      </div>
-                    </div>
-                    
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="text-sm font-medium">
-                          {getChangeTypeLabel(entry.changeType)}
-                        </span>
-                        {entry.changeType.includes('status') && (
-                          <div className="flex items-center gap-1">
-                            {entry.previousValue !== 'none' && getStatusBadge(entry.previousValue)}
-                            <span className="text-muted-foreground">→</span>
-                            {entry.newValue !== 'none' && getStatusBadge(entry.newValue)}
+            <div className="overflow-x-auto">
+              <table className="w-full border-collapse">
+                <thead>
+                  <tr className="border-b bg-gray-50">
+                    <th className="text-left p-3 text-sm font-medium text-gray-700">Date & Time</th>
+                    <th className="text-left p-3 text-sm font-medium text-gray-700">Change Type</th>
+                    <th className="text-left p-3 text-sm font-medium text-gray-700">Previous Value</th>
+                    <th className="text-left p-3 text-sm font-medium text-gray-700">New Value</th>
+                    <th className="text-left p-3 text-sm font-medium text-gray-700">Changed By</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredHistory.map((entry) => {
+                    const field = entry.changeType.replace('event_', '');
+                    return (
+                      <tr key={entry.id} className="border-b hover:bg-gray-50">
+                        <td className="p-3 text-sm">
+                          <div className="flex flex-col">
+                            <span className="font-medium">
+                              {new Date(entry.createdAt).toLocaleDateString('en-US', {
+                                month: 'short',
+                                day: 'numeric',
+                                year: 'numeric'
+                              })}
+                            </span>
+                            <span className="text-xs text-gray-500">
+                              {new Date(entry.createdAt).toLocaleTimeString('en-US', {
+                                hour: '2-digit',
+                                minute: '2-digit'
+                              })}
+                            </span>
                           </div>
-                        )}
-                      </div>
-                      
-                      <p className="text-sm text-gray-600 mb-2">
-                        {entry.description}
-                      </p>
-                      
-                      <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                        <span className="flex items-center gap-1">
-                          <Clock className="h-3 w-3" />
-                          {new Date(entry.createdAt).toLocaleTimeString()}
-                        </span>
-                        
-                        {entry.changedBy && (
-                          <span className="flex items-center gap-1">
-                            <User className="h-3 w-3" />
-                            {entry.changedBy.firstName} {entry.changedBy.lastName}
-                          </span>
-                        )}
-                        
-                        {entry.booking?.musician && (
-                          <span className="flex items-center gap-1">
-                            <MessageSquare className="h-3 w-3" />
-                            {entry.booking.musician.stageName}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ))
+                        </td>
+                        <td className="p-3 text-sm">
+                          <div className="flex items-center gap-2">
+                            <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center">
+                              {getChangeTypeIcon(entry.changeType)}
+                            </div>
+                            <span className="font-medium">{getChangeTypeLabel(entry.changeType)}</span>
+                          </div>
+                        </td>
+                        <td className="p-3 text-sm">
+                          <div className="max-w-xs">
+                            {entry.changeType.includes('status') ? (
+                              getStatusBadge(entry.previousValue)
+                            ) : (
+                              <span className="text-gray-600">
+                                {formatValue(entry.previousValue, field)}
+                              </span>
+                            )}
+                          </div>
+                        </td>
+                        <td className="p-3 text-sm">
+                          <div className="max-w-xs">
+                            {entry.changeType.includes('status') ? (
+                              getStatusBadge(entry.newValue)
+                            ) : (
+                              <span className="text-gray-600">
+                                {formatValue(entry.newValue, field)}
+                              </span>
+                            )}
+                          </div>
+                        </td>
+                        <td className="p-3 text-sm">
+                          {entry.changedBy ? (
+                            <div className="flex items-center gap-2">
+                              <User className="h-4 w-4 text-gray-400" />
+                              <span className="text-gray-700">
+                                {entry.changedBy.firstName} {entry.changedBy.lastName}
+                              </span>
+                            </div>
+                          ) : (
+                            <span className="text-gray-400">System</span>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
           )}
         </div>
       </CardContent>
