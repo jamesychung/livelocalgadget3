@@ -27,7 +27,7 @@ _export(exports, {
 *  |_|_| \_/ \___|_|\___/ \___\__,_|_|\__, |\__,_|\__,_|\__, |\___|\__|\___/ 
 *                                     |___/             |___/                
 *
-* Built for environment `Development` at version 579
+* Built for environment `Development` at version 769
 * Framework version: ^1.4.0
 * Edit this app here: https://livelocalgadget6.gadget.dev/edit
 */ /// <reference path="./ActionContextTypes.d.ts" />
@@ -118,6 +118,7 @@ _export_star(require("./models/Venue"), exports);
 _export_star(require("./models/User"), exports);
 _export_star(require("./models/Session"), exports);
 _export_star(require("./models/EventHistory"), exports);
+_export_star(require("./models/EventApplication"), exports);
 function _export_star(from, to) {
     Object.keys(from).forEach(function(k) {
         if (k !== "default" && !Object.prototype.hasOwnProperty.call(to, k)) {

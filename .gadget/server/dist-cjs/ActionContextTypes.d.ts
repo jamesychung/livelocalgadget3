@@ -1,5 +1,7 @@
 import "path";
 
+import { CreateBookingActionContext } from "./models/Booking";
+
 import { UpdateBookingActionContext } from "./models/Booking";
 
 import { CreateEventActionContext } from "./models/Event";
@@ -42,29 +44,19 @@ import { ChangePasswordUserActionContext } from "./models/User";
 
 import { CreateEventHistoryActionContext } from "./models/EventHistory";
 
-import { SeedCreateEventsGlobalActionContext } from "./global-actions";
-
-import { SeedCreateMusiciansGlobalActionContext } from "./global-actions";
-
-import { SeedCreateReviewsGlobalActionContext } from "./global-actions";
-
-import { SeedCreateUsersGlobalActionContext } from "./global-actions";
-
-import { SeedCreateVenuesGlobalActionContext } from "./global-actions";
-
-import { SeedQuickSeedGlobalActionContext } from "./global-actions";
-
-import { SeedSeedAllDataGlobalActionContext } from "./global-actions";
-
-import { SeedSeedDataGlobalActionContext } from "./global-actions";
-
-import { SeedSimpleSeedGlobalActionContext } from "./global-actions";
+import { CreateEventApplicationActionContext } from "./models/EventApplication";
 
 import { SendBookingEmailsGlobalActionContext } from "./global-actions";
 
 import { SendEmailGlobalActionContext } from "./global-actions";
 
 
+
+
+declare module "../../../api/models/booking/actions/create" {
+  export type ActionRun = (params: CreateBookingActionContext) => Promise<any>;
+  export type ActionOnSuccess = (params: CreateBookingActionContext) => Promise<any>;
+}
 
 
 declare module "../../../api/models/booking/actions/update" {
@@ -193,57 +185,9 @@ declare module "../../../api/models/eventHistory/actions/create" {
 }
 
 
-declare module "../../../api/actions/seed/createEvents" {
-  export type ActionRun = (params: SeedCreateEventsGlobalActionContext) => Promise<any>;
-  export type ActionOnSuccess = (params: SeedCreateEventsGlobalActionContext) => Promise<any>;
-}
-
-
-declare module "../../../api/actions/seed/createMusicians" {
-  export type ActionRun = (params: SeedCreateMusiciansGlobalActionContext) => Promise<any>;
-  export type ActionOnSuccess = (params: SeedCreateMusiciansGlobalActionContext) => Promise<any>;
-}
-
-
-declare module "../../../api/actions/seed/createReviews" {
-  export type ActionRun = (params: SeedCreateReviewsGlobalActionContext) => Promise<any>;
-  export type ActionOnSuccess = (params: SeedCreateReviewsGlobalActionContext) => Promise<any>;
-}
-
-
-declare module "../../../api/actions/seed/createUsers" {
-  export type ActionRun = (params: SeedCreateUsersGlobalActionContext) => Promise<any>;
-  export type ActionOnSuccess = (params: SeedCreateUsersGlobalActionContext) => Promise<any>;
-}
-
-
-declare module "../../../api/actions/seed/createVenues" {
-  export type ActionRun = (params: SeedCreateVenuesGlobalActionContext) => Promise<any>;
-  export type ActionOnSuccess = (params: SeedCreateVenuesGlobalActionContext) => Promise<any>;
-}
-
-
-declare module "../../../api/actions/seed/quickSeed" {
-  export type ActionRun = (params: SeedQuickSeedGlobalActionContext) => Promise<any>;
-  export type ActionOnSuccess = (params: SeedQuickSeedGlobalActionContext) => Promise<any>;
-}
-
-
-declare module "../../../api/actions/seed/seedAllData" {
-  export type ActionRun = (params: SeedSeedAllDataGlobalActionContext) => Promise<any>;
-  export type ActionOnSuccess = (params: SeedSeedAllDataGlobalActionContext) => Promise<any>;
-}
-
-
-declare module "../../../api/actions/seed/seedData" {
-  export type ActionRun = (params: SeedSeedDataGlobalActionContext) => Promise<any>;
-  export type ActionOnSuccess = (params: SeedSeedDataGlobalActionContext) => Promise<any>;
-}
-
-
-declare module "../../../api/actions/seed/simpleSeed" {
-  export type ActionRun = (params: SeedSimpleSeedGlobalActionContext) => Promise<any>;
-  export type ActionOnSuccess = (params: SeedSimpleSeedGlobalActionContext) => Promise<any>;
+declare module "../../../api/models/eventApplication/actions/create" {
+  export type ActionRun = (params: CreateEventApplicationActionContext) => Promise<any>;
+  export type ActionOnSuccess = (params: CreateEventApplicationActionContext) => Promise<any>;
 }
 
 

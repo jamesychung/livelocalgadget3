@@ -21,7 +21,6 @@ export type DefaultBookingServerSelection = {
 	readonly notes: true
 	readonly specialRequirements: true
 	readonly startTime: true
-	readonly status: true
 	readonly totalAmount: true
 	readonly venueId: true
 	readonly venue: false
@@ -29,7 +28,37 @@ export type DefaultBookingServerSelection = {
 	readonly proposedRate: true
 	readonly eventId: true
 	readonly event: false
+	readonly status: true
 };
+/** Context of the `create` action on the `booking` model. */
+export interface CreateBookingActionContext extends AmbientContext {
+	/**
+	* The model this action is operating on
+	*/
+	model: NotYetTyped;
+	/**
+	* An object specifying the `booking` record this action is operating on.
+	*/
+	record: GadgetRecord<Select<Booking, DefaultBookingServerSelection>>;
+	/**
+	* @deprecated Use 'return' instead.
+	*/
+	scope: ActionExecutionScope;
+	/**
+	* An object specifying the trigger to this action (e.g. API call, webhook events etc.).
+	*/
+	trigger: TriggerWithType<"api"> | TriggerWithType<"background-action">;
+	/**
+	* An object containing the incoming data(this models fields) passed by triggers or user inputs.
+	*/
+	params: {
+		id?: string
+	};
+	/**
+	* @private The context of this action.
+	*/
+	context: CreateBookingActionContext;
+}
 /** Context of the `update` action on the `booking` model. */
 export interface UpdateBookingActionContext extends AmbientContext {
 	/**

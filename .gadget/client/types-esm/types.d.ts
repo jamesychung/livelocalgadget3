@@ -66,10 +66,12 @@ export type InternalUserRecord = Scalars["JSONObject"];
 export type InternalSessionRecord = Scalars["JSONObject"];
 /** Represents one eventHistory result record in internal api calls. Returns a JSON blob of all the record's fields. */
 export type InternalEventHistoryRecord = Scalars["JSONObject"];
+/** Represents one eventApplication result record in internal api calls. Returns a JSON blob of all the record's fields. */
+export type InternalEventApplicationRecord = Scalars["JSONObject"];
 /** The `Upload` scalar type represents a file upload. */
 export type Upload = any;
-export type BackgroundActionResult = AvailableSeedCreateEventsResultSelection | AvailableSeedCreateMusiciansResultSelection | AvailableSeedCreateReviewsResultSelection | AvailableSeedCreateUsersResultSelection | AvailableSeedCreateVenuesResultSelection | AvailableSeedQuickSeedResultSelection | AvailableSeedSeedAllDataResultSelection | AvailableSeedSeedDataResultSelection | AvailableSeedSimpleSeedResultSelection | AvailableSendBookingEmailsResultSelection | AvailableSendEmailResultSelection | AvailableUpdateBookingResultSelection | AvailableCreateEventResultSelection | AvailableUpdateEventResultSelection | AvailableFindFirstEventResultSelection | AvailableCreateMusicianResultSelection | AvailableUpdateMusicianResultSelection | AvailableFindFirstMusicianResultSelection | AvailableCreateVenueResultSelection | AvailableUpdateVenueResultSelection | AvailableFindFirstVenueResultSelection | AvailableSignUpUserResultSelection | AvailableSignInUserResultSelection | AvailableSignOutUserResultSelection | AvailableUpdateUserResultSelection | AvailableDeleteUserResultSelection | AvailableSendVerifyEmailUserResultSelection | AvailableVerifyEmailUserResultSelection | AvailableSendResetPasswordUserResultSelection | AvailableResetPasswordUserResultSelection | AvailableChangePasswordUserResultSelection | AvailableCreateEventHistoryResultSelection;
-export type AvailableBackgroundActionResultSelection = SeedCreateEventsResult | SeedCreateMusiciansResult | SeedCreateReviewsResult | SeedCreateUsersResult | SeedCreateVenuesResult | SeedQuickSeedResult | SeedSeedAllDataResult | SeedSeedDataResult | SeedSimpleSeedResult | SendBookingEmailsResult | SendEmailResult | UpdateBookingResult | CreateEventResult | UpdateEventResult | FindFirstEventResult | CreateMusicianResult | UpdateMusicianResult | FindFirstMusicianResult | CreateVenueResult | UpdateVenueResult | FindFirstVenueResult | SignUpUserResult | SignInUserResult | SignOutUserResult | UpdateUserResult | DeleteUserResult | SendVerifyEmailUserResult | VerifyEmailUserResult | SendResetPasswordUserResult | ResetPasswordUserResult | ChangePasswordUserResult | CreateEventHistoryResult;
+export type BackgroundActionResult = AvailableSendBookingEmailsResultSelection | AvailableSendEmailResultSelection | AvailableCreateBookingResultSelection | AvailableUpdateBookingResultSelection | AvailableCreateEventResultSelection | AvailableUpdateEventResultSelection | AvailableFindFirstEventResultSelection | AvailableCreateMusicianResultSelection | AvailableUpdateMusicianResultSelection | AvailableFindFirstMusicianResultSelection | AvailableCreateVenueResultSelection | AvailableUpdateVenueResultSelection | AvailableFindFirstVenueResultSelection | AvailableSignUpUserResultSelection | AvailableSignInUserResultSelection | AvailableSignOutUserResultSelection | AvailableUpdateUserResultSelection | AvailableDeleteUserResultSelection | AvailableSendVerifyEmailUserResultSelection | AvailableVerifyEmailUserResultSelection | AvailableSendResetPasswordUserResultSelection | AvailableResetPasswordUserResultSelection | AvailableChangePasswordUserResultSelection | AvailableCreateEventHistoryResultSelection | AvailableCreateEventApplicationResultSelection;
+export type AvailableBackgroundActionResultSelection = SendBookingEmailsResult | SendEmailResult | CreateBookingResult | UpdateBookingResult | CreateEventResult | UpdateEventResult | FindFirstEventResult | CreateMusicianResult | UpdateMusicianResult | FindFirstMusicianResult | CreateVenueResult | UpdateVenueResult | FindFirstVenueResult | SignUpUserResult | SignInUserResult | SignOutUserResult | UpdateUserResult | DeleteUserResult | SendVerifyEmailUserResult | VerifyEmailUserResult | SendResetPasswordUserResult | ResetPasswordUserResult | ChangePasswordUserResult | CreateEventHistoryResult | CreateEventApplicationResult;
 export type EventSort = {
     /** Sort the results by the id field. Defaults to ascending (smallest value first). */
     id?: SortOrder | null;
@@ -111,8 +113,8 @@ export type EventSort = {
     setlist?: SortOrder | null;
     /** Sort the results by the startTime field. Defaults to ascending (smallest value first). */
     startTime?: SortOrder | null;
-    /** Sort the results by the status field. Defaults to ascending (smallest value first). */
-    status?: SortOrder | null;
+    /** Sort the results by the eventStatus field. Defaults to ascending (smallest value first). */
+    eventStatus?: SortOrder | null;
     /** Sort the results by the ticketPrice field. Defaults to ascending (smallest value first). */
     ticketPrice?: SortOrder | null;
     /** Sort the results by the ticketType field. Defaults to ascending (smallest value first). */
@@ -121,6 +123,8 @@ export type EventSort = {
     title?: SortOrder | null;
     /** Sort the results by the totalCapacity field. Defaults to ascending (smallest value first). */
     totalCapacity?: SortOrder | null;
+    /** Sort the results by the rate field. Defaults to ascending (smallest value first). */
+    rate?: SortOrder | null;
 };
 export type EventFilter = {
     AND?: (EventFilter | null)[];
@@ -150,13 +154,14 @@ export type EventFilter = {
     recurringPattern?: StringFilter | null;
     setlist?: JSONFilter | null;
     startTime?: StringFilter | null;
-    status?: StringFilter | null;
+    eventStatus?: StringFilter | null;
     ticketPrice?: FloatFilter | null;
     ticketType?: StringFilter | null;
     title?: StringFilter | null;
     totalCapacity?: FloatFilter | null;
     venueId?: IDFilter | null;
     venue?: VenueRelationshipFilter | null;
+    rate?: FloatFilter | null;
 };
 export type IDFilter = {
     equals?: (Scalars['GadgetID'] | null) | null;
@@ -378,13 +383,14 @@ export type EventsInnerRelationshipFilter = {
     recurringPattern?: StringFilter | null;
     setlist?: JSONFilter | null;
     startTime?: StringFilter | null;
-    status?: StringFilter | null;
+    eventStatus?: StringFilter | null;
     ticketPrice?: FloatFilter | null;
     ticketType?: StringFilter | null;
     title?: StringFilter | null;
     totalCapacity?: FloatFilter | null;
     venueId?: IDFilter | null;
     venue?: VenueRelationshipFilter | null;
+    rate?: FloatFilter | null;
 };
 export type BookingsRelationshipFilter = {
     some?: BookingsInnerRelationshipFilter | null;
@@ -410,7 +416,6 @@ export type BookingsInnerRelationshipFilter = {
     notes?: StringFilter | null;
     specialRequirements?: StringFilter | null;
     startTime?: StringFilter | null;
-    status?: StringFilter | null;
     totalAmount?: FloatFilter | null;
     venueId?: IDFilter | null;
     venue?: VenueRelationshipFilter | null;
@@ -418,6 +423,7 @@ export type BookingsInnerRelationshipFilter = {
     proposedRate?: FloatFilter | null;
     eventId?: IDFilter | null;
     event?: EventRelationshipFilter | null;
+    status?: StringFilter | null;
 };
 export type EventRelationshipFilter = {
     AND?: (EventRelationshipFilter | null)[];
@@ -448,13 +454,14 @@ export type EventRelationshipFilter = {
     recurringPattern?: StringFilter | null;
     setlist?: JSONFilter | null;
     startTime?: StringFilter | null;
-    status?: StringFilter | null;
+    eventStatus?: StringFilter | null;
     ticketPrice?: FloatFilter | null;
     ticketType?: StringFilter | null;
     title?: StringFilter | null;
     totalCapacity?: FloatFilter | null;
     venueId?: IDFilter | null;
     venue?: VenueRelationshipFilter | null;
+    rate?: FloatFilter | null;
 };
 export type BookingSort = {
     /** Sort the results by the id field. Defaults to ascending (smallest value first). */
@@ -481,14 +488,14 @@ export type BookingSort = {
     specialRequirements?: SortOrder | null;
     /** Sort the results by the startTime field. Defaults to ascending (smallest value first). */
     startTime?: SortOrder | null;
-    /** Sort the results by the status field. Defaults to ascending (smallest value first). */
-    status?: SortOrder | null;
     /** Sort the results by the totalAmount field. Defaults to ascending (smallest value first). */
     totalAmount?: SortOrder | null;
     /** Sort the results by the musicianPitch field. Defaults to ascending (smallest value first). */
     musicianPitch?: SortOrder | null;
     /** Sort the results by the proposedRate field. Defaults to ascending (smallest value first). */
     proposedRate?: SortOrder | null;
+    /** Sort the results by the status field. Defaults to ascending (smallest value first). */
+    status?: SortOrder | null;
 };
 export type BookingFilter = {
     AND?: (BookingFilter | null)[];
@@ -510,7 +517,6 @@ export type BookingFilter = {
     notes?: StringFilter | null;
     specialRequirements?: StringFilter | null;
     startTime?: StringFilter | null;
-    status?: StringFilter | null;
     totalAmount?: FloatFilter | null;
     venueId?: IDFilter | null;
     venue?: VenueRelationshipFilter | null;
@@ -518,6 +524,7 @@ export type BookingFilter = {
     proposedRate?: FloatFilter | null;
     eventId?: IDFilter | null;
     event?: EventRelationshipFilter | null;
+    status?: StringFilter | null;
 };
 export type ReviewSort = {
     /** Sort the results by the id field. Defaults to ascending (smallest value first). */
@@ -811,16 +818,16 @@ export type EventHistorySort = {
     updatedAt?: SortOrder | null;
     /** Sort the results by the changeType field. Defaults to ascending (smallest value first). */
     changeType?: SortOrder | null;
-    /** Sort the results by the previousValue field. Defaults to ascending (smallest value first). */
-    previousValue?: SortOrder | null;
-    /** Sort the results by the description field. Defaults to ascending (smallest value first). */
-    description?: SortOrder | null;
-    /** Sort the results by the newValue field. Defaults to ascending (smallest value first). */
-    newValue?: SortOrder | null;
     /** Sort the results by the context field. Defaults to ascending (smallest value first). */
     context?: SortOrder | null;
+    /** Sort the results by the description field. Defaults to ascending (smallest value first). */
+    description?: SortOrder | null;
     /** Sort the results by the metadata field. Defaults to ascending (smallest value first). */
     metadata?: SortOrder | null;
+    /** Sort the results by the newValue field. Defaults to ascending (smallest value first). */
+    newValue?: SortOrder | null;
+    /** Sort the results by the previousValue field. Defaults to ascending (smallest value first). */
+    previousValue?: SortOrder | null;
 };
 export type EventHistoryFilter = {
     AND?: (EventHistoryFilter | null)[];
@@ -831,16 +838,16 @@ export type EventHistoryFilter = {
     updatedAt?: DateTimeFilter | null;
     bookingId?: IDFilter | null;
     booking?: BookingRelationshipFilter | null;
-    eventId?: IDFilter | null;
-    event?: EventRelationshipFilter | null;
+    changeType?: StringFilter | null;
     changedById?: IDFilter | null;
     changedBy?: UserRelationshipFilter | null;
-    changeType?: StringFilter | null;
-    previousValue?: StringFilter | null;
-    description?: StringFilter | null;
-    newValue?: StringFilter | null;
     context?: JSONFilter | null;
+    description?: StringFilter | null;
+    eventId?: IDFilter | null;
+    event?: EventRelationshipFilter | null;
     metadata?: JSONFilter | null;
+    newValue?: StringFilter | null;
+    previousValue?: StringFilter | null;
 };
 export type BookingRelationshipFilter = {
     AND?: (BookingRelationshipFilter | null)[];
@@ -863,7 +870,6 @@ export type BookingRelationshipFilter = {
     notes?: StringFilter | null;
     specialRequirements?: StringFilter | null;
     startTime?: StringFilter | null;
-    status?: StringFilter | null;
     totalAmount?: FloatFilter | null;
     venueId?: IDFilter | null;
     venue?: VenueRelationshipFilter | null;
@@ -871,33 +877,63 @@ export type BookingRelationshipFilter = {
     proposedRate?: FloatFilter | null;
     eventId?: IDFilter | null;
     event?: EventRelationshipFilter | null;
+    status?: StringFilter | null;
 };
-export type CreateEventInput = {
-    availableTickets?: (Scalars['Float'] | null) | null;
-    category?: (Scalars['String'] | null) | null;
-    createdBy?: UserBelongsToInput | null;
+export type EventApplicationSort = {
+    /** Sort the results by the id field. Defaults to ascending (smallest value first). */
+    id?: SortOrder | null;
+    /** Sort the results by the createdAt field. Defaults to ascending (smallest value first). */
+    createdAt?: SortOrder | null;
+    /** Sort the results by the updatedAt field. Defaults to ascending (smallest value first). */
+    updatedAt?: SortOrder | null;
+    /** Sort the results by the status field. Defaults to ascending (smallest value first). */
+    status?: SortOrder | null;
+    /** Sort the results by the appliedAt field. Defaults to ascending (smallest value first). */
+    appliedAt?: SortOrder | null;
+    /** Sort the results by the message field. Defaults to ascending (smallest value first). */
+    message?: SortOrder | null;
+    /** Sort the results by the reviewedAt field. Defaults to ascending (smallest value first). */
+    reviewedAt?: SortOrder | null;
+};
+export type EventApplicationFilter = {
+    AND?: (EventApplicationFilter | null)[];
+    OR?: (EventApplicationFilter | null)[];
+    NOT?: (EventApplicationFilter | null)[];
+    id?: IDFilter | null;
+    createdAt?: DateTimeFilter | null;
+    updatedAt?: DateTimeFilter | null;
+    eventId?: IDFilter | null;
+    event?: EventRelationshipFilter | null;
+    musicianId?: IDFilter | null;
+    musician?: MusicianRelationshipFilter | null;
+    venueId?: IDFilter | null;
+    venue?: VenueRelationshipFilter | null;
+    status?: StringFilter | null;
+    appliedAt?: DateTimeFilter | null;
+    message?: StringFilter | null;
+    reviewedAt?: DateTimeFilter | null;
+    reviewedById?: IDFilter | null;
+    reviewedBy?: UserRelationshipFilter | null;
+};
+export type UpsertBookingInput = {
+    id?: (Scalars['GadgetID'] | null) | null;
+    bookedBy?: UserBelongsToInput | null;
     date?: Date | Scalars['ISO8601DateString'] | null;
-    description?: (Scalars['String'] | null) | null;
+    depositAmount?: (Scalars['Float'] | null) | null;
+    depositPaid?: (Scalars['Boolean'] | null) | null;
     endTime?: (Scalars['String'] | null) | null;
-    equipment?: (Scalars['JSON'] | null) | null;
-    genres?: (Scalars['JSON'] | null) | null;
-    image?: (Scalars['String'] | null) | null;
+    fullPaymentPaid?: (Scalars['Boolean'] | null) | null;
     isActive?: (Scalars['Boolean'] | null) | null;
-    isPublic?: (Scalars['Boolean'] | null) | null;
-    isRecurring?: (Scalars['Boolean'] | null) | null;
     musician?: MusicianBelongsToInput | null;
-    recurringDays?: (Scalars['JSON'] | null) | null;
-    recurringEndDate?: Date | Scalars['ISO8601DateString'] | null;
-    recurringInterval?: (Scalars['Float'] | null) | null;
-    recurringPattern?: (Scalars['String'] | null) | null;
-    setlist?: (Scalars['JSON'] | null) | null;
+    notes?: (Scalars['String'] | null) | null;
+    specialRequirements?: (Scalars['String'] | null) | null;
     startTime?: (Scalars['String'] | null) | null;
-    status?: (Scalars['String'] | null) | null;
-    ticketPrice?: (Scalars['Float'] | null) | null;
-    ticketType?: (Scalars['String'] | null) | null;
-    title?: (Scalars['String'] | null) | null;
-    totalCapacity?: (Scalars['Float'] | null) | null;
+    totalAmount?: (Scalars['Float'] | null) | null;
     venue?: VenueBelongsToInput | null;
+    musicianPitch?: (Scalars['String'] | null) | null;
+    proposedRate?: (Scalars['Float'] | null) | null;
+    event?: EventBelongsToInput | null;
+    status?: (Scalars['String'] | null) | null;
 };
 export type UserBelongsToInput = {
     signUp?: NestedSignUpUserInput | null;
@@ -1014,9 +1050,13 @@ export type NestedCreateMusicianInput = {
     yearsExperience?: (Scalars['Float'] | null) | null;
 };
 export type BookingHasManyInput = {
+    create?: NestedCreateBookingInput | null;
     update?: NestedUpdateBookingInput | null;
     /** Creates, updates, or deletes existing records in the database as needed to arrive at the list of records specified. */
     _converge?: ConvergeBookingInput | null;
+};
+export type NestedCreateBookingInput = {
+    id: (Scalars['GadgetID'] | null);
 };
 export type NestedUpdateBookingInput = {
     id: (Scalars['GadgetID'] | null);
@@ -1040,12 +1080,12 @@ export type ConvergeBookingValues = {
     notes?: (Scalars['String'] | null) | null;
     specialRequirements?: (Scalars['String'] | null) | null;
     startTime?: (Scalars['String'] | null) | null;
-    status?: (Scalars['String'] | null) | null;
     totalAmount?: (Scalars['Float'] | null) | null;
     venue?: VenueBelongsToInput | null;
     musicianPitch?: (Scalars['String'] | null) | null;
     proposedRate?: (Scalars['Float'] | null) | null;
     event?: EventBelongsToInput | null;
+    status?: (Scalars['String'] | null) | null;
 };
 export type VenueBelongsToInput = {
     create?: NestedCreateVenueInput | null;
@@ -1108,12 +1148,13 @@ export type NestedCreateEventInput = {
     recurringPattern?: (Scalars['String'] | null) | null;
     setlist?: (Scalars['JSON'] | null) | null;
     startTime?: (Scalars['String'] | null) | null;
-    status?: (Scalars['String'] | null) | null;
+    eventStatus?: (Scalars['String'] | null) | null;
     ticketPrice?: (Scalars['Float'] | null) | null;
     ticketType?: (Scalars['String'] | null) | null;
     title?: (Scalars['String'] | null) | null;
     totalCapacity?: (Scalars['Float'] | null) | null;
     venue?: VenueBelongsToInput | null;
+    rate?: (Scalars['Float'] | null) | null;
 };
 export type NestedUpdateEventInput = {
     availableTickets?: (Scalars['Float'] | null) | null;
@@ -1135,12 +1176,13 @@ export type NestedUpdateEventInput = {
     recurringPattern?: (Scalars['String'] | null) | null;
     setlist?: (Scalars['JSON'] | null) | null;
     startTime?: (Scalars['String'] | null) | null;
-    status?: (Scalars['String'] | null) | null;
+    eventStatus?: (Scalars['String'] | null) | null;
     ticketPrice?: (Scalars['Float'] | null) | null;
     ticketType?: (Scalars['String'] | null) | null;
     title?: (Scalars['String'] | null) | null;
     totalCapacity?: (Scalars['Float'] | null) | null;
     venue?: VenueBelongsToInput | null;
+    rate?: (Scalars['Float'] | null) | null;
     id: (Scalars['GadgetID'] | null);
 };
 export type NestedFindFirstEventInput = {
@@ -1173,12 +1215,13 @@ export type ConvergeEventValues = {
     recurringPattern?: (Scalars['String'] | null) | null;
     setlist?: (Scalars['JSON'] | null) | null;
     startTime?: (Scalars['String'] | null) | null;
-    status?: (Scalars['String'] | null) | null;
+    eventStatus?: (Scalars['String'] | null) | null;
     ticketPrice?: (Scalars['Float'] | null) | null;
     ticketType?: (Scalars['String'] | null) | null;
     title?: (Scalars['String'] | null) | null;
     totalCapacity?: (Scalars['Float'] | null) | null;
     venue?: VenueBelongsToInput | null;
+    rate?: (Scalars['Float'] | null) | null;
 };
 export type ConvergeActionMap = {
     /** One of the model action's API identifiers. Specifies which action to use to create new records that are in the set of specified records but not yet in the database. Defaults to the action named `create` if it exists. */
@@ -1260,6 +1303,39 @@ export type NestedUpdateMusicianInput = {
 export type NestedFindFirstMusicianInput = {
     id: (Scalars['GadgetID'] | null);
 };
+export type BulkUpsertBookingsInput = {
+    /** An array of Strings */
+    on?: ((Scalars['String'] | null))[];
+    booking?: UpsertBookingInput | null;
+};
+export type CreateEventInput = {
+    availableTickets?: (Scalars['Float'] | null) | null;
+    category?: (Scalars['String'] | null) | null;
+    createdBy?: UserBelongsToInput | null;
+    date?: Date | Scalars['ISO8601DateString'] | null;
+    description?: (Scalars['String'] | null) | null;
+    endTime?: (Scalars['String'] | null) | null;
+    equipment?: (Scalars['JSON'] | null) | null;
+    genres?: (Scalars['JSON'] | null) | null;
+    image?: (Scalars['String'] | null) | null;
+    isActive?: (Scalars['Boolean'] | null) | null;
+    isPublic?: (Scalars['Boolean'] | null) | null;
+    isRecurring?: (Scalars['Boolean'] | null) | null;
+    musician?: MusicianBelongsToInput | null;
+    recurringDays?: (Scalars['JSON'] | null) | null;
+    recurringEndDate?: Date | Scalars['ISO8601DateString'] | null;
+    recurringInterval?: (Scalars['Float'] | null) | null;
+    recurringPattern?: (Scalars['String'] | null) | null;
+    setlist?: (Scalars['JSON'] | null) | null;
+    startTime?: (Scalars['String'] | null) | null;
+    eventStatus?: (Scalars['String'] | null) | null;
+    ticketPrice?: (Scalars['Float'] | null) | null;
+    ticketType?: (Scalars['String'] | null) | null;
+    title?: (Scalars['String'] | null) | null;
+    totalCapacity?: (Scalars['Float'] | null) | null;
+    venue?: VenueBelongsToInput | null;
+    rate?: (Scalars['Float'] | null) | null;
+};
 export type BulkCreateEventsInput = {
     event?: CreateEventInput | null;
 };
@@ -1283,12 +1359,13 @@ export type UpdateEventInput = {
     recurringPattern?: (Scalars['String'] | null) | null;
     setlist?: (Scalars['JSON'] | null) | null;
     startTime?: (Scalars['String'] | null) | null;
-    status?: (Scalars['String'] | null) | null;
+    eventStatus?: (Scalars['String'] | null) | null;
     ticketPrice?: (Scalars['Float'] | null) | null;
     ticketType?: (Scalars['String'] | null) | null;
     title?: (Scalars['String'] | null) | null;
     totalCapacity?: (Scalars['Float'] | null) | null;
     venue?: VenueBelongsToInput | null;
+    rate?: (Scalars['Float'] | null) | null;
 };
 export type BulkUpdateEventsInput = {
     event?: UpdateEventInput | null;
@@ -1315,12 +1392,13 @@ export type UpsertEventInput = {
     recurringPattern?: (Scalars['String'] | null) | null;
     setlist?: (Scalars['JSON'] | null) | null;
     startTime?: (Scalars['String'] | null) | null;
-    status?: (Scalars['String'] | null) | null;
+    eventStatus?: (Scalars['String'] | null) | null;
     ticketPrice?: (Scalars['Float'] | null) | null;
     ticketType?: (Scalars['String'] | null) | null;
     title?: (Scalars['String'] | null) | null;
     totalCapacity?: (Scalars['Float'] | null) | null;
     venue?: VenueBelongsToInput | null;
+    rate?: (Scalars['Float'] | null) | null;
 };
 export type BulkUpsertEventsInput = {
     /** An array of Strings */
@@ -1643,12 +1721,12 @@ export type InternalBookingInput = {
     notes?: (Scalars['String'] | null) | null;
     specialRequirements?: (Scalars['String'] | null) | null;
     startTime?: (Scalars['String'] | null) | null;
-    status?: (Scalars['String'] | null) | null;
     totalAmount?: (Scalars['Float'] | null) | null;
     venue?: InternalBelongsToInput | null;
     musicianPitch?: (Scalars['String'] | null) | null;
     proposedRate?: (Scalars['Float'] | null) | null;
     event?: InternalBelongsToInput | null;
+    status?: (Scalars['String'] | null) | null;
     /** An optional list of atomically applied commands for race-safe mutations of the record */
     _atomics?: InternalBookingAtomicsInput | null;
 };
@@ -1699,12 +1777,13 @@ export type InternalEventInput = {
     recurringPattern?: (Scalars['String'] | null) | null;
     setlist?: (Scalars['JSON'] | null) | null;
     startTime?: (Scalars['String'] | null) | null;
-    status?: (Scalars['String'] | null) | null;
+    eventStatus?: (Scalars['String'] | null) | null;
     ticketPrice?: (Scalars['Float'] | null) | null;
     ticketType?: (Scalars['String'] | null) | null;
     title?: (Scalars['String'] | null) | null;
     totalCapacity?: (Scalars['Float'] | null) | null;
     venue?: InternalBelongsToInput | null;
+    rate?: (Scalars['Float'] | null) | null;
     /** An optional list of atomically applied commands for race-safe mutations of the record */
     _atomics?: InternalEventAtomicsInput | null;
 };
@@ -1717,6 +1796,8 @@ export type InternalEventAtomicsInput = {
     ticketPrice?: (NumericAtomicFieldUpdateInput)[];
     /** Numeric atomic commands for operating on totalCapacity. */
     totalCapacity?: (NumericAtomicFieldUpdateInput)[];
+    /** Numeric atomic commands for operating on rate. */
+    rate?: (NumericAtomicFieldUpdateInput)[];
 };
 export type InternalMusicianInput = {
     state?: (Scalars['String'] | null) | null;
@@ -1871,14 +1952,29 @@ export type InternalEventHistoryInput = {
     createdAt?: Date | Scalars['ISO8601DateString'] | null;
     updatedAt?: Date | Scalars['ISO8601DateString'] | null;
     booking?: InternalBelongsToInput | null;
-    event?: InternalBelongsToInput | null;
-    changedBy?: InternalBelongsToInput | null;
     changeType?: (Scalars['String'] | null) | null;
-    previousValue?: (Scalars['String'] | null) | null;
-    description?: (Scalars['String'] | null) | null;
-    newValue?: (Scalars['String'] | null) | null;
+    changedBy?: InternalBelongsToInput | null;
     context?: (Scalars['JSON'] | null) | null;
+    description?: (Scalars['String'] | null) | null;
+    event?: InternalBelongsToInput | null;
     metadata?: (Scalars['JSON'] | null) | null;
+    newValue?: (Scalars['String'] | null) | null;
+    previousValue?: (Scalars['String'] | null) | null;
+};
+export type InternalEventApplicationInput = {
+    state?: (Scalars['RecordState'] | null) | null;
+    stateHistory?: (Scalars['RecordState'] | null) | null;
+    id?: (Scalars['GadgetID'] | null) | null;
+    createdAt?: Date | Scalars['ISO8601DateString'] | null;
+    updatedAt?: Date | Scalars['ISO8601DateString'] | null;
+    event?: InternalBelongsToInput | null;
+    musician?: InternalBelongsToInput | null;
+    venue?: InternalBelongsToInput | null;
+    status?: (Scalars['String'] | null) | null;
+    appliedAt?: Date | Scalars['ISO8601DateString'] | null;
+    message?: (Scalars['String'] | null) | null;
+    reviewedAt?: Date | Scalars['ISO8601DateString'] | null;
+    reviewedBy?: InternalBelongsToInput | null;
 };
 /** All built-in and custom scalars, mapped to their actual values */
 export interface Scalars {
@@ -2472,13 +2568,25 @@ export type AvailableGadgetGenericFieldValidationSelection = {
     name?: boolean | null | undefined;
     specID?: boolean | null | undefined;
 };
-export interface UpsertError extends UpsertEventResult, UpsertMusicianResult, UpsertVenueResult, UpsertUserResult {
+export interface UpsertError extends UpsertBookingResult, UpsertEventResult, UpsertMusicianResult, UpsertVenueResult, UpsertUserResult {
     __typename: 'UpsertError';
     success: Scalars['Boolean'];
     errors: ExecutionError[];
     actionRun: (Scalars['String'] | null);
 }
 export type AvailableUpsertErrorSelection = {
+    __typename?: boolean | null | undefined;
+    success?: boolean | null | undefined;
+    errors?: AvailableExecutionErrorSelection;
+    actionRun?: boolean | null | undefined;
+};
+export type UpsertBookingResult = {
+    __typename: 'UpsertError' | 'CreateBookingResult' | 'UpdateBookingResult';
+    success: Scalars['Boolean'];
+    errors: ExecutionError[];
+    actionRun: (Scalars['String'] | null);
+};
+export type AvailableUpsertBookingResultSelection = {
     __typename?: boolean | null | undefined;
     success?: boolean | null | undefined;
     errors?: AvailableExecutionErrorSelection;
@@ -2558,6 +2666,9 @@ export type Query = {
     eventHistory: (EventHistory | null);
     eventHistories: EventHistoryConnection;
     eventHistoryGellyView: (Scalars['JSON'] | null);
+    eventApplication: (EventApplication | null);
+    eventApplications: EventApplicationConnection;
+    eventApplicationGellyView: (Scalars['JSON'] | null);
     gellyView: (Scalars['JSON'] | null);
     currentSession: (Session | null);
     internal: InternalQueries;
@@ -2588,6 +2699,9 @@ export type AvailableQuerySelection = {
     eventHistory?: AvailableEventHistorySelection;
     eventHistories?: AvailableEventHistoryConnectionSelection;
     eventHistoryGellyView?: boolean | null | undefined;
+    eventApplication?: AvailableEventApplicationSelection;
+    eventApplications?: AvailableEventApplicationConnectionSelection;
+    eventApplicationGellyView?: boolean | null | undefined;
     gellyView?: boolean | null | undefined;
     currentSession?: AvailableSessionSelection;
     internal?: AvailableInternalQueriesSelection;
@@ -2613,7 +2727,6 @@ export type Booking = {
     notes: (Scalars['String'] | null);
     specialRequirements: (Scalars['String'] | null);
     startTime: (Scalars['String'] | null);
-    status: (Scalars['String'] | null);
     totalAmount: (Scalars['Float'] | null);
     venue: (Venue | null);
     venueId: (Scalars['GadgetID'] | null);
@@ -2621,6 +2734,7 @@ export type Booking = {
     proposedRate: (Scalars['Float'] | null);
     event: (Event | null);
     eventId: (Scalars['GadgetID'] | null);
+    status: (Scalars['String'] | null);
     /** Get all the fields for this record. Useful for not having to list out all the fields you want to retrieve, but slower. */
     _all: Scalars['JSONObject'];
 };
@@ -2645,7 +2759,6 @@ export type AvailableBookingSelection = {
     notes?: boolean | null | undefined;
     specialRequirements?: boolean | null | undefined;
     startTime?: boolean | null | undefined;
-    status?: boolean | null | undefined;
     totalAmount?: boolean | null | undefined;
     venue?: AvailableVenueSelection;
     venueId?: boolean | null | undefined;
@@ -2653,6 +2766,7 @@ export type AvailableBookingSelection = {
     proposedRate?: boolean | null | undefined;
     event?: AvailableEventSelection;
     eventId?: boolean | null | undefined;
+    status?: boolean | null | undefined;
     /** Get all the fields for this record. Useful for not having to list out all the fields you want to retrieve, but slower. */
     _all?: boolean | null | undefined;
 };
@@ -3043,13 +3157,14 @@ export type Event = {
     recurringPattern: (Scalars['String'] | null);
     setlist: (Scalars['JSON'] | null);
     startTime: (Scalars['String'] | null);
-    status: (Scalars['String'] | null);
+    eventStatus: (Scalars['String'] | null);
     ticketPrice: (Scalars['Float'] | null);
     ticketType: (Scalars['String'] | null);
     title: (Scalars['String'] | null);
     totalCapacity: (Scalars['Float'] | null);
     venue: (Venue | null);
     venueId: (Scalars['GadgetID'] | null);
+    rate: (Scalars['Float'] | null);
     /** Get all the fields for this record. Useful for not having to list out all the fields you want to retrieve, but slower. */
     _all: Scalars['JSONObject'];
 };
@@ -3082,13 +3197,14 @@ export type AvailableEventSelection = {
     recurringPattern?: boolean | null | undefined;
     setlist?: boolean | null | undefined;
     startTime?: boolean | null | undefined;
-    status?: boolean | null | undefined;
+    eventStatus?: boolean | null | undefined;
     ticketPrice?: boolean | null | undefined;
     ticketType?: boolean | null | undefined;
     title?: boolean | null | undefined;
     totalCapacity?: boolean | null | undefined;
     venue?: AvailableVenueSelection;
     venueId?: boolean | null | undefined;
+    rate?: boolean | null | undefined;
     /** Get all the fields for this record. Useful for not having to list out all the fields you want to retrieve, but slower. */
     _all?: boolean | null | undefined;
 };
@@ -3301,16 +3417,16 @@ export type EventHistory = {
     updatedAt: Scalars['DateTime'];
     booking: (Booking | null);
     bookingId: (Scalars['GadgetID'] | null);
-    event: (Event | null);
-    eventId: (Scalars['GadgetID'] | null);
+    changeType: (Scalars['String'] | null);
     changedBy: (User | null);
     changedById: (Scalars['GadgetID'] | null);
-    changeType: (Scalars['String'] | null);
-    previousValue: (Scalars['String'] | null);
-    description: (Scalars['String'] | null);
-    newValue: (Scalars['String'] | null);
     context: (Scalars['JSON'] | null);
+    description: (Scalars['String'] | null);
+    event: (Event | null);
+    eventId: (Scalars['GadgetID'] | null);
     metadata: (Scalars['JSON'] | null);
+    newValue: (Scalars['String'] | null);
+    previousValue: (Scalars['String'] | null);
     /** Get all the fields for this record. Useful for not having to list out all the fields you want to retrieve, but slower. */
     _all: Scalars['JSONObject'];
 };
@@ -3324,16 +3440,16 @@ export type AvailableEventHistorySelection = {
     updatedAt?: boolean | null | undefined;
     booking?: AvailableBookingSelection;
     bookingId?: boolean | null | undefined;
-    event?: AvailableEventSelection;
-    eventId?: boolean | null | undefined;
+    changeType?: boolean | null | undefined;
     changedBy?: AvailableUserSelection;
     changedById?: boolean | null | undefined;
-    changeType?: boolean | null | undefined;
-    previousValue?: boolean | null | undefined;
-    description?: boolean | null | undefined;
-    newValue?: boolean | null | undefined;
     context?: boolean | null | undefined;
+    description?: boolean | null | undefined;
+    event?: AvailableEventSelection;
+    eventId?: boolean | null | undefined;
     metadata?: boolean | null | undefined;
+    newValue?: boolean | null | undefined;
+    previousValue?: boolean | null | undefined;
     /** Get all the fields for this record. Useful for not having to list out all the fields you want to retrieve, but slower. */
     _all?: boolean | null | undefined;
 };
@@ -3364,6 +3480,82 @@ export type AvailableEventHistoryEdgeSelection = {
     __typename?: boolean | null | undefined;
     /** The item at the end of the edge */
     node?: AvailableEventHistorySelection;
+    /** A cursor for use in pagination */
+    cursor?: boolean | null | undefined;
+};
+export type EventApplication = {
+    __typename: 'EventApplication';
+    /** The globally unique, unchanging identifier for this record. Assigned and managed by Gadget. */
+    id: Scalars['GadgetID'];
+    /** The time at which this record was first created. Set once upon record creation and never changed. Managed by Gadget. */
+    createdAt: Scalars['DateTime'];
+    /** The time at which this record was last changed. Set each time the record is successfully acted upon by an action. Managed by Gadget. */
+    updatedAt: Scalars['DateTime'];
+    event: (Event | null);
+    eventId: (Scalars['GadgetID'] | null);
+    musician: (Musician | null);
+    musicianId: (Scalars['GadgetID'] | null);
+    venue: (Venue | null);
+    venueId: (Scalars['GadgetID'] | null);
+    status: (Scalars['String'] | null);
+    appliedAt: (Scalars['DateTime'] | null);
+    message: (Scalars['String'] | null);
+    reviewedAt: (Scalars['DateTime'] | null);
+    reviewedBy: (User | null);
+    reviewedById: (Scalars['GadgetID'] | null);
+    /** Get all the fields for this record. Useful for not having to list out all the fields you want to retrieve, but slower. */
+    _all: Scalars['JSONObject'];
+};
+export type AvailableEventApplicationSelection = {
+    __typename?: boolean | null | undefined;
+    /** The globally unique, unchanging identifier for this record. Assigned and managed by Gadget. */
+    id?: boolean | null | undefined;
+    /** The time at which this record was first created. Set once upon record creation and never changed. Managed by Gadget. */
+    createdAt?: boolean | null | undefined;
+    /** The time at which this record was last changed. Set each time the record is successfully acted upon by an action. Managed by Gadget. */
+    updatedAt?: boolean | null | undefined;
+    event?: AvailableEventSelection;
+    eventId?: boolean | null | undefined;
+    musician?: AvailableMusicianSelection;
+    musicianId?: boolean | null | undefined;
+    venue?: AvailableVenueSelection;
+    venueId?: boolean | null | undefined;
+    status?: boolean | null | undefined;
+    appliedAt?: boolean | null | undefined;
+    message?: boolean | null | undefined;
+    reviewedAt?: boolean | null | undefined;
+    reviewedBy?: AvailableUserSelection;
+    reviewedById?: boolean | null | undefined;
+    /** Get all the fields for this record. Useful for not having to list out all the fields you want to retrieve, but slower. */
+    _all?: boolean | null | undefined;
+};
+/** A connection to a list of EventApplication items. */
+export type EventApplicationConnection = {
+    __typename: 'EventApplicationConnection';
+    /** A list of edges. */
+    edges: EventApplicationEdge[];
+    /** Information to aid in pagination. */
+    pageInfo: PageInfo;
+};
+export type AvailableEventApplicationConnectionSelection = {
+    __typename?: boolean | null | undefined;
+    /** A list of edges. */
+    edges?: AvailableEventApplicationEdgeSelection;
+    /** Information to aid in pagination. */
+    pageInfo?: AvailablePageInfoSelection;
+};
+/** An edge in a EventApplication connection. */
+export type EventApplicationEdge = {
+    __typename: 'EventApplicationEdge';
+    /** The item at the end of the edge */
+    node: EventApplication;
+    /** A cursor for use in pagination */
+    cursor: Scalars['String'];
+};
+export type AvailableEventApplicationEdgeSelection = {
+    __typename?: boolean | null | undefined;
+    /** The item at the end of the edge */
+    node?: AvailableEventApplicationSelection;
     /** A cursor for use in pagination */
     cursor?: boolean | null | undefined;
 };
@@ -3467,6 +3659,8 @@ export type InternalQueries = {
     listSession: InternalSessionRecordConnection;
     eventHistory: (InternalEventHistoryRecord | null);
     listEventHistory: InternalEventHistoryRecordConnection;
+    eventApplication: (InternalEventApplicationRecord | null);
+    listEventApplication: InternalEventApplicationRecordConnection;
     gellyView: (Scalars['JSON'] | null);
 };
 export type AvailableInternalQueriesSelection = {
@@ -3489,6 +3683,8 @@ export type AvailableInternalQueriesSelection = {
     listSession?: AvailableInternalSessionRecordConnectionSelection;
     eventHistory?: boolean | null | undefined;
     listEventHistory?: AvailableInternalEventHistoryRecordConnectionSelection;
+    eventApplication?: boolean | null | undefined;
+    listEventApplication?: AvailableInternalEventApplicationRecordConnectionSelection;
     gellyView?: boolean | null | undefined;
 };
 /** A connection to a list of InternalBookingRecord items. */
@@ -3731,10 +3927,44 @@ export type AvailableInternalEventHistoryRecordEdgeSelection = {
     /** A cursor for use in pagination */
     cursor?: boolean | null | undefined;
 };
+/** A connection to a list of InternalEventApplicationRecord items. */
+export type InternalEventApplicationRecordConnection = {
+    __typename: 'InternalEventApplicationRecordConnection';
+    /** A list of edges. */
+    edges: InternalEventApplicationRecordEdge[];
+    /** Information to aid in pagination. */
+    pageInfo: PageInfo;
+};
+export type AvailableInternalEventApplicationRecordConnectionSelection = {
+    __typename?: boolean | null | undefined;
+    /** A list of edges. */
+    edges?: AvailableInternalEventApplicationRecordEdgeSelection;
+    /** Information to aid in pagination. */
+    pageInfo?: AvailablePageInfoSelection;
+};
+/** An edge in a InternalEventApplicationRecord connection. */
+export type InternalEventApplicationRecordEdge = {
+    __typename: 'InternalEventApplicationRecordEdge';
+    /** The item at the end of the edge */
+    node: InternalEventApplicationRecord;
+    /** A cursor for use in pagination */
+    cursor: Scalars['String'];
+};
+export type AvailableInternalEventApplicationRecordEdgeSelection = {
+    __typename?: boolean | null | undefined;
+    /** The item at the end of the edge */
+    node?: boolean | null | undefined;
+    /** A cursor for use in pagination */
+    cursor?: boolean | null | undefined;
+};
 export type Mutation = {
     __typename: 'Mutation';
+    createBooking: (CreateBookingResult | null);
+    bulkCreateBookings: (BulkCreateBookingsResult | null);
     updateBooking: (UpdateBookingResult | null);
     bulkUpdateBookings: (BulkUpdateBookingsResult | null);
+    upsertBooking: (UpsertBookingResult | null);
+    bulkUpsertBookings: BulkUpsertBookingsResult;
     createEvent: (CreateEventResult | null);
     bulkCreateEvents: (BulkCreateEventsResult | null);
     updateEvent: (UpdateEventResult | null);
@@ -3783,16 +4013,21 @@ export type Mutation = {
     bulkUpsertUsers: BulkUpsertUsersResult;
     createEventHistory: (CreateEventHistoryResult | null);
     bulkCreateEventHistories: (BulkCreateEventHistoriesResult | null);
+    createEventApplication: (CreateEventApplicationResult | null);
+    bulkCreateEventApplications: (BulkCreateEventApplicationsResult | null);
     sendBookingEmails: (SendBookingEmailsResult | null);
     sendEmail: (SendEmailResult | null);
     background: BackgroundMutations;
     internal: InternalMutations;
-    seed: SeedMutations;
 };
 export type AvailableMutationSelection = {
     __typename?: boolean | null | undefined;
+    createBooking?: AvailableCreateBookingResultSelection;
+    bulkCreateBookings?: AvailableBulkCreateBookingsResultSelection;
     updateBooking?: AvailableUpdateBookingResultSelection;
     bulkUpdateBookings?: AvailableBulkUpdateBookingsResultSelection;
+    upsertBooking?: AvailableUpsertBookingResultSelection;
+    bulkUpsertBookings?: AvailableBulkUpsertBookingsResultSelection;
     createEvent?: AvailableCreateEventResultSelection;
     bulkCreateEvents?: AvailableBulkCreateEventsResultSelection;
     updateEvent?: AvailableUpdateEventResultSelection;
@@ -3841,19 +4076,53 @@ export type AvailableMutationSelection = {
     bulkUpsertUsers?: AvailableBulkUpsertUsersResultSelection;
     createEventHistory?: AvailableCreateEventHistoryResultSelection;
     bulkCreateEventHistories?: AvailableBulkCreateEventHistoriesResultSelection;
+    createEventApplication?: AvailableCreateEventApplicationResultSelection;
+    bulkCreateEventApplications?: AvailableBulkCreateEventApplicationsResultSelection;
     sendBookingEmails?: AvailableSendBookingEmailsResultSelection;
     sendEmail?: AvailableSendEmailResultSelection;
     background?: AvailableBackgroundMutationsSelection;
     internal?: AvailableInternalMutationsSelection;
-    seed?: AvailableSeedMutationsSelection;
 };
-export type UpdateBookingResult = {
+export interface CreateBookingResult extends UpsertBookingResult {
+    __typename: 'CreateBookingResult';
+    success: Scalars['Boolean'];
+    errors: ExecutionError[];
+    actionRun: (Scalars['String'] | null);
+    booking: (Booking | null);
+}
+export type AvailableCreateBookingResultSelection = {
+    __typename?: boolean | null | undefined;
+    success?: boolean | null | undefined;
+    errors?: AvailableExecutionErrorSelection;
+    actionRun?: boolean | null | undefined;
+    booking?: AvailableBookingSelection;
+};
+/** The output when running the create on the booking model in bulk. */
+export type BulkCreateBookingsResult = {
+    __typename: 'BulkCreateBookingsResult';
+    /** Boolean describing if all the bulk actions succeeded or not */
+    success: Scalars['Boolean'];
+    /** Aggregated list of errors that any bulk action encountered while processing */
+    errors: ExecutionError[];
+    /** The list of all changed booking records by each sent bulk action. Returned in the same order as the input bulk action params. */
+    bookings: (Booking | null)[];
+};
+export type AvailableBulkCreateBookingsResultSelection = {
+    __typename?: boolean | null | undefined;
+    /** Boolean describing if all the bulk actions succeeded or not */
+    success?: boolean | null | undefined;
+    /** Aggregated list of errors that any bulk action encountered while processing */
+    errors?: AvailableExecutionErrorSelection;
+    /** The list of all changed booking records by each sent bulk action. Returned in the same order as the input bulk action params. */
+    bookings?: AvailableBookingSelection;
+};
+export interface UpdateBookingResult extends UpsertBookingResult {
     __typename: 'UpdateBookingResult';
     success: Scalars['Boolean'];
     errors: ExecutionError[];
     actionRun: (Scalars['String'] | null);
     booking: (Booking | null);
-};
+}
 export type AvailableUpdateBookingResultSelection = {
     __typename?: boolean | null | undefined;
     success?: boolean | null | undefined;
@@ -3878,6 +4147,25 @@ export type AvailableBulkUpdateBookingsResultSelection = {
     /** Aggregated list of errors that any bulk action encountered while processing */
     errors?: AvailableExecutionErrorSelection;
     /** The list of all changed booking records by each sent bulk action. Returned in the same order as the input bulk action params. */
+    bookings?: AvailableBookingSelection;
+};
+/** The result of a bulk upsert operation for the booking model */
+export type BulkUpsertBookingsResult = {
+    __typename: 'BulkUpsertBookingsResult';
+    /** Boolean describing if all the bulk actions succeeded or not */
+    success: Scalars['Boolean'];
+    /** Aggregated list of errors that any bulk action encountered while processing */
+    errors: ExecutionError[];
+    /** The results of each upsert action in the bulk operation */
+    bookings: (Booking | null)[];
+};
+export type AvailableBulkUpsertBookingsResultSelection = {
+    __typename?: boolean | null | undefined;
+    /** Boolean describing if all the bulk actions succeeded or not */
+    success?: boolean | null | undefined;
+    /** Aggregated list of errors that any bulk action encountered while processing */
+    errors?: AvailableExecutionErrorSelection;
+    /** The results of each upsert action in the bulk operation */
     bookings?: AvailableBookingSelection;
 };
 export interface CreateEventResult extends UpsertEventResult {
@@ -4642,6 +4930,39 @@ export type AvailableBulkCreateEventHistoriesResultSelection = {
     /** The list of all changed eventHistory records by each sent bulk action. Returned in the same order as the input bulk action params. */
     eventHistories?: AvailableEventHistorySelection;
 };
+export type CreateEventApplicationResult = {
+    __typename: 'CreateEventApplicationResult';
+    success: Scalars['Boolean'];
+    errors: ExecutionError[];
+    actionRun: (Scalars['String'] | null);
+    eventApplication: (EventApplication | null);
+};
+export type AvailableCreateEventApplicationResultSelection = {
+    __typename?: boolean | null | undefined;
+    success?: boolean | null | undefined;
+    errors?: AvailableExecutionErrorSelection;
+    actionRun?: boolean | null | undefined;
+    eventApplication?: AvailableEventApplicationSelection;
+};
+/** The output when running the create on the eventApplication model in bulk. */
+export type BulkCreateEventApplicationsResult = {
+    __typename: 'BulkCreateEventApplicationsResult';
+    /** Boolean describing if all the bulk actions succeeded or not */
+    success: Scalars['Boolean'];
+    /** Aggregated list of errors that any bulk action encountered while processing */
+    errors: ExecutionError[];
+    /** The list of all changed eventApplication records by each sent bulk action. Returned in the same order as the input bulk action params. */
+    eventApplications: (EventApplication | null)[];
+};
+export type AvailableBulkCreateEventApplicationsResultSelection = {
+    __typename?: boolean | null | undefined;
+    /** Boolean describing if all the bulk actions succeeded or not */
+    success?: boolean | null | undefined;
+    /** Aggregated list of errors that any bulk action encountered while processing */
+    errors?: AvailableExecutionErrorSelection;
+    /** The list of all changed eventApplication records by each sent bulk action. Returned in the same order as the input bulk action params. */
+    eventApplications?: AvailableEventApplicationSelection;
+};
 export type SendBookingEmailsResult = {
     __typename: 'SendBookingEmailsResult';
     success: Scalars['Boolean'];
@@ -4668,8 +4989,12 @@ export type AvailableSendEmailResultSelection = {
 };
 export type BackgroundMutations = {
     __typename: 'BackgroundMutations';
+    createBooking: EnqueueBackgroundActionResult;
+    bulkCreateBookings: BulkEnqueueBackgroundActionResult;
     updateBooking: EnqueueBackgroundActionResult;
     bulkUpdateBookings: BulkEnqueueBackgroundActionResult;
+    upsertBooking: EnqueueBackgroundActionResult;
+    bulkUpsertBookings: BulkEnqueueBackgroundActionResult;
     createEvent: EnqueueBackgroundActionResult;
     bulkCreateEvents: BulkEnqueueBackgroundActionResult;
     updateEvent: EnqueueBackgroundActionResult;
@@ -4718,14 +5043,19 @@ export type BackgroundMutations = {
     bulkUpsertUsers: BulkEnqueueBackgroundActionResult;
     createEventHistory: EnqueueBackgroundActionResult;
     bulkCreateEventHistories: BulkEnqueueBackgroundActionResult;
+    createEventApplication: EnqueueBackgroundActionResult;
+    bulkCreateEventApplications: BulkEnqueueBackgroundActionResult;
     sendBookingEmails: EnqueueBackgroundActionResult;
     sendEmail: EnqueueBackgroundActionResult;
-    seed: BackgroundSeedMutations;
 };
 export type AvailableBackgroundMutationsSelection = {
     __typename?: boolean | null | undefined;
+    createBooking?: AvailableEnqueueBackgroundActionResultSelection;
+    bulkCreateBookings?: AvailableBulkEnqueueBackgroundActionResultSelection;
     updateBooking?: AvailableEnqueueBackgroundActionResultSelection;
     bulkUpdateBookings?: AvailableBulkEnqueueBackgroundActionResultSelection;
+    upsertBooking?: AvailableEnqueueBackgroundActionResultSelection;
+    bulkUpsertBookings?: AvailableBulkEnqueueBackgroundActionResultSelection;
     createEvent?: AvailableEnqueueBackgroundActionResultSelection;
     bulkCreateEvents?: AvailableBulkEnqueueBackgroundActionResultSelection;
     updateEvent?: AvailableEnqueueBackgroundActionResultSelection;
@@ -4774,9 +5104,10 @@ export type AvailableBackgroundMutationsSelection = {
     bulkUpsertUsers?: AvailableBulkEnqueueBackgroundActionResultSelection;
     createEventHistory?: AvailableEnqueueBackgroundActionResultSelection;
     bulkCreateEventHistories?: AvailableBulkEnqueueBackgroundActionResultSelection;
+    createEventApplication?: AvailableEnqueueBackgroundActionResultSelection;
+    bulkCreateEventApplications?: AvailableBulkEnqueueBackgroundActionResultSelection;
     sendBookingEmails?: AvailableEnqueueBackgroundActionResultSelection;
     sendEmail?: AvailableEnqueueBackgroundActionResultSelection;
-    seed?: AvailableBackgroundSeedMutationsSelection;
 };
 /** The value returned from enqueuing an action to run in the background */
 export type EnqueueBackgroundActionResult = {
@@ -4815,30 +5146,6 @@ export type AvailableBulkEnqueueBackgroundActionResultSelection = {
     errors?: AvailableExecutionErrorSelection;
     backgroundActions?: AvailableBackgroundActionHandleSelection;
 };
-export type BackgroundSeedMutations = {
-    __typename: 'BackgroundSeedMutations';
-    createEvents: EnqueueBackgroundActionResult;
-    createMusicians: EnqueueBackgroundActionResult;
-    createReviews: EnqueueBackgroundActionResult;
-    createUsers: EnqueueBackgroundActionResult;
-    createVenues: EnqueueBackgroundActionResult;
-    quickSeed: EnqueueBackgroundActionResult;
-    seedAllData: EnqueueBackgroundActionResult;
-    seedData: EnqueueBackgroundActionResult;
-    simpleSeed: EnqueueBackgroundActionResult;
-};
-export type AvailableBackgroundSeedMutationsSelection = {
-    __typename?: boolean | null | undefined;
-    createEvents?: AvailableEnqueueBackgroundActionResultSelection;
-    createMusicians?: AvailableEnqueueBackgroundActionResultSelection;
-    createReviews?: AvailableEnqueueBackgroundActionResultSelection;
-    createUsers?: AvailableEnqueueBackgroundActionResultSelection;
-    createVenues?: AvailableEnqueueBackgroundActionResultSelection;
-    quickSeed?: AvailableEnqueueBackgroundActionResultSelection;
-    seedAllData?: AvailableEnqueueBackgroundActionResultSelection;
-    seedData?: AvailableEnqueueBackgroundActionResultSelection;
-    simpleSeed?: AvailableEnqueueBackgroundActionResultSelection;
-};
 export type InternalMutations = {
     __typename: 'InternalMutations';
     startTransaction: Scalars['String'];
@@ -4852,6 +5159,7 @@ export type InternalMutations = {
     deleteManyBooking: (InternalDeleteManyBookingResult | null);
     bulkCreateBookings: (InternalBulkCreateBookingsResult | null);
     upsertBooking: (InternalUpsertBookingResult | null);
+    triggerCreateBooking: (CreateBookingResult | null);
     triggerUpdateBooking: (UpdateBookingResult | null);
     createEvent: (InternalCreateEventResult | null);
     updateEvent: (InternalUpdateEventResult | null);
@@ -4915,11 +5223,17 @@ export type InternalMutations = {
     bulkCreateEventHistories: (InternalBulkCreateEventHistoriesResult | null);
     upsertEventHistory: (InternalUpsertEventHistoryResult | null);
     triggerCreateEventHistory: (CreateEventHistoryResult | null);
+    createEventApplication: (InternalCreateEventApplicationResult | null);
+    updateEventApplication: (InternalUpdateEventApplicationResult | null);
+    deleteEventApplication: (InternalDeleteEventApplicationResult | null);
+    deleteManyEventApplication: (InternalDeleteManyEventApplicationResult | null);
+    bulkCreateEventApplications: (InternalBulkCreateEventApplicationsResult | null);
+    upsertEventApplication: (InternalUpsertEventApplicationResult | null);
+    triggerCreateEventApplication: (CreateEventApplicationResult | null);
     triggerSendBookingEmails: (SendBookingEmailsResult | null);
     triggerSendEmail: (SendEmailResult | null);
     cancelBackgroundAction: CancelBackgroundActionResult;
     bulkCancelBackgroundActions: BulkCancelBackgroundActionResult;
-    seed: InternalSeedMutations;
 };
 export type AvailableInternalMutationsSelection = {
     __typename?: boolean | null | undefined;
@@ -4934,6 +5248,7 @@ export type AvailableInternalMutationsSelection = {
     deleteManyBooking?: AvailableInternalDeleteManyBookingResultSelection;
     bulkCreateBookings?: AvailableInternalBulkCreateBookingsResultSelection;
     upsertBooking?: AvailableInternalUpsertBookingResultSelection;
+    triggerCreateBooking?: AvailableCreateBookingResultSelection;
     triggerUpdateBooking?: AvailableUpdateBookingResultSelection;
     createEvent?: AvailableInternalCreateEventResultSelection;
     updateEvent?: AvailableInternalUpdateEventResultSelection;
@@ -4997,11 +5312,17 @@ export type AvailableInternalMutationsSelection = {
     bulkCreateEventHistories?: AvailableInternalBulkCreateEventHistoriesResultSelection;
     upsertEventHistory?: AvailableInternalUpsertEventHistoryResultSelection;
     triggerCreateEventHistory?: AvailableCreateEventHistoryResultSelection;
+    createEventApplication?: AvailableInternalCreateEventApplicationResultSelection;
+    updateEventApplication?: AvailableInternalUpdateEventApplicationResultSelection;
+    deleteEventApplication?: AvailableInternalDeleteEventApplicationResultSelection;
+    deleteManyEventApplication?: AvailableInternalDeleteManyEventApplicationResultSelection;
+    bulkCreateEventApplications?: AvailableInternalBulkCreateEventApplicationsResultSelection;
+    upsertEventApplication?: AvailableInternalUpsertEventApplicationResultSelection;
+    triggerCreateEventApplication?: AvailableCreateEventApplicationResultSelection;
     triggerSendBookingEmails?: AvailableSendBookingEmailsResultSelection;
     triggerSendEmail?: AvailableSendEmailResultSelection;
     cancelBackgroundAction?: AvailableCancelBackgroundActionResultSelection;
     bulkCancelBackgroundActions?: AvailableBulkCancelBackgroundActionResultSelection;
-    seed?: AvailableInternalSeedMutationsSelection;
 };
 export type LockOperationResult = {
     __typename: 'LockOperationResult';
@@ -5705,6 +6026,92 @@ export type AvailableInternalUpsertEventHistoryResultSelection = {
     created?: boolean | null | undefined;
     eventHistory?: boolean | null | undefined;
 };
+export type InternalCreateEventApplicationResult = {
+    __typename: 'InternalCreateEventApplicationResult';
+    success: Scalars['Boolean'];
+    errors: ExecutionError[];
+    /** Whether the record was created by this upsert operation */
+    created: Scalars['Boolean'];
+    eventApplication: (InternalEventApplicationRecord | null);
+};
+export type AvailableInternalCreateEventApplicationResultSelection = {
+    __typename?: boolean | null | undefined;
+    success?: boolean | null | undefined;
+    errors?: AvailableExecutionErrorSelection;
+    /** Whether the record was created by this upsert operation */
+    created?: boolean | null | undefined;
+    eventApplication?: boolean | null | undefined;
+};
+export type InternalUpdateEventApplicationResult = {
+    __typename: 'InternalUpdateEventApplicationResult';
+    success: Scalars['Boolean'];
+    errors: ExecutionError[];
+    /** Whether the record was created by this upsert operation */
+    created: Scalars['Boolean'];
+    eventApplication: (InternalEventApplicationRecord | null);
+};
+export type AvailableInternalUpdateEventApplicationResultSelection = {
+    __typename?: boolean | null | undefined;
+    success?: boolean | null | undefined;
+    errors?: AvailableExecutionErrorSelection;
+    /** Whether the record was created by this upsert operation */
+    created?: boolean | null | undefined;
+    eventApplication?: boolean | null | undefined;
+};
+export type InternalDeleteEventApplicationResult = {
+    __typename: 'InternalDeleteEventApplicationResult';
+    success: Scalars['Boolean'];
+    errors: ExecutionError[];
+    /** Whether the record was created by this upsert operation */
+    created: Scalars['Boolean'];
+    eventApplication: (InternalEventApplicationRecord | null);
+};
+export type AvailableInternalDeleteEventApplicationResultSelection = {
+    __typename?: boolean | null | undefined;
+    success?: boolean | null | undefined;
+    errors?: AvailableExecutionErrorSelection;
+    /** Whether the record was created by this upsert operation */
+    created?: boolean | null | undefined;
+    eventApplication?: boolean | null | undefined;
+};
+export type InternalDeleteManyEventApplicationResult = {
+    __typename: 'InternalDeleteManyEventApplicationResult';
+    success: Scalars['Boolean'];
+    errors: ExecutionError[];
+};
+export type AvailableInternalDeleteManyEventApplicationResultSelection = {
+    __typename?: boolean | null | undefined;
+    success?: boolean | null | undefined;
+    errors?: AvailableExecutionErrorSelection;
+};
+export type InternalBulkCreateEventApplicationsResult = {
+    __typename: 'InternalBulkCreateEventApplicationsResult';
+    success: Scalars['Boolean'];
+    errors: ExecutionError[];
+    eventApplications: (InternalEventApplicationRecord | null)[];
+};
+export type AvailableInternalBulkCreateEventApplicationsResultSelection = {
+    __typename?: boolean | null | undefined;
+    success?: boolean | null | undefined;
+    errors?: AvailableExecutionErrorSelection;
+    eventApplications?: boolean | null | undefined;
+};
+export type InternalUpsertEventApplicationResult = {
+    __typename: 'InternalUpsertEventApplicationResult';
+    success: Scalars['Boolean'];
+    errors: ExecutionError[];
+    /** Whether the record was created by this upsert operation */
+    created: Scalars['Boolean'];
+    eventApplication: (InternalEventApplicationRecord | null);
+};
+export type AvailableInternalUpsertEventApplicationResultSelection = {
+    __typename?: boolean | null | undefined;
+    success?: boolean | null | undefined;
+    errors?: AvailableExecutionErrorSelection;
+    /** Whether the record was created by this upsert operation */
+    created?: boolean | null | undefined;
+    eventApplication?: boolean | null | undefined;
+};
 /** The value returned from cancelling a background action */
 export type CancelBackgroundActionResult = {
     __typename: 'CancelBackgroundActionResult';
@@ -5728,162 +6135,6 @@ export type AvailableBulkCancelBackgroundActionResultSelection = {
     __typename?: boolean | null | undefined;
     successCount?: boolean | null | undefined;
     failedCount?: boolean | null | undefined;
-};
-export type InternalSeedMutations = {
-    __typename: 'InternalSeedMutations';
-    triggerCreateEvents: (SeedCreateEventsResult | null);
-    triggerCreateMusicians: (SeedCreateMusiciansResult | null);
-    triggerCreateReviews: (SeedCreateReviewsResult | null);
-    triggerCreateUsers: (SeedCreateUsersResult | null);
-    triggerCreateVenues: (SeedCreateVenuesResult | null);
-    triggerQuickSeed: (SeedQuickSeedResult | null);
-    triggerSeedAllData: (SeedSeedAllDataResult | null);
-    triggerSeedData: (SeedSeedDataResult | null);
-    triggerSimpleSeed: (SeedSimpleSeedResult | null);
-};
-export type AvailableInternalSeedMutationsSelection = {
-    __typename?: boolean | null | undefined;
-    triggerCreateEvents?: AvailableSeedCreateEventsResultSelection;
-    triggerCreateMusicians?: AvailableSeedCreateMusiciansResultSelection;
-    triggerCreateReviews?: AvailableSeedCreateReviewsResultSelection;
-    triggerCreateUsers?: AvailableSeedCreateUsersResultSelection;
-    triggerCreateVenues?: AvailableSeedCreateVenuesResultSelection;
-    triggerQuickSeed?: AvailableSeedQuickSeedResultSelection;
-    triggerSeedAllData?: AvailableSeedSeedAllDataResultSelection;
-    triggerSeedData?: AvailableSeedSeedDataResultSelection;
-    triggerSimpleSeed?: AvailableSeedSimpleSeedResultSelection;
-};
-export type SeedCreateEventsResult = {
-    __typename: 'SeedCreateEventsResult';
-    success: Scalars['Boolean'];
-    errors: ExecutionError[];
-    result: (Scalars['JSON'] | null);
-};
-export type AvailableSeedCreateEventsResultSelection = {
-    __typename?: boolean | null | undefined;
-    success?: boolean | null | undefined;
-    errors?: AvailableExecutionErrorSelection;
-    result?: boolean | null | undefined;
-};
-export type SeedCreateMusiciansResult = {
-    __typename: 'SeedCreateMusiciansResult';
-    success: Scalars['Boolean'];
-    errors: ExecutionError[];
-    result: (Scalars['JSON'] | null);
-};
-export type AvailableSeedCreateMusiciansResultSelection = {
-    __typename?: boolean | null | undefined;
-    success?: boolean | null | undefined;
-    errors?: AvailableExecutionErrorSelection;
-    result?: boolean | null | undefined;
-};
-export type SeedCreateReviewsResult = {
-    __typename: 'SeedCreateReviewsResult';
-    success: Scalars['Boolean'];
-    errors: ExecutionError[];
-    result: (Scalars['JSON'] | null);
-};
-export type AvailableSeedCreateReviewsResultSelection = {
-    __typename?: boolean | null | undefined;
-    success?: boolean | null | undefined;
-    errors?: AvailableExecutionErrorSelection;
-    result?: boolean | null | undefined;
-};
-export type SeedCreateUsersResult = {
-    __typename: 'SeedCreateUsersResult';
-    success: Scalars['Boolean'];
-    errors: ExecutionError[];
-    result: (Scalars['JSON'] | null);
-};
-export type AvailableSeedCreateUsersResultSelection = {
-    __typename?: boolean | null | undefined;
-    success?: boolean | null | undefined;
-    errors?: AvailableExecutionErrorSelection;
-    result?: boolean | null | undefined;
-};
-export type SeedCreateVenuesResult = {
-    __typename: 'SeedCreateVenuesResult';
-    success: Scalars['Boolean'];
-    errors: ExecutionError[];
-    result: (Scalars['JSON'] | null);
-};
-export type AvailableSeedCreateVenuesResultSelection = {
-    __typename?: boolean | null | undefined;
-    success?: boolean | null | undefined;
-    errors?: AvailableExecutionErrorSelection;
-    result?: boolean | null | undefined;
-};
-export type SeedQuickSeedResult = {
-    __typename: 'SeedQuickSeedResult';
-    success: Scalars['Boolean'];
-    errors: ExecutionError[];
-    result: (Scalars['JSON'] | null);
-};
-export type AvailableSeedQuickSeedResultSelection = {
-    __typename?: boolean | null | undefined;
-    success?: boolean | null | undefined;
-    errors?: AvailableExecutionErrorSelection;
-    result?: boolean | null | undefined;
-};
-export type SeedSeedAllDataResult = {
-    __typename: 'SeedSeedAllDataResult';
-    success: Scalars['Boolean'];
-    errors: ExecutionError[];
-    result: (Scalars['JSON'] | null);
-};
-export type AvailableSeedSeedAllDataResultSelection = {
-    __typename?: boolean | null | undefined;
-    success?: boolean | null | undefined;
-    errors?: AvailableExecutionErrorSelection;
-    result?: boolean | null | undefined;
-};
-export type SeedSeedDataResult = {
-    __typename: 'SeedSeedDataResult';
-    success: Scalars['Boolean'];
-    errors: ExecutionError[];
-    result: (Scalars['JSON'] | null);
-};
-export type AvailableSeedSeedDataResultSelection = {
-    __typename?: boolean | null | undefined;
-    success?: boolean | null | undefined;
-    errors?: AvailableExecutionErrorSelection;
-    result?: boolean | null | undefined;
-};
-export type SeedSimpleSeedResult = {
-    __typename: 'SeedSimpleSeedResult';
-    success: Scalars['Boolean'];
-    errors: ExecutionError[];
-    result: (Scalars['JSON'] | null);
-};
-export type AvailableSeedSimpleSeedResultSelection = {
-    __typename?: boolean | null | undefined;
-    success?: boolean | null | undefined;
-    errors?: AvailableExecutionErrorSelection;
-    result?: boolean | null | undefined;
-};
-export type SeedMutations = {
-    __typename: 'SeedMutations';
-    createEvents: (SeedCreateEventsResult | null);
-    createMusicians: (SeedCreateMusiciansResult | null);
-    createReviews: (SeedCreateReviewsResult | null);
-    createUsers: (SeedCreateUsersResult | null);
-    createVenues: (SeedCreateVenuesResult | null);
-    quickSeed: (SeedQuickSeedResult | null);
-    seedAllData: (SeedSeedAllDataResult | null);
-    seedData: (SeedSeedDataResult | null);
-    simpleSeed: (SeedSimpleSeedResult | null);
-};
-export type AvailableSeedMutationsSelection = {
-    __typename?: boolean | null | undefined;
-    createEvents?: AvailableSeedCreateEventsResultSelection;
-    createMusicians?: AvailableSeedCreateMusiciansResultSelection;
-    createReviews?: AvailableSeedCreateReviewsResultSelection;
-    createUsers?: AvailableSeedCreateUsersResultSelection;
-    createVenues?: AvailableSeedCreateVenuesResultSelection;
-    quickSeed?: AvailableSeedQuickSeedResultSelection;
-    seedAllData?: AvailableSeedSeedAllDataResultSelection;
-    seedData?: AvailableSeedSeedDataResultSelection;
-    simpleSeed?: AvailableSeedSimpleSeedResultSelection;
 };
 export type Subscription = {
     __typename: 'Subscription';

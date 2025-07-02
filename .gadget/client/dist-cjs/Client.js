@@ -20,6 +20,7 @@ var Client_exports = {};
 __export(Client_exports, {
   Client: () => Client,
   DefaultBookingSelection: () => import_Booking2.DefaultBookingSelection,
+  DefaultEventApplicationSelection: () => import_EventApplication2.DefaultEventApplicationSelection,
   DefaultEventHistorySelection: () => import_EventHistory2.DefaultEventHistorySelection,
   DefaultEventSelection: () => import_Event2.DefaultEventSelection,
   DefaultMusicianSelection: () => import_Musician2.DefaultMusicianSelection,
@@ -42,7 +43,7 @@ var import_User = require("./models/User.js");
 var import_Session = require("./models/Session.js");
 var import_CurrentSession = require("./models/CurrentSession.js");
 var import_EventHistory = require("./models/EventHistory.js");
-var import_seed = require("./namespaces/seed.js");
+var import_EventApplication = require("./models/EventApplication.js");
 var import_Booking2 = require("./models/Booking.js");
 var import_Event2 = require("./models/Event.js");
 var import_Musician2 = require("./models/Musician.js");
@@ -51,6 +52,7 @@ var import_Venue2 = require("./models/Venue.js");
 var import_User2 = require("./models/User.js");
 var import_Session2 = require("./models/Session.js");
 var import_EventHistory2 = require("./models/EventHistory.js");
+var import_EventApplication2 = require("./models/EventApplication.js");
 const import_meta = {};
 const productionEnv = "production";
 const fallbackEnv = "development";
@@ -97,7 +99,7 @@ class Livelocalgadget6Client {
     /**
      * The list of environments with a customized API root endpoint
      */
-    this.apiRoots = { "production": "https://livelocalgadget6.gadget.app/", "development": "https://livelocalgadget6--development.gadget.app/" };
+    this.apiRoots = { "development": "https://livelocalgadget6--development.gadget.app/", "production": "https://livelocalgadget6.gadget.app/" };
     this.applicationId = "240767";
     /** Start a transaction against the Gadget backend which will atomically commit (or rollback). */
     this.transaction = async (callback) => {
@@ -180,7 +182,7 @@ class Livelocalgadget6Client {
     this.session = new import_Session.SessionManager(this.connection);
     this.currentSession = new import_CurrentSession.CurrentSessionManager(this.connection);
     this.eventHistory = new import_EventHistory.EventHistoryManager(this.connection);
-    this.seed = new import_seed.SeedNamespace(this);
+    this.eventApplication = new import_EventApplication.EventApplicationManager(this.connection);
     this.internal = {
       booking: new import_api_client_core.InternalModelManager("booking", this.connection, { "pluralApiIdentifier": "bookings", "hasAmbiguousIdentifiers": false, "namespace": [] }),
       event: new import_api_client_core.InternalModelManager("event", this.connection, { "pluralApiIdentifier": "events", "hasAmbiguousIdentifiers": false, "namespace": [] }),
@@ -190,7 +192,7 @@ class Livelocalgadget6Client {
       user: new import_api_client_core.InternalModelManager("user", this.connection, { "pluralApiIdentifier": "users", "hasAmbiguousIdentifiers": false, "namespace": [] }),
       session: new import_api_client_core.InternalModelManager("session", this.connection, { "pluralApiIdentifier": "sessions", "hasAmbiguousIdentifiers": false, "namespace": [] }),
       eventHistory: new import_api_client_core.InternalModelManager("eventHistory", this.connection, { "pluralApiIdentifier": "eventHistories", "hasAmbiguousIdentifiers": false, "namespace": [] }),
-      seed: {}
+      eventApplication: new import_api_client_core.InternalModelManager("eventApplication", this.connection, { "pluralApiIdentifier": "eventApplications", "hasAmbiguousIdentifiers": false, "namespace": [] })
     };
   }
   /**
@@ -298,12 +300,13 @@ class Livelocalgadget6Client {
     return this.toString();
   }
 }
-Livelocalgadget6Client.prototype[Symbol.for("gadget/modelRelationships")] = { "booking": { "bookedBy": { "type": "BelongsTo", "model": "user" }, "musician": { "type": "BelongsTo", "model": "musician" }, "venue": { "type": "BelongsTo", "model": "venue" }, "event": { "type": "BelongsTo", "model": "event" } }, "event": { "createdBy": { "type": "BelongsTo", "model": "user" }, "musician": { "type": "BelongsTo", "model": "musician" }, "venue": { "type": "BelongsTo", "model": "venue" } }, "musician": { "reviews": { "type": "HasMany", "model": "review" }, "bookings": { "type": "HasMany", "model": "booking" }, "events": { "type": "HasMany", "model": "event" }, "user": { "type": "BelongsTo", "model": "user" } }, "review": { "event": { "type": "BelongsTo", "model": "venue" }, "musician": { "type": "BelongsTo", "model": "musician" }, "reviewer": { "type": "BelongsTo", "model": "user" }, "venue": { "type": "BelongsTo", "model": "venue" } }, "venue": { "events": { "type": "HasMany", "model": "event" }, "bookings": { "type": "HasMany", "model": "booking" }, "owner": { "type": "BelongsTo", "model": "user" }, "reviews": { "type": "HasMany", "model": "review" } }, "user": {}, "session": { "user": { "type": "BelongsTo", "model": "user" } }, "eventHistory": { "booking": { "type": "BelongsTo", "model": "booking" }, "event": { "type": "BelongsTo", "model": "event" }, "changedBy": { "type": "BelongsTo", "model": "user" } } };
+Livelocalgadget6Client.prototype[Symbol.for("gadget/modelRelationships")] = { "booking": { "bookedBy": { "type": "BelongsTo", "model": "user" }, "musician": { "type": "BelongsTo", "model": "musician" }, "venue": { "type": "BelongsTo", "model": "venue" }, "event": { "type": "BelongsTo", "model": "event" } }, "event": { "createdBy": { "type": "BelongsTo", "model": "user" }, "musician": { "type": "BelongsTo", "model": "musician" }, "venue": { "type": "BelongsTo", "model": "venue" } }, "musician": { "reviews": { "type": "HasMany", "model": "review" }, "bookings": { "type": "HasMany", "model": "booking" }, "events": { "type": "HasMany", "model": "event" }, "user": { "type": "BelongsTo", "model": "user" } }, "review": { "event": { "type": "BelongsTo", "model": "venue" }, "musician": { "type": "BelongsTo", "model": "musician" }, "reviewer": { "type": "BelongsTo", "model": "user" }, "venue": { "type": "BelongsTo", "model": "venue" } }, "venue": { "events": { "type": "HasMany", "model": "event" }, "bookings": { "type": "HasMany", "model": "booking" }, "owner": { "type": "BelongsTo", "model": "user" }, "reviews": { "type": "HasMany", "model": "review" } }, "user": {}, "session": { "user": { "type": "BelongsTo", "model": "user" } }, "eventHistory": { "booking": { "type": "BelongsTo", "model": "booking" }, "changedBy": { "type": "BelongsTo", "model": "user" }, "event": { "type": "BelongsTo", "model": "event" } }, "eventApplication": { "event": { "type": "BelongsTo", "model": "event" }, "musician": { "type": "BelongsTo", "model": "musician" }, "venue": { "type": "BelongsTo", "model": "venue" }, "reviewedBy": { "type": "BelongsTo", "model": "user" } } };
 const Client = Livelocalgadget6Client;
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
   Client,
   DefaultBookingSelection,
+  DefaultEventApplicationSelection,
   DefaultEventHistorySelection,
   DefaultEventSelection,
   DefaultMusicianSelection,

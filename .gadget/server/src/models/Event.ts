@@ -31,13 +31,14 @@ export type DefaultEventServerSelection = {
       readonly recurringPattern: true;
       readonly setlist: true;
       readonly startTime: true;
-      readonly status: true;
+      readonly eventStatus: true;
       readonly ticketPrice: true;
       readonly ticketType: true;
       readonly title: true;
       readonly totalCapacity: true;
       readonly venueId: true;
     readonly venue: false;
+      readonly rate: true;
   };
 
   
@@ -63,7 +64,7 @@ export interface CreateEventActionContext extends AmbientContext {
   * An object containing the incoming data(this models fields) passed by triggers or user inputs.
   */
   params: {
-event?: { availableTickets?: number;category?: string;createdBy?: { _link: string | null };date?: Date;description?: string;endTime?: string;equipment?: Scalars["JSON"];genres?: Scalars["JSON"];image?: string;isActive?: boolean;isPublic?: boolean;isRecurring?: boolean;musician?: { _link: string | null };recurringDays?: Scalars["JSON"];recurringEndDate?: Date;recurringInterval?: number;recurringPattern?: string;setlist?: Scalars["JSON"];startTime?: string;status?: string;ticketPrice?: number;ticketType?: string;title?: string;totalCapacity?: number;venue?: { _link: string | null }; };
+event?: { availableTickets?: number;category?: string;createdBy?: { _link: string | null };date?: Date;description?: string;endTime?: string;equipment?: Scalars["JSON"];genres?: Scalars["JSON"];image?: string;isActive?: boolean;isPublic?: boolean;isRecurring?: boolean;musician?: { _link: string | null };recurringDays?: Scalars["JSON"];recurringEndDate?: Date;recurringInterval?: number;recurringPattern?: string;setlist?: Scalars["JSON"];startTime?: string;eventStatus?: string;ticketPrice?: number;ticketType?: string;title?: string;totalCapacity?: number;venue?: { _link: string | null };rate?: number; };
 };
   /**
   * @private The context of this action.
@@ -95,7 +96,7 @@ export interface UpdateEventActionContext extends AmbientContext {
   * An object containing the incoming data(this models fields) passed by triggers or user inputs.
   */
   params: {
-event?: { availableTickets?: number;category?: string;createdBy?: { _link: string | null };date?: Date;description?: string;endTime?: string;equipment?: Scalars["JSON"];genres?: Scalars["JSON"];image?: string;isActive?: boolean;isPublic?: boolean;isRecurring?: boolean;musician?: { _link: string | null };recurringDays?: Scalars["JSON"];recurringEndDate?: Date;recurringInterval?: number;recurringPattern?: string;setlist?: Scalars["JSON"];startTime?: string;status?: string;ticketPrice?: number;ticketType?: string;title?: string;totalCapacity?: number;venue?: { _link: string | null }; };    
+event?: { availableTickets?: number;category?: string;createdBy?: { _link: string | null };date?: Date;description?: string;endTime?: string;equipment?: Scalars["JSON"];genres?: Scalars["JSON"];image?: string;isActive?: boolean;isPublic?: boolean;isRecurring?: boolean;musician?: { _link: string | null };recurringDays?: Scalars["JSON"];recurringEndDate?: Date;recurringInterval?: number;recurringPattern?: string;setlist?: Scalars["JSON"];startTime?: string;eventStatus?: string;ticketPrice?: number;ticketType?: string;title?: string;totalCapacity?: number;venue?: { _link: string | null };rate?: number; };    
 id?: string;
 };
   /**

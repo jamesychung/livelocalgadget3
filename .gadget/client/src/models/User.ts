@@ -768,7 +768,7 @@ export type UserManager = {
       * * const result = await api.user.update("1", {
         *   email: "example@email.com",
         *   emailVerified: true,
-        *   lastSignedIn: "2025-06-01T00:00:00.000+00:00",
+        *   lastSignedIn: "2025-07-01T00:00:00.000+00:00",
         *   password: "nohacking123%",
         *   roles: ["signed-in"],
         * });
@@ -788,7 +788,7 @@ export type UserManager = {
         *   user: {
         *     email: "example@email.com",
         *     emailVerified: true,
-        *     lastSignedIn: "2025-06-01T00:00:00.000+00:00",
+        *     lastSignedIn: "2025-07-01T00:00:00.000+00:00",
         *     password: "nohacking123%",
         *     roles: ["signed-in"],
         *   },
@@ -1361,7 +1361,7 @@ export type UserManager = {
         *   email: "example@email.com",
         *   emailVerified: true,
         *   id: "1",
-        *   lastSignedIn: "2025-06-01T00:00:00.000+00:00",
+        *   lastSignedIn: "2025-07-01T00:00:00.000+00:00",
         *   on: ["email"],
         *   password: "nohacking123%",
         * });
@@ -1385,7 +1385,7 @@ export type UserManager = {
         *     email: "example@email.com",
         *     emailVerified: true,
         *     id: "1",
-        *     lastSignedIn: "2025-06-01T00:00:00.000+00:00",
+        *     lastSignedIn: "2025-07-01T00:00:00.000+00:00",
         *     password: "nohacking123%",
         *   },
         * });

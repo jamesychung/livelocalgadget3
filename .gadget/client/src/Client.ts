@@ -15,7 +15,7 @@ import { DefaultUserSelection, UserManager } from "./models/User.js";
 import { DefaultSessionSelection, SessionManager } from "./models/Session.js";
 import { CurrentSessionManager } from "./models/CurrentSession.js";
 import { DefaultEventHistorySelection, EventHistoryManager } from "./models/EventHistory.js";
-import { SeedNamespace } from "./namespaces/seed.js";
+import { DefaultEventApplicationSelection, EventApplicationManager } from "./models/EventApplication.js";
 export { DefaultBookingSelection, type BookingRecord } from "./models/Booking.js";
 export { DefaultEventSelection, type EventRecord } from "./models/Event.js";
 export { DefaultMusicianSelection, type MusicianRecord } from "./models/Musician.js";
@@ -24,6 +24,7 @@ export { DefaultVenueSelection, type VenueRecord } from "./models/Venue.js";
 export { DefaultUserSelection, type UserRecord } from "./models/User.js";
 export { DefaultSessionSelection, type SessionRecord } from "./models/Session.js";
 export { DefaultEventHistorySelection, type EventHistoryRecord } from "./models/EventHistory.js";
+export { DefaultEventApplicationSelection, type EventApplicationRecord } from "./models/EventApplication.js";
 
 type ClientOptions = Omit<ApiClientOptions, "environment"> & { environment?: string };
 type AllOptionalVariables<T> = Partial<T> extends T ? object : never;
@@ -44,9 +45,8 @@ export type InternalModelManagers = {
    session: InternalModelManager;
    /** The internal API model manager for the eventHistory model */
    eventHistory: InternalModelManager;
-   seed: {
-   
-   };
+   /** The internal API model manager for the eventApplication model */
+   eventApplication: InternalModelManager;
  };
 
 const productionEnv = "production";
@@ -135,7 +135,7 @@ export class Livelocalgadget6Client implements AnyClient {
   session!: SessionManager;
   currentSession!: CurrentSessionManager;
   eventHistory!: EventHistoryManager;
-  seed!: SeedNamespace;
+  eventApplication!: EventApplicationManager;
 
   /**
   * Namespaced object for accessing models via the Gadget internal APIs, which provide lower level and higher privileged operations directly against the database. Useful for maintenance operations like migrations or correcting broken data, and for implementing the high level actions.
@@ -150,7 +150,7 @@ export class Livelocalgadget6Client implements AnyClient {
   /**
    * The list of environments with a customized API root endpoint
    */
-  apiRoots: Record<string, string> = {"production":"https://livelocalgadget6.gadget.app/","development":"https://livelocalgadget6--development.gadget.app/"};
+  apiRoots: Record<string, string> = {"development":"https://livelocalgadget6--development.gadget.app/","production":"https://livelocalgadget6.gadget.app/"};
 
 
 
@@ -247,7 +247,7 @@ export class Livelocalgadget6Client implements AnyClient {
     this.session = new SessionManager(this.connection);
     this.currentSession = new CurrentSessionManager(this.connection);
     this.eventHistory = new EventHistoryManager(this.connection);
-    this.seed = new SeedNamespace(this);
+    this.eventApplication = new EventApplicationManager(this.connection);
 
     this.internal = {
                       booking: new InternalModelManager("booking", this.connection, {"pluralApiIdentifier":"bookings","hasAmbiguousIdentifiers":false,"namespace":[]}),
@@ -258,9 +258,7 @@ export class Livelocalgadget6Client implements AnyClient {
                       user: new InternalModelManager("user", this.connection, {"pluralApiIdentifier":"users","hasAmbiguousIdentifiers":false,"namespace":[]}),
                       session: new InternalModelManager("session", this.connection, {"pluralApiIdentifier":"sessions","hasAmbiguousIdentifiers":false,"namespace":[]}),
                       eventHistory: new InternalModelManager("eventHistory", this.connection, {"pluralApiIdentifier":"eventHistories","hasAmbiguousIdentifiers":false,"namespace":[]}),
-                      seed: {
-                      
-                      },
+                      eventApplication: new InternalModelManager("eventApplication", this.connection, {"pluralApiIdentifier":"eventApplications","hasAmbiguousIdentifiers":false,"namespace":[]}),
                     };
   }
 
@@ -519,7 +517,7 @@ export class Livelocalgadget6Client implements AnyClient {
   }
 }
 
-(Livelocalgadget6Client.prototype as any)[Symbol.for("gadget/modelRelationships")] = {"booking":{"bookedBy":{"type":"BelongsTo","model":"user"},"musician":{"type":"BelongsTo","model":"musician"},"venue":{"type":"BelongsTo","model":"venue"},"event":{"type":"BelongsTo","model":"event"}},"event":{"createdBy":{"type":"BelongsTo","model":"user"},"musician":{"type":"BelongsTo","model":"musician"},"venue":{"type":"BelongsTo","model":"venue"}},"musician":{"reviews":{"type":"HasMany","model":"review"},"bookings":{"type":"HasMany","model":"booking"},"events":{"type":"HasMany","model":"event"},"user":{"type":"BelongsTo","model":"user"}},"review":{"event":{"type":"BelongsTo","model":"venue"},"musician":{"type":"BelongsTo","model":"musician"},"reviewer":{"type":"BelongsTo","model":"user"},"venue":{"type":"BelongsTo","model":"venue"}},"venue":{"events":{"type":"HasMany","model":"event"},"bookings":{"type":"HasMany","model":"booking"},"owner":{"type":"BelongsTo","model":"user"},"reviews":{"type":"HasMany","model":"review"}},"user":{},"session":{"user":{"type":"BelongsTo","model":"user"}},"eventHistory":{"booking":{"type":"BelongsTo","model":"booking"},"event":{"type":"BelongsTo","model":"event"},"changedBy":{"type":"BelongsTo","model":"user"}}};
+(Livelocalgadget6Client.prototype as any)[Symbol.for("gadget/modelRelationships")] = {"booking":{"bookedBy":{"type":"BelongsTo","model":"user"},"musician":{"type":"BelongsTo","model":"musician"},"venue":{"type":"BelongsTo","model":"venue"},"event":{"type":"BelongsTo","model":"event"}},"event":{"createdBy":{"type":"BelongsTo","model":"user"},"musician":{"type":"BelongsTo","model":"musician"},"venue":{"type":"BelongsTo","model":"venue"}},"musician":{"reviews":{"type":"HasMany","model":"review"},"bookings":{"type":"HasMany","model":"booking"},"events":{"type":"HasMany","model":"event"},"user":{"type":"BelongsTo","model":"user"}},"review":{"event":{"type":"BelongsTo","model":"venue"},"musician":{"type":"BelongsTo","model":"musician"},"reviewer":{"type":"BelongsTo","model":"user"},"venue":{"type":"BelongsTo","model":"venue"}},"venue":{"events":{"type":"HasMany","model":"event"},"bookings":{"type":"HasMany","model":"booking"},"owner":{"type":"BelongsTo","model":"user"},"reviews":{"type":"HasMany","model":"review"}},"user":{},"session":{"user":{"type":"BelongsTo","model":"user"}},"eventHistory":{"booking":{"type":"BelongsTo","model":"booking"},"changedBy":{"type":"BelongsTo","model":"user"},"event":{"type":"BelongsTo","model":"event"}},"eventApplication":{"event":{"type":"BelongsTo","model":"event"},"musician":{"type":"BelongsTo","model":"musician"},"venue":{"type":"BelongsTo","model":"venue"},"reviewedBy":{"type":"BelongsTo","model":"user"}}};
 
 /** Legacy export under the `Client` name for backwards compatibility. */
 export const Client: typeof Livelocalgadget6Client = Livelocalgadget6Client;

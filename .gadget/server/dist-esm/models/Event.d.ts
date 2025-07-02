@@ -30,13 +30,14 @@ export type DefaultEventServerSelection = {
 	readonly recurringPattern: true
 	readonly setlist: true
 	readonly startTime: true
-	readonly status: true
+	readonly eventStatus: true
 	readonly ticketPrice: true
 	readonly ticketType: true
 	readonly title: true
 	readonly totalCapacity: true
 	readonly venueId: true
 	readonly venue: false
+	readonly rate: true
 };
 /** Context of the `create` action on the `event` model. */
 export interface CreateEventActionContext extends AmbientContext {
@@ -84,7 +85,7 @@ export interface CreateEventActionContext extends AmbientContext {
 			recurringPattern?: string
 			setlist?: Scalars["JSON"]
 			startTime?: string
-			status?: string
+			eventStatus?: string
 			ticketPrice?: number
 			ticketType?: string
 			title?: string
@@ -92,6 +93,7 @@ export interface CreateEventActionContext extends AmbientContext {
 			venue?: {
 				_link: string | null
 			}
+			rate?: number
 		}
 	};
 	/**
@@ -145,7 +147,7 @@ export interface UpdateEventActionContext extends AmbientContext {
 			recurringPattern?: string
 			setlist?: Scalars["JSON"]
 			startTime?: string
-			status?: string
+			eventStatus?: string
 			ticketPrice?: number
 			ticketType?: string
 			title?: string
@@ -153,6 +155,7 @@ export interface UpdateEventActionContext extends AmbientContext {
 			venue?: {
 				_link: string | null
 			}
+			rate?: number
 		}
 		id?: string
 	};

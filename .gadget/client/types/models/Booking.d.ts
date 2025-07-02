@@ -1,5 +1,5 @@
 import { GadgetConnection, GadgetRecord, GadgetRecordList, LimitToKnownKeys, Selectable } from "@gadgetinc/api-client-core";
-import { Query, IDsList, PromiseOrLiveIterator, Booking, AvailableBookingSelection, BookingSort, BookingFilter } from "../types.js";
+import { Query, IDsList, PromiseOrLiveIterator, Booking, AvailableBookingSelection, BookingSort, BookingFilter, Scalars, UpsertBookingInput } from "../types.js";
 import { DefaultSelection, Select, DeepFilterNever } from "../utils.js";
 /**
 * A type that holds only the selected fields (and nested fields) of booking. The present fields in the result type of this are dynamic based on the options to each call that uses it.
@@ -108,15 +108,48 @@ export interface MaybeFindFirstBookingOptions {
     /** Only return records matching this freeform search string */
     search?: string | null;
 }
+export interface CreateBookingOptions {
+    /** Select fields other than the defaults of the record to return */
+    select?: AvailableBookingSelection;
+}
 export interface UpdateBookingOptions {
     /** Select fields other than the defaults of the record to return */
     select?: AvailableBookingSelection;
 }
+export interface UpsertBookingOptions {
+    /** Select fields other than the defaults of the record to return */
+    select?: AvailableBookingSelection;
+}
+/**
+ * The return value from executing create on booking
+ * Is a GadgetRecord of the model's type.
+ **/
+export type CreateBookingResult<Options extends CreateBookingOptions> = SelectedBookingOrDefault<Options> extends void ? void : GadgetRecord<SelectedBookingOrDefault<Options>>;
 /**
  * The return value from executing update on booking
  * Is a GadgetRecord of the model's type.
  **/
 export type UpdateBookingResult<Options extends UpdateBookingOptions> = SelectedBookingOrDefault<Options> extends void ? void : GadgetRecord<SelectedBookingOrDefault<Options>>;
+/**
+ * The fully-qualified, expanded form of the inputs for executing the upsert action.
+ * The flattened style should be preferred over this style, but for models with ambiguous API identifiers, this style can be used to remove any ambiguity.
+ **/
+export type FullyQualifiedUpsertBookingVariables = {
+    on?: ((Scalars['String'] | null))[];
+    booking?: UpsertBookingInput;
+};
+/**
+ * The inputs for executing upsert on booking.
+ * This is the flattened style of inputs, suitable for general use, and should be preferred.
+ **/
+export type UpsertBookingVariables = Omit<UpsertBookingInput, "on"> & {
+    on?: ((Scalars['String'] | null))[];
+};
+/**
+ * The return value from executing upsert on booking
+ *
+ **/
+export type UpsertBookingResult<Options extends UpsertBookingOptions> = SelectedBookingOrDefault<Options> extends void ? void : GadgetRecord<SelectedBookingOrDefault<Options>>;
 /**
  * A manager for the booking model with all the available operations for reading and writing to it.*/
 export type BookingManager = {
@@ -225,6 +258,74 @@ export type BookingManager = {
         selectionType: AvailableBookingSelection;
         schemaType: Query["booking"];
     };
+    create: {
+        /**
+         * Executes the create actionon one record specified by `id`.Runs the action and returns a Promise for the updated record.
+        *
+        * This is the fully qualified, nested api identifier style overload that should be used when there's an ambiguity between an action param and a model field.
+        *
+        * @example
+        * * const bookingRecord = await api.booking.create("1");
+        **/
+        <Options extends CreateBookingOptions>(id: string, options?: LimitToKnownKeys<Options, CreateBookingOptions>): Promise<CreateBookingResult<Options>>;
+        type: 'action';
+        operationName: 'createBooking';
+        operationReturnType: 'CreateBooking';
+        namespace: null;
+        modelApiIdentifier: typeof modelApiIdentifier;
+        operatesWithRecordIdentity: true;
+        modelSelectionField: typeof modelApiIdentifier;
+        isBulk: false;
+        isDeleter: false;
+        variables: {
+            id: {
+                required: true;
+                type: 'GadgetID';
+            };
+        };
+        variablesType: ({
+            id: string;
+        });
+        hasAmbiguousIdentifier: false;
+        paramOnlyVariables: [];
+        hasReturnType: false;
+        acceptsModelInput: false;
+        hasCreateOrUpdateEffect: false;
+        imports: [];
+        optionsType: CreateBookingOptions;
+        selectionType: AvailableBookingSelection;
+        schemaType: Query["booking"];
+        defaultSelection: typeof DefaultBookingSelection;
+    };
+    bulkCreate: {
+        /**
+          * Executes the bulkCreate action with the given inputs.
+          */
+        <Options extends CreateBookingOptions>(ids: string[], options?: LimitToKnownKeys<Options, CreateBookingOptions>): Promise<CreateBookingResult<Options>[]>;
+        type: 'action';
+        operationName: 'bulkCreateBookings';
+        isBulk: true;
+        isDeleter: false;
+        hasReturnType: false;
+        acceptsModelInput: false;
+        operatesWithRecordIdentity: true;
+        singleActionFunctionName: 'create';
+        modelApiIdentifier: typeof modelApiIdentifier;
+        modelSelectionField: typeof pluralModelApiIdentifier;
+        optionsType: CreateBookingOptions;
+        namespace: null;
+        variables: {
+            ids: {
+                required: true;
+                type: '[GadgetID!]';
+            };
+        };
+        variablesType: IDsList | undefined;
+        paramOnlyVariables: [];
+        selectionType: AvailableBookingSelection;
+        schemaType: Query["booking"];
+        defaultSelection: typeof DefaultBookingSelection;
+    };
     update: {
         /**
          * Executes the update actionon one record specified by `id`.Runs the action and returns a Promise for the updated record.
@@ -289,6 +390,110 @@ export type BookingManager = {
         };
         variablesType: IDsList | undefined;
         paramOnlyVariables: [];
+        selectionType: AvailableBookingSelection;
+        schemaType: Query["booking"];
+        defaultSelection: typeof DefaultBookingSelection;
+    };
+    upsert: {
+        /**
+         * Executes the upsert action.Accepts the parameters for the action via the `variables` argument.Runs the action and returns a Promise for the updated record.
+        *
+        * This is the flat style, all-params-together overload that most use cases should use.
+        *
+        * @example
+        * * const result = await api.booking.upsert({
+          *   bookedBy: {
+          *     _link: "1",
+          *   },
+          *   date: "2025-07-01T00:00:00.000+00:00",
+          *   depositAmount: 123,
+          *   depositPaid: true,
+          *   id: "1",
+          * });
+        **/
+        <Options extends UpsertBookingOptions>(variables: UpsertBookingVariables, options?: LimitToKnownKeys<Options, UpsertBookingOptions>): Promise<UpsertBookingResult<Options>>;
+        /**
+         * Executes the upsert action.Accepts the parameters for the action via the `variables` argument.Runs the action and returns a Promise for the updated record.
+        *
+        * This is the fully qualified, nested api identifier style overload that should be used when there's an ambiguity between an action param and a model field.
+        *
+        * @example
+        * * const result = await api.booking.upsert({
+          *   booking: {
+          *     bookedBy: {
+          *       _link: "1",
+          *     },
+          *     date: "2025-07-01T00:00:00.000+00:00",
+          *     depositAmount: 123,
+          *     depositPaid: true,
+          *     id: "1",
+          *   },
+          * });
+        **/
+        <Options extends UpsertBookingOptions>(variables: FullyQualifiedUpsertBookingVariables, options?: LimitToKnownKeys<Options, UpsertBookingOptions>): Promise<UpsertBookingResult<Options>>;
+        type: 'action';
+        operationName: 'upsertBooking';
+        operationReturnType: 'UpsertBooking';
+        namespace: null;
+        modelApiIdentifier: typeof modelApiIdentifier;
+        operatesWithRecordIdentity: false;
+        modelSelectionField: typeof modelApiIdentifier;
+        isBulk: false;
+        isDeleter: false;
+        variables: {
+            on: {
+                required: false;
+                type: '[String!]';
+            };
+            booking: {
+                required: false;
+                type: 'UpsertBookingInput';
+            };
+        };
+        variablesType: (((FullyQualifiedUpsertBookingVariables | UpsertBookingVariables)) | undefined);
+        hasAmbiguousIdentifier: false;
+        paramOnlyVariables: ['on'];
+        hasReturnType: {
+            '... on CreateBookingResult': {
+                hasReturnType: false;
+            };
+            '... on UpdateBookingResult': {
+                hasReturnType: false;
+            };
+        };
+        acceptsModelInput: true;
+        hasCreateOrUpdateEffect: true;
+        imports: ['Scalars', 'UpsertBookingInput'];
+        optionsType: UpsertBookingOptions;
+        selectionType: AvailableBookingSelection;
+        schemaType: Query["booking"];
+        defaultSelection: typeof DefaultBookingSelection;
+    };
+    bulkUpsert: {
+        /**
+          * Executes the bulkUpsert action with the given inputs.
+          */
+        <Options extends UpsertBookingOptions>(inputs: (FullyQualifiedUpsertBookingVariables | UpsertBookingVariables)[], options?: LimitToKnownKeys<Options, UpsertBookingOptions>): Promise<any[]>;
+        type: 'action';
+        operationName: 'bulkUpsertBookings';
+        isBulk: true;
+        isDeleter: false;
+        hasReturnType: false;
+        acceptsModelInput: true;
+        operatesWithRecordIdentity: false;
+        singleActionFunctionName: 'upsert';
+        modelApiIdentifier: typeof modelApiIdentifier;
+        modelSelectionField: typeof pluralModelApiIdentifier;
+        optionsType: UpsertBookingOptions;
+        namespace: null;
+        variables: {
+            inputs: {
+                required: true;
+                type: '[BulkUpsertBookingsInput!]';
+            };
+        };
+        variablesType: (FullyQualifiedUpsertBookingVariables | UpsertBookingVariables)[];
+        paramOnlyVariables: ['on'];
         selectionType: AvailableBookingSelection;
         schemaType: Query["booking"];
         defaultSelection: typeof DefaultBookingSelection;

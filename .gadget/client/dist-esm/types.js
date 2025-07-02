@@ -68,6 +68,8 @@ var BackgroundActionOutcome = /* @__PURE__ */ ((BackgroundActionOutcome2) => {
 ;
 ;
 ;
+;
+;
 export {
   BackgroundActionOutcome,
   BackgroundActionPriority,

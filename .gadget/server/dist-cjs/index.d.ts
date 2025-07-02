@@ -9,7 +9,7 @@
 *  |_|_| \_/ \___|_|\___/ \___\__,_|_|\__, |\__,_|\__,_|\__, |\___|\__|\___/ 
 *                                     |___/             |___/                
 *
-* Built for environment `Development` at version 579
+* Built for environment `Development` at version 769
 * Framework version: ^1.4.0
 * Edit this app here: https://livelocalgadget6.gadget.dev/edit
 */
@@ -47,6 +47,7 @@ export * from "./models/Venue";
 export * from "./models/User";
 export * from "./models/Session";
 export * from "./models/EventHistory";
+export * from "./models/EventApplication";
 /**
 * A map of connection name to instantiated connection objects for the app.
 */

@@ -11,9 +11,7 @@ export const settings: GadgetSettings = {
         unauthorizedUserRedirect: "signInPath",
         defaultSignedInRoles: ["signed-in"],
       },
-      methods: {
-        emailPassword: true,
-      },
+      methods: { emailPassword: true },
     },
   },
 };

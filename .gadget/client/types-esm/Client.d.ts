@@ -11,7 +11,7 @@ import { UserManager } from "./models/User.js";
 import { SessionManager } from "./models/Session.js";
 import { CurrentSessionManager } from "./models/CurrentSession.js";
 import { EventHistoryManager } from "./models/EventHistory.js";
-import { SeedNamespace } from "./namespaces/seed.js";
+import { EventApplicationManager } from "./models/EventApplication.js";
 export { DefaultBookingSelection, type BookingRecord } from "./models/Booking.js";
 export { DefaultEventSelection, type EventRecord } from "./models/Event.js";
 export { DefaultMusicianSelection, type MusicianRecord } from "./models/Musician.js";
@@ -20,6 +20,7 @@ export { DefaultVenueSelection, type VenueRecord } from "./models/Venue.js";
 export { DefaultUserSelection, type UserRecord } from "./models/User.js";
 export { DefaultSessionSelection, type SessionRecord } from "./models/Session.js";
 export { DefaultEventHistorySelection, type EventHistoryRecord } from "./models/EventHistory.js";
+export { DefaultEventApplicationSelection, type EventApplicationRecord } from "./models/EventApplication.js";
 type ClientOptions = Omit<ApiClientOptions, "environment"> & {
     environment?: string;
 };
@@ -41,7 +42,8 @@ export type InternalModelManagers = {
     session: InternalModelManager;
     /** The internal API model manager for the eventHistory model */
     eventHistory: InternalModelManager;
-    seed: {};
+    /** The internal API model manager for the eventApplication model */
+    eventApplication: InternalModelManager;
 };
 /**
  * Function type for the inline view execution function.
@@ -89,7 +91,7 @@ export declare class Livelocalgadget6Client implements AnyClient {
     session: SessionManager;
     currentSession: CurrentSessionManager;
     eventHistory: EventHistoryManager;
-    seed: SeedNamespace;
+    eventApplication: EventApplicationManager;
     /**
     * Namespaced object for accessing models via the Gadget internal APIs, which provide lower level and higher privileged operations directly against the database. Useful for maintenance operations like migrations or correcting broken data, and for implementing the high level actions.
     *

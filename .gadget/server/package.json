@@ -50,7 +50,7 @@
   "gadget": {
     "applicationName": "livelocalgadget6",
     "environmentName": "Development",
-    "environmentVersion": "579"
+    "environmentVersion": "769"
   },
   "main": "./dist-cjs/index.js",
   "module": "./dist-esm/index.js",
@@ -86,5 +86,5 @@
       ]
     }
   },
-  "version": "1.2.0-development.579"
+  "version": "1.2.0-development.769"
 }

@@ -8,7 +8,7 @@
 *  |_|_| \_/ \___|_|\___/ \___\__,_|_|\__, |\__,_|\__,_|\__, |\___|\__|\___/
 *                                     |___/             |___/
 *
-* Built for environment "Development" at version 579
+* Built for environment "Development" at version 769
 * API docs: https://docs.gadget.dev/api/livelocalgadget6
 * Edit this app here: https://livelocalgadget6.gadget.app/edit
 */

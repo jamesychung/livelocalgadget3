@@ -1,6 +1,6 @@
 import type { GadgetModel } from "gadget-server";
 
-// This file describes the schema for the "event" model, go to https://livelocalbeatsgg2.gadget.app/edit to view/edit your model in Gadget
+// This file describes the schema for the "event" model, go to https://livelocalgadget6.gadget.app/edit to view/edit your model in Gadget
 // For more information on how to update this file http://docs.gadget.dev
 
 export const schema: GadgetModel = {
@@ -24,56 +24,49 @@ export const schema: GadgetModel = {
     },
     description: { type: "string", storageKey: "event_description" },
     endTime: { type: "string", storageKey: "event_end_time" },
-    equipment: { 
-      type: "json", 
+    equipment: {
+      type: "json",
+      default: [],
       storageKey: "event_equipment",
-      default: [],
     },
-    genres: { 
-      type: "json", 
-      storageKey: "event_genres",
-      default: [],
-    },
+    eventStatus: { type: "string", storageKey: "event_status" },
+    genres: { type: "json", default: [], storageKey: "event_genres" },
     image: { type: "url", storageKey: "event_image" },
     isActive: { type: "boolean", storageKey: "event_is_active" },
     isPublic: { type: "boolean", storageKey: "event_is_public" },
-    isRecurring: { 
-      type: "boolean", 
-      storageKey: "event_is_recurring",
+    isRecurring: {
+      type: "boolean",
       default: false,
+      storageKey: "event_is_recurring",
     },
     musician: {
       type: "belongsTo",
       parent: { model: "musician" },
       storageKey: "event_musician",
     },
-    recurringDays: { 
-      type: "json", 
-      storageKey: "event_recurring_days",
+    rate: { type: "number", storageKey: "event_rate" },
+    recurringDays: {
+      type: "json",
       default: [],
+      storageKey: "event_recurring_days",
     },
-    recurringEndDate: { 
-      type: "dateTime", 
+    recurringEndDate: {
+      type: "dateTime",
+      includeTime: true,
       storageKey: "event_recurring_end_date",
     },
-    recurringInterval: { 
-      type: "number", 
-      storageKey: "event_recurring_interval",
+    recurringInterval: {
+      type: "number",
       default: 1,
+      storageKey: "event_recurring_interval",
     },
-    recurringPattern: { 
-      type: "string", 
-      storageKey: "event_recurring_pattern",
+    recurringPattern: {
+      type: "string",
       default: "weekly",
-    },
-    rate: { 
-      type: "number", 
-      storageKey: "event_rate",
-      description: "How much the venue is willing to pay musicians"
+      storageKey: "event_recurring_pattern",
     },
     setlist: { type: "json", storageKey: "event_setlist" },
     startTime: { type: "string", storageKey: "event_start_time" },
-    status: { type: "string", storageKey: "event_status" },
     ticketPrice: { type: "number", storageKey: "event_ticket_price" },
     ticketType: { type: "string", storageKey: "event_ticket_type" },
     title: { type: "string", storageKey: "event_title" },

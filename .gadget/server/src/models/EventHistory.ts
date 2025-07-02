@@ -12,16 +12,16 @@ export type DefaultEventHistoryServerSelection = {
       readonly updatedAt: true;
       readonly bookingId: true;
     readonly booking: false;
-      readonly eventId: true;
-    readonly event: false;
+      readonly changeType: true;
       readonly changedById: true;
     readonly changedBy: false;
-      readonly changeType: true;
-      readonly previousValue: true;
-      readonly description: true;
-      readonly newValue: true;
       readonly context: true;
+      readonly description: true;
+      readonly eventId: true;
+    readonly event: false;
       readonly metadata: true;
+      readonly newValue: true;
+      readonly previousValue: true;
   };
 
   

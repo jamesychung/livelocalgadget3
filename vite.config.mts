@@ -1,18 +1,17 @@
 import { defineConfig } from "vite";
-import { gadget } from "gadget-server/vite";
-import { reactRouter } from "@react-router/dev/vite";
-import path from "path";
+import react from '@vitejs/plugin-react';
+import path from 'path';
 
 export default defineConfig({
-  plugins: [gadget(), reactRouter()],
-  resolve: {
-    alias: {
-      "@": path.resolve(__dirname, "./web"),
-    },
-  },
+  plugins: [react()],
   define: {
     // Provide process.env for browser compatibility
     "process.env": {},
+  },
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './app')
+    },
   },
   server: {
     hmr: {

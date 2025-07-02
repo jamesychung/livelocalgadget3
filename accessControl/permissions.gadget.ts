@@ -33,6 +33,7 @@ export const permissions: GadgetPermissions = {
         booking: {
           read: true,
           actions: {
+            create: true,
             update: true,
           },
         },
@@ -41,6 +42,11 @@ export const permissions: GadgetPermissions = {
           actions: {
             create: true,
             update: true,
+          },
+        },
+        eventApplication: {
+          actions: {
+            create: true,
           },
         },
         eventHistory: {
@@ -82,6 +88,10 @@ export const permissions: GadgetPermissions = {
           },
         },
       },
+      actions: {
+        sendBookingEmails: true,
+        sendEmail: true,
+      },
     },
     musician: {
       storageKey: "musician",
@@ -93,6 +103,7 @@ export const permissions: GadgetPermissions = {
         booking: {
           read: true,
           actions: {
+            create: true,
             update: true,
           },
         },
@@ -101,6 +112,11 @@ export const permissions: GadgetPermissions = {
           actions: {
             create: true,
             update: true,
+          },
+        },
+        eventApplication: {
+          actions: {
+            create: true,
           },
         },
         eventHistory: {
@@ -128,6 +144,10 @@ export const permissions: GadgetPermissions = {
           },
         },
       },
+      actions: {
+        sendBookingEmails: true,
+        sendEmail: true,
+      },
     },
     "signed-in": {
       storageKey: "signed-in",
@@ -139,6 +159,7 @@ export const permissions: GadgetPermissions = {
         booking: {
           read: true,
           actions: {
+            create: true,
             update: true,
           },
         },
@@ -147,6 +168,11 @@ export const permissions: GadgetPermissions = {
           actions: {
             create: true,
             update: true,
+          },
+        },
+        eventApplication: {
+          actions: {
+            create: true,
           },
         },
         eventHistory: {
@@ -197,6 +223,7 @@ export const permissions: GadgetPermissions = {
         booking: {
           read: true,
           actions: {
+            create: true,
             update: true,
           },
         },
@@ -231,6 +258,10 @@ export const permissions: GadgetPermissions = {
             update: true,
           },
         },
+      },
+      actions: {
+        sendBookingEmails: true,
+        sendEmail: true,
       },
     },
   },

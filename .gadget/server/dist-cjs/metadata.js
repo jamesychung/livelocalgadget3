@@ -220,19 +220,6 @@ _export(exports, {
                 },
                 "internalWritable": true
             },
-            "booking_status": {
-                "fieldType": "String",
-                "key": "booking_status",
-                "name": "status",
-                "apiIdentifier": "status",
-                "configuration": {
-                    "type": "StringConfig",
-                    "key": "3M95EkWfy2oo",
-                    "createdDate": "2025-06-26T01:11:18.233Z",
-                    "default": null
-                },
-                "internalWritable": true
-            },
             "booking_total_amount": {
                 "fieldType": "Number",
                 "key": "booking_total_amount",
@@ -299,6 +286,19 @@ _export(exports, {
                     "createdDate": "2025-06-29T21:49:41.439Z",
                     "relatedModelKey": "event",
                     "relatedModelApiIdentifier": "event"
+                },
+                "internalWritable": true
+            },
+            "booking_status": {
+                "fieldType": "String",
+                "key": "booking_status",
+                "name": "status",
+                "apiIdentifier": "status",
+                "configuration": {
+                    "type": "StringConfig",
+                    "key": "EdSERDpfuqhO",
+                    "createdDate": "2025-06-30T19:32:52.885Z",
+                    "default": null
                 },
                 "internalWritable": true
             }
@@ -616,8 +616,8 @@ _export(exports, {
             "event_status": {
                 "fieldType": "String",
                 "key": "event_status",
-                "name": "status",
-                "apiIdentifier": "status",
+                "name": "eventStatus",
+                "apiIdentifier": "eventStatus",
                 "configuration": {
                     "type": "StringConfig",
                     "key": "0g5I3Qew29Aq",
@@ -691,6 +691,20 @@ _export(exports, {
                     "createdDate": "2025-06-26T01:11:18.254Z",
                     "relatedModelKey": "venue",
                     "relatedModelApiIdentifier": "venue"
+                },
+                "internalWritable": true
+            },
+            "event_rate": {
+                "fieldType": "Number",
+                "key": "event_rate",
+                "name": "rate",
+                "apiIdentifier": "rate",
+                "configuration": {
+                    "type": "NumberConfig",
+                    "key": "thnoztNlzYgk",
+                    "createdDate": "2025-06-30T06:44:26.558Z",
+                    "decimals": null,
+                    "default": null
                 },
                 "internalWritable": true
             }
@@ -2144,17 +2158,16 @@ _export(exports, {
                 },
                 "internalWritable": true
             },
-            "eventHistory_event": {
-                "fieldType": "BelongsTo",
-                "key": "eventHistory_event",
-                "name": "event",
-                "apiIdentifier": "event",
+            "eventHistory_change_type": {
+                "fieldType": "String",
+                "key": "eventHistory_change_type",
+                "name": "changeType",
+                "apiIdentifier": "changeType",
                 "configuration": {
-                    "type": "BelongsToConfig",
-                    "key": "DYDhlILeHO4O",
-                    "createdDate": "2025-06-29T19:28:09.854Z",
-                    "relatedModelKey": "event",
-                    "relatedModelApiIdentifier": "event"
+                    "type": "StringConfig",
+                    "key": "ct3X-3EGgmrD",
+                    "createdDate": "2025-06-29T19:28:09.856Z",
+                    "default": null
                 },
                 "internalWritable": true
             },
@@ -2172,29 +2185,16 @@ _export(exports, {
                 },
                 "internalWritable": true
             },
-            "eventHistory_change_type": {
-                "fieldType": "String",
-                "key": "eventHistory_change_type",
-                "name": "changeType",
-                "apiIdentifier": "changeType",
+            "eventHistory_context": {
+                "fieldType": "JSON",
+                "key": "eventHistory_context",
+                "name": "context",
+                "apiIdentifier": "context",
                 "configuration": {
-                    "type": "StringConfig",
-                    "key": "ct3X-3EGgmrD",
-                    "createdDate": "2025-06-29T19:28:09.856Z",
-                    "default": null
-                },
-                "internalWritable": true
-            },
-            "eventHistory_previous_value": {
-                "fieldType": "String",
-                "key": "eventHistory_previous_value",
-                "name": "previousValue",
-                "apiIdentifier": "previousValue",
-                "configuration": {
-                    "type": "StringConfig",
-                    "key": "OhmJ2xd3HgrD",
-                    "createdDate": "2025-06-29T19:28:09.856Z",
-                    "default": null
+                    "type": "JSONConfig",
+                    "key": "ppOMm_Kgn-uw",
+                    "createdDate": "2025-06-29T19:28:09.858Z",
+                    "default": "{}"
                 },
                 "internalWritable": true
             },
@@ -2211,29 +2211,17 @@ _export(exports, {
                 },
                 "internalWritable": true
             },
-            "eventHistory_new_value": {
-                "fieldType": "String",
-                "key": "eventHistory_new_value",
-                "name": "newValue",
-                "apiIdentifier": "newValue",
+            "eventHistory_event": {
+                "fieldType": "BelongsTo",
+                "key": "eventHistory_event",
+                "name": "event",
+                "apiIdentifier": "event",
                 "configuration": {
-                    "type": "StringConfig",
-                    "key": "tAWwWCcSzZKq",
-                    "createdDate": "2025-06-29T19:28:09.857Z",
-                    "default": null
-                },
-                "internalWritable": true
-            },
-            "eventHistory_context": {
-                "fieldType": "JSON",
-                "key": "eventHistory_context",
-                "name": "context",
-                "apiIdentifier": "context",
-                "configuration": {
-                    "type": "JSONConfig",
-                    "key": "ppOMm_Kgn-uw",
-                    "createdDate": "2025-06-29T19:28:09.858Z",
-                    "default": "{}"
+                    "type": "BelongsToConfig",
+                    "key": "DYDhlILeHO4O",
+                    "createdDate": "2025-06-29T19:28:09.854Z",
+                    "relatedModelKey": "event",
+                    "relatedModelApiIdentifier": "event"
                 },
                 "internalWritable": true
             },
@@ -2249,6 +2237,32 @@ _export(exports, {
                     "default": "{}"
                 },
                 "internalWritable": true
+            },
+            "eventHistory_new_value": {
+                "fieldType": "String",
+                "key": "eventHistory_new_value",
+                "name": "newValue",
+                "apiIdentifier": "newValue",
+                "configuration": {
+                    "type": "StringConfig",
+                    "key": "tAWwWCcSzZKq",
+                    "createdDate": "2025-06-29T19:28:09.857Z",
+                    "default": null
+                },
+                "internalWritable": true
+            },
+            "eventHistory_previous_value": {
+                "fieldType": "String",
+                "key": "eventHistory_previous_value",
+                "name": "previousValue",
+                "apiIdentifier": "previousValue",
+                "configuration": {
+                    "type": "StringConfig",
+                    "key": "OhmJ2xd3HgrD",
+                    "createdDate": "2025-06-29T19:28:09.856Z",
+                    "default": null
+                },
+                "internalWritable": true
             }
         },
         "graphqlTypeName": "EventHistory",
@@ -2256,6 +2270,174 @@ _export(exports, {
             "type": "StateChart",
             "key": "cit6h3ASwRi9",
             "createdDate": 1751225289851,
+            "actions": {},
+            "transitions": {},
+            "stateInActionCode": false,
+            "childStates": []
+        }
+    },
+    "EventApplication": {
+        "key": "eventApplication",
+        "name": "eventApplication",
+        "apiIdentifier": "eventApplication",
+        "namespace": [],
+        "fields": {
+            "eventApplication-system-id": {
+                "fieldType": "ID",
+                "key": "eventApplication-system-id",
+                "name": "ID",
+                "apiIdentifier": "id",
+                "configuration": {
+                    "type": "IDConfig",
+                    "key": "aafpTpoOlsi8",
+                    "createdDate": "2025-07-01T01:15:25.915Z"
+                },
+                "internalWritable": true
+            },
+            "eventApplication-system-createdAt": {
+                "fieldType": "DateTime",
+                "key": "eventApplication-system-createdAt",
+                "name": "Created At",
+                "apiIdentifier": "createdAt",
+                "configuration": {
+                    "type": "DateTimeConfig",
+                    "key": "VNL5j5oSTV39",
+                    "createdDate": "2025-07-01T01:15:25.916Z",
+                    "includeTime": true,
+                    "default": null
+                },
+                "internalWritable": true
+            },
+            "eventApplication-system-updatedAt": {
+                "fieldType": "DateTime",
+                "key": "eventApplication-system-updatedAt",
+                "name": "Updated At",
+                "apiIdentifier": "updatedAt",
+                "configuration": {
+                    "type": "DateTimeConfig",
+                    "key": "Vc04O6RtNuT7",
+                    "createdDate": "2025-07-01T01:15:25.917Z",
+                    "includeTime": true,
+                    "default": null
+                },
+                "internalWritable": true
+            },
+            "event_application_event": {
+                "fieldType": "BelongsTo",
+                "key": "event_application_event",
+                "name": "event",
+                "apiIdentifier": "event",
+                "configuration": {
+                    "type": "BelongsToConfig",
+                    "key": "GN3rbpV3YQR0",
+                    "createdDate": "2025-07-01T01:15:25.917Z",
+                    "relatedModelKey": "event",
+                    "relatedModelApiIdentifier": "event"
+                },
+                "internalWritable": true
+            },
+            "event_application_musician": {
+                "fieldType": "BelongsTo",
+                "key": "event_application_musician",
+                "name": "musician",
+                "apiIdentifier": "musician",
+                "configuration": {
+                    "type": "BelongsToConfig",
+                    "key": "qXI73pP1PQt6",
+                    "createdDate": "2025-07-01T01:15:25.918Z",
+                    "relatedModelKey": "musician",
+                    "relatedModelApiIdentifier": "musician"
+                },
+                "internalWritable": true
+            },
+            "event_application_venue": {
+                "fieldType": "BelongsTo",
+                "key": "event_application_venue",
+                "name": "venue",
+                "apiIdentifier": "venue",
+                "configuration": {
+                    "type": "BelongsToConfig",
+                    "key": "NxW8gDDx7F5i",
+                    "createdDate": "2025-07-01T01:15:25.919Z",
+                    "relatedModelKey": "venue",
+                    "relatedModelApiIdentifier": "venue"
+                },
+                "internalWritable": true
+            },
+            "event_application_status": {
+                "fieldType": "String",
+                "key": "event_application_status",
+                "name": "status",
+                "apiIdentifier": "status",
+                "configuration": {
+                    "type": "StringConfig",
+                    "key": "r5XYi2ykO_Xt",
+                    "createdDate": "2025-07-01T01:15:25.921Z",
+                    "default": null
+                },
+                "internalWritable": true
+            },
+            "event_application_applied_at": {
+                "fieldType": "DateTime",
+                "key": "event_application_applied_at",
+                "name": "appliedAt",
+                "apiIdentifier": "appliedAt",
+                "configuration": {
+                    "type": "DateTimeConfig",
+                    "key": "X5a895KwmXoX",
+                    "createdDate": "2025-07-01T01:15:25.922Z",
+                    "includeTime": true,
+                    "default": null
+                },
+                "internalWritable": true
+            },
+            "event_application_message": {
+                "fieldType": "String",
+                "key": "event_application_message",
+                "name": "message",
+                "apiIdentifier": "message",
+                "configuration": {
+                    "type": "StringConfig",
+                    "key": "nscrbX3fmpvC",
+                    "createdDate": "2025-07-01T01:15:25.922Z",
+                    "default": null
+                },
+                "internalWritable": true
+            },
+            "event_application_reviewed_at": {
+                "fieldType": "DateTime",
+                "key": "event_application_reviewed_at",
+                "name": "reviewedAt",
+                "apiIdentifier": "reviewedAt",
+                "configuration": {
+                    "type": "DateTimeConfig",
+                    "key": "ALDUv2gHRjQe",
+                    "createdDate": "2025-07-01T01:15:25.923Z",
+                    "includeTime": true,
+                    "default": null
+                },
+                "internalWritable": true
+            },
+            "event_application_reviewed_by": {
+                "fieldType": "BelongsTo",
+                "key": "event_application_reviewed_by",
+                "name": "reviewedBy",
+                "apiIdentifier": "reviewedBy",
+                "configuration": {
+                    "type": "BelongsToConfig",
+                    "key": "JCLwFfe06bst",
+                    "createdDate": "2025-07-01T01:15:25.924Z",
+                    "relatedModelKey": "DataModel-AppAuth-User",
+                    "relatedModelApiIdentifier": "user"
+                },
+                "internalWritable": true
+            }
+        },
+        "graphqlTypeName": "EventApplication",
+        "stateChart": {
+            "type": "StateChart",
+            "key": "TQzxptGiBU5n",
+            "createdDate": 1751332525913,
             "actions": {},
             "transitions": {},
             "stateInActionCode": false,
@@ -2274,5 +2456,6 @@ _export(exports, {
     "api:venue": "Venue",
     "api:user": "User",
     "api:session": "Session",
-    "api:eventHistory": "EventHistory"
+    "api:eventHistory": "EventHistory",
+    "api:eventApplication": "EventApplication"
 };

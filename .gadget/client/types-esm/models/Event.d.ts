@@ -37,19 +37,20 @@ export declare const DefaultEventSelection: {
     readonly description: true;
     readonly endTime: true;
     readonly equipment: true;
+    readonly eventStatus: true;
     readonly genres: true;
     readonly image: true;
     readonly isActive: true;
     readonly isPublic: true;
     readonly isRecurring: true;
     readonly musicianId: true;
+    readonly rate: true;
     readonly recurringDays: true;
     readonly recurringEndDate: true;
     readonly recurringInterval: true;
     readonly recurringPattern: true;
     readonly setlist: true;
     readonly startTime: true;
-    readonly status: true;
     readonly ticketPrice: true;
     readonly ticketType: true;
     readonly title: true;
@@ -308,7 +309,7 @@ export type EventManager = {
           *   createdBy: {
           *     _link: "1",
           *   },
-          *   date: "2025-06-01T00:00:00.000+00:00",
+          *   date: "2025-07-01T00:00:00.000+00:00",
           *   description: "example value for description",
           * });
         **/
@@ -326,7 +327,7 @@ export type EventManager = {
           *     createdBy: {
           *       _link: "1",
           *     },
-          *     date: "2025-06-01T00:00:00.000+00:00",
+          *     date: "2025-07-01T00:00:00.000+00:00",
           *     description: "example value for description",
           *   },
           * });
@@ -401,7 +402,7 @@ export type EventManager = {
           *   createdBy: {
           *     _link: "1",
           *   },
-          *   date: "2025-06-01T00:00:00.000+00:00",
+          *   date: "2025-07-01T00:00:00.000+00:00",
           *   description: "example value for description",
           * });
         **/
@@ -419,7 +420,7 @@ export type EventManager = {
           *     createdBy: {
           *       _link: "1",
           *     },
-          *     date: "2025-06-01T00:00:00.000+00:00",
+          *     date: "2025-07-01T00:00:00.000+00:00",
           *     description: "example value for description",
           *   },
           * });
@@ -572,7 +573,7 @@ export type EventManager = {
           *   createdBy: {
           *     _link: "1",
           *   },
-          *   date: "2025-06-01T00:00:00.000+00:00",
+          *   date: "2025-07-01T00:00:00.000+00:00",
           *   id: "1",
           * });
         **/
@@ -590,7 +591,7 @@ export type EventManager = {
           *     createdBy: {
           *       _link: "1",
           *     },
-          *     date: "2025-06-01T00:00:00.000+00:00",
+          *     date: "2025-07-01T00:00:00.000+00:00",
           *     id: "1",
           *   },
           * });

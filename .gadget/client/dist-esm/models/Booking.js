@@ -30,6 +30,8 @@ const pluralModelApiIdentifier = "bookings";
 ;
 ;
 ;
+;
+;
 const BookingManager = buildModelManager(
   modelApiIdentifier,
   pluralModelApiIdentifier,
@@ -94,6 +96,42 @@ const BookingManager = buildModelManager(
     },
     {
       type: "action",
+      operationName: "createBooking",
+      operationReturnType: "CreateBooking",
+      functionName: "create",
+      namespace: null,
+      modelApiIdentifier,
+      operatesWithRecordIdentity: true,
+      modelSelectionField: modelApiIdentifier,
+      isBulk: false,
+      isDeleter: false,
+      variables: { id: { required: true, type: "GadgetID" } },
+      hasAmbiguousIdentifier: false,
+      paramOnlyVariables: [],
+      hasReturnType: false,
+      acceptsModelInput: false,
+      hasCreateOrUpdateEffect: false,
+      defaultSelection: DefaultBookingSelection
+    },
+    {
+      type: "action",
+      operationName: "bulkCreateBookings",
+      functionName: "bulkCreate",
+      isBulk: true,
+      isDeleter: false,
+      hasReturnType: false,
+      acceptsModelInput: false,
+      operatesWithRecordIdentity: true,
+      singleActionFunctionName: "create",
+      modelApiIdentifier,
+      modelSelectionField: pluralModelApiIdentifier,
+      namespace: null,
+      variables: { ids: { required: true, type: "[GadgetID!]" } },
+      paramOnlyVariables: [],
+      defaultSelection: DefaultBookingSelection
+    },
+    {
+      type: "action",
       operationName: "updateBooking",
       operationReturnType: "UpdateBooking",
       functionName: "update",
@@ -126,6 +164,48 @@ const BookingManager = buildModelManager(
       namespace: null,
       variables: { ids: { required: true, type: "[GadgetID!]" } },
       paramOnlyVariables: [],
+      defaultSelection: DefaultBookingSelection
+    },
+    {
+      type: "action",
+      operationName: "upsertBooking",
+      operationReturnType: "UpsertBooking",
+      functionName: "upsert",
+      namespace: null,
+      modelApiIdentifier,
+      operatesWithRecordIdentity: false,
+      modelSelectionField: modelApiIdentifier,
+      isBulk: false,
+      isDeleter: false,
+      variables: {
+        on: { required: false, type: "[String!]" },
+        booking: { required: false, type: "UpsertBookingInput" }
+      },
+      hasAmbiguousIdentifier: false,
+      paramOnlyVariables: ["on"],
+      hasReturnType: {
+        "... on CreateBookingResult": { hasReturnType: false },
+        "... on UpdateBookingResult": { hasReturnType: false }
+      },
+      acceptsModelInput: true,
+      hasCreateOrUpdateEffect: true,
+      defaultSelection: DefaultBookingSelection
+    },
+    {
+      type: "action",
+      operationName: "bulkUpsertBookings",
+      functionName: "bulkUpsert",
+      isBulk: true,
+      isDeleter: false,
+      hasReturnType: false,
+      acceptsModelInput: true,
+      operatesWithRecordIdentity: false,
+      singleActionFunctionName: "upsert",
+      modelApiIdentifier,
+      modelSelectionField: pluralModelApiIdentifier,
+      namespace: null,
+      variables: { inputs: { required: true, type: "[BulkUpsertBookingsInput!]" } },
+      paramOnlyVariables: ["on"],
       defaultSelection: DefaultBookingSelection
     },
     {

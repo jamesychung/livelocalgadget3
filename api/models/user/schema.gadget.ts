@@ -1,6 +1,6 @@
 import type { GadgetModel } from "gadget-server";
 
-// This file describes the schema for the "user" model, go to https://livelocalgadget3.gadget.app/edit to view/edit your model in Gadget
+// This file describes the schema for the "user" model, go to https://livelocalgadget6.gadget.app/edit to view/edit your model in Gadget
 // For more information on how to update this file http://docs.gadget.dev
 
 export const schema: GadgetModel = {
@@ -56,9 +56,6 @@ export const schema: GadgetModel = {
       default: ["unauthenticated"],
       storageKey: "YZoQg8wSA07s",
     },
-    userType: { 
-      type: "string", 
-      storageKey: "userTypeField"
-    },
+    userType: { type: "string", storageKey: "userTypeField" },
   },
 };

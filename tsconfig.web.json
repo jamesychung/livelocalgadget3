@@ -1,10 +1,10 @@
 {
   "extends": "./tsconfig.json",
   "include": [
-    "web/**/*",
+    "app/**/*",
     ".react-router/types/**/*",
-    "web/**/.server/**/*",
-    "web/**/.client/**/*"
+    "app/**/.server/**/*",
+    "app/**/.client/**/*"
   ],
   "compilerOptions": {
     "composite": true,
@@ -27,7 +27,7 @@
     ],
     "paths": {
       "@/*": [
-        "./web/*"
+        "./app/*"
       ]
     },
     "esModuleInterop": true,
