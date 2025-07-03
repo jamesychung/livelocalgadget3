@@ -222,7 +222,7 @@ export function useVenueProfile(userId?: string) {
       return await supabase
         .from('venues')
         .select('*')
-        .eq('user_id', userId)
+        .eq('owner_id', userId)
         .single();
     },
     [userId]

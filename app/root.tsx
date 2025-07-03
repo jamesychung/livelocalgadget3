@@ -32,8 +32,11 @@ import Settings from "./routes/_app.settings";
 import Availability from "./routes/_app.availability";
 import Profile from "./routes/_app.profile";
 import VenueEvents from "./routes/_app.venue-events";
+import CreateEvent from "./routes/_app.create-event";
+import VenueEventDetail from "./routes/_app.venue-event.$eventId";
 import VenueHowTo from "./routes/_app.venue-how-to";
 import VenueProfileEdit from "./routes/_app.venue-profile.edit";
+import VenueProfileCreate from "./routes/_app.venue-profile.create";
 import MusicianProfile from "./routes/_app.musician-profile";
 
 // Define root context type
@@ -87,8 +90,11 @@ export default function App() {
                 <Route path="venue-dashboard" element={<VenueDashboard />} />
                 <Route path="venue-musicians" element={<VenueMusicians />} />
                 <Route path="venue-events" element={<VenueEvents />} />
+                <Route path="create-event" element={<CreateEvent />} />
+                <Route path="venue-event/:eventId" element={<VenueEventDetail />} />
                 <Route path="venue-how-to" element={<VenueHowTo />} />
                 <Route path="venue-profile/edit" element={<VenueProfileEdit />} />
+                <Route path="venue-profile/create" element={<VenueProfileCreate />} />
                 
                 {/* Search routes */}
                 <Route path="search/musicians" element={<SearchMusicians />} />

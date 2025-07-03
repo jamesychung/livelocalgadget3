@@ -3,43 +3,48 @@ import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card"
 import { Button } from "../components/ui/button";
 import { ArrowLeft, Calendar, Music, MapPin, Clock } from "lucide-react";
 import { Link, useOutletContext } from 'react-router-dom';
-import { useFindMany } from "@gadgetinc/react";
-import { api } from "../api";
+import { useSupabaseQuery } from "../hooks/useSupabaseData";
+import { supabase } from "../lib/supabase";
 import type { AuthOutletContext } from "./_app";
 
 export default function EventsPage() {
     const { user } = useOutletContext<AuthOutletContext>();
 
     // Fetch public events
-    const [{ data: eventsData, fetching: eventsFetching, error: eventsError }] = useFindMany(api.event, {
-        filter: { isPublic: { equals: true } },
-        select: {
-            id: true,
-            title: true,
-            description: true,
-            date: true,
-            startTime: true,
-            endTime: true,
-            ticketPrice: true,
-            status: true,
-            venue: {
-                id: true,
-                name: true,
-                city: true,
-                state: true
-            },
-            musician: {
-                id: true,
-                stageName: true
-            }
+    const { data: eventsData, loading: eventsLoading, error: eventsError } = useSupabaseQuery(
+        async () => {
+            return await supabase
+                .from('events')
+                .select(`
+                    id,
+                    title,
+                    description,
+                    date,
+                    start_time,
+                    end_time,
+                    ticket_price,
+                    status,
+                    venue:venues(
+                        id,
+                        name,
+                        city,
+                        state
+                    ),
+                    musician:musicians(
+                        id,
+                        stage_name
+                    )
+                `)
+                .eq('is_public', true)
+                .limit(50);
         },
-        first: 50,
-    });
+        []
+    );
 
     const events: any[] = eventsData || [];
 
     // Show loading state while fetching
-    if (eventsFetching) {
+    if (eventsLoading) {
         return (
             <div className="container mx-auto p-6">
                 <div className="flex items-center justify-center min-h-[400px]">
@@ -98,11 +103,11 @@ export default function EventsPage() {
                                         </span>
                                     </div>
                                     
-                                    {event.startTime && (
+                                    {event.start_time && (
                                         <div className="flex items-center gap-2">
                                             <Clock className="h-4 w-4 text-muted-foreground" />
                                             <span>
-                                                {event.startTime}{event.endTime ? ` - ${event.endTime}` : ''}
+                                                {event.start_time}{event.end_time ? ` - ${event.end_time}` : ''}
                                             </span>
                                         </div>
                                     )}
@@ -122,14 +127,15 @@ export default function EventsPage() {
                                         <div className="flex items-center gap-2">
                                             <Music className="h-4 w-4 text-muted-foreground" />
                                             <span>
-                                                {event.musician.stageName}
+                                                {event.musician.stage_name}
                                             </span>
                                         </div>
                                     )}
                                     
-                                    {event.ticketPrice && (
-                                        <div className="font-medium">
-                                            ${event.ticketPrice}
+                                    {event.ticket_price && (
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-muted-foreground">$</span>
+                                            <span>{event.ticket_price}</span>
                                         </div>
                                     )}
                                 </div>

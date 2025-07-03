@@ -89,6 +89,8 @@ export function VenueEventsWithApplications({
     // Filter events that have applications
     const eventsWithApplications = events.filter(event => getEventApplications(event.id).length > 0);
     const sortedEvents = sortEvents(eventsWithApplications);
+    
+
 
     // Handle row click to open dialog
     const handleRowClick = (event: any) => {
@@ -319,7 +321,7 @@ export function VenueEventsWithApplications({
                                                         <div className="flex items-center gap-2">
                                                             <DollarSign className="h-4 w-4 text-muted-foreground" />
                                                             <span className="text-sm">
-                                                                ${booking.proposedRate || booking.musician?.hourlyRate}/hr
+                                                                ${booking.proposedRate || booking.musician?.hourly_rate}/hr
                                                             </span>
                                                         </div>
                                                     </div>

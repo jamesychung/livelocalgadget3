@@ -2,7 +2,7 @@ import { Button } from "../components/ui/button";
 import { Card } from "../components/ui/card";
 import { useOutletContext, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from "react";
-import { api } from "../api";
+import { supabase } from "../lib/supabase";
 import type { AuthOutletContext } from "./_app";
 
 export default function () {
@@ -19,45 +19,65 @@ export default function () {
           return;
         }
 
+        // If user already has a musician or venue profile, redirect to appropriate dashboard
+        if (user.musician) {
+          console.log("🎵 Found existing musician profile, redirecting to dashboard");
+          navigate("/musician-dashboard");
+          return;
+        }
+
+        if (user.venue) {
+          console.log("🏢 Found existing venue profile, redirecting to dashboard");
+          navigate("/venue-dashboard");
+          return;
+        }
+
         // Check user type and redirect accordingly
         if (user.userType === "musician") {
           // Check if user has a musician profile, create if not
-          const musicianProfile = await api.musician.findMany({
-            filter: {
-              user: { id: { equals: user.id } }
-            }
-          });
+          const { data: musicianProfile } = await supabase
+            .from('musicians')
+            .select('*')
+            .eq('email', user.email)
+            .single();
           
-          if (!musicianProfile || musicianProfile.length === 0) {
+          if (!musicianProfile) {
             // Create musician profile
-            await api.musician.create({
-              user: { _link: user.id },
-              name: `${user.firstName} ${user.lastName}`,
-              stageName: user.firstName,
-              email: user.email,
-              genres: [],
-            });
+            await supabase
+              .from('musicians')
+              .insert({
+                user_id: user.id,
+                stage_name: user.firstName,
+                email: user.email,
+                genres: [],
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString()
+              });
           }
           
           navigate("/musician-dashboard");
           return;
         }
 
-        if (user.userType === "venue") {
+        if (user.userType === "venue_owner") {
           // Check if user has a venue profile, create if not
-          const venueProfile = await api.venue.findMany({
-            filter: {
-              owner: { id: { equals: user.id } }
-            }
-          });
+          const { data: venueProfile } = await supabase
+            .from('venues')
+            .select('*')
+            .eq('email', user.email)
+            .single();
           
-          if (!venueProfile || venueProfile.length === 0) {
+          if (!venueProfile) {
             // Create venue profile
-            await api.venue.create({
-              owner: { _link: user.id },
-              name: `${user.firstName}'s Venue`,
-              email: user.email,
-            });
+            await supabase
+              .from('venues')
+              .insert({
+                owner_id: user.id,
+                name: `${user.firstName}'s Venue`,
+                email: user.email,
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString()
+              });
           }
           
           navigate("/venue-dashboard");

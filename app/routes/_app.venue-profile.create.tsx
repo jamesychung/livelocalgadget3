@@ -1,11 +1,9 @@
 import { useState } from "react";
 import { useOutletContext, useNavigate } from 'react-router-dom';
 import { Button } from "../components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
-import { ArrowLeft, Save, Building, MapPin, Phone, Globe, DollarSign, Star, Users, Clock, AlertCircle } from "lucide-react";
-import { api } from "../api";
+import { Card, CardContent } from "../components/ui/card";
+import { supabase } from "../lib/supabase";
 import type { AuthOutletContext } from "./_app";
-import { UserProfileForm } from "../components/shared/UserProfileForm";
 
 export default function VenueProfileCreate() {
   const { user } = useOutletContext<AuthOutletContext>();
@@ -14,45 +12,39 @@ export default function VenueProfileCreate() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
-  const handleSave = async (formData: any) => {
+  const handleCreateVenue = async () => {
     try {
       setSaving(true);
       setError(null);
-      setSuccess(false);
 
-      // Create new venue profile
-      const createData = {
-        name: formData.name || "",
-        description: formData.description || "",
-        city: formData.city || "",
-        state: formData.state || "",
-        country: formData.country || "",
-        phone: formData.phone || "",
-        website: formData.website && formData.website.trim() ? formData.website.trim() : null,
-        profilePicture: formData.profilePicture && formData.profilePicture.trim() ? formData.profilePicture.trim() : null,
-        additionalPictures: formData.additionalPictures || [],
-        socialLinks: formData.socialLinks || [],
-        genres: formData.genres || [],
-        type: formData.type || "",
-        capacity: parseInt(formData.capacity) || 0,
-        priceRange: formData.priceRange || "",
-        amenities: formData.amenities || [],
-        address: formData.address || "",
-        zipCode: formData.zipCode || "",
-        email: formData.email || "",
-        owner: { _link: user.id },
-      };
+      // Get current user ID
+      const { data: { user: authUser } } = await supabase.auth.getUser();
+      if (!authUser) {
+        throw new Error("User not authenticated");
+      }
 
-      const createResult = await api.venue.create(createData);
+      console.log("Creating venue profile for user:", authUser.id);
 
-      // Update the user profile (firstName, lastName, email)
-      const userUpdateData = {
-        firstName: formData.firstName || user.firstName,
-        lastName: formData.lastName || user.lastName,
-        email: formData.email || user.email,
-      };
+      // Create a simple venue profile
+      const { data: venueData, error: venueError } = await supabase
+        .from('venues')
+        .insert({
+          owner_id: authUser.id,
+          name: "My Venue",
+          description: "A great venue for live music",
+          email: authUser.email || user?.email || "",
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        })
+        .select()
+        .single();
 
-      await api.user.update(user.id, userUpdateData);
+      if (venueError) {
+        console.error("Venue creation error:", venueError);
+        throw venueError;
+      }
+
+      console.log("Venue profile created successfully:", venueData);
 
       setSuccess(true);
       
@@ -69,59 +61,14 @@ export default function VenueProfileCreate() {
     }
   };
 
-  const safeString = (value: any): string => {
-    if (typeof value === 'string') return value;
-    if (Array.isArray(value)) return value.join(', ');
-    return '';
-  };
-
-  const safeArray = (value: any): string[] => {
-    if (Array.isArray(value)) return value;
-    if (typeof value === 'string' && value.trim()) return [value];
-    return [];
-  };
-
-  // Default form data for venue creation
-  const defaultFormData = {
-    firstName: user?.firstName || "",
-    lastName: user?.lastName || "",
-    email: user?.email || "",
-    name: "",
-    description: "",
-    type: "",
-    capacity: "",
-    city: "",
-    state: "",
-    country: "",
-    address: "",
-    zipCode: "",
-    phone: "",
-    website: "",
-    priceRange: "",
-    genres: [],
-    amenities: [],
-    profilePicture: "",
-    additionalPictures: [],
-    socialLinks: [],
-    hours: {},
-    venueEmail: "",
-  };
-
   return (
     <div className="container mx-auto p-6 space-y-6">
-      {/* Header */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Button variant="outline" onClick={() => navigate("/venue-dashboard")}>
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Dashboard
-          </Button>
-          <div>
-            <h1 className="text-3xl font-bold">Create Venue Profile</h1>
-            <p className="text-muted-foreground">
-              Set up your venue profile to start attracting musicians and hosting events
-            </p>
-          </div>
+        <div>
+          <h1 className="text-3xl font-bold">Create Venue Profile</h1>
+          <p className="text-muted-foreground">
+            Set up your venue profile to start attracting musicians and hosting events
+          </p>
         </div>
       </div>
 
@@ -130,7 +77,6 @@ export default function VenueProfileCreate() {
         <Card className="border-green-200 bg-green-50">
           <CardContent className="pt-6">
             <div className="flex items-center gap-2 text-green-800">
-              <Star className="h-5 w-5" />
               <p className="font-medium">Venue profile created successfully!</p>
             </div>
             <p className="text-green-700 mt-1">Redirecting to your dashboard...</p>
@@ -143,7 +89,6 @@ export default function VenueProfileCreate() {
         <Card className="border-red-200 bg-red-50">
           <CardContent className="pt-6">
             <div className="flex items-center gap-2 text-red-800">
-              <AlertCircle className="h-5 w-5" />
               <p className="font-medium">Error</p>
             </div>
             <p className="text-red-700 mt-1">{error}</p>
@@ -151,25 +96,17 @@ export default function VenueProfileCreate() {
         </Card>
       )}
 
-      {/* Profile Form */}
+      {/* Simple Form */}
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Building className="h-5 w-5" />
-            Venue Information
-          </CardTitle>
-          <CardDescription>
-            Tell musicians about your venue, its amenities, and what makes it special
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <UserProfileForm
-            role="venue"
-            profile={defaultFormData}
-            onSave={handleSave}
-            isSaving={saving}
-            allowNameEdit={true}
-          />
+        <CardContent className="pt-6">
+          <p className="mb-4">Click the button below to create a simple venue profile:</p>
+          <Button 
+            onClick={handleCreateVenue}
+            disabled={saving}
+            className="w-full"
+          >
+            {saving ? "Creating..." : "Create Venue Profile"}
+          </Button>
         </CardContent>
       </Card>
     </div>

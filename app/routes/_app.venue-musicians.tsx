@@ -8,13 +8,13 @@ import { Checkbox } from "../components/ui/checkbox";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../components/ui/table";
 import { ArrowLeft, Users, Search, Filter, Calendar, MapPin, Music, DollarSign, Send } from "lucide-react";
 import { Link, useOutletContext, useLocation, useNavigate } from 'react-router-dom';
-import { useFindMany, useAction } from "@gadgetinc/react";
-import { api } from "../api";
+import { useVenueProfile, useSupabaseQuery, useSupabaseMutation } from "../hooks/useSupabaseData";
+import { supabase } from "../lib/supabase";
 import type { AuthOutletContext } from "./_app";
 
 interface Musician {
     id: string;
-    stageName: string;
+    stage_name: string;
     genres: string[];
     availability: any;
     email: string;
@@ -22,15 +22,15 @@ interface Musician {
     city: string;
     state: string;
     bio: string;
-    hourlyRate: number;
+    hourly_rate: number;
 }
 
 interface Event {
     id: string;
     title: string;
     date: string;
-    startTime: string;
-    endTime: string;
+    start_time: string;
+    end_time: string;
     genres: string[];
     venue: {
         id: string;
@@ -51,45 +51,57 @@ export default function VenueMusiciansPage() {
     // Get event data from navigation state
     const eventData = location.state as { eventId?: string; eventTitle?: string; action?: string };
 
+    // Fetch venue profile
+    const { data: venue, loading: venueLoading } = useVenueProfile(user?.id);
+
     // Fetch all musicians
-    const [{ data: musiciansData, fetching: musiciansFetching }] = useFindMany(api.musician, {
-        select: {
-            id: true,
-            stageName: true,
-            genres: true,
-            availability: true,
-            email: true,
-            phone: true,
-            city: true,
-            state: true,
-            bio: true,
-            hourlyRate: true
+    const { data: musiciansData, loading: musiciansLoading } = useSupabaseQuery(
+        async () => {
+            return await supabase
+                .from('musicians')
+                .select(`
+                    id,
+                    stage_name,
+                    genres,
+                    availability,
+                    email,
+                    phone,
+                    city,
+                    state,
+                    bio,
+                    hourly_rate
+                `)
+                .limit(100);
         },
-        first: 100
-    });
+        []
+    );
 
     // Fetch venue's events
-    const [{ data: eventsData, fetching: eventsFetching }] = useFindMany(api.event, {
-        filter: { 
-            venue: { owner: { id: { equals: user?.id } } },
-            eventStatus: { equals: "invited" }
+    const { data: eventsData, loading: eventsLoading } = useSupabaseQuery(
+        async () => {
+            if (!venue?.id) return { data: null, error: null };
+            return await supabase
+                .from('events')
+                .select(`
+                    id,
+                    title,
+                    date,
+                    start_time,
+                    end_time,
+                    genres,
+                    venue:venues(
+                        id,
+                        name
+                    )
+                `)
+                .eq('venue_id', venue.id)
+                .eq('status', 'invited');
         },
-        select: {
-            id: true,
-            title: true,
-            date: true,
-            startTime: true,
-            endTime: true,
-            genres: true,
-            venue: {
-                id: true,
-                name: true
-            }
-        }
-    });
+        [venue?.id]
+    );
 
-    // Create booking action for invitations - temporarily disabled
-    // const [createBookingResult, createBooking] = useAction(api.booking.create);
+    // Mutation hook for creating bookings
+    const { mutate: createBooking, loading: createBookingLoading } = useSupabaseMutation();
 
     const musicians: Musician[] = musiciansData || [];
     const events: Event[] = eventsData || [];
@@ -110,7 +122,7 @@ export default function VenueMusiciansPage() {
 
     // Filter musicians based on search and genre
     const filteredMusicians = musicians.filter(musician => {
-        const matchesSearch = musician.stageName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        const matchesSearch = musician.stage_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                             musician.city?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                             musician.state?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                             musician.bio?.toLowerCase().includes(searchTerm.toLowerCase());
@@ -176,12 +188,12 @@ export default function VenueMusiciansPage() {
                     
                     if (event && musician) {
                         invitations.push({
-                            booking: {
-                                event: { _link: eventId },
-                                musician: { _link: musicianId },
-                                bookedBy: { _link: user.id },
-                                status: "invited",
-                            }
+                            event_id: eventId,
+                            musician_id: musicianId,
+                            venue_id: venue?.id,
+                            status: "applied",
+                            created_at: new Date().toISOString(),
+                            updated_at: new Date().toISOString()
                         });
                     }
                 }
@@ -189,8 +201,11 @@ export default function VenueMusiciansPage() {
 
             // Create all invitations
             for (const invitation of invitations) {
-                // await createBooking(invitation);
-                console.log("Would create invitation:", invitation);
+                await createBooking(async () => {
+                    return await supabase
+                        .from('bookings')
+                        .insert(invitation);
+                });
             }
 
             alert(`Successfully sent ${invitations.length} invitation(s)!`);
@@ -204,7 +219,7 @@ export default function VenueMusiciansPage() {
     };
 
     // Show loading state
-    if (musiciansFetching || eventsFetching) {
+    if (venueLoading || musiciansLoading || eventsLoading) {
         return (
             <div className="container mx-auto p-6">
                 <div className="flex items-center justify-center min-h-[400px]">
@@ -222,7 +237,7 @@ export default function VenueMusiciansPage() {
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
-                    <Button variant="outline" asChild>
+                    <Button asChild variant="outline" size="sm">
                         <Link to="/venue-events">
                             <ArrowLeft className="mr-2 h-4 w-4" />
                             Back to Events
@@ -231,207 +246,196 @@ export default function VenueMusiciansPage() {
                     <div>
                         <h1 className="text-3xl font-bold">Invite Musicians</h1>
                         <p className="text-muted-foreground">
-                            {eventData?.eventTitle ? `Invite musicians to "${eventData.eventTitle}"` : "Select events and musicians to invite"}
+                            Select musicians to invite to your events
                         </p>
                     </div>
                 </div>
+                <div className="flex items-center gap-2">
+                    <Badge variant="secondary">
+                        {musicians.length} Musicians
+                    </Badge>
+                    <Badge variant="secondary">
+                        {events.length} Events
+                    </Badge>
+                </div>
             </div>
 
-            <div className="grid gap-6 lg:grid-cols-3">
-                {/* Left Column - Event Selection */}
-                <div className="lg:col-span-1">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="flex items-center gap-2">
-                                <Calendar className="h-5 w-5" />
-                                Select Events
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            {events.length === 0 ? (
-                                <p className="text-muted-foreground">No invited events found.</p>
-                            ) : (
-                                <div className="space-y-3">
-                                    {events.map((event) => (
-                                        <div key={event.id} className="flex items-start space-x-3 p-3 border rounded-lg">
-                                            <Checkbox
-                                                id={`event-${event.id}`}
-                                                checked={selectedEvents.includes(event.id)}
-                                                onCheckedChange={(checked) => handleEventSelection(event.id, checked as boolean)}
-                                            />
-                                            <div className="flex-1">
-                                                <Label htmlFor={`event-${event.id}`} className="font-medium cursor-pointer">
-                                                    {event.title}
-                                                </Label>
-                                                <p className="text-sm text-muted-foreground">
-                                                    {new Date(event.date).toLocaleDateString()} • {event.startTime} - {event.endTime}
-                                                </p>
-                                                {event.genres && event.genres.length > 0 && (
-                                                    <div className="flex flex-wrap gap-1 mt-1">
-                                                        {event.genres.slice(0, 2).map((genre, index) => (
-                                                            <Badge key={index} variant="outline" className="text-xs">
-                                                                {genre}
-                                                            </Badge>
-                                                        ))}
-                                                        {event.genres.length > 2 && (
-                                                            <Badge variant="outline" className="text-xs">
-                                                                +{event.genres.length - 2} more
-                                                            </Badge>
-                                                        )}
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
-                        </CardContent>
-                    </Card>
-
-                    {/* Genre Filter */}
-                    <Card className="mt-6">
-                        <CardHeader>
-                            <CardTitle className="flex items-center gap-2">
-                                <Music className="h-5 w-5" />
-                                Filter by Genre
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="grid grid-cols-2 gap-2 max-h-60 overflow-y-auto">
-                                {availableGenres.map((genre) => (
+            {/* Search and Filters */}
+            <Card>
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                        <Search className="h-5 w-5" />
+                        Search & Filter
+                    </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <Label htmlFor="search">Search Musicians</Label>
+                            <Input
+                                id="search"
+                                placeholder="Search by name, location, or bio..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                            />
+                        </div>
+                        <div>
+                            <Label>Filter by Genre</Label>
+                            <div className="flex flex-wrap gap-2 mt-2">
+                                {availableGenres.slice(0, 8).map((genre) => (
                                     <div key={genre} className="flex items-center space-x-2">
                                         <Checkbox
-                                            id={`genre-${genre}`}
+                                            id={genre}
                                             checked={genreFilter.includes(genre)}
-                                            onCheckedChange={(checked) => handleGenreFilter(genre, checked as boolean)}
+                                            onCheckedChange={(checked) => 
+                                                handleGenreFilter(genre, checked as boolean)
+                                            }
                                         />
-                                        <Label htmlFor={`genre-${genre}`} className="text-sm cursor-pointer">
-                                            {genre}
-                                        </Label>
+                                        <Label htmlFor={genre} className="text-sm">{genre}</Label>
                                     </div>
                                 ))}
                             </div>
-                        </CardContent>
-                    </Card>
-                </div>
-
-                {/* Right Column - Musician Selection */}
-                <div className="lg:col-span-2">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="flex items-center gap-2">
-                                <Users className="h-5 w-5" />
-                                Select Musicians ({selectedMusicians.length} selected)
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            {/* Search */}
-                            <div className="mb-4">
-                                <div className="relative">
-                                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                    <Input
-                                        type="text"
-                                        placeholder="Search musicians by name, location, or bio..."
-                                        value={searchTerm}
-                                        onChange={(e) => setSearchTerm(e.target.value)}
-                                        className="pl-10"
-                                    />
-                                </div>
-                            </div>
-
-                            {/* Musicians Table */}
-                            {filteredMusicians.length > 0 ? (
-                                <div className="overflow-x-auto">
-                                    <Table>
-                                        <TableHeader>
-                                            <TableRow>
-                                                <TableHead className="w-12">Select</TableHead>
-                                                <TableHead>Musician</TableHead>
-                                                <TableHead>Location</TableHead>
-                                                <TableHead>Genres</TableHead>
-                                                <TableHead>Rate</TableHead>
-                                            </TableRow>
-                                        </TableHeader>
-                                        <TableBody>
-                                            {filteredMusicians.map((musician) => (
-                                                <TableRow key={musician.id}>
-                                                    <TableCell>
-                                                        <Checkbox
-                                                            checked={selectedMusicians.includes(musician.id)}
-                                                            onCheckedChange={(checked) => handleMusicianSelection(musician.id, checked as boolean)}
-                                                        />
-                                                    </TableCell>
-                                                    <TableCell>
-                                                        <div>
-                                                            <div className="font-medium">{musician.stageName}</div>
-                                                            <div className="text-sm text-muted-foreground">{musician.email}</div>
-                                                        </div>
-                                                    </TableCell>
-                                                    <TableCell>
-                                                        <div className="flex items-center gap-1 text-sm">
-                                                            <MapPin className="h-3 w-3" />
-                                                            {musician.city && musician.state ? `${musician.city}, ${musician.state}` : 'Not specified'}
-                                                        </div>
-                                                    </TableCell>
-                                                    <TableCell>
-                                                        <div className="flex flex-wrap gap-1">
-                                                            {musician.genres?.slice(0, 3).map((genre, index) => (
-                                                                <Badge key={index} variant="outline" className="text-xs">
-                                                                    {genre}
-                                                                </Badge>
-                                                            ))}
-                                                            {musician.genres && musician.genres.length > 3 && (
-                                                                <Badge variant="outline" className="text-xs">
-                                                                    +{musician.genres.length - 3}
-                                                                </Badge>
-                                                            )}
-                                                        </div>
-                                                    </TableCell>
-                                                    <TableCell>
-                                                        {musician.hourlyRate ? (
-                                                            <div className="flex items-center gap-1 text-green-600">
-                                                                <DollarSign className="h-3 w-3" />
-                                                                {musician.hourlyRate}/hr
-                                                            </div>
-                                                        ) : (
-                                                            <span className="text-muted-foreground">TBD</span>
-                                                        )}
-                                                    </TableCell>
-                                                </TableRow>
-                                            ))}
-                                        </TableBody>
-                                    </Table>
-                                </div>
-                            ) : (
-                                <div className="text-center py-12">
-                                    <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                                    <h3 className="text-lg font-medium mb-2">No musicians found</h3>
-                                    <p className="text-muted-foreground">
-                                        {searchTerm || genreFilter.length > 0 
-                                            ? "Try adjusting your search or filter criteria."
-                                            : "There are currently no musicians available."
-                                        }
-                                    </p>
-                                </div>
-                            )}
-                        </CardContent>
-                    </Card>
-
-                    {/* Action Buttons */}
-                    <div className="flex justify-end gap-4 mt-6">
-                        <Button variant="outline" asChild>
-                            <Link to="/venue-events">Cancel</Link>
-                        </Button>
-                        <Button 
-                            onClick={handleSendInvitations}
-                            disabled={selectedMusicians.length === 0 || selectedEvents.length === 0 || isSubmitting}
-                            className="bg-blue-600 hover:bg-blue-700"
-                        >
-                            <Send className="mr-2 h-4 w-4" />
-                            {isSubmitting ? "Sending..." : `Send ${selectedMusicians.length * selectedEvents.length} Invitation(s)`}
-                        </Button>
+                        </div>
                     </div>
-                </div>
+                </CardContent>
+            </Card>
+
+            {/* Events Selection */}
+            <Card>
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                        <Calendar className="h-5 w-5" />
+                        Select Events
+                    </CardTitle>
+                </CardHeader>
+                <CardContent>
+                    {events.length > 0 ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {events.map((event) => (
+                                <div key={event.id} className="border rounded-lg p-4">
+                                    <div className="flex items-start gap-3">
+                                        <Checkbox
+                                            checked={selectedEvents.includes(event.id)}
+                                            onCheckedChange={(checked) => 
+                                                handleEventSelection(event.id, checked as boolean)
+                                            }
+                                        />
+                                        <div className="flex-1">
+                                            <h3 className="font-medium">{event.title}</h3>
+                                            <p className="text-sm text-muted-foreground">
+                                                {new Date(event.date).toLocaleDateString()}
+                                            </p>
+                                            <p className="text-sm text-muted-foreground">
+                                                {event.start_time} - {event.end_time}
+                                            </p>
+                                            {event.genres && event.genres.length > 0 && (
+                                                <div className="flex flex-wrap gap-1 mt-2">
+                                                    {event.genres.map((genre, index) => (
+                                                        <Badge key={index} variant="outline" className="text-xs">
+                                                            {genre}
+                                                        </Badge>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="text-center py-8">
+                            <Calendar className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+                            <p className="text-muted-foreground">No events available for invitations</p>
+                            <p className="text-sm text-muted-foreground mt-1">
+                                Create events first to invite musicians
+                            </p>
+                        </div>
+                    )}
+                </CardContent>
+            </Card>
+
+            {/* Musicians Selection */}
+            <Card>
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                        <Users className="h-5 w-5" />
+                        Select Musicians ({filteredMusicians.length})
+                    </CardTitle>
+                </CardHeader>
+                <CardContent>
+                    {filteredMusicians.length > 0 ? (
+                        <div className="space-y-4">
+                            {filteredMusicians.map((musician) => (
+                                <div key={musician.id} className="border rounded-lg p-4">
+                                    <div className="flex items-start gap-4">
+                                        <Checkbox
+                                            checked={selectedMusicians.includes(musician.id)}
+                                            onCheckedChange={(checked) => 
+                                                handleMusicianSelection(musician.id, checked as boolean)
+                                            }
+                                        />
+                                        <div className="flex-1">
+                                            <div className="flex items-center justify-between">
+                                                <h3 className="font-medium">{musician.stage_name}</h3>
+                                                <div className="flex items-center gap-2">
+                                                    <MapPin className="h-4 w-4 text-muted-foreground" />
+                                                    <span className="text-sm text-muted-foreground">
+                                                        {musician.city}, {musician.state}
+                                                    </span>
+                                                    {musician.hourly_rate && (
+                                                        <>
+                                                            <DollarSign className="h-4 w-4 text-muted-foreground" />
+                                                            <span className="text-sm text-muted-foreground">
+                                                                ${musician.hourly_rate}/hr
+                                                            </span>
+                                                        </>
+                                                    )}
+                                                </div>
+                                            </div>
+                                            {musician.bio && (
+                                                <p className="text-sm text-muted-foreground mt-1">
+                                                    {musician.bio}
+                                                </p>
+                                            )}
+                                            {musician.genres && musician.genres.length > 0 && (
+                                                <div className="flex flex-wrap gap-1 mt-2">
+                                                    {musician.genres.map((genre, index) => (
+                                                        <Badge key={index} variant="secondary" className="text-xs">
+                                                            {genre}
+                                                        </Badge>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="text-center py-8">
+                            <Users className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+                            <p className="text-muted-foreground">No musicians found</p>
+                            <p className="text-sm text-muted-foreground mt-1">
+                                Try adjusting your search or filters
+                            </p>
+                        </div>
+                    )}
+                </CardContent>
+            </Card>
+
+            {/* Action Buttons */}
+            <div className="flex justify-end gap-4">
+                <Button asChild variant="outline">
+                    <Link to="/venue-events">Cancel</Link>
+                </Button>
+                <Button 
+                    onClick={handleSendInvitations}
+                    disabled={selectedMusicians.length === 0 || selectedEvents.length === 0 || isSubmitting}
+                    className="flex items-center gap-2"
+                >
+                    <Send className="h-4 w-4" />
+                    {isSubmitting ? 'Sending...' : `Send ${selectedMusicians.length * selectedEvents.length} Invitation(s)`}
+                </Button>
             </div>
         </div>
     );

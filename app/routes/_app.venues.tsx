@@ -3,36 +3,41 @@ import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card"
 import { Button } from "../components/ui/button";
 import { ArrowLeft, Building, Search, MapPin, Star, Users } from "lucide-react";
 import { Link, useOutletContext } from 'react-router-dom';
-import { useFindMany } from "@gadgetinc/react";
-import { api } from "../api";
+import { useSupabaseQuery } from "../hooks/useSupabaseData";
+import { supabase } from "../lib/supabase";
 import type { AuthOutletContext } from "./_app";
 
 export default function VenuesPage() {
     const { user } = useOutletContext<AuthOutletContext>();
 
     // Fetch venues
-    const [{ data: venuesData, fetching: venuesFetching, error: venuesError }] = useFindMany(api.venue, {
-        filter: { isActive: { equals: true } },
-        select: {
-            id: true,
-            name: true,
-            description: true,
-            type: true,
-            city: true,
-            state: true,
-            rating: true,
-            capacity: true,
-            profilePicture: true,
-            genres: true,
-            amenities: true
+    const { data: venuesData, loading: venuesLoading, error: venuesError } = useSupabaseQuery(
+        async () => {
+            return await supabase
+                .from('venues')
+                .select(`
+                    id,
+                    name,
+                    description,
+                    type,
+                    city,
+                    state,
+                    rating,
+                    capacity,
+                    profile_picture,
+                    genres,
+                    amenities
+                `)
+                .eq('is_active', true)
+                .limit(50);
         },
-        first: 50,
-    });
+        []
+    );
 
     const venues: any[] = venuesData || [];
 
     // Show loading state while fetching
-    if (venuesFetching) {
+    if (venuesLoading) {
         return (
             <div className="container mx-auto p-6">
                 <div className="flex items-center justify-center min-h-[400px]">

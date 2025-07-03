@@ -5,7 +5,7 @@ import { Label } from "../components/ui/label";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../lib/auth";
 import { useState } from "react";
-import { supabase } from "../api";
+import { supabase } from "../lib/supabase";
 
 export default function SignInPage() {
   const { signIn } = useAuth();
@@ -41,7 +41,7 @@ export default function SignInPage() {
       const { data: profile, error: profileError } = await supabase
         .from('users')
         .select('first_name, last_name, user_type')
-        .eq('id', user.id)
+        .eq('email', user.email)
         .single();
       
       if (profileError) {
@@ -59,7 +59,7 @@ export default function SignInPage() {
       // Redirect based on user type
       if (profile.user_type === "musician") {
         navigate("/musician-dashboard");
-      } else if (profile.user_type === "venue") {
+      } else if (profile.user_type === "venue_owner") {
         navigate("/venue-dashboard");
       } else {
         navigate("/signed-in");

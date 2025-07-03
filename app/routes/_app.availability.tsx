@@ -3,62 +3,90 @@ import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card"
 import { Button } from "../components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { Link, useOutletContext, useNavigate } from 'react-router-dom';
-import { useFindMany, useAction } from "@gadgetinc/react";
-import { api } from "../api";
+import { supabase } from "../lib/supabase";
 import type { AuthOutletContext } from "./_app";
 import AvailabilityManager from "../components/shared/AvailabilityManager";
 
 export default function AvailabilityPage() {
-    // Add error boundary for context
-    let user;
-    let navigate;
+    const context = useOutletContext<AuthOutletContext>();
+    const navigate = useNavigate();
+    const [isLoading, setIsLoading] = useState(true);
+    const [musicianProfile, setMusicianProfile] = useState<any>(null);
+    const [error, setError] = useState<string | null>(null);
+    const [isSaving, setIsSaving] = useState(false);
     
-    try {
-        const context = useOutletContext<AuthOutletContext>();
-        user = context?.user;
-        navigate = useNavigate();
-    } catch (error) {
-        console.error("Error accessing context:", error);
-        return (
-            <div className="container mx-auto p-6">
-                <div className="flex items-center justify-center min-h-[400px]">
-                    <div className="text-center">
-                        <h1 className="text-2xl font-bold mb-4">Error Loading Page</h1>
-                        <p className="text-muted-foreground mb-6">
-                            There was an error loading the availability page. Please try refreshing the page.
-                        </p>
-                        <Button onClick={() => window.location.reload()}>
-                            Refresh Page
-                        </Button>
-                    </div>
-                </div>
-            </div>
-        );
-    }
-
-    const [{ data: musicianData, fetching: musicianFetching, error: musicianError }, refetch] = useFindMany(api.musician, {
-        filter: { user: { id: { equals: user?.id } } },
-        select: {
-            id: true, 
-            stageName: true, 
-            availability: true
-        },
-        first: 1,
-        pause: !user?.id,
-    });
-
-    const musician: any = musicianData?.[0];
-
-    const [updateMusicianResult, updateMusician] = useAction(api.musician.update);
-
+    // Ensure we have the user from context
+    const user = context?.user;
+    
     useEffect(() => {
-        if (musicianError) {
-            console.error("Error loading musician data:", musicianError);
-        }
-    }, [musicianError]);
+        const fetchMusicianProfile = async () => {
+            if (!user?.id) {
+                setIsLoading(false);
+                return;
+            }
 
-    // Show loading state while fetching
-    if (musicianFetching) {
+            try {
+                const { data, error } = await supabase
+                    .from("musicians")
+                    .select("*")
+                    .eq("email", user.email)
+                    .single();
+
+                if (error) {
+                    console.error("Error loading musician data:", error);
+                    setError("Failed to load profile. Please try again.");
+                } else if (!data) {
+                    setError("No musician profile found. Redirecting to create page...");
+                    setTimeout(() => {
+                        navigate("/musician-profile/create");
+                    }, 2000);
+                } else {
+                    setMusicianProfile(data);
+                }
+            } catch (err) {
+                console.error("Error in data fetching:", err);
+                setError("An unexpected error occurred");
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchMusicianProfile();
+    }, [user, navigate]);
+
+    // Handle availability updates
+    const handleAvailabilityUpdate = async (availabilityData: any) => {
+        if (!musicianProfile?.id) {
+            console.error("No musician ID found");
+            return;
+        }
+        
+        setIsSaving(true);
+        console.log("Saving availability data:", availabilityData);
+        
+        try {
+            const { error } = await supabase
+                .from("musicians")
+                .update({ availability: availabilityData })
+                .eq("id", musicianProfile.id);
+
+            if (error) {
+                console.error("Update failed:", error);
+                setError("Failed to update availability. Please try again.");
+            } else {
+                console.log("Availability updated successfully");
+                setMusicianProfile({ ...musicianProfile, availability: availabilityData });
+                setError(null);
+            }
+        } catch (err) {
+            console.error("Error updating availability:", err);
+            setError("An unexpected error occurred while saving.");
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
+    if (isLoading) {
         return (
             <div className="container mx-auto p-6">
                 <div className="flex items-center justify-center min-h-[400px]">
@@ -71,8 +99,7 @@ export default function AvailabilityPage() {
         );
     }
 
-    // If no musician profile found, show a message with option to create one
-    if (!musician) {
+    if (error && !musicianProfile) {
         return (
             <div className="container mx-auto p-6">
                 <div className="flex items-center justify-center min-h-[400px]">
@@ -100,42 +127,25 @@ export default function AvailabilityPage() {
         );
     }
 
-    // Handle availability updates
-    const handleAvailabilityUpdate = async (availabilityData: any) => {
-        if (!musician?.id) {
-            console.error("No musician ID found");
-            return;
-        }
-        
-        console.log("Saving availability data:", availabilityData);
-        console.log("Musician ID:", musician.id);
-        
-        // Ensure the data is properly formatted
-        const formattedData = JSON.parse(JSON.stringify(availabilityData));
-        console.log("Formatted data:", formattedData);
-        
-        try {
-            const result = await updateMusician({
-                id: musician.id,
-                availability: formattedData
-            });
-            
-            console.log("Update result:", result);
-            
-            if (result.error) {
-                console.error("Update failed:", result.error);
-                return;
-            }
-            
-            console.log("Availability updated successfully");
-            
-            // Refetch the data to ensure UI is in sync with database
-            refetch();
-            
-        } catch (error) {
-            console.error("Error updating availability:", error);
-        }
-    };
+    if (!musicianProfile) {
+        return (
+            <div className="container mx-auto p-6">
+                <div className="flex items-center justify-center min-h-[400px]">
+                    <div className="text-center">
+                        <h1 className="text-2xl font-bold mb-4">No Profile Found</h1>
+                        <p className="text-muted-foreground mb-6">
+                            You need to create a musician profile first.
+                        </p>
+                        <Button asChild>
+                            <Link to="/musician-profile/create">
+                                Create Profile
+                            </Link>
+                        </Button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="container mx-auto p-6 space-y-6">
@@ -151,11 +161,18 @@ export default function AvailabilityPage() {
                     <div>
                         <h1 className="text-3xl font-bold">Availability Management</h1>
                         <p className="text-muted-foreground">
-                            Manage your availability for {musician.stageName || user?.firstName}
+                            Manage your availability for {musicianProfile.stage_name || user?.first_name}
                         </p>
                     </div>
                 </div>
             </div>
+
+            {/* Error Message */}
+            {error && (
+                <div className="bg-red-50 border border-red-200 rounded-md p-4">
+                    <p className="text-red-700">{error}</p>
+                </div>
+            )}
 
             {/* Quick Stats */}
             <div className="grid gap-4 md:grid-cols-3">
@@ -165,7 +182,7 @@ export default function AvailabilityPage() {
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold">
-                            {Object.keys(musician.availability || {}).length}
+                            {Object.keys(musicianProfile.availability || {}).length}
                         </div>
                         <p className="text-xs text-muted-foreground">
                             Days with availability set
@@ -180,7 +197,7 @@ export default function AvailabilityPage() {
                         <div className="text-2xl font-bold">
                             {(() => {
                                 let total = 0;
-                                Object.values(musician.availability || {}).forEach((daySlots: any) => {
+                                Object.values(musicianProfile.availability || {}).forEach((daySlots: any) => {
                                     total += daySlots?.length || 0;
                                 });
                                 return total;
@@ -199,7 +216,7 @@ export default function AvailabilityPage() {
                         <div className="text-2xl font-bold">
                             {(() => {
                                 let totalHours = 0;
-                                Object.values(musician.availability || {}).forEach((daySlots: any) => {
+                                Object.values(musicianProfile.availability || {}).forEach((daySlots: any) => {
                                     daySlots?.forEach((slot: any) => {
                                         const start = new Date(`2000-01-01T${slot.startTime}`);
                                         const end = new Date(`2000-01-01T${slot.endTime}`);
@@ -218,7 +235,7 @@ export default function AvailabilityPage() {
 
             {/* Availability Manager */}
             <AvailabilityManager
-                availability={musician?.availability || {}}
+                availability={musicianProfile?.availability || {}}
                 onSave={handleAvailabilityUpdate}
                 title="Your Availability Schedule"
                 description="Set your available time slots for venues to see when booking you. You can view this in weekly or monthly format."

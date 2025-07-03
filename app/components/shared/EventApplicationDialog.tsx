@@ -97,9 +97,9 @@ export function EventApplicationDialog({
                                         <div className="flex-1">
                                             <div className="flex items-center gap-3 mb-1">
                                                 <h5 className="font-medium">{musician.stageName}</h5>
-                                                {musician.hourlyRate && (
+                                                {musician.hourly_rate && (
                                                     <Badge variant="outline" className="text-green-600 border-green-300">
-                                                        ${musician.hourlyRate}/hr
+                                                        ${musician.hourly_rate}/hr
                                                     </Badge>
                                                 )}
                                             </div>

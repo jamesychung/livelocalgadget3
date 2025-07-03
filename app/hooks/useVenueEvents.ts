@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
-import { useFindMany } from "@gadgetinc/react";
-import { api } from "../api";
+import { supabase } from "../lib/supabase";
 
 export function useVenueEvents(user: any) {
     const [isEditing, setIsEditing] = useState(false);
@@ -20,108 +19,192 @@ export function useVenueEvents(user: any) {
         status: ""
     });
 
-    // Check if API is properly initialized
-    const isApiReady = api && api.venue && api.event && api.booking && api.musician;
+    // State for data fetching
+    const [venue, setVenue] = useState<any>(null);
+    const [allEvents, setAllEvents] = useState<any[]>([]);
+    const [allBookings, setAllBookings] = useState<any[]>([]);
+    const [eventsFetching, setEventsFetching] = useState(false);
+    const [bookingsFetching, setBookingsFetching] = useState(false);
+    const [eventsError, setEventsError] = useState<any>(null);
+    const [bookingsError, setBookingsError] = useState<any>(null);
+
+    // Check if user is authenticated
     const isUserAuthenticated = !!user?.id;
 
-    // Real venue data - fetch from API
-    const [{ data: venueData }] = useFindMany(api.venue, {
-        select: {
-            id: true,
-            name: true,
-            city: true,
-            state: true
-        },
-        filter: {
-            owner: { id: { equals: user?.id } }
-        },
-        pause: !isApiReady || !user?.id,
-    });
+    // Fetch venue data
+    useEffect(() => {
+        const fetchVenue = async () => {
+            if (!isUserAuthenticated) return;
 
-    const venue = venueData?.[0]; // Get the first venue for this user
+            try {
+                const { data: { user: authUser } } = await supabase.auth.getUser();
+                if (!authUser) return;
 
-    // Fetch events for this venue (real API call)
-    const [{ data: eventsData, fetching: eventsFetching, error: eventsError }] = useFindMany(api.event, {
-        filter: { venue: { id: { equals: venue?.id } } },
-        select: {
-            id: true,
-            title: true,
-            date: true,
-            startTime: true,
-            endTime: true,
-            eventStatus: true,
-            totalCapacity: true,
-            availableTickets: true,
-            ticketPrice: true,
-            venue: {
-                id: true,
-                name: true
-            },
-            musician: {
-                id: true,
-                stageName: true,
-                genre: true,
-                city: true,
-                state: true
-            }
-        },
-        pause: !venue?.id,
-    });
+                const { data: venueData, error } = await supabase
+                    .from('venues')
+                    .select('id, name, city, state')
+                    .eq('owner_id', authUser.id)
+                    .single();
 
-    const allEvents: any[] = eventsData || [];
-
-    // Debug logging
-    console.log("=== VENUE EVENTS DEBUG ===");
-    console.log("API Ready:", isApiReady);
-    console.log("User ID:", user?.id);
-    console.log("Venue:", venue);
-    console.log("Venue ID:", venue?.id);
-    console.log("Events Data:", eventsData);
-    console.log("All Events:", allEvents);
-    console.log("Events Fetching:", eventsFetching);
-    console.log("Events Error:", eventsError);
-
-    // Fetch bookings data
-    const [{ data: bookingsData, fetching: bookingsFetching, error: bookingsError }] = useFindMany(api.booking, {
-        select: {
-            id: true,
-            status: true,
-            proposedRate: true,
-            musicianPitch: true,
-            createdAt: true,
-            event: {
-                id: true,
-                title: true,
-                date: true,
-                venue: {
-                    id: true,
-                    name: true
+                if (error) {
+                    console.error("Error fetching venue:", error);
+                    return;
                 }
-            },
-            musician: {
-                id: true,
-                stageName: true,
-                genres: true,
-                city: true,
-                state: true,
-                hourlyRate: true
-            },
-            bookedBy: {
-                id: true
-            }
-        },
-        pause: !isApiReady,
-    });
 
-    const allBookings: any[] = bookingsData || [];
+                setVenue(venueData);
+            } catch (error) {
+                console.error("Error fetching venue:", error);
+            }
+        };
+
+        fetchVenue();
+    }, [isUserAuthenticated]);
+
+    // Fetch events for this venue
+    useEffect(() => {
+        const fetchEvents = async () => {
+            if (!venue?.id) return;
+
+            setEventsFetching(true);
+            setEventsError(null);
+
+            try {
+                const { data: eventsData, error } = await supabase
+                    .from('events')
+                    .select(`
+                        id,
+                        title,
+                        description,
+                        date,
+                        start_time,
+                        end_time,
+                        event_status,
+                        total_capacity,
+                        available_tickets,
+                        ticket_price,
+                        venue_id,
+                        venue:venues(id, name),
+                        musician:musicians(id, stage_name, genre, city, state)
+                    `)
+                    .eq('venue_id', venue.id);
+                
+                console.log("🔍 Events query result:", { eventsData, error, venueId: venue.id });
+
+                if (error) {
+                    setEventsError(error);
+                    console.error("Error fetching events:", error);
+                    return;
+                }
+
+                // Transform data to match expected format
+                const transformedEvents = eventsData?.map(event => ({
+                    ...event,
+                    startTime: event.start_time,
+                    endTime: event.end_time,
+                    eventStatus: event.event_status,
+                    totalCapacity: event.total_capacity,
+                    availableTickets: event.available_tickets,
+                    ticketPrice: event.ticket_price
+                })) || [];
+
+                setAllEvents(transformedEvents);
+            } catch (error) {
+                setEventsError(error);
+                console.error("Error fetching events:", error);
+            } finally {
+                setEventsFetching(false);
+            }
+        };
+
+        fetchEvents();
+    }, [venue?.id]);
+
+        // Fetch bookings data
+    useEffect(() => {
+        const fetchBookings = async () => {
+            if (!venue?.id) {
+                return;
+            }
+
+            setBookingsFetching(true);
+            setBookingsError(null);
+
+            try {
+                // First get all events for this venue
+                const { data: venueEvents, error: eventsError } = await supabase
+                    .from('events')
+                    .select('id')
+                    .eq('venue_id', venue.id);
+
+                if (eventsError) {
+                    setBookingsError(eventsError);
+                    console.error("Error fetching venue events:", eventsError);
+                    return;
+                }
+
+                const venueEventIds = venueEvents?.map(event => event.id) || [];
+
+                if (venueEventIds.length === 0) {
+                    setAllBookings([]);
+                    return;
+                }
+
+                // Then get all bookings for those events
+                const { data: bookingsData, error } = await supabase
+                    .from('bookings')
+                    .select(`
+                        id,
+                        status,
+                        proposed_rate,
+                        musician_pitch,
+                        created_at,
+                        event:events(id, title, date, venue:venues(id, name)),
+                        musician:musicians(id, stage_name, genres, city, state, hourly_rate),
+                        booked_by
+                    `)
+                    .in('event_id', venueEventIds);
+
+                if (error) {
+                    setBookingsError(error);
+                    console.error("Error fetching bookings:", error);
+                    return;
+                }
+
+                // Transform data to match expected format
+                const transformedBookings = bookingsData?.map(booking => ({
+                    ...booking,
+                    proposedRate: booking.proposed_rate,
+                    musicianPitch: booking.musician_pitch,
+                    createdAt: booking.created_at
+                })) || [];
+
+                setAllBookings(transformedBookings);
+            } catch (error) {
+                setBookingsError(error);
+                console.error("Error fetching bookings:", error);
+            } finally {
+                setBookingsFetching(false);
+            }
+        };
+
+        fetchBookings();
+    }, [venue?.id]);
+
+                    // Debug logging
+                console.log("=== VENUE EVENTS DEBUG ===");
+                console.log("User ID:", user?.id);
+                console.log("Venue:", venue);
+                console.log("Venue ID:", venue?.id);
+                console.log("All Events:", allEvents);
+                console.log("Events Fetching:", eventsFetching);
+                console.log("Events Error:", eventsError);
+                console.log("All Bookings:", allBookings);
 
     // Filter bookings for this venue's events
     const venueBookings = allBookings.filter(booking => {
-        // Filter bookings for events that belong to this venue
         if (venue && booking.event?.venue?.id) {
             return booking.event.venue.id === venue.id;
         }
-        // For now, include all bookings if venue filtering isn't set up
         return true;
     });
 
@@ -138,10 +221,74 @@ export function useVenueEvents(user: any) {
     // Mock musicians data (keeping this working)
     const musiciansData: any[] = [];
 
-    // Mock action functions (keeping these as mock to prevent useAction errors)
-    const updateEvent = async (data: any) => { console.log("Mock updateEvent:", data); };
-    const createEvent = async (data: any) => { console.log("Mock createEvent:", data); };
-    const updateBooking = async (data: any) => { console.log("Mock updateBooking:", data); };
+    // Supabase action functions
+    const updateEvent = async (data: any) => {
+        try {
+            const { error } = await supabase
+                .from('events')
+                .update({
+                    title: data.title,
+                    description: data.description,
+                    date: data.date,
+                    start_time: data.startTime,
+                    end_time: data.endTime,
+                    event_status: data.eventStatus,
+                    total_capacity: data.totalCapacity,
+                    ticket_price: data.ticketPrice
+                })
+                .eq('id', data.id);
+
+            if (error) throw error;
+            return { id: data.id };
+        } catch (error) {
+            console.error("Error updating event:", error);
+            throw error;
+        }
+    };
+
+    const createEvent = async (data: any) => {
+        try {
+            const { data: newEvent, error } = await supabase
+                .from('events')
+                .insert([{
+                    title: data.title,
+                    description: data.description,
+                    date: data.date,
+                    start_time: data.startTime,
+                    end_time: data.endTime,
+                    event_status: data.eventStatus,
+                    total_capacity: data.totalCapacity,
+                    ticket_price: data.ticketPrice,
+                    venue_id: venue?.id
+                }])
+                .select()
+                .single();
+
+            if (error) throw error;
+            return newEvent;
+        } catch (error) {
+            console.error("Error creating event:", error);
+            throw error;
+        }
+    };
+
+    const updateBooking = async (data: any) => {
+        try {
+            const { error } = await supabase
+                .from('bookings')
+                .update({
+                    status: data.status,
+                    proposed_rate: data.proposedRate
+                })
+                .eq('id', data.id);
+
+            if (error) throw error;
+            return { id: data.id };
+        } catch (error) {
+            console.error("Error updating booking:", error);
+            throw error;
+        }
+    };
 
     useEffect(() => {
         if (eventsError) console.error("Error loading events data:", eventsError);
@@ -169,12 +316,18 @@ export function useVenueEvents(user: any) {
         return allEvents.filter(event => pendingAppEventIds.includes(event.id));
     };
 
+    // Debug logging for bookings and applications
+    console.log("Venue Bookings (filtered):", venueBookings);
+    console.log("Pending Applications:", getPendingApplications());
+    console.log("Events with Applications:", getEventsWithApplications());
+
     // Event handlers
     const handleUpdateEvent = async (eventId: string, updates: any) => {
         try {
             console.log("Updating event:", eventId, updates);
             await updateEvent({ id: eventId, ...updates });
-            // Refresh data or update local state
+            // Refresh data
+            window.location.reload();
         } catch (error) {
             console.error("Error updating event:", error);
         }
@@ -203,12 +356,26 @@ export function useVenueEvents(user: any) {
 
     const handleEditSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        
         if (!editingEvent) return;
 
         try {
-            await handleUpdateEvent(editingEvent.id, editFormData);
+            await updateEvent({
+                id: editingEvent.id,
+                title: editFormData.title,
+                description: editFormData.description,
+                date: editFormData.date,
+                startTime: editFormData.startTime,
+                endTime: editFormData.endTime,
+                ticketPrice: parseFloat(editFormData.ticketPrice) || 0,
+                totalCapacity: parseInt(editFormData.totalCapacity) || 0,
+                eventStatus: editFormData.status
+            });
+
             setEditDialogOpen(false);
             setEditingEvent(null);
+            // Refresh data
+            window.location.reload();
         } catch (error) {
             console.error("Error updating event:", error);
         }
@@ -216,22 +383,12 @@ export function useVenueEvents(user: any) {
 
     const handleAddEvent = async (eventData: any) => {
         try {
-            const newEvent = {
-                title: eventData.title,
-                description: eventData.description,
-                date: eventData.date,
-                startTime: eventData.startTime,
-                endTime: eventData.endTime,
-                ticketPrice: parseFloat(eventData.ticketPrice) || 0,
-                totalCapacity: parseInt(eventData.totalCapacity) || 0,
-                venue: { id: venue?.id ?? "no-venue" },
-                ...(eventData.musicianId && { musician: { id: eventData.musicianId } })
-            };
-
-            await createEvent(newEvent);
-            setIsEditing(false);
+            console.log("Adding event:", eventData);
+            await createEvent(eventData);
+            // Refresh data
+            window.location.reload();
         } catch (error) {
-            console.error("Error creating event:", error);
+            console.error("Error adding event:", error);
         }
     };
 
@@ -257,55 +414,40 @@ export function useVenueEvents(user: any) {
     };
 
     const toggleApplicationExpansion = (eventId: string) => {
-        setExpandedApplications(prev => {
-            const newSet = new Set(prev);
-            if (newSet.has(eventId)) {
-                newSet.delete(eventId);
-            } else {
-                newSet.add(eventId);
-            }
-            return newSet;
-        });
+        const newExpanded = new Set(expandedApplications);
+        if (newExpanded.has(eventId)) {
+            newExpanded.delete(eventId);
+        } else {
+            newExpanded.add(eventId);
+        }
+        setExpandedApplications(newExpanded);
     };
 
     const handleBookApplication = async (applicationId: string, eventId: string) => {
         try {
-            // Update the booking status to confirmed
+            console.log("Booking application:", applicationId, "for event:", eventId);
             await updateBooking({
                 id: applicationId,
                 status: "confirmed"
             });
-
-            // Update the event to have the selected musician
-            const application = applicationsWithStaticData.find(app => app.id === applicationId);
-            if (application) {
-                await updateEvent({
-                    id: eventId,
-                    status: "confirmed",
-                    musician: { _link: application.musician.id }
-                });
-            }
-
-            // Refresh the page or update local state
+            // Refresh data
             window.location.reload();
         } catch (error) {
             console.error("Error booking application:", error);
-            alert("Error booking application. Please try again.");
         }
     };
 
     const handleRejectApplication = async (applicationId: string) => {
         try {
+            console.log("Rejecting application:", applicationId);
             await updateBooking({
                 id: applicationId,
                 status: "rejected"
             });
-
-            // Refresh the page or update local state
+            // Refresh data
             window.location.reload();
         } catch (error) {
             console.error("Error rejecting application:", error);
-            alert("Error rejecting application. Please try again.");
         }
     };
 
@@ -351,10 +493,5 @@ export function useVenueEvents(user: any) {
         toggleApplicationExpansion,
         handleBookApplication,
         handleRejectApplication,
-
-        // Mock functions
-        updateEvent,
-        createEvent,
-        updateBooking,
     };
 } 

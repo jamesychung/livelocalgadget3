@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
@@ -11,8 +11,7 @@ import { RadioGroup, RadioGroupItem } from "../components/ui/radio-group";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../components/ui/table";
 import { ArrowLeft, Calendar, Clock, Music, DollarSign, Save, X, Settings, Repeat, Users } from "lucide-react";
 import { Link, useOutletContext, useNavigate } from 'react-router-dom';
-import { useFindMany, useAction } from "@gadgetinc/react";
-import { api } from "../api";
+import { supabase } from "../lib/supabase";
 import type { AuthOutletContext } from "./_app";
 
 export default function CreateEventPage() {
@@ -124,38 +123,76 @@ export default function CreateEventPage() {
         recurringDays: [] as string[]
     });
 
-    // Fetch venue data
-    const [{ data: venueData, fetching: venueFetching }] = useFindMany(api.venue, {
-        filter: { owner: { id: { equals: user?.id } } },
-        select: {
-            id: true,
-            name: true,
-            city: true,
-            state: true
-        },
-        first: 1,
-        pause: !user?.id,
-    });
+    // State for data fetching
+    const [venue, setVenue] = useState<any>(null);
+    const [musicians, setMusicians] = useState<any[]>([]);
+    const [venueFetching, setVenueFetching] = useState(false);
+    const [musiciansFetching, setMusiciansFetching] = useState(false);
 
-    const venue = venueData?.[0] as any;
+    // Fetch venue data
+    useEffect(() => {
+        const fetchVenue = async () => {
+            if (!user?.id) return;
+
+            setVenueFetching(true);
+            try {
+                const { data: { user: authUser } } = await supabase.auth.getUser();
+                if (!authUser) return;
+
+                const { data: venueData, error } = await supabase
+                    .from('venues')
+                    .select('id, name, city, state')
+                    .eq('email', authUser.email)
+                    .single();
+
+                if (error) {
+                    console.error("Error fetching venue:", error);
+                    return;
+                }
+
+                setVenue(venueData);
+            } catch (error) {
+                console.error("Error fetching venue:", error);
+            } finally {
+                setVenueFetching(false);
+            }
+        };
+
+        fetchVenue();
+    }, [user?.id]);
 
     // Fetch musicians for selection
-    const [{ data: musiciansData, fetching: musiciansFetching }] = useFindMany(api.musician, {
-        select: {
-            id: true,
-            stageName: true,
-            genre: true,
-            city: true,
-            state: true,
-            hourlyRate: true
-        },
-        first: 50,
-    });
+    useEffect(() => {
+        const fetchMusicians = async () => {
+            setMusiciansFetching(true);
+            try {
+                const { data: musiciansData, error } = await supabase
+                    .from('musicians')
+                    .select('id, stage_name, genre, city, state, hourly_rate')
+                    .limit(50);
 
-    const musicians: any[] = musiciansData || [];
+                if (error) {
+                    console.error("Error fetching musicians:", error);
+                    return;
+                }
 
-    // Create event action
-    const [createEventResult, createEvent] = useAction(api.event.create);
+                // Transform data to match expected format
+                const transformedMusicians = musiciansData?.map(musician => ({
+                    ...musician,
+                    stageName: musician.stage_name,
+                    hourlyRate: musician.hourly_rate
+                })) || [];
+
+                setMusicians(transformedMusicians);
+            } catch (error) {
+                console.error("Error fetching musicians:", error);
+            } finally {
+                setMusiciansFetching(false);
+            }
+        };
+
+        fetchMusicians();
+    }, []);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -183,55 +220,58 @@ export default function CreateEventPage() {
             const startTimeString = eventForm.startTime || "00:00";
             const endTimeString = eventForm.endTime || "23:59";
             
-            // Create ISO datetime string for the event date field
-            const startDateTime = `${dateString}T${startTimeString}:00.000Z`;
+            // Create ISO datetime string for the event date field (local time, not UTC)
+            const startDateTime = `${dateString}T${startTimeString}:00`;
 
-            // Format recurring end date if provided
+            // Format recurring end date if provided (local time, not UTC)
             let recurringEndDateTime = null;
             if (eventForm.isRecurring && eventForm.recurringEndDate) {
-                recurringEndDateTime = `${eventForm.recurringEndDate}T23:59:59.000Z`;
+                recurringEndDateTime = `${eventForm.recurringEndDate}T23:59:59`;
             }
 
             const newEvent = {
                 title: eventForm.title,
                 description: eventForm.description,
                 date: startDateTime, // Use the ISO datetime string for the event date
-                startTime: startTimeString, // Keep as HH:MM format
-                endTime: endTimeString, // Keep as HH:MM format
-                ticketPrice: parseFloat(eventForm.ticketPrice) || 0,
+                start_time: startTimeString, // Keep as HH:MM format
+                end_time: endTimeString, // Keep as HH:MM format
+                ticket_price: parseFloat(eventForm.ticketPrice) || 0,
                 rate: parseFloat(eventForm.rate) || 0,
-                totalCapacity: parseInt(eventForm.totalCapacity) || 0,
+                total_capacity: parseInt(eventForm.totalCapacity) || 0,
                 category: eventForm.category,
-                ticketType: eventForm.ticketType,
+                ticket_type: eventForm.ticketType,
                 genres: eventForm.genres,
                 equipment: eventForm.equipment,
-                isPublic: eventForm.isPublic,
-                isActive: eventForm.isActive,
-                eventStatus: eventForm.eventType, // Use eventType for eventStatus
-                isRecurring: eventForm.isRecurring,
-                recurringPattern: eventForm.recurringPattern,
-                recurringInterval: eventForm.recurringInterval,
-                recurringDays: eventForm.recurringDays,
-                ...(recurringEndDateTime && { recurringEndDate: recurringEndDateTime }),
-                venue: { _link: venue.id },
-                createdBy: { _link: user.id },
-                ...(eventForm.musicianId !== "none" && { musician: { _link: eventForm.musicianId } })
+                is_public: eventForm.isPublic,
+                is_active: eventForm.isActive,
+                event_status: eventForm.eventType, // Use eventType for eventStatus
+                is_recurring: eventForm.isRecurring,
+                recurring_pattern: eventForm.recurringPattern,
+                recurring_interval: eventForm.recurringInterval,
+                recurring_days: eventForm.recurringDays,
+                ...(recurringEndDateTime && { recurring_end_date: recurringEndDateTime }),
+                venue_id: venue.id,
+                created_by: user.id,
+                ...(eventForm.musicianId !== "none" && { musician_id: eventForm.musicianId })
             };
 
             console.log("Creating event with data:", newEvent);
             console.log("User context:", user);
             console.log("Venue data:", venue);
             
-            const result = await createEvent(newEvent);
-            console.log("Create event result:", result);
+            const { data: result, error } = await supabase
+                .from('events')
+                .insert([newEvent])
+                .select()
+                .single();
             
-            if (result.error) {
-                console.error("Create event error:", result.error);
-                alert(`Failed to create event: ${result.error.message || 'Unknown error'}`);
+            if (error) {
+                console.error("Create event error:", error);
+                alert(`Failed to create event: ${error.message || 'Unknown error'}`);
                 return;
             }
             
-            console.log("Event created successfully:", result.data);
+            console.log("Event created successfully:", result);
             
             // Redirect based on event type
             if (eventForm.eventType === "invited") {

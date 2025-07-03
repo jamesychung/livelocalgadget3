@@ -108,7 +108,7 @@ export default function VenueEventsPage() {
                 activeTab={activeTab}
                 setActiveTab={setActiveTab}
                 allEvents={allEvents}
-                venueBookings={venueBookings}
+                venueBookings={allBookings}
                 getApplicationCount={getApplicationCount}
                 onEventClick={handleEventClick}
                 onEditEvent={handleEditEvent}

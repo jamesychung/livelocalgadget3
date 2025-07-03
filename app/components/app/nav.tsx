@@ -82,37 +82,37 @@ const navigationItems: NavItem[] = [
     title: "Venue Dashboard",
     path: "/venue-dashboard",
     icon: Music,
-    roles: ["venue"],
+    roles: ["venue_owner"],
   },
   {
     title: "How to for Venues",
     path: "/venue-how-to",
     icon: Star,
-    roles: ["venue"],
+    roles: ["venue_owner"],
   },
   {
     title: "Venue Profile",
     path: "/venue-profile/edit",
     icon: User,
-    roles: ["venue"],
+    roles: ["venue_owner"],
   },
   {
     title: "Venue Bookings",
     path: "/venue-bookings",
     icon: Calendar,
-    roles: ["venue"],
+    roles: ["venue_owner"],
   },
   {
     title: "Venue Events",
     path: "/venue-events",
     icon: Star,
-    roles: ["venue"],
+    roles: ["venue_owner"],
   },
   {
     title: "Invite Musicians",
     path: "/venue-musicians",
     icon: Users,
-    roles: ["venue"],
+    roles: ["venue_owner"],
   },
   {
     title: "Settings",
@@ -172,7 +172,7 @@ export const Navigation = ({ onLinkClick, user }: { onLinkClick?: () => void, us
     // Check if user has any of the required roles
     const hasRole = item.roles.some(role => {
       if (role === "musician") return user?.user_type === "musician" || user?.userType === "musician" || !!user?.musician;
-      if (role === "venue") return user?.user_type === "venue" || user?.userType === "venue" || !!user?.venue;
+      if (role === "venue_owner") return user?.user_type === "venue" || user?.user_type === "venue_owner" || user?.userType === "venue" || user?.userType === "venue_owner" || !!user?.venue;
       if (role === "fan") return user?.user_type === "fan" || user?.userType === "fan";
       return false;
     });

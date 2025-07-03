@@ -5,7 +5,7 @@ import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
 import { useOutletContext, useNavigate } from 'react-router-dom';
-import { api, supabase } from "../api";
+import { supabase } from "../lib/supabase";
 import type { AuthOutletContext } from "./_app";
 
 export default function ProfileSetupPage() {
@@ -43,7 +43,7 @@ export default function ProfileSetupPage() {
           const { data: userProfile } = await supabase
             .from('users')
             .select('*')
-            .eq('id', authUser.id)
+            .eq('email', authUser.email)
             .single();
             
           if (userProfile) {
@@ -76,14 +76,25 @@ export default function ProfileSetupPage() {
   const handleProfileCreation = async (userType: string, userId: string) => {
     try {
       if (userType === "musician") {
-        await api.musician.create({
-          user: { _link: userId },
-          stageName: formData.firstName,
-          email: user?.email || '',
-          genres: [],
-        });
+        // Create musician profile using Supabase
+        const { error: musicianError } = await supabase
+          .from('musicians')
+          .insert({
+            user_id: userId,
+            stage_name: formData.firstName,
+            email: user?.email || '',
+            genres: [],
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          });
+        
+        if (musicianError) {
+          console.error("Error creating musician profile:", musicianError);
+          throw musicianError;
+        }
+        
         navigate("/musician-dashboard");
-      } else if (userType === "venue") {
+      } else if (userType === "venue_owner") {
         navigate("/venue-profile/create");
       } else {
         navigate("/signed-in");
@@ -131,7 +142,7 @@ export default function ProfileSetupPage() {
           last_name: formData.lastName,
           user_type: formData.userType
         })
-        .eq('id', userId);
+        .eq('email', user?.email || '');
 
       if (error) throw error;
 
@@ -207,7 +218,7 @@ export default function ProfileSetupPage() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="musician">Musician</SelectItem>
-                    <SelectItem value="venue">Venue Owner</SelectItem>
+                    <SelectItem value="venue_owner">Venue Owner</SelectItem>
                     <SelectItem value="fan">Music Fan</SelectItem>
                   </SelectContent>
                 </Select>

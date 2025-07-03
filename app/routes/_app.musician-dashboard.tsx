@@ -68,7 +68,7 @@ export default function MusicianDashboard() {
                 const { data: musicianData, error: musicianError } = await supabase
                     .from('musicians')
                     .select('*')
-                    .eq('user_id', user.id)
+                    .eq('email', user.email)
                     .single();
 
                 if (musicianError) {

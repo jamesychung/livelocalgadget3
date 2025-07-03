@@ -6,8 +6,8 @@ import { Label } from "../components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
 import { ArrowLeft, Music, Search, MapPin, Star, Filter, Calendar } from "lucide-react";
 import { Link, useOutletContext } from 'react-router-dom';
-import { useFindMany } from "@gadgetinc/react";
-import { api } from "../api";
+import { useSupabaseQuery } from "../hooks/useSupabaseData";
+import { supabase } from "../lib/supabase";
 import type { AuthOutletContext } from "./_app";
 
 export default function SearchMusiciansPage() {
@@ -17,30 +17,35 @@ export default function SearchMusiciansPage() {
     const [selectedLocation, setSelectedLocation] = useState("all");
 
     // Fetch musicians with filters
-    const [{ data: musiciansData, fetching: musiciansFetching, error: musiciansError }] = useFindMany(api.musician, {
-        select: {
-            id: true,
-            stageName: true,
-            bio: true,
-            genre: true,
-            genres: true,
-            city: true,
-            state: true,
-            rating: true,
-            hourlyRate: true,
-            profilePicture: true,
-            instruments: true,
-            availability: true
+    const { data: musiciansData, loading: musiciansLoading, error: musiciansError } = useSupabaseQuery(
+        async () => {
+            return await supabase
+                .from('musicians')
+                .select(`
+                    id,
+                    stage_name,
+                    bio,
+                    genre,
+                    genres,
+                    city,
+                    state,
+                    rating,
+                    hourly_rate,
+                    profile_picture,
+                    instruments,
+                    availability
+                `)
+                .limit(50);
         },
-        first: 50,
-    });
+        []
+    );
 
     const musicians: any[] = musiciansData || [];
 
     // Filter musicians based on search criteria
     const filteredMusicians = musicians.filter((musician) => {
         const matchesSearch = !searchTerm || 
-            (musician.stageName && musician.stageName.toLowerCase().includes(searchTerm.toLowerCase())) ||
+            (musician.stage_name && musician.stage_name.toLowerCase().includes(searchTerm.toLowerCase())) ||
             (musician.bio && musician.bio.toLowerCase().includes(searchTerm.toLowerCase()));
         
         const matchesGenre = selectedGenre === "all" || 
@@ -171,7 +176,7 @@ export default function SearchMusiciansPage() {
                                 <CardHeader>
                                     <CardTitle className="flex items-center gap-2">
                                         <Music className="h-5 w-5" />
-                                        {musician.stageName}
+                                        {musician.stage_name}
                                     </CardTitle>
                                 </CardHeader>
                                 <CardContent className="space-y-4">
@@ -205,24 +210,19 @@ export default function SearchMusiciansPage() {
                                             </div>
                                         )}
                                         
-                                        {musician.hourlyRate && (
-                                            <div className="font-medium">
-                                                ${musician.hourlyRate}/hour
+                                        {musician.hourly_rate && (
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-muted-foreground">$</span>
+                                                <span>{musician.hourly_rate}/hr</span>
                                             </div>
                                         )}
                                     </div>
                                     
-                                    <div className="flex gap-2">
-                                        <Button asChild className="flex-1">
-                                            <Link to={`/musician/${musician.id}`}>
-                                                View Profile
-                                            </Link>
-                                        </Button>
-                                        <Button variant="outline" className="flex-1">
-                                            <Calendar className="mr-2 h-4 w-4" />
-                                            Book
-                                        </Button>
-                                    </div>
+                                    <Button asChild className="w-full">
+                                        <Link to={`/musician/${musician.id}`}>
+                                            View Profile
+                                        </Link>
+                                    </Button>
                                 </CardContent>
                             </Card>
                         ))
@@ -231,7 +231,7 @@ export default function SearchMusiciansPage() {
                             <Music className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                             <h3 className="text-lg font-medium mb-2">No musicians found</h3>
                             <p className="text-muted-foreground">
-                                Try adjusting your search criteria or check back later.
+                                Try adjusting your search criteria or filters.
                             </p>
                         </div>
                     )}

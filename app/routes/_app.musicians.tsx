@@ -3,35 +3,40 @@ import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card"
 import { Button } from "../components/ui/button";
 import { ArrowLeft, Music, Search, MapPin, Star } from "lucide-react";
 import { Link, useOutletContext } from 'react-router-dom';
-import { useFindMany } from "@gadgetinc/react";
-import { api } from "../api";
+import { useSupabaseQuery } from "../hooks/useSupabaseData";
+import { supabase } from "../lib/supabase";
 import type { AuthOutletContext } from "./_app";
 
 export default function MusiciansPage() {
     const { user } = useOutletContext<AuthOutletContext>();
 
     // Fetch musicians
-    const [{ data: musiciansData, fetching: musiciansFetching, error: musiciansError }] = useFindMany(api.musician, {
-        select: {
-            id: true,
-            stageName: true,
-            bio: true,
-            genre: true,
-            genres: true,
-            city: true,
-            state: true,
-            rating: true,
-            hourlyRate: true,
-            profilePicture: true,
-            instruments: true
+    const { data: musiciansData, loading: musiciansLoading, error: musiciansError } = useSupabaseQuery(
+        async () => {
+            return await supabase
+                .from('musicians')
+                .select(`
+                    id,
+                    stage_name,
+                    bio,
+                    genre,
+                    genres,
+                    city,
+                    state,
+                    rating,
+                    hourly_rate,
+                    profile_picture,
+                    instruments
+                `)
+                .limit(50);
         },
-        first: 50,
-    });
+        []
+    );
 
     const musicians: any[] = musiciansData || [];
 
     // Show loading state while fetching
-    if (musiciansFetching) {
+    if (musiciansLoading) {
         return (
             <div className="container mx-auto p-6">
                 <div className="flex items-center justify-center min-h-[400px]">
@@ -78,7 +83,7 @@ export default function MusiciansPage() {
                             <CardHeader>
                                 <CardTitle className="flex items-center gap-2">
                                     <Music className="h-5 w-5" />
-                                    {musician.stageName}
+                                    {musician.stage_name}
                                 </CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-4">
@@ -112,9 +117,10 @@ export default function MusiciansPage() {
                                         </div>
                                     )}
                                     
-                                    {musician.hourlyRate && (
-                                        <div className="font-medium">
-                                            ${musician.hourlyRate}/hour
+                                    {musician.hourly_rate && (
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-muted-foreground">$</span>
+                                            <span>{musician.hourly_rate}/hr</span>
                                         </div>
                                     )}
                                 </div>

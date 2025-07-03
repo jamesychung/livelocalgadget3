@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
@@ -6,9 +6,11 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from ".
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "../components/ui/dialog";
 import { ArrowLeft, Calendar, Music, MapPin, Clock, DollarSign, Users, Search, Filter, Eye, Send, MessageSquare, X, Check } from "lucide-react";
 import { Link, useOutletContext } from 'react-router-dom';
-import { useFindMany } from "@gadgetinc/react";
-import { api } from "../api";
+import { supabase } from "../lib/supabase";
 import type { AuthOutletContext } from "./_app";
+import { getBookingStatusDisplay, BOOKING_STATUSES } from '../lib/utils';
+import { BookingStatusBadge } from '../components/shared/BookingStatusBadge';
+import { BookingActionButtons } from '../components/shared/BookingActionButtons';
 
 interface TimeSlot {
     startTime: string;
@@ -29,9 +31,13 @@ export default function MusicianAvailEventsPage() {
     const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
     const [selectedEvent, setSelectedEvent] = useState<any>(null);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
-
-    // Check if API is properly initialized
-    const isApiReady = api && api.event && api.musician && api.booking;
+    
+    // State for data
+    const [events, setEvents] = useState<any[]>([]);
+    const [musicians, setMusicians] = useState<any[]>([]);
+    const [bookings, setBookings] = useState<any[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
     // Debug user context
     console.log("👤 Musician Available Events - User context:", {
@@ -42,103 +48,146 @@ export default function MusicianAvailEventsPage() {
         stageName: user?.musician?.stageName
     });
 
-    // Fetch all events
-    const [{ data: eventsData, fetching: eventsFetching, error: eventsError }] = useFindMany(api.event, {
-        select: {
-            id: true,
-            title: true,
-            description: true,
-            date: true,
-            startTime: true,
-            endTime: true,
-            eventStatus: true,
-            rate: true,
-            genres: true,
-            venue: {
-                id: true,
-                name: true,
-                city: true,
-                state: true
+    // Fetch data from Supabase
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                setIsLoading(true);
+                
+                // Fetch events
+                const { data: eventsData, error: eventsError } = await supabase
+                    .from('events')
+                    .select(`
+                        id,
+                        title,
+                        description,
+                        date,
+                        start_time,
+                        end_time,
+                        event_status,
+                        rate,
+                        genres,
+                        venue:venues(id, name, city, state)
+                    `)
+                    .in('event_status', ['open', 'invited']);
+
+                if (eventsError) throw eventsError;
+
+                // Fetch musicians
+                const { data: musiciansData, error: musiciansError } = await supabase
+                    .from('musicians')
+                    .select(`
+                        id,
+                        stage_name,
+                        genres,
+                        availability,
+                        email,
+                        phone,
+                        city,
+                        state,
+                        bio,
+                        hourly_rate
+                    `)
+                    .limit(100);
+
+                if (musiciansError) throw musiciansError;
+
+                // Fetch bookings
+                const { data: bookingsData, error: bookingsError } = await supabase
+                    .from('bookings')
+                    .select(`
+                        id,
+                        status,
+                        event_id,
+                        musician_id
+                    `);
+
+                if (bookingsError) throw bookingsError;
+
+                setEvents(eventsData || []);
+                setMusicians(musiciansData || []);
+                setBookings(bookingsData || []);
+                
+            } catch (err: any) {
+                console.error("Error fetching data:", err);
+                setError(err.message);
+            } finally {
+                setIsLoading(false);
             }
-        },
-        filter: {
-            eventStatus: { in: ["open", "invited"] }
-        },
-        pause: !isApiReady,
-    });
+        };
 
-    // Fetch all musicians for matching
-    const [{ data: musiciansData, fetching: musiciansFetching }] = useFindMany(api.musician, {
-        select: {
-            id: true,
-            stageName: true,
-            genres: true,
-            availability: true,
-            email: true,
-            phone: true,
-            city: true,
-            state: true,
-            bio: true,
-            hourlyRate: true
-        },
-        first: 100
-    });
-
-    // Fetch bookings to check application status
-    const [{ data: bookingsData }] = useFindMany(api.booking, {
-        select: {
-            id: true,
-            status: true,
-            event: {
-                id: true
-            },
-            musician: {
-                id: true
-            }
-        },
-        pause: !isApiReady || !user?.musician?.id,
-    });
-
-    const events: any[] = eventsData || [];
-    const musicians: any[] = musiciansData || [];
-    const bookings: any[] = bookingsData || [];
+        fetchData();
+    }, [user]);
 
     // Helper function to get musician's application status for an event
-    const getMusicianApplicationStatus = (eventId: string): string => {
-        if (!user?.musician?.id) return "available";
+    const getMusicianApplicationStatus = (eventId: string): { status: string; booking?: any } => {
+        if (!user?.musician?.id) return { status: "available" };
         
         const booking = bookings.find(booking => 
-            booking.event?.id === eventId && 
-            booking.musician?.id === user.musician.id
+            booking.event_id === eventId && 
+            booking.musician_id === user.musician.id
         );
         
-        if (!booking) return "available";
+        if (!booking) return { status: "available" };
         
-        switch (booking.status) {
+        return { status: booking.status, booking };
+    };
+
+    // Helper function to get status display info
+    const getStatusDisplay = (status: string, booking?: any) => {
+        switch (status) {
             case "applied":
-                return "applied";
+                return {
+                    label: "Application Submitted",
+                    variant: "default" as const,
+                    className: "bg-blue-100 text-blue-800",
+                    icon: "📝"
+                };
+            case "booked":
+                return {
+                    label: "Venue Selected You - Please Confirm",
+                    variant: "default" as const,
+                    className: "bg-yellow-100 text-yellow-800",
+                    icon: "⭐"
+                };
             case "confirmed":
-                return "confirmed";
-            case "rejected":
-                return "rejected";
+                return {
+                    label: "Booking Confirmed",
+                    variant: "default" as const,
+                    className: "bg-green-100 text-green-800",
+                    icon: "✅"
+                };
             case "cancelled":
-                return "cancelled";
+                const cancelledBy = booking?.cancelled_by_role === 'venue' ? 'Venue' : 'You';
+                const reason = booking?.cancellation_reason ? ` - ${booking.cancellation_reason}` : '';
+                return {
+                    label: `Cancelled by ${cancelledBy}${reason}`,
+                    variant: "secondary" as const,
+                    className: "bg-red-100 text-red-800",
+                    icon: "❌"
+                };
+            case "completed":
+                return {
+                    label: "Event Completed",
+                    variant: "secondary" as const,
+                    className: "bg-gray-100 text-gray-800",
+                    icon: "🎉"
+                };
             default:
-                return "available";
+                return {
+                    label: "Available",
+                    variant: "outline" as const,
+                    className: "bg-gray-50 text-gray-600",
+                    icon: "🎵"
+                };
         }
     };
 
     // Debug: Log what we're getting from the queries
     console.log("🔍 Debug - Events query result:", {
-        eventsData,
         eventsCount: events.length,
-        eventsFetching,
-        eventsError
-    });
-    console.log("🔍 Debug - Musicians query result:", {
-        musiciansData,
-        musiciansCount: musicians.length,
-        musiciansFetching
+        isLoading,
+        error
     });
     console.log("🔍 Debug - Sample events:", events.slice(0, 3));
     console.log("🔍 Debug - Sample musicians:", musicians.slice(0, 3));
@@ -198,8 +247,7 @@ export default function MusicianAvailEventsPage() {
             const slotEnd = slot.endTime;
             
             // Simple time overlap check
-            const overlaps = eventStartTime <= slotEnd && eventEndTime >= slotStart;
-            return overlaps;
+            return slotStart <= eventEndTime && slotEnd >= eventStartTime;
         });
         
         return hasTimeMatch;
@@ -221,8 +269,8 @@ export default function MusicianAvailEventsPage() {
             // Check availability matching
             const timeMatches = doesTimeMatchAvailability(
                 event.date, 
-                event.startTime || "00:00", 
-                event.endTime || "23:59", 
+                event.start_time || "00:00", 
+                event.end_time || "23:59", 
                 musician.availability
             );
             
@@ -277,8 +325,8 @@ export default function MusicianAvailEventsPage() {
 
     // Calculate summary statistics
     const totalEvents = events.length;
-    const openEvents = events.filter(event => event.eventStatus === 'open').length;
-    const invitedEvents = events.filter(event => event.eventStatus === 'invited').length;
+    const openEvents = events.filter(event => event.event_status === 'open').length;
+    const invitedEvents = events.filter(event => event.event_status === 'invited').length;
 
     // Filter events based on search and status
     const filteredEvents = events.filter(event => {
@@ -286,7 +334,7 @@ export default function MusicianAvailEventsPage() {
                             event.venue?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                             event.description?.toLowerCase().includes(searchTerm.toLowerCase());
         
-        const matchesStatus = statusFilter === "all" || event.eventStatus === statusFilter;
+        const matchesStatus = statusFilter === "all" || event.event_status === statusFilter;
         
         return matchesSearch && matchesStatus;
     });
@@ -302,51 +350,57 @@ export default function MusicianAvailEventsPage() {
 
     // Handle dialog actions
     const handleApply = async () => {
-        console.log("🎵 handleApply called with:", {
-            selectedEvent,
-            user,
-            musicianId: user?.musician?.id
-        });
-
         if (!selectedEvent || !user?.musician?.id) {
-            console.log("❌ Cannot apply - missing data:", {
-                hasSelectedEvent: !!selectedEvent,
-                hasUser: !!user,
-                hasMusicianId: !!user?.musician?.id
-            });
-            alert("Unable to apply. Please ensure you have a musician profile.");
+            console.error("Missing event or musician ID");
             return;
         }
 
         try {
-            console.log("🎵 Creating booking with data:", {
-                eventId: selectedEvent.id,
-                musicianId: user.musician.id,
-                userId: user.id,
-                proposedRate: user.musician.hourlyRate || 0,
-                pitch: `I'm excited to perform at ${selectedEvent.venue?.name || 'your venue'}! I have experience in ${user.musician.genres?.join(', ') || 'various genres'} and would love to contribute to your event.`
-            });
+            console.log("🎯 Applying to event:", selectedEvent.id);
+            console.log("👤 Musician ID:", user.musician.id);
+            console.log("💰 Proposed rate:", user.musician.hourly_rate || 0);
 
-            // Create a booking record
-            const result = await api.booking.create({
-                event: { _link: selectedEvent.id },
-                musician: { _link: user.musician.id },
-                bookedBy: { _link: user.id },
-                status: "applied",
-                proposedRate: user.musician.hourlyRate || 0,
-                musicianPitch: `I'm excited to perform at ${selectedEvent.venue?.name || 'your venue'}! I have experience in ${user.musician.genres?.join(', ') || 'various genres'} and would love to contribute to your event.`
-            });
+            // Create a booking record with status 'applied'
+            const { data: booking, error } = await supabase
+                .from('bookings')
+                .insert([
+                    {
+                        event_id: selectedEvent.id,
+                        musician_id: user.musician.id,
+                        venue_id: selectedEvent.venue_id,
+                        booked_by: user.id,
+                        status: "applied",
+                        proposed_rate: user.musician.hourly_rate || 0,
+                        musician_pitch: `I'm excited to perform at ${selectedEvent.venue?.name || 'your venue'}! I have experience in ${user.musician.genres?.join(', ') || 'various genres'} and would love to contribute to your event.`,
+                        date: selectedEvent.date,
+                        start_time: selectedEvent.start_time,
+                        end_time: selectedEvent.end_time
+                    }
+                ])
+                .select()
+                .single();
 
-            console.log("✅ Booking created successfully:", result);
+            if (error) {
+                console.error("❌ Booking creation failed:", error);
+                alert("Failed to apply. Please try again.");
+                return;
+            }
 
-            alert("Application submitted successfully! The venue will review your application.");
-            setIsDialogOpen(false);
+            console.log("✅ Booking created successfully:", booking);
             
-            // Refresh the page to update the musician status
-            window.location.reload();
+            // Update local state to reflect the new booking
+            setBookings(prev => [...prev, booking]);
+            
+            // Close dialog and show success message
+            setIsDialogOpen(false);
+            setSelectedEvent(null);
+            
+            // Show success message
+            alert("Application submitted successfully! The venue will review your application.");
+            
         } catch (error) {
             console.error("❌ Error applying to event:", error);
-            alert("Failed to submit application. Please try again.");
+            alert("An error occurred while applying. Please try again.");
         }
     };
 
@@ -363,7 +417,7 @@ export default function MusicianAvailEventsPage() {
     };
 
     // Show loading state while fetching
-    if (eventsFetching || musiciansFetching) {
+    if (isLoading) {
         return (
             <div className="container mx-auto p-6">
                 <div className="flex items-center justify-center min-h-[400px]">
@@ -377,7 +431,7 @@ export default function MusicianAvailEventsPage() {
     }
 
     // Show error state if events query failed
-    if (eventsError) {
+    if (error) {
         return (
             <div className="container mx-auto p-6">
                 <div className="flex items-center justify-center min-h-[400px]">
@@ -577,14 +631,14 @@ export default function MusicianAvailEventsPage() {
                                                         <div className="font-medium">
                                                             {event.date ? new Date(event.date).toLocaleDateString() : 'TBD'}
                                                         </div>
-                                                        {event.startTime && (
+                                                        {event.start_time && (
                                                             <div className="text-sm text-muted-foreground">
-                                                                Start: {event.startTime}
+                                                                Start: {event.start_time}
                                                             </div>
                                                         )}
-                                                        {event.endTime && (
+                                                        {event.end_time && (
                                                             <div className="text-sm text-muted-foreground">
-                                                                End: {event.endTime}
+                                                                End: {event.end_time}
                                                             </div>
                                                         )}
                                                     </div>
@@ -610,53 +664,25 @@ export default function MusicianAvailEventsPage() {
                                                 </TableCell>
                                                 <TableCell>
                                                     <Badge 
-                                                        variant={event.eventStatus === 'open' ? 'default' : 'secondary'}
+                                                        variant={event.event_status === 'open' ? 'default' : 'secondary' as const}
                                                         className={
-                                                            event.eventStatus === 'open' ? 'bg-green-100 text-green-800' :
+                                                            event.event_status === 'open' ? 'bg-green-100 text-green-800' :
                                                             'bg-gray-100 text-gray-800'
                                                         }
                                                     >
-                                                        {event.eventStatus?.charAt(0).toUpperCase() + event.eventStatus?.slice(1) || 'Unknown'}
+                                                        {event.event_status?.charAt(0).toUpperCase() + event.event_status?.slice(1) || 'Unknown'}
                                                     </Badge>
                                                 </TableCell>
                                                 <TableCell>
                                                     {(() => {
-                                                        const status = getMusicianApplicationStatus(event.id);
-                                                        let badgeVariant = "secondary";
-                                                        let className = "bg-gray-100 text-gray-800";
-                                                        
-                                                        switch (status) {
-                                                            case "available":
-                                                                badgeVariant = "default";
-                                                                className = "bg-green-100 text-green-800";
-                                                                break;
-                                                            case "applied":
-                                                                badgeVariant = "default";
-                                                                className = "bg-blue-100 text-blue-800";
-                                                                break;
-                                                            case "confirmed":
-                                                                badgeVariant = "default";
-                                                                className = "bg-green-100 text-green-800";
-                                                                break;
-                                                            case "rejected":
-                                                                badgeVariant = "default";
-                                                                className = "bg-red-100 text-red-800";
-                                                                break;
-                                                            case "cancelled":
-                                                                badgeVariant = "default";
-                                                                className = "bg-gray-100 text-gray-800";
-                                                                break;
-                                                            default:
-                                                                badgeVariant = "secondary";
-                                                                className = "bg-gray-100 text-gray-800";
-                                                        }
-                                                        
+                                                        const { status, booking } = getMusicianApplicationStatus(event.id);
+                                                        const statusInfo = getStatusDisplay(status, booking);
                                                         return (
                                                             <Badge 
-                                                                variant={badgeVariant}
-                                                                className={className}
+                                                                variant={statusInfo.variant}
+                                                                className={statusInfo.className}
                                                             >
-                                                                {status.charAt(0).toUpperCase() + status.slice(1)}
+                                                                {statusInfo.label}
                                                             </Badge>
                                                         );
                                                     })()}
@@ -700,9 +726,9 @@ export default function MusicianAvailEventsPage() {
                                     <h3 className="font-semibold mb-2">Event Information</h3>
                                     <div className="space-y-2 text-sm">
                                         <div><span className="font-medium">Date:</span> {selectedEvent.date ? new Date(selectedEvent.date).toLocaleDateString() : 'TBD'}</div>
-                                        <div><span className="font-medium">Time:</span> {selectedEvent.startTime} - {selectedEvent.endTime}</div>
+                                        <div><span className="font-medium">Time:</span> {selectedEvent.start_time} - {selectedEvent.end_time}</div>
                                         <div><span className="font-medium">Rate:</span> {selectedEvent.rate ? `$${selectedEvent.rate}` : 'TBD'}</div>
-                                        <div><span className="font-medium">Status:</span> {selectedEvent.eventStatus}</div>
+                                        <div><span className="font-medium">Status:</span> {selectedEvent.event_status}</div>
                                     </div>
                                 </div>
                                 
@@ -751,10 +777,10 @@ export default function MusicianAvailEventsPage() {
                                             <div key={musician.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                                                 <div className="flex-1">
                                                     <div className="flex items-center gap-3 mb-1">
-                                                        <h5 className="font-medium">{musician.stageName}</h5>
-                                                        {musician.hourlyRate && (
+                                                        <h5 className="font-medium">{musician.stage_name}</h5>
+                                                        {musician.hourly_rate && (
                                                             <Badge variant="outline" className="text-green-600 border-green-300">
-                                                                ${musician.hourlyRate}/hr
+                                                                ${musician.hourly_rate}/hr
                                                             </Badge>
                                                         )}
                                                     </div>

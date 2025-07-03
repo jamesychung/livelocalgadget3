@@ -33,7 +33,7 @@ export default function MusicianProfile() {
         const { data, error } = await supabase
           .from("musicians")
           .select("*")
-          .eq("user_id", user.id)
+          .eq("email", user.email)
           .single();
 
         if (error) {
@@ -172,8 +172,8 @@ export default function MusicianProfile() {
                   <DollarSign className="h-4 w-4 mr-2" /> Rate
                 </h3>
                 <p className="mt-1">
-                  {musicianProfile.hourlyRate 
-                    ? `$${musicianProfile.hourlyRate} per hour` 
+                  {musicianProfile.hourly_rate 
+                    ? `$${musicianProfile.hourly_rate} per hour` 
                     : "Rate not specified"}
                 </p>
               </div>

@@ -61,10 +61,10 @@ export const VenueBookedMusicianCard: React.FC<VenueBookedMusicianCardProps> = (
               )}
             </div>
             
-            {musician.hourlyRate && (
+            {musician.hourly_rate && (
               <div className="mt-2">
                 <Badge variant="secondary" className="text-sm">
-                  ${musician.hourlyRate}/hour
+                  ${musician.hourly_rate}/hour
                 </Badge>
               </div>
             )}

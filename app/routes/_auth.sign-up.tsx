@@ -6,7 +6,7 @@ import { Separator } from "../components/ui/separator";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../lib/auth";
 import { useState } from "react";
-import { supabase } from "../api";
+import { supabase } from "../lib/supabase";
 
 export default function SignUpPage() {
   const { signUp } = useAuth();
@@ -23,11 +23,19 @@ export default function SignUpPage() {
     setLoading(true);
 
     try {
+      console.log("Starting sign up process for:", email);
       const { error } = await signUp(email, password);
+      
       if (error) {
+        console.error("Sign up error:", error);
         setError(error.message);
       } else {
+        console.log("Sign up successful");
         setIsSubmitSuccessful(true);
+        
+        // Since email verification is disabled, we can navigate directly
+        console.log("Navigating to profile setup...");
+        navigate("/profile-setup");
         
         // Listen for auth state change (email verification)
         const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
@@ -41,6 +49,7 @@ export default function SignUpPage() {
         });
       }
     } catch (err) {
+      console.error("Sign up exception:", err);
       setError("An unexpected error occurred");
     } finally {
       setLoading(false);

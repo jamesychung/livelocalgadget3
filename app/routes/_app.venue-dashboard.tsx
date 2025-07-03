@@ -5,8 +5,8 @@ import { Badge } from "../components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 import { Link, useOutletContext, useNavigate } from 'react-router-dom';
 import { Edit, Clock, MapPin, CalendarDays, Star, DollarSign, AlertCircle, Building, Calendar, Plus, Users, Phone, Globe } from "lucide-react";
-import { useFindMany } from "@gadgetinc/react";
-import { api } from "../api";
+import { useVenueProfile, useSupabaseQuery } from "../hooks/useSupabaseData";
+import { supabase } from "../lib/supabase";
 import type { AuthOutletContext } from "./_app";
 import { ClickableImage } from "../components/shared/ClickableImage";
 import VenueSystemFlowchart from "../components/shared/VenueSystemFlowchart";
@@ -15,9 +15,13 @@ import VenueSystemFlowchart from "../components/shared/VenueSystemFlowchart";
 function getStatusBadge(status: string) {
     const statusColors: Record<string, string> = {
         pending: "bg-yellow-100 text-yellow-800",
+        applied: "bg-blue-100 text-blue-800",
+        booked: "bg-orange-100 text-orange-800",
         confirmed: "bg-green-100 text-green-800",
         cancelled: "bg-red-100 text-red-800",
         completed: "bg-blue-100 text-blue-800",
+        open: "bg-green-100 text-green-800",
+        invited: "bg-purple-100 text-purple-800",
     };
     return (
         <Badge className={statusColors[status?.toLowerCase()] || "bg-gray-100 text-gray-800"}>
@@ -39,79 +43,80 @@ export default function VenueDashboard() {
     const { user } = useOutletContext<AuthOutletContext>();
     const navigate = useNavigate();
 
-    const [{ data: venueData, fetching: venueFetching, error: venueError }] = useFindMany(api.venue, {
-        filter: { owner: { id: { equals: user?.id } } },
-        select: {
-            id: true, name: true, description: true, type: true, capacity: true, city: true,
-            state: true, country: true, address: true, website: true, profilePicture: true, 
-            rating: true, priceRange: true, amenities: true, hours: true,
-            phone: true, email: true, isActive: true, isVerified: true, zipCode: true,
-            genres: true, socialLinks: true
-        },
-        sort: { updatedAt: "Descending" },
-        first: 1,
-        pause: !user?.id,
-    });
+    console.log("VenueDashboard - User:", user);
+    console.log("VenueDashboard - User ID:", user?.id);
 
-    const venue: any = venueData?.[0];
+    // Fetch venue profile
+    const { data: venue, loading: venueLoading, error: venueError } = useVenueProfile(user?.id);
 
-    const [{ data: bookingsData, fetching: bookingsFetching, error: bookingsError }] = useFindMany(api.booking, {
-        filter: { venue: { id: { equals: venue?.id } } },
-        select: {
-            id: true, 
-            status: true, 
-            date: true,
-            startTime: true,
-            endTime: true,
-            totalAmount: true,
-            notes: true,
-            musician: { 
-                id: true, 
-                stageName: true,
-                city: true,
-                state: true,
-                genre: true,
-                genres: true
-            }
-        },
-        pause: !venue?.id,
-    });
+    console.log("VenueDashboard - Venue data:", venue);
+    console.log("VenueDashboard - Venue loading:", venueLoading);
+    console.log("VenueDashboard - Venue error:", venueError);
 
-    const [{ data: eventsData, fetching: eventsFetching, error: eventsError }] = useFindMany(api.event, {
-        filter: { venue: { id: { equals: venue?.id } } },
-        select: {
-            id: true,
-            title: true,
-            description: true,
-            date: true,
-            status: true,
-            musician: {
-                id: true,
-                stageName: true,
-                city: true,
-                state: true,
-                genre: true
-            }
+    // Fetch bookings for this venue
+    const { data: bookingsData, loading: bookingsLoading, error: bookingsError } = useSupabaseQuery(
+        async () => {
+            if (!venue?.id) return { data: null, error: null };
+            return await supabase
+                .from('bookings')
+                .select(`
+                    *,
+                    musician:musicians(
+                        id,
+                        stage_name,
+                        city,
+                        state,
+                        genre,
+                        genres
+                    )
+                `)
+                .eq('venue_id', venue.id)
+                .order('created_at', { ascending: false });
         },
-        pause: !venue?.id,
-    });
+        [venue?.id]
+    );
 
-    const [{ data: reviewsData, fetching: reviewsFetching, error: reviewsError }] = useFindMany(api.review, {
-        filter: { venue: { id: { equals: venue?.id } } },
-        select: {
-            id: true,
-            rating: true,
-            comment: true,
-            createdAt: true,
-            reviewer: {
-                firstName: true,
-                lastName: true,
-            },
+    // Fetch events for this venue
+    const { data: eventsData, loading: eventsLoading, error: eventsError } = useSupabaseQuery(
+        async () => {
+            if (!venue?.id) return { data: null, error: null };
+            return await supabase
+                .from('events')
+                .select(`
+                    *,
+                    musician:musicians(
+                        id,
+                        stage_name,
+                        city,
+                        state,
+                        genre
+                    )
+                `)
+                .eq('venue_id', venue.id)
+                .order('created_at', { ascending: false });
         },
-        sort: { createdAt: "Descending" },
-        first: 10,
-        pause: !venue?.id,
-    });
+        [venue?.id]
+    );
+
+    // Fetch reviews for this venue
+    const { data: reviewsData, loading: reviewsLoading, error: reviewsError } = useSupabaseQuery(
+        async () => {
+            if (!venue?.id) return { data: null, error: null };
+            return await supabase
+                .from('reviews')
+                .select(`
+                    *,
+                    reviewer:users(
+                        first_name,
+                        last_name
+                    )
+                `)
+                .eq('venue_id', venue.id)
+                .order('created_at', { ascending: false })
+                .limit(10);
+        },
+        [venue?.id]
+    );
 
     const bookings: any[] = bookingsData || [];
     const events: any[] = eventsData || [];
@@ -125,7 +130,7 @@ export default function VenueDashboard() {
     }, [venueError, bookingsError, eventsError, reviewsError]);
 
     // Show loading state while fetching
-    if (venueFetching) {
+    if (venueLoading) {
         return (
             <div className="container mx-auto p-6">
                 <div className="flex items-center justify-center min-h-[400px]">
@@ -160,7 +165,7 @@ export default function VenueDashboard() {
     }
     
     const upcomingEvents = events.filter((e: any) => e.date && new Date(e.date) > new Date()) ?? [];
-    const pendingBookings = bookings.filter((b: any) => b.status === 'pending') ?? [];
+    const pendingBookings = bookings.filter((b: any) => b.status === 'pending' || b.status === 'applied') ?? [];
 
     return (
         <div className="container mx-auto p-6 space-y-6">
@@ -168,7 +173,7 @@ export default function VenueDashboard() {
                 <div>
                     <h1 className="text-3xl font-bold">Venue Dashboard</h1>
                     <p className="text-muted-foreground">
-                        Welcome back, {venue.name || user?.firstName}!
+                        Welcome back, {venue.name || user?.first_name}!
                     </p>
                 </div>
                 <div className="flex gap-2">
@@ -241,11 +246,11 @@ export default function VenueDashboard() {
                                                     <p className="text-sm text-muted-foreground">{formatDateTime(event.date)}</p>
                                                     {event.musician && (
                                                         <p className="text-sm text-muted-foreground">
-                                                            Featuring: {event.musician.stageName}
+                                                            Featuring: {event.musician.stage_name}
                                                         </p>
                                                     )}
                                                 </div>
-                                                {getStatusBadge(event.eventStatus)}
+                                                {getStatusBadge(event.status)}
                                             </div>
                                         ))}
                                     </div>
@@ -270,7 +275,7 @@ export default function VenueDashboard() {
                                                             to={`/musician/${booking.musician.id}`}
                                                             className="text-blue-600 hover:text-blue-800 hover:underline"
                                                         >
-                                                            {booking.musician.stageName}
+                                                            {booking.musician.stage_name}
                                                         </Link>
                                                     ) : (
                                                         'Musician TBD'
@@ -282,8 +287,8 @@ export default function VenueDashboard() {
                                                 <div className="flex items-center gap-2">
                                                     <Clock className="h-4 w-4" />
                                                     {formatDateTime(booking.date)}
-                                                    {booking.startTime && (
-                                                        <span> • {booking.startTime}{booking.endTime ? ` - ${booking.endTime}` : ''}</span>
+                                                    {booking.start_time && (
+                                                        <span> • {booking.start_time}{booking.end_time ? ` - ${booking.end_time}` : ''}</span>
                                                     )}
                                                 </div>
                                                 <div className="flex items-center gap-2">
@@ -297,10 +302,10 @@ export default function VenueDashboard() {
                                                         }
                                                     })()}
                                                 </div>
-                                                {booking.totalAmount && (
+                                                {booking.total_amount && (
                                                     <div className="flex items-center gap-2">
                                                         <DollarSign className="h-4 w-4" />
-                                                        ${booking.totalAmount}
+                                                        ${booking.total_amount}
                                                     </div>
                                                 )}
                                                 {booking.musician?.genre && (
@@ -334,7 +339,7 @@ export default function VenueDashboard() {
                                         <div key={event.id} className="border rounded-lg p-4">
                                             <div className="flex items-center justify-between mb-2">
                                                 <h3 className="font-medium">{event.title || 'Untitled Event'}</h3>
-                                                {getStatusBadge(event.eventStatus)}
+                                                {getStatusBadge(event.status)}
                                             </div>
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-muted-foreground">
                                                 <div className="flex items-center gap-2">
@@ -347,7 +352,7 @@ export default function VenueDashboard() {
                                                             to={`/musician/${event.musician.id}`}
                                                             className="text-blue-600 hover:text-blue-800 hover:underline"
                                                         >
-                                                            {event.musician.stageName}
+                                                            {event.musician.stage_name}
                                                         </Link></span>
                                                     </div>
                                                 )}
@@ -409,11 +414,11 @@ export default function VenueDashboard() {
                                                         ))}
                                                     </div>
                                                     <span className="text-sm font-medium">
-                                                        {review.reviewer.firstName} {review.reviewer.lastName}
+                                                        {review.reviewer?.first_name} {review.reviewer?.last_name}
                                                     </span>
                                                 </div>
                                                 <span className="text-sm text-muted-foreground">
-                                                    {new Date(review.createdAt).toLocaleDateString()}
+                                                    {new Date(review.created_at).toLocaleDateString()}
                                                 </span>
                                             </div>
                                             <p className="text-sm text-muted-foreground">{review.comment}</p>
@@ -443,11 +448,11 @@ export default function VenueDashboard() {
                         </CardHeader>
                         <CardContent className="space-y-4">
                             {/* Profile Picture */}
-                            {venue.profilePicture && (
+                            {venue.profile_picture && (
                                 <div className="flex justify-center mb-6">
                                     <div className="relative">
                                         <ClickableImage 
-                                            src={venue.profilePicture} 
+                                            src={venue.profile_picture} 
                                             alt="Venue Profile" 
                                             className="w-32 h-32 object-cover rounded-lg border shadow-sm"
                                         />
@@ -472,7 +477,7 @@ export default function VenueDashboard() {
                                 <div>{venue.capacity ? `${venue.capacity} people` : 'Not set'}</div>
 
                                 <div className="font-semibold">Price Range:</div>
-                                <div>{venue.priceRange || 'Not set'}</div>
+                                <div>{venue.price_range || 'Not set'}</div>
 
                                 <div className="font-semibold">Location:</div>
                                 <div>
@@ -483,7 +488,7 @@ export default function VenueDashboard() {
                                 <div>{venue.address || 'Not set'}</div>
 
                                 <div className="font-semibold">Zip Code:</div>
-                                <div>{venue.zipCode || 'Not set'}</div>
+                                <div>{venue.zip_code || 'Not set'}</div>
                                 
                                 <div className="font-semibold">Website:</div>
                                 <div>

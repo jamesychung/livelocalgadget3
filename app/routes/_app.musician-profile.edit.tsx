@@ -59,7 +59,7 @@ export default function MusicianProfileEdit() {
         const { data, error } = await supabase
           .from('musicians')
           .select('*')
-          .eq('user_id', user.id)
+          .eq('email', user.email)
           .single();
 
         if (error) {

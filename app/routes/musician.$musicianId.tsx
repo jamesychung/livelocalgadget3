@@ -23,7 +23,7 @@ interface MusicianData {
   profilePicture?: string;
   rating?: number;
   totalGigs?: number;
-  hourlyRate?: number;
+  hourly_rate?: number;
   instruments?: string[];
   availability?: any;
   website?: string;
@@ -195,7 +195,7 @@ export default function MusicianProfile() {
     .join(", ");
 
   // Format hourly rate
-  const hourlyRate = musician.hourlyRate ? `$${musician.hourlyRate}/hour` : "Rate not set";
+  const hourlyRate = musician.hourly_rate ? `$${musician.hourly_rate}/hour` : "Rate not set";
 
   // Get display name
   const displayName = musician.stageName || "Musician";
