@@ -24,27 +24,29 @@ export const VenueEventsSummaryDashboard: React.FC<VenueEventsSummaryDashboardPr
   maxStats = 4,
   className = ""
 }) => {
-  // Debug logging
-  console.log('🔍 Dashboard Component Debug:', {
-    statsReceived: stats.length,
-    statsData: stats.map(s => ({ id: s.id, title: s.title, value: s.value, type: typeof s.value })),
-    maxStats
-  });
-
   // Sort by priority if provided, then take the first maxStats
   const displayStats = stats
     .sort((a, b) => (b.priority || 0) - (a.priority || 0))
     .slice(0, maxStats);
 
-  console.log('🔍 Display Stats:', displayStats.map(s => ({ id: s.id, title: s.title, value: s.value })));
-  
-  // Log each stat individually to see the actual values
-  displayStats.forEach((stat, index) => {
-    console.log(`🔍 Stat ${index + 1}:`, stat.id, stat.title, stat.value, typeof stat.value);
-  });
+  // Handle empty stats case
+  if (displayStats.length === 0) {
+    return (
+      <div className={`${className}`}>
+        <Card className="border-dashed">
+          <CardContent className="flex flex-col items-center justify-center py-8">
+            <Calendar className="h-12 w-12 text-muted-foreground mb-4" />
+            <p className="text-muted-foreground text-center">
+              No stats selected. Click "Customize" to choose which stats to display.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
-      return (
-      <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 ${className}`}>
+  return (
+    <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 ${className}`}>
       {displayStats.map((stat, index) => {
         const IconComponent = stat.icon;
         

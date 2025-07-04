@@ -21,7 +21,6 @@ import VenueEventCalendar from "../components/shared/VenueEventCalendar";
 import { EventDetailDialog } from "../components/musician/events/EventDetailDialog";
 
 export default function VenueEventsWorkflowBasedPage() {
-    console.log("VenueEventsWorkflowBasedPage render");
     const { user } = useOutletContext<AuthOutletContext>();
     const [activeWorkflowTab, setActiveWorkflowTab] = useState("my-events");
     const [selectedEventForApplications, setSelectedEventForApplications] = useState<any>(null);
@@ -88,7 +87,6 @@ export default function VenueEventsWorkflowBasedPage() {
 
     // Override handleEventClick to use our new state
     const handleEventClick = (event: any) => {
-        console.log("Set selectedEvent:", event);
         setSelectedEvent(event);
         setIsEventDetailDialogOpen(true);
     };
@@ -255,7 +253,7 @@ export default function VenueEventsWorkflowBasedPage() {
                                                     <CardContent className="pt-6">
                                                         <div
                                                             className="flex flex-col gap-2"
-                                                            onClick={() => { console.log('Card clicked', event); handleEventClick(event); }}
+                                                            onClick={() => handleEventClick(event)}
                                                             style={{ cursor: 'pointer' }}
                                                         >
                                                             <div className="flex items-start justify-between">
@@ -374,7 +372,7 @@ export default function VenueEventsWorkflowBasedPage() {
                                                     <CardContent className="pt-6">
                                                         <div
                                                             className="flex flex-col gap-2"
-                                                            onClick={() => { console.log('Applications card clicked', event); handleViewApplications(event); }}
+                                                            onClick={() => handleViewApplications(event)}
                                                             style={{ cursor: 'pointer' }}
                                                         >
                                                             <div className="flex items-start justify-between">
@@ -447,15 +445,24 @@ export default function VenueEventsWorkflowBasedPage() {
                     <TabsContent value="planning" className="space-y-4">
                         <Card>
                             <CardHeader>
-                                <CardTitle>Event Planning</CardTitle>
+                                <CardTitle>Event Planning & Booking Management</CardTitle>
                                 <p className="text-sm text-muted-foreground">
-                                    Calendar view for planning and scheduling
+                                    Calendar view for planning, scheduling, and managing confirmed bookings
                                 </p>
                             </CardHeader>
                             <CardContent>
                                 <VenueEventCalendar
                                     events={allEvents}
+                                    bookings={allBookings}
                                     onEditEvent={handleEditEvent}
+                                    onViewBookingDetails={(eventId) => {
+                                        const event = allEvents.find(e => e.id === eventId);
+                                        if (event) {
+                                            handleViewApplications(event);
+                                        }
+                                    }}
+                                    title="Event Planning & Bookings"
+                                    description="Manage your venue's events, confirmed bookings, and calendar planning"
                                 />
                             </CardContent>
                         </Card>
@@ -482,7 +489,7 @@ export default function VenueEventsWorkflowBasedPage() {
                                                     <CardContent className="pt-6">
                                                         <div
                                                             className="flex flex-col gap-2"
-                                                            onClick={() => { console.log('Card clicked', event); handleEventClick(event); }}
+                                                            onClick={() => handleEventClick(event)}
                                                             style={{ cursor: 'pointer' }}
                                                         >
                                                             <div className="flex items-start justify-between">
@@ -570,8 +577,6 @@ export default function VenueEventsWorkflowBasedPage() {
                     onRejectApplication={handleRejectApplication}
                 />
                 {/* Event Detail Dialog */}
-                {selectedEvent && <div style={{position: 'fixed', top: 0, left: 0, zIndex: 9999, background: 'yellow'}}>Dialog Open</div>}
-                {console.log("Rendering EventDetailDialog", { selectedEvent })}
                 <EventDetailDialog
                     isOpen={isEventDetailDialogOpen}
                     setIsOpen={setIsEventDetailDialogOpen}

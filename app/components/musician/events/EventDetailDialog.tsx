@@ -178,19 +178,11 @@ export const EventDetailDialog: React.FC<EventDetailDialogProps> = ({
             <TabsContent value="activity" className="pt-4">
               {(() => {
                 const { booking } = getMusicianApplicationStatus(selectedEvent.id);
-                console.log('🔍 EventDetailDialog Debug:');
-                console.log('selectedEvent:', selectedEvent);
-                console.log('booking from getMusicianApplicationStatus:', booking);
-                console.log('bookings prop:', bookings);
-                
                 // Convert single booking to array for generateEventActivityItems
                 const applications = booking ? [booking] : [];
-                const activityItems = generateEventActivityItems(selectedEvent, applications);
-                console.log('Generated event activity items:', activityItems);
-                
                 return (
                   <ActivityLog
-                    activities={activityItems}
+                    activities={generateEventActivityItems(selectedEvent, applications)}
                   />
                 );
               })()}

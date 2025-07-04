@@ -1,8 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../../../lib/auth";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../ui/tabs";
+import { Button } from "../../ui/button";
 import { DashboardHeader } from "./DashboardHeader";
 import { OverviewTab } from "./OverviewTab";
+import { BookingsTab } from "./BookingsTab";
+import { VenueEventsSummaryDashboard } from "../../shared/VenueEventsSummaryDashboard";
+import { VenueStatsSettings } from "../../shared/VenueStatsSettings";
+import { useVenueEventsStats, createVenueEventStats } from "../../../hooks/useVenueEventsStats";
 import { VenueProfile, Event, Booking, Review, DashboardStats } from "./types";
 import { 
   fetchVenueProfile, 
@@ -28,6 +33,31 @@ export const VenueDashboard: React.FC = () => {
     pendingCancelBookings: 0
   });
   const [isLoading, setIsLoading] = useState(true);
+
+  // Stats customization state with localStorage persistence
+  const [showStatsSettings, setShowStatsSettings] = useState(false);
+  const [selectedStatIds, setSelectedStatIds] = useState<string[]>(() => {
+    // Load from localStorage on initial render
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('venue-dashboard-stats');
+      if (saved) {
+        try {
+          return JSON.parse(saved);
+        } catch (error) {
+          console.error('Error parsing saved stats:', error);
+        }
+      }
+    }
+    // Default stats if nothing saved
+    return ['totalEvents', 'confirmedBookings', 'upcomingEvents', 'averageRating'];
+  });
+
+  // Save to localStorage whenever selectedStatIds changes
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('venue-dashboard-stats', JSON.stringify(selectedStatIds));
+    }
+  }, [selectedStatIds]);
 
   useEffect(() => {
     const loadDashboardData = async () => {
@@ -72,6 +102,11 @@ export const VenueDashboard: React.FC = () => {
     booking.status === 'applied' || booking.status === 'selected'
   );
 
+  // Get confirmed bookings for the overview tab
+  const confirmedBookings = bookings.filter(booking => 
+    booking.status === 'confirmed'
+  );
+
   // Get pending cancel bookings
   const pendingCancelBookings = bookings.filter(booking => 
     booking.status === 'pending_cancel'
@@ -85,6 +120,11 @@ export const VenueDashboard: React.FC = () => {
       return new Date(b.date).getTime() - new Date(a.date).getTime();
     })
     .slice(0, 5);
+
+  // Calculate stats using the venue events stats hook
+  const venueEventsStats = useVenueEventsStats(events, bookings, pendingBookings);
+  const allAvailableStats = createVenueEventStats(venueEventsStats);
+  const selectedStats = allAvailableStats.filter(stat => selectedStatIds.includes(stat.id));
 
   if (isLoading) {
     return <div className="p-6">Loading dashboard...</div>;
@@ -100,8 +140,33 @@ export const VenueDashboard: React.FC = () => {
   }
 
   return (
-    <div className="p-6">
-      <DashboardHeader venue={venue} user={user} stats={stats} />
+    <div className="p-6 space-y-6">
+      <DashboardHeader venue={venue} user={user!} />
+      
+      {/* Customizable Stats Dashboard */}
+      <div className="flex flex-col gap-2">
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-semibold">Dashboard Stats</h2>
+          <Button size="sm" variant="outline" onClick={() => setShowStatsSettings((v: boolean) => !v)}>
+            Customize
+          </Button>
+        </div>
+        <VenueEventsSummaryDashboard
+          stats={selectedStats}
+          maxStats={8}
+        />
+        {showStatsSettings && (
+          <div className="mt-2">
+            <VenueStatsSettings
+              availableStats={allAvailableStats}
+              selectedStatIds={selectedStatIds}
+              onStatsChange={setSelectedStatIds}
+              maxStats={8}
+              onClose={() => setShowStatsSettings(false)}
+            />
+          </div>
+        )}
+      </div>
       
       <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-6">
         <TabsList>
@@ -115,7 +180,7 @@ export const VenueDashboard: React.FC = () => {
           <OverviewTab 
             venue={venue}
             recentEvents={recentEvents}
-            pendingBookings={pendingBookings}
+            pendingBookings={[...pendingBookings, ...confirmedBookings]}
             pendingCancelBookings={pendingCancelBookings}
           />
         </TabsContent>
@@ -126,8 +191,11 @@ export const VenueDashboard: React.FC = () => {
         </TabsContent>
         
         <TabsContent value="bookings" className="mt-6">
-          {/* Bookings tab content will be implemented separately */}
-          <p>Bookings tab content</p>
+          <BookingsTab 
+            bookings={bookings}
+            venue={venue}
+            events={events}
+          />
         </TabsContent>
         
         <TabsContent value="profile" className="mt-6">

@@ -117,7 +117,7 @@ export interface DashboardStats {
 export interface DashboardHeaderProps {
   venue: VenueProfile;
   user: User;
-  stats: DashboardStats;
+  stats?: DashboardStats;
 }
 
 export interface DashboardStatsProps {

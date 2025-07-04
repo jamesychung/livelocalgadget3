@@ -642,30 +642,9 @@ export const ApplicationDetailDialog: React.FC<ApplicationDetailDialogProps> = (
               </TabsContent>
               
               <TabsContent value="activity" className="pt-4">
-                {(() => {
-                  console.log('🔍 ApplicationDetailDialog Debug:');
-                  console.log('selectedEvent:', selectedEvent);
-                  console.log('selectedEvent.created_at:', selectedEvent?.created_at);
-                  console.log('applications:', applications);
-                  console.log('applications with event data:', applications.map(app => ({
-                    id: app.id,
-                    applied_at: app.applied_at,
-                    selected_at: app.selected_at,
-                    confirmed_at: app.confirmed_at,
-                    musician: app.musician?.stage_name,
-                    event: app.event,
-                    event_created_at: app.event?.created_at
-                  })));
-                  
-                  const activityItems = generateEventActivityItems(selectedEvent, applications);
-                  console.log('Generated activity items:', activityItems);
-                  
-                  return (
-                    <ActivityLog
-                      activities={activityItems}
-                    />
-                  );
-                })()}
+                <ActivityLog
+                  activities={generateEventActivityItems(selectedEvent, applications)}
+                />
               </TabsContent>
             </Tabs>
           </div>

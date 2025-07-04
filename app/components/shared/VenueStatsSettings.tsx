@@ -19,7 +19,6 @@ export const VenueStatsSettings: React.FC<VenueStatsSettingsProps> = ({
   onClose
 }) => {
   const handleToggle = (id: string, checked: boolean) => {
-    console.log("Toggle fired:", { id, checked, selectedStatIds });
     if (checked) {
       if (!selectedStatIds.includes(id) && selectedStatIds.length < maxStats) {
         onStatsChange([...selectedStatIds, id]);

@@ -1,10 +1,13 @@
-import React from "react";
+import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "../../ui/card";
 import { Button } from "../../ui/button";
+import { Badge } from "../../ui/badge";
 import { OverviewTabProps, Booking, Event } from "./types";
 import { formatDate } from "./utils";
 import { StatusBadge } from "./StatusBadge";
 import { Link } from "react-router-dom";
+import { Calendar, Clock, MapPin, Phone, Mail } from "lucide-react";
+import { EventBookingDialog } from "../../shared/EventBookingDialog";
 
 export const OverviewTab: React.FC<OverviewTabProps> = ({ 
   venue, 
@@ -12,76 +15,219 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
   pendingBookings,
   pendingCancelBookings 
 }) => {
+  const [selectedEvent, setSelectedEvent] = useState<any>(null);
+  const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
+  const [isEventDialogOpen, setIsEventDialogOpen] = useState(false);
+
+  const handleEventClick = (booking: Booking) => {
+    setSelectedEvent(booking.event);
+    setSelectedBooking(booking);
+    setIsEventDialogOpen(true);
+  };
+
+  const closeEventDialog = () => {
+    setIsEventDialogOpen(false);
+    setSelectedEvent(null);
+    setSelectedBooking(null);
+  };
+
+  // Get confirmed bookings from pendingBookings data (we'll need to pass this from parent)
+  const confirmedBookings = pendingBookings.filter(booking => booking.status === 'confirmed');
+  
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-lg font-semibold flex justify-between items-center">
-            <span>Recent Events</span>
-            <Link to="/venue-events">
-              <Button variant="ghost" size="sm">View All</Button>
-            </Link>
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {recentEvents.length > 0 ? (
+    <div className="space-y-6">
+      {/* Confirmed Bookings - Top Priority Section */}
+      {confirmedBookings.length > 0 && (
+        <Card className="border-green-200 bg-green-50">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg font-semibold flex justify-between items-center text-green-800">
+              <span>🎵 Confirmed Bookings - Don't Miss These!</span>
+              <Link to="/venue-dashboard?tab=bookings">
+                <Button variant="ghost" size="sm" className="text-green-700 hover:text-green-900">
+                  View Calendar
+                </Button>
+              </Link>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
             <div className="space-y-4">
-              {recentEvents.slice(0, 5).map((event) => (
-                <EventItem key={event.id} event={event} />
+              {confirmedBookings.slice(0, 5).map((booking) => (
+                <ConfirmedBookingItem 
+                  key={booking.id} 
+                  booking={booking} 
+                  onEventClick={() => handleEventClick(booking)}
+                />
               ))}
             </div>
-          ) : (
-            <div className="text-center py-4">
-              <p className="text-gray-500">No events yet</p>
-              <Link to="/venue-events">
-                <Button variant="outline" size="sm" className="mt-2">Create Event</Button>
-              </Link>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      )}
 
-      <div className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-lg font-semibold flex justify-between items-center">
-              <span>Pending Applications</span>
-              <Link to="/venue-musicians">
+              <span>Recent Events</span>
+              <Link to="/venue-events">
                 <Button variant="ghost" size="sm">View All</Button>
               </Link>
             </CardTitle>
           </CardHeader>
           <CardContent>
-            {pendingBookings.length > 0 ? (
+            {recentEvents.length > 0 ? (
               <div className="space-y-4">
-                {pendingBookings.slice(0, 3).map((booking) => (
-                  <BookingItem key={booking.id} booking={booking} />
+                {recentEvents.slice(0, 5).map((event) => (
+                  <EventItem key={event.id} event={event} />
                 ))}
               </div>
             ) : (
-              <p className="text-center py-4 text-gray-500">No pending applications</p>
+              <div className="text-center py-4">
+                <p className="text-gray-500">No events yet</p>
+                <Link to="/venue-events">
+                  <Button variant="outline" size="sm" className="mt-2">Create Event</Button>
+                </Link>
+              </div>
             )}
           </CardContent>
         </Card>
 
-        {pendingCancelBookings.length > 0 && (
-          <Card className="border-orange-200">
+        <div className="space-y-6">
+          <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-lg font-semibold flex justify-between items-center">
-                <span>Pending Cancellations</span>
+                <span>Pending Applications</span>
                 <Link to="/venue-musicians">
                   <Button variant="ghost" size="sm">View All</Button>
                 </Link>
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                {pendingCancelBookings.slice(0, 3).map((booking) => (
-                  <BookingItem key={booking.id} booking={booking} />
-                ))}
-              </div>
+              {pendingBookings.length > 0 ? (
+                <div className="space-y-4">
+                  {pendingBookings.slice(0, 3).map((booking) => (
+                    <BookingItem key={booking.id} booking={booking} />
+                  ))}
+                </div>
+              ) : (
+                <p className="text-center py-4 text-gray-500">No pending applications</p>
+              )}
             </CardContent>
           </Card>
+
+          {pendingCancelBookings.length > 0 && (
+            <Card className="border-orange-200">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-lg font-semibold flex justify-between items-center">
+                  <span>Pending Cancellations</span>
+                  <Link to="/venue-musicians">
+                    <Button variant="ghost" size="sm">View All</Button>
+                  </Link>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {pendingCancelBookings.slice(0, 3).map((booking) => (
+                    <BookingItem key={booking.id} booking={booking} />
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      </div>
+
+      <EventBookingDialog
+        isOpen={isEventDialogOpen}
+        onClose={closeEventDialog}
+        event={selectedEvent}
+        booking={selectedBooking}
+        viewMode="venue"
+      />
+    </div>
+  );
+};
+
+const ConfirmedBookingItem: React.FC<{ 
+  booking: Booking; 
+  onEventClick: () => void;
+}> = ({ booking, onEventClick }) => {
+  const formatTime = (timeString?: string) => {
+    if (!timeString) return '';
+    const [hours, minutes] = timeString.split(':');
+    const hour = parseInt(hours);
+    const ampm = hour >= 12 ? 'PM' : 'AM';
+    const displayHour = hour % 12 || 12;
+    return `${displayHour}:${minutes} ${ampm}`;
+  };
+
+  return (
+    <div 
+      className="flex items-center justify-between bg-white p-4 rounded-lg border border-green-200 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+      onClick={onEventClick}
+    >
+      <div className="flex items-center space-x-4">
+        <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center overflow-hidden">
+          {booking.musician?.profile_picture ? (
+            <img 
+              src={booking.musician.profile_picture} 
+              alt={booking.musician.stage_name} 
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <span className="text-green-600 font-semibold text-lg">
+              {booking.musician?.stage_name?.charAt(0) || "M"}
+            </span>
+          )}
+        </div>
+        <div className="flex-1">
+          <div className="flex items-center gap-2 mb-1">
+            <h4 className="font-semibold text-green-800">{booking.musician?.stage_name}</h4>
+            <Badge variant="secondary" className="bg-green-100 text-green-800">
+              Confirmed
+            </Badge>
+          </div>
+          <div className="flex items-center gap-4 text-sm text-gray-600">
+            <div className="flex items-center gap-1">
+              <Calendar className="h-4 w-4" />
+              <span>{formatDate(booking.event?.date)}</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <Clock className="h-4 w-4" />
+              <span>{formatTime(booking.event?.start_time)} - {formatTime(booking.event?.end_time)}</span>
+            </div>
+          </div>
+          <div className="text-sm text-gray-500 mt-1">
+            {booking.event?.title}
+          </div>
+          <div className="text-xs text-blue-600 mt-1">
+            Click for event details and activity log
+          </div>
+        </div>
+      </div>
+      <div className="flex items-center gap-2">
+        {booking.musician?.phone && (
+          <Button 
+            variant="outline" 
+            size="sm" 
+            asChild
+            onClick={(e) => e.stopPropagation()}
+          >
+            <a href={`tel:${booking.musician.phone}`}>
+              <Phone className="h-4 w-4" />
+            </a>
+          </Button>
+        )}
+        {booking.musician?.email && (
+          <Button 
+            variant="outline" 
+            size="sm" 
+            asChild
+            onClick={(e) => e.stopPropagation()}
+          >
+            <a href={`mailto:${booking.musician.email}`}>
+              <Mail className="h-4 w-4" />
+            </a>
+          </Button>
         )}
       </div>
     </div>

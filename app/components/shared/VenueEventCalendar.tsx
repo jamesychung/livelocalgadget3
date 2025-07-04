@@ -5,7 +5,7 @@ import { Badge } from "../ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "../ui/dialog";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { Calendar } from "../ui/calendar";
-import { Clock, Plus, X, Save, Settings, Calendar as CalendarIcon, ChevronLeft, ChevronRight, Music, Building } from "lucide-react";
+import { Clock, Plus, X, Save, Settings, Calendar as CalendarIcon, ChevronLeft, ChevronRight, Music, Building, Users, CheckCircle, AlertCircle } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "../../lib/utils";
 import { Link } from 'react-router-dom';
@@ -26,6 +26,10 @@ interface Event {
     };
     totalAmount?: number;
     notes?: string;
+    // Add booking-related fields
+    confirmedBookings?: number;
+    pendingApplications?: number;
+    hasConfirmedBooking?: boolean;
 }
 
 interface VenueEventCalendarProps {
@@ -38,10 +42,13 @@ interface VenueEventCalendarProps {
     onEditToggle?: () => void;
     title?: string;
     description?: string;
+    // Add booking management props
+    bookings?: any[];
+    onViewBookingDetails?: (eventId: string) => void;
 }
 
 type ViewMode = 'weekly' | 'monthly';
-type EventType = 'all' | 'confirmed' | 'proposed';
+type EventType = 'all' | 'confirmed' | 'proposed' | 'bookings';
 
 export default function VenueEventCalendar({
     events,
@@ -52,7 +59,9 @@ export default function VenueEventCalendar({
     isEditing = false,
     onEditToggle,
     title = "Venue Event Calendar",
-    description = "Manage your venue's events and bookings"
+    description = "Manage your venue's events and bookings",
+    bookings = [],
+    onViewBookingDetails
 }: VenueEventCalendarProps) {
     const [viewMode, setViewMode] = useState<ViewMode>('weekly');
     const [currentMonth, setCurrentMonth] = useState(new Date());
@@ -60,9 +69,26 @@ export default function VenueEventCalendar({
     const [eventTypeFilter, setEventTypeFilter] = useState<EventType>('all');
     const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
 
+    // Enhance events with booking information
+    const enhancedEvents = events.map(event => {
+        const eventBookings = bookings.filter(booking => booking.event?.id === event.id);
+        const confirmedBookings = eventBookings.filter(booking => booking.status === 'confirmed');
+        const pendingApplications = eventBookings.filter(booking => 
+            booking.status === 'applied' || booking.status === 'selected'
+        );
+        
+        return {
+            ...event,
+            confirmedBookings: confirmedBookings.length,
+            pendingApplications: pendingApplications.length,
+            hasConfirmedBooking: confirmedBookings.length > 0
+        };
+    });
+
     // Filter events based on type
-    const filteredEvents = events.filter(event => {
+    const filteredEvents = enhancedEvents.filter(event => {
         if (eventTypeFilter === 'all') return true;
+        if (eventTypeFilter === 'bookings') return event.hasConfirmedBooking;
         return event.eventStatus === eventTypeFilter;
     });
 
@@ -379,6 +405,13 @@ export default function VenueEventCalendar({
                             onClick={() => setEventTypeFilter('proposed')}
                         >
                             Proposed
+                        </Button>
+                        <Button
+                            variant={eventTypeFilter === 'bookings' ? 'default' : 'outline'}
+                            size="sm"
+                            onClick={() => setEventTypeFilter('bookings')}
+                        >
+                            Bookings
                         </Button>
                     </div>
                 </CardContent>
