@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
@@ -11,6 +11,7 @@ import type { AuthOutletContext } from "./_app";
 import { ClickableImage } from "../components/shared/ClickableImage";
 import VenueSystemFlowchart from "../components/shared/VenueSystemFlowchart";
 import { BookingActionButtons } from "../components/shared/BookingActionButtons";
+import { BookingDetailDialog } from "../components/shared/BookingDetailDialog";
 
 // Helper function to render status badges
 function getStatusBadge(status: string) {
@@ -44,6 +45,8 @@ function formatDateTime(dateTime: string | Date | null | undefined) {
 export default function VenueDashboard() {
     const { user } = useOutletContext<AuthOutletContext>();
     const navigate = useNavigate();
+    const [selectedBooking, setSelectedBooking] = useState<any>(null);
+    const [isBookingDialogOpen, setIsBookingDialogOpen] = useState(false);
 
     // Fetch venue profile
     const { data: venue, loading: venueLoading, error: venueError } = useVenueProfile(user?.id);
@@ -119,6 +122,69 @@ export default function VenueDashboard() {
 
     // Filter bookings by status
     const pendingCancelBookings = bookings.filter(b => b.status === 'pending_cancel');
+
+    // Handle booking click to view details with activity log
+    const handleViewBookingDetails = async (booking: any) => {
+        try {
+            // Find the event for this booking
+            const event = events.find(e => e.id === booking.event_id);
+            
+            if (!event) {
+                console.error("Event not found for booking:", booking);
+                return;
+            }
+            
+            // Fetch complete booking data with event information
+            const { data, error } = await supabase
+                .from('bookings')
+                .select(`
+                    *,
+                    event:events (
+                        id,
+                        title,
+                        date,
+                        start_time,
+                        end_time,
+                        description,
+                        created_at
+                    ),
+                    musician:musicians (
+                        id,
+                        stage_name,
+                        genre,
+                        city,
+                        state,
+                        phone,
+                        email,
+                        hourly_rate,
+                        profile_picture
+                    )
+                `)
+                .eq('id', booking.id)
+                .single();
+                
+            if (error) {
+                console.error('Error fetching complete booking data:', error);
+                return;
+            }
+            
+            // Combine booking with event data for activity log
+            const bookingWithEventData = {
+                ...data,
+                date: data.event?.date,
+                start_time: data.event?.start_time,
+                end_time: data.event?.end_time,
+                venue: venue
+            };
+            
+            console.log("Opening booking details with activity log:", bookingWithEventData);
+            
+            setSelectedBooking(bookingWithEventData);
+            setIsBookingDialogOpen(true);
+        } catch (err) {
+            console.error('Error fetching booking details:', err);
+        }
+    };
 
     useEffect(() => {
         if (venueError) console.error("Error loading venue data:", venueError);
@@ -238,7 +304,27 @@ export default function VenueDashboard() {
                                 {upcomingEvents.length > 0 ? (
                                     <div className="space-y-4">
                                         {upcomingEvents.map((event) => (
-                                            <div key={event.id} className="flex items-center justify-between p-3 border rounded-lg">
+                                            <div 
+                                                key={event.id} 
+                                                className="flex items-center justify-between p-3 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors"
+                                                onClick={() => {
+                                                    // Find any booking associated with this event
+                                                    const eventBooking = bookings.find(b => b.event_id === event.id);
+                                                    if (eventBooking) {
+                                                        handleViewBookingDetails(eventBooking);
+                                                    } else {
+                                                        console.log("No booking found for this event");
+                                                        // Create a temporary booking object with event data
+                                                        const tempBooking = {
+                                                            id: `temp-${event.id}`,
+                                                            event_id: event.id,
+                                                            status: event.status,
+                                                            venue_id: venue?.id
+                                                        };
+                                                        handleViewBookingDetails(tempBooking);
+                                                    }
+                                                }}
+                                            >
                                                 <div>
                                                     <p className="font-medium">{event.title || 'Untitled Event'}</p>
                                                     <p className="text-sm text-muted-foreground">{formatDateTime(event.date)}</p>
@@ -265,13 +351,18 @@ export default function VenueDashboard() {
                             {bookings && bookings.length > 0 ? (
                                 <div className="space-y-4">
                                     {bookings.map((booking) => (
-                                        <div key={booking.id} className="border rounded-lg p-4">
+                                        <div 
+                                            key={booking.id} 
+                                            className="border rounded-lg p-4 cursor-pointer hover:bg-gray-50 transition-colors"
+                                            onClick={() => handleViewBookingDetails(booking)}
+                                        >
                                             <div className="flex items-center justify-between mb-2">
                                                 <h3 className="font-medium">
                                                     {booking.musician ? (
                                                         <Link 
                                                             to={`/musician/${booking.musician.id}`}
                                                             className="text-blue-600 hover:text-blue-800 hover:underline"
+                                                            onClick={(e) => e.stopPropagation()} // Prevent booking box click
                                                         >
                                                             {booking.musician.stage_name}
                                                         </Link>
@@ -319,15 +410,16 @@ export default function VenueDashboard() {
                                                     <strong>Notes:</strong> {booking.notes}
                                                 </div>
                                             )}
-                                            <BookingActionButtons
-                                                booking={booking}
-                                                currentUser={user}
-                                                onStatusUpdate={(updatedBooking) => {
-                                                    // TODO: Replace with your setBookings or equivalent state update function
-                                                    // setBookings(prev => prev.map(b => b.id === updatedBooking.id ? updatedBooking : b));
-                                                }}
-                                                className="mt-3"
-                                            />
+                                            <div className="flex gap-2 mt-3" onClick={(e) => e.stopPropagation()}>
+                                                <BookingActionButtons
+                                                    booking={booking}
+                                                    currentUser={user}
+                                                    onStatusUpdate={(updatedBooking) => {
+                                                        // TODO: Replace with your setBookings or equivalent state update function
+                                                        // setBookings(prev => prev.map(b => b.id === updatedBooking.id ? updatedBooking : b));
+                                                    }}
+                                                />
+                                            </div>
                                         </div>
                                     ))}
                                 </div>
@@ -343,7 +435,27 @@ export default function VenueDashboard() {
                             {events && events.length > 0 ? (
                                 <div className="space-y-4">
                                     {events.map((event) => (
-                                        <div key={event.id} className="border rounded-lg p-4">
+                                        <div 
+                                            key={event.id} 
+                                            className="border rounded-lg p-4 cursor-pointer hover:bg-gray-50 transition-colors"
+                                            onClick={() => {
+                                                // Find any booking associated with this event
+                                                const eventBooking = bookings.find(b => b.event_id === event.id);
+                                                if (eventBooking) {
+                                                    handleViewBookingDetails(eventBooking);
+                                                } else {
+                                                    console.log("No booking found for this event");
+                                                    // Create a temporary booking object with event data
+                                                    const tempBooking = {
+                                                        id: `temp-${event.id}`,
+                                                        event_id: event.id,
+                                                        status: event.status,
+                                                        venue_id: venue?.id
+                                                    };
+                                                    handleViewBookingDetails(tempBooking);
+                                                }
+                                            }}
+                                        >
                                             <div className="flex items-center justify-between mb-2">
                                                 <h3 className="font-medium">{event.title || 'Untitled Event'}</h3>
                                                 {getStatusBadge(event.status)}
@@ -358,6 +470,7 @@ export default function VenueDashboard() {
                                                         <span>Featuring: <Link 
                                                             to={`/musician/${event.musician.id}`}
                                                             className="text-blue-600 hover:text-blue-800 hover:underline"
+                                                            onClick={(e) => e.stopPropagation()} // Prevent event box click when clicking on musician link
                                                         >
                                                             {event.musician.stage_name}
                                                         </Link></span>
@@ -382,6 +495,19 @@ export default function VenueDashboard() {
                                                     {event.description}
                                                 </div>
                                             )}
+                                            <div className="flex gap-2 mt-3">
+                                                <Button 
+                                                    variant="outline" 
+                                                    size="sm"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation(); // Prevent event box click
+                                                        navigate(`/venue-event/${event.id}`);
+                                                    }}
+                                                >
+                                                    <Edit className="h-4 w-4 mr-2" />
+                                                    Manage Event
+                                                </Button>
+                                            </div>
                                         </div>
                                     ))}
                                 </div>
@@ -407,7 +533,7 @@ export default function VenueDashboard() {
                                     {reviews.map((review) => (
                                         <div key={review.id} className="border rounded-lg p-4">
                                             <div className="flex items-center justify-between mb-2">
-                                                <div className="flex items-center gap-2">
+                                                <div className="flex items-center">
                                                     <div className="flex items-center">
                                                         {[...Array(5)].map((_, i) => (
                                                             <Star
@@ -528,6 +654,16 @@ export default function VenueDashboard() {
                     </Card>
                 </TabsContent>
             </Tabs>
+            <BookingDetailDialog
+                booking={selectedBooking}
+                isOpen={isBookingDialogOpen}
+                onClose={() => setIsBookingDialogOpen(false)}
+                currentUser={{venue: { id: venue?.id }}}
+                onStatusUpdate={(updatedBooking) => {
+                    // Refresh the page to get updated data
+                    window.location.reload();
+                }}
+            />
         </div>
     );
 } 

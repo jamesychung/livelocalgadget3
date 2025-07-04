@@ -61,7 +61,8 @@ export const BookingActionButtons: React.FC<BookingActionButtonsProps> = ({
       actions.push({ value: BOOKING_STATUSES.CONFIRMED, label: 'Confirm Booking' });
     }
     
-    if (currentStatus === BOOKING_STATUSES.CONFIRMED && (isVenue || isMusician)) {
+    // Only show "Mark as Completed" if the event is confirmed and hasn't been completed yet
+    if (currentStatus === BOOKING_STATUSES.CONFIRMED && (isVenue || isMusician) && !booking.completed_at) {
       actions.push({ value: BOOKING_STATUSES.COMPLETED, label: 'Mark as Completed' });
     }
     
@@ -85,11 +86,14 @@ export const BookingActionButtons: React.FC<BookingActionButtonsProps> = ({
 
   const handleAction = async () => {
     if (!selectedAction) return;
+    
     setIsLoading(true);
+    
     try {
       const updateData: any = {
         updated_at: new Date().toISOString()
       };
+      
       if (selectedAction === BOOKING_STATUSES.CONFIRMED) {
         updateData.confirmed_at = new Date().toISOString();
       } else if (selectedAction === 'pending_cancel') {
@@ -101,7 +105,7 @@ export const BookingActionButtons: React.FC<BookingActionButtonsProps> = ({
         updateData.cancellation_reason = cancellationReason === CANCELLATION_REASONS.OTHER 
           ? customReason 
           : cancellationReason;
-          
+        
         // Debug info for cancel request
         
       } else if (selectedAction === BOOKING_STATUSES.CANCELLED) {
@@ -112,25 +116,40 @@ export const BookingActionButtons: React.FC<BookingActionButtonsProps> = ({
         
         // Debug info for cancel confirmation
         
+      } else if (selectedAction === BOOKING_STATUSES.COMPLETED) {
+        updateData.status = BOOKING_STATUSES.COMPLETED;
+        updateData.completed_at = new Date().toISOString();
+        
+        // Only add these fields if the columns exist in the database
+        try {
+          updateData.completed_by = currentUser.id;
+          updateData.completed_by_role = isMusician ? 'musician' : 'venue';
+        } catch (error) {
+          console.warn('Could not set completed_by fields, columns may not exist yet:', error);
+        }
       } else {
         updateData.status = selectedAction;
       }
+      
       const { data: updatedBooking, error } = await supabase
         .from('bookings')
         .update(updateData)
         .eq('id', booking.id)
         .select()
         .single();
+        
       if (error) {
         console.error('Failed to update booking:', error);
         alert('Failed to update booking status. Please try again.');
         return;
       }
+      
       onStatusUpdate(updatedBooking);
       setIsDialogOpen(false);
       setSelectedAction('');
       setCancellationReason('');
       setCustomReason('');
+      
       // Show success message
       const actionLabels: Record<string, string> = {
         [BOOKING_STATUSES.SELECTED]: 'Musician selected successfully!',
@@ -139,6 +158,7 @@ export const BookingActionButtons: React.FC<BookingActionButtonsProps> = ({
         ['pending_cancel']: 'Cancel requested. Awaiting confirmation.',
         [BOOKING_STATUSES.CANCELLED]: 'Booking cancelled successfully.'
       };
+      
       alert(actionLabels[selectedAction] || 'Status updated successfully!');
     } catch (error) {
       console.error('Error updating booking:', error);

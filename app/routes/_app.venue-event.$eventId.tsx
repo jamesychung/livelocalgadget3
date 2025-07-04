@@ -90,44 +90,32 @@ export default function VenueEventManagementPage() {
         
         try {
             setEventLoading(true);
-            const eventData = await api.event.findOne(eventId, {
-                select: {
-                    id: true,
-                    title: true,
-                    description: true,
-                    date: true,
-                    startTime: true,
-                    endTime: true,
-                    ticketPrice: true,
-                    totalCapacity: true,
-                    availableTickets: true,
-                    status: true,
-                    genres: true,
-        venue: {
-                        id: true,
-                        name: true,
-                        address: true,
-                        city: true,
-                        state: true,
-                        zipCode: true,
-                        phone: true,
-                        email: true,
-                        website: true
-        },
-        musician: {
-                        id: true,
-                        stageName: true,
-                        genre: true,
-                        city: true,
-                        state: true,
-                        phone: true,
-                        email: true,
-                        hourlyRate: true,
-                        profilePicture: true
-                    }
-                }
-            });
-            setEvent(eventData);
+            
+            const { data: eventData, error } = await supabase
+                .from('events')
+                .select(`
+                    *,
+                    venue:venues (
+                        id, 
+                        name, 
+                        address,
+                        city,
+                        state,
+                        zip_code,
+                        phone,
+                        email,
+                        website
+                    )
+                `)
+                .eq('id', eventId)
+                .single();
+                
+            if (error) {
+                console.error("Error fetching event:", error);
+                setEvent(null);
+            } else {
+                setEvent(eventData);
+            }
         } catch (error) {
             console.error("Error fetching event:", error);
             setEvent(null);
@@ -142,67 +130,40 @@ export default function VenueEventManagementPage() {
         try {
             setBookingsLoading(true);
             
-            // Try to fetch bookings with event filter
-            let bookings;
-            try {
-                bookings = await api.booking.findMany({
-                    filter: {
-                        event: { id: { equals: eventId } }
-                    },
-                    select: {
-                        id: true,
-                        status: true,
-                        proposedRate: true,
-                        musicianPitch: true,
-                        createdAt: true,
-            musician: {
-                            id: true,
-                            stageName: true,
-                            genre: true,
-                            city: true,
-                            state: true,
-                            phone: true,
-                            email: true,
-                            hourlyRate: true,
-                            profilePicture: true
-                        }
-                    },
-                    sort: { createdAt: "Descending" }
-                });
-            } catch (filterError) {
-                console.warn("Event filter failed, fetching all bookings and filtering client-side:", filterError);
-                
-                // Fallback: fetch all bookings and filter client-side
-                const allBookings = await api.booking.findMany({
-                    select: {
-                        id: true,
-                        status: true,
-                        proposedRate: true,
-                        musicianPitch: true,
-                        createdAt: true,
-                        event: {
-                            id: true
-                        },
-            musician: {
-                            id: true,
-                            stageName: true,
-                            genre: true,
-                            city: true,
-                            state: true,
-                            phone: true,
-                            email: true,
-                            hourlyRate: true,
-                            profilePicture: true
-                        }
-                    },
-                    sort: { createdAt: "Descending" }
-                });
-                
-                // Filter bookings for this event
-                bookings = allBookings.filter(booking => booking.event?.id === eventId);
-            }
+            // Fetch bookings directly with supabase to get all fields needed for activity log
+            const { data: bookings, error } = await supabase
+                .from('bookings')
+                .select(`
+                    *,
+                    event:events (
+                        id,
+                        title,
+                        date,
+                        start_time,
+                        end_time,
+                        description,
+                        created_at
+                    ),
+                    musician:musicians (
+                        id,
+                        stage_name,
+                        genre,
+                        city,
+                        state,
+                        phone,
+                        email,
+                        hourly_rate,
+                        profile_picture
+                    )
+                `)
+                .eq('event_id', eventId);
             
-            setBookingsData(bookings);
+            if (error) {
+                console.error("Error fetching bookings:", error);
+                setBookingsData([]);
+            } else {
+                setBookingsData(bookings || []);
+            }
         } catch (error) {
             console.error("Error fetching bookings:", error);
             setBookingsData([]);

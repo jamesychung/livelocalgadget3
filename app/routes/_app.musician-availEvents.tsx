@@ -11,6 +11,8 @@ import type { AuthOutletContext } from "./_app";
 import { getBookingStatusDisplay, BOOKING_STATUSES } from '../lib/utils';
 import { BookingStatusBadge } from '../components/shared/BookingStatusBadge';
 import { BookingActionButtons } from '../components/shared/BookingActionButtons';
+import { BookingDetailDialog } from '../components/shared/BookingDetailDialog';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 
 interface TimeSlot {
     startTime: string;
@@ -31,6 +33,8 @@ export default function MusicianAvailEventsPage() {
     const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
     const [selectedEvent, setSelectedEvent] = useState<any>(null);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [selectedBooking, setSelectedBooking] = useState<any>(null);
+    const [isBookingDialogOpen, setIsBookingDialogOpen] = useState(false);
     
     // State for data
     const [events, setEvents] = useState<any[]>([]);
@@ -58,6 +62,7 @@ export default function MusicianAvailEventsPage() {
                         event_status,
                         rate,
                         genres,
+                        created_at,
                         venue_id,
                         venue:venues(id, name, city, state)
                     `)
@@ -98,7 +103,16 @@ export default function MusicianAvailEventsPage() {
                         cancelled_at,
                         cancelled_by,
                         cancel_confirmed_by_role,
-                        cancellation_reason
+                        cancellation_reason,
+                        applied_at,
+                        selected_at,
+                        confirmed_at,
+                        completed_at,
+                        completed_by,
+                        completed_by_role,
+                        proposed_rate,
+                        musician_pitch,
+                        musician:musicians(id, stage_name, city, state)
                     `);
 
                 if (bookingsError) throw bookingsError;
@@ -437,6 +451,45 @@ export default function MusicianAvailEventsPage() {
         setIsDialogOpen(false);
     };
 
+    // Handle booking click to view details with activity log
+    const handleViewBookingDetails = (booking: any) => {
+        // Find the event for this booking
+        const event = events.find(e => e.id === booking.event_id);
+        
+        if (!event) {
+            console.error("Event not found for booking:", booking);
+            return;
+        }
+        
+        // Find musician data if not already included in booking
+        const musician = booking.musician || musicians.find(m => m.id === booking.musician_id);
+        
+        // Combine booking with event data for activity log
+        const bookingWithEvent = {
+            ...booking,
+            event: event,
+            musician: musician,
+            // Add any missing fields that might be needed for the activity log
+            date: event.date,
+            start_time: event.start_time,
+            end_time: event.end_time,
+            venue: event.venue
+        };
+        
+        console.log("Opening booking details with activity log:", bookingWithEvent);
+        
+        setSelectedBooking(bookingWithEvent);
+        setIsBookingDialogOpen(true);
+    };
+
+    // Handle booking status update
+    const handleBookingStatusUpdate = (updatedBooking: any) => {
+        // Update bookings state
+        setBookings(prev => 
+            prev.map(b => b.id === updatedBooking.id ? updatedBooking : b)
+        );
+    };
+
     // Show loading state while fetching
     if (isLoading) {
         return (
@@ -699,12 +752,31 @@ export default function MusicianAvailEventsPage() {
                                                         const { status, booking } = getMusicianApplicationStatus(event.id);
                                                         const statusInfo = getStatusDisplay(status, booking);
                                                         return (
-                                                            <Badge 
-                                                                variant={statusInfo.variant}
-                                                                className={statusInfo.className}
-                                                            >
-                                                                {statusInfo.label}
-                                                            </Badge>
+                                                            <div className="space-y-2">
+                                                                <Badge 
+                                                                    variant={statusInfo.variant}
+                                                                    className={statusInfo.className}
+                                                                >
+                                                                    {statusInfo.label}
+                                                                </Badge>
+                                                                
+                                                                {booking && (
+                                                                    <div className="flex justify-start">
+                                                                        <Button 
+                                                                            variant="ghost" 
+                                                                            size="sm"
+                                                                            className="text-xs px-2 py-1 h-auto"
+                                                                            onClick={(e) => {
+                                                                                e.stopPropagation(); // Prevent event row click
+                                                                                handleViewBookingDetails(booking);
+                                                                            }}
+                                                                        >
+                                                                            <Eye className="h-3 w-3 mr-1" />
+                                                                            Activity Log
+                                                                        </Button>
+                                                                    </div>
+                                                                )}
+                                                            </div>
                                                         );
                                                     })()}
                                                 </TableCell>
@@ -741,127 +813,331 @@ export default function MusicianAvailEventsPage() {
                     
                     {selectedEvent && (
                         <div className="space-y-6">
-                            {/* Event Details */}
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div>
-                                    <h3 className="font-semibold mb-2">Event Information</h3>
-                                    <div className="space-y-2 text-sm">
-                                        <div><span className="font-medium">Date:</span> {selectedEvent.date ? new Date(selectedEvent.date).toLocaleDateString() : 'TBD'}</div>
-                                        <div><span className="font-medium">Time:</span> {selectedEvent.start_time} - {selectedEvent.end_time}</div>
-                                        <div><span className="font-medium">Rate:</span> {selectedEvent.rate ? `$${selectedEvent.rate}` : 'TBD'}</div>
-                                        <div><span className="font-medium">Status:</span> {selectedEvent.event_status}</div>
-                                    </div>
-                                </div>
+                            <Tabs defaultValue="details">
+                                <TabsList className="grid w-full grid-cols-2">
+                                    <TabsTrigger value="details">Event Details</TabsTrigger>
+                                    <TabsTrigger value="activity">Activity Log</TabsTrigger>
+                                </TabsList>
                                 
-                                <div>
-                                    <h3 className="font-semibold mb-2">Venue Information</h3>
-                                    <div className="space-y-2 text-sm">
-                                        <div><span className="font-medium">Name:</span> {selectedEvent.venue?.name}</div>
-                                        <div><span className="font-medium">Location:</span> {selectedEvent.venue?.city && selectedEvent.venue?.state ? `${selectedEvent.venue.city}, ${selectedEvent.venue.state}` : 'Not specified'}</div>
-                                        <div><span className="font-medium">Type:</span> {selectedEvent.venue?.type || 'Not specified'}</div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Description */}
-                            {selectedEvent.description && (
-                                <div>
-                                    <h3 className="font-semibold mb-2">Description</h3>
-                                    <p className="text-sm text-muted-foreground">{selectedEvent.description}</p>
-                                </div>
-                            )}
-
-                            {/* Genres */}
-                            {selectedEvent.genres && selectedEvent.genres.length > 0 && (
-                                <div>
-                                    <h3 className="font-semibold mb-2">Genres</h3>
-                                    <div className="flex flex-wrap gap-1">
-                                        {selectedEvent.genres.map((genre: string, index: number) => (
-                                            <Badge key={index} variant="outline" className="text-xs">
-                                                {genre}
-                                            </Badge>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* Matching Musicians */}
-                            <div>
-                                <h3 className="font-semibold mb-2 flex items-center gap-2">
-                                    <Users className="h-4 w-4" />
-                                    Matching Musicians ({getMatchingMusicians(selectedEvent).length})
-                                </h3>
-                                
-                                {getMatchingMusicians(selectedEvent).length > 0 ? (
-                                    <div className="grid gap-3 max-h-60 overflow-y-auto">
-                                        {getMatchingMusicians(selectedEvent).map((musician) => (
-                                            <div key={musician.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                                                <div className="flex-1">
-                                                    <div className="flex items-center gap-3 mb-1">
-                                                        <h5 className="font-medium">{musician.stage_name}</h5>
-                                                        {musician.hourly_rate && (
-                                                            <Badge variant="outline" className="text-green-600 border-green-300">
-                                                                ${musician.hourly_rate}/hr
-                                                            </Badge>
-                                                        )}
-                                                    </div>
-                                                    
-                                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm text-muted-foreground">
-                                                        <div>
-                                                            <span className="font-medium">Location:</span> {musician.city && musician.state ? `${musician.city}, ${musician.state}` : 'Not specified'}
-                                                        </div>
-                                                        <div>
-                                                            <span className="font-medium">Contact:</span> {musician.email}
-                                                        </div>
-                                                        <div>
-                                                            <span className="font-medium">Genres:</span> {musician.genres?.join(", ") || "None specified"}
-                                                        </div>
-                                                    </div>
-                                                    
-                                                    {musician.bio && (
-                                                        <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
-                                                            {musician.bio}
-                                                        </p>
-                                                    )}
-                                                </div>
-                                                
-                                                <div className="flex gap-2 ml-4">
-                                                    <Button size="sm" variant="outline" asChild>
-                                                        <Link to={`/musician/${musician.id}`}>
-                                                            <Eye className="h-4 w-4" />
-                                                        </Link>
-                                                    </Button>
-                                                </div>
+                                <TabsContent value="details" className="space-y-6 pt-4">
+                                    {/* Event Details */}
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div>
+                                            <h3 className="font-semibold mb-2">Event Information</h3>
+                                            <div className="space-y-2 text-sm">
+                                                <div><span className="font-medium">Date:</span> {selectedEvent.date ? new Date(selectedEvent.date).toLocaleDateString() : 'TBD'}</div>
+                                                <div><span className="font-medium">Time:</span> {selectedEvent.start_time} - {selectedEvent.end_time}</div>
+                                                <div><span className="font-medium">Rate:</span> {selectedEvent.rate ? `$${selectedEvent.rate}` : 'TBD'}</div>
+                                                <div><span className="font-medium">Status:</span> {selectedEvent.event_status}</div>
                                             </div>
-                                        ))}
+                                        </div>
+                                        
+                                        <div>
+                                            <h3 className="font-semibold mb-2">Venue Information</h3>
+                                            <div className="space-y-2 text-sm">
+                                                <div><span className="font-medium">Name:</span> {selectedEvent.venue?.name}</div>
+                                                <div><span className="font-medium">Location:</span> {selectedEvent.venue?.city && selectedEvent.venue?.state ? `${selectedEvent.venue.city}, ${selectedEvent.venue.state}` : 'Not specified'}</div>
+                                                <div><span className="font-medium">Type:</span> {selectedEvent.venue?.type || 'Not specified'}</div>
+                                            </div>
+                                        </div>
                                     </div>
-                                ) : (
-                                    <div className="text-center py-6 text-muted-foreground">
-                                        <Users className="h-8 w-8 mx-auto mb-2" />
-                                        <p>No musicians match this event's criteria</p>
-                                    </div>
-                                )}
-                            </div>
 
-                            {/* Musician Booking Actions */}
-                            {(() => {
-                              const { status, booking } = getMusicianApplicationStatus(selectedEvent.id);
-                              if (booking) {
-                                return (
-                                  <BookingActionButtons
-                                    booking={booking}
-                                    currentUser={user}
-                                    onStatusUpdate={(updatedBooking) => {
-                                      setBookings(prev =>
-                                        prev.map(b => b.id === updatedBooking.id ? updatedBooking : b)
-                                      );
-                                    }}
-                                    className="mb-4"
-                                  />
-                                );
-                              }
-                              return null;
-                            })()}
+                                    {/* Description */}
+                                    {selectedEvent.description && (
+                                        <div>
+                                            <h3 className="font-semibold mb-2">Description</h3>
+                                            <p className="text-sm text-muted-foreground">{selectedEvent.description}</p>
+                                        </div>
+                                    )}
+
+                                    {/* Genres */}
+                                    {selectedEvent.genres && selectedEvent.genres.length > 0 && (
+                                        <div>
+                                            <h3 className="font-semibold mb-2">Genres</h3>
+                                            <div className="flex flex-wrap gap-1">
+                                                {selectedEvent.genres.map((genre: string, index: number) => (
+                                                    <Badge key={index} variant="outline" className="text-xs">
+                                                        {genre}
+                                                    </Badge>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Matching Musicians */}
+                                    <div>
+                                        <h3 className="font-semibold mb-2 flex items-center gap-2">
+                                            <Users className="h-4 w-4" />
+                                            Matching Musicians ({getMatchingMusicians(selectedEvent).length})
+                                        </h3>
+                                        
+                                        {getMatchingMusicians(selectedEvent).length > 0 ? (
+                                            <div className="grid gap-3 max-h-60 overflow-y-auto">
+                                                {getMatchingMusicians(selectedEvent).map((musician) => (
+                                                    <div key={musician.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                                        <div className="flex-1">
+                                                            <div className="flex items-center gap-3 mb-1">
+                                                                <h5 className="font-medium">{musician.stage_name}</h5>
+                                                                {musician.hourly_rate && (
+                                                                    <Badge variant="outline" className="text-green-600 border-green-300">
+                                                                        ${musician.hourly_rate}/hr
+                                                                    </Badge>
+                                                                )}
+                                                            </div>
+                                                            
+                                                            <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm text-muted-foreground">
+                                                                <div>
+                                                                    <span className="font-medium">Location:</span> {musician.city && musician.state ? `${musician.city}, ${musician.state}` : 'Not specified'}
+                                                                </div>
+                                                                <div>
+                                                                    <span className="font-medium">Contact:</span> {musician.email}
+                                                                </div>
+                                                                <div>
+                                                                    <span className="font-medium">Genres:</span> {musician.genres?.join(", ") || "None specified"}
+                                                                </div>
+                                                            </div>
+                                                            
+                                                            {musician.bio && (
+                                                                <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
+                                                                    {musician.bio}
+                                                                </p>
+                                                            )}
+                                                        </div>
+                                                        
+                                                        <div className="flex gap-2 ml-4">
+                                                            <Button size="sm" variant="outline" asChild>
+                                                                <Link to={`/musician/${musician.id}`}>
+                                                                    <Eye className="h-4 w-4" />
+                                                                </Link>
+                                                            </Button>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            <div className="text-center py-6 text-muted-foreground">
+                                                <Users className="h-8 w-8 mx-auto mb-2" />
+                                                <p>No musicians match this event's criteria</p>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* Musician Booking Actions */}
+                                    {(() => {
+                                      const { status, booking } = getMusicianApplicationStatus(selectedEvent.id);
+                                      if (booking) {
+                                        return (
+                                          <div className="flex items-center justify-between">
+                                            <BookingActionButtons
+                                              booking={booking}
+                                              currentUser={user}
+                                              onStatusUpdate={(updatedBooking) => {
+                                                setBookings(prev =>
+                                                  prev.map(b => b.id === updatedBooking.id ? updatedBooking : b)
+                                                );
+                                              }}
+                                            />
+                                            
+                                            <Button 
+                                              variant="outline" 
+                                              size="sm"
+                                              onClick={() => handleViewBookingDetails(booking)}
+                                            >
+                                              <Eye className="h-4 w-4 mr-2" />
+                                              View Activity Log
+                                            </Button>
+                                          </div>
+                                        );
+                                      }
+                                      return null;
+                                    })()}
+                                </TabsContent>
+                                
+                                <TabsContent value="activity" className="pt-4">
+                                    <div className="space-y-4">
+                                        <h3 className="font-semibold mb-2 flex items-center gap-2">
+                                            <Clock className="h-4 w-4" />
+                                            Event Timeline
+                                        </h3>
+                                        
+                                        <div className="overflow-x-auto">
+                                          <table className="w-full border-collapse">
+                                            <thead>
+                                              <tr className="border-b">
+                                                <th className="text-left py-2 px-3 text-sm font-medium text-muted-foreground">Date & Time</th>
+                                                <th className="text-left py-2 px-3 text-sm font-medium text-muted-foreground">Action</th>
+                                                <th className="text-left py-2 px-3 text-sm font-medium text-muted-foreground">By</th>
+                                                <th className="text-left py-2 px-3 text-sm font-medium text-muted-foreground">Details</th>
+                                              </tr>
+                                            </thead>
+                                            <tbody>
+                                              {/* Event Creation */}
+                                              <tr className="bg-gray-50">
+                                                <td className="py-2 px-3 text-sm text-muted-foreground">
+                                                  {selectedEvent.created_at ? new Date(selectedEvent.created_at).toLocaleString() : "Unknown"}
+                                                </td>
+                                                <td className="py-2 px-3 text-sm font-medium">
+                                                  Event Created
+                                                </td>
+                                                <td className="py-2 px-3">
+                                                  <Badge variant="outline" className="text-xs">
+                                                    Venue
+                                                  </Badge>
+                                                </td>
+                                                <td className="py-2 px-3 text-sm">
+                                                  Event "{selectedEvent.title}" was created
+                                                </td>
+                                              </tr>
+                                              
+                                              {/* Booking Activities */}
+                                              {(() => {
+                                                const { booking } = getMusicianApplicationStatus(selectedEvent.id);
+                                                if (!booking) return null;
+                                                
+                                                const activityRows = [];
+                                                
+                                                // Application
+                                                if (booking.applied_at) {
+                                                  activityRows.push(
+                                                    <tr key="applied" className={activityRows.length % 2 === 0 ? "bg-white" : "bg-gray-50"}>
+                                                      <td className="py-2 px-3 text-sm text-muted-foreground">
+                                                        {new Date(booking.applied_at).toLocaleString()}
+                                                      </td>
+                                                      <td className="py-2 px-3 text-sm font-medium">
+                                                        Applied to Event
+                                                      </td>
+                                                      <td className="py-2 px-3">
+                                                        <Badge variant="outline" className="text-xs">
+                                                          Musician
+                                                        </Badge>
+                                                      </td>
+                                                      <td className="py-2 px-3 text-sm">
+                                                        Applied with rate: ${booking.proposed_rate || 'Not specified'}
+                                                      </td>
+                                                    </tr>
+                                                  );
+                                                }
+                                                
+                                                // Selection
+                                                if (booking.selected_at) {
+                                                  activityRows.push(
+                                                    <tr key="selected" className={activityRows.length % 2 === 0 ? "bg-white" : "bg-gray-50"}>
+                                                      <td className="py-2 px-3 text-sm text-muted-foreground">
+                                                        {new Date(booking.selected_at).toLocaleString()}
+                                                      </td>
+                                                      <td className="py-2 px-3 text-sm font-medium">
+                                                        Selected by Venue
+                                                      </td>
+                                                      <td className="py-2 px-3">
+                                                        <Badge variant="outline" className="text-xs">
+                                                          Venue
+                                                        </Badge>
+                                                      </td>
+                                                      <td className="py-2 px-3 text-sm">
+                                                        Venue selected this musician for the event
+                                                      </td>
+                                                    </tr>
+                                                  );
+                                                }
+                                                
+                                                // Confirmation
+                                                if (booking.confirmed_at) {
+                                                  activityRows.push(
+                                                    <tr key="confirmed" className={activityRows.length % 2 === 0 ? "bg-white" : "bg-gray-50"}>
+                                                      <td className="py-2 px-3 text-sm text-muted-foreground">
+                                                        {new Date(booking.confirmed_at).toLocaleString()}
+                                                      </td>
+                                                      <td className="py-2 px-3 text-sm font-medium">
+                                                        Booking Confirmed
+                                                      </td>
+                                                      <td className="py-2 px-3">
+                                                        <Badge variant="outline" className="text-xs">
+                                                          Musician
+                                                        </Badge>
+                                                      </td>
+                                                      <td className="py-2 px-3 text-sm">
+                                                        Musician confirmed the booking
+                                                      </td>
+                                                    </tr>
+                                                  );
+                                                }
+                                                
+                                                // Cancel Request
+                                                if (booking.cancel_requested_at) {
+                                                  const requestedBy = booking.cancel_requested_by_role === 'venue' ? 'Venue' : 'Musician';
+                                                  activityRows.push(
+                                                    <tr key="cancel_requested" className={activityRows.length % 2 === 0 ? "bg-white" : "bg-gray-50"}>
+                                                      <td className="py-2 px-3 text-sm text-muted-foreground">
+                                                        {new Date(booking.cancel_requested_at).toLocaleString()}
+                                                      </td>
+                                                      <td className="py-2 px-3 text-sm font-medium">
+                                                        Cancellation Requested
+                                                      </td>
+                                                      <td className="py-2 px-3">
+                                                        <Badge variant="outline" className="text-xs">
+                                                          {requestedBy}
+                                                        </Badge>
+                                                      </td>
+                                                      <td className="py-2 px-3 text-sm">
+                                                        {booking.cancellation_reason ? `Reason: ${booking.cancellation_reason}` : "No reason provided"}
+                                                      </td>
+                                                    </tr>
+                                                  );
+                                                }
+                                                
+                                                // Cancellation Confirmation
+                                                if (booking.cancelled_at) {
+                                                  const confirmedBy = booking.cancel_confirmed_by_role === 'venue' ? 'Venue' : 'Musician';
+                                                  activityRows.push(
+                                                    <tr key="cancelled" className={activityRows.length % 2 === 0 ? "bg-white" : "bg-gray-50"}>
+                                                      <td className="py-2 px-3 text-sm text-muted-foreground">
+                                                        {new Date(booking.cancelled_at).toLocaleString()}
+                                                      </td>
+                                                      <td className="py-2 px-3 text-sm font-medium">
+                                                        Cancellation Confirmed
+                                                      </td>
+                                                      <td className="py-2 px-3">
+                                                        <Badge variant="outline" className="text-xs">
+                                                          {confirmedBy}
+                                                        </Badge>
+                                                      </td>
+                                                      <td className="py-2 px-3 text-sm">
+                                                        Booking was cancelled
+                                                      </td>
+                                                    </tr>
+                                                  );
+                                                }
+                                                
+                                                // Completion
+                                                if (booking.completed_at) {
+                                                  activityRows.push(
+                                                    <tr key="completed" className={activityRows.length % 2 === 0 ? "bg-white" : "bg-gray-50"}>
+                                                      <td className="py-2 px-3 text-sm text-muted-foreground">
+                                                        {new Date(booking.completed_at).toLocaleString()}
+                                                      </td>
+                                                      <td className="py-2 px-3 text-sm font-medium">
+                                                        Event Completed
+                                                      </td>
+                                                      <td className="py-2 px-3">
+                                                        <Badge variant="outline" className="text-xs">
+                                                          {booking.completed_by_role ? (booking.completed_by_role === 'venue' ? 'Venue' : 'Musician') : "System"}
+                                                        </Badge>
+                                                      </td>
+                                                      <td className="py-2 px-3 text-sm">
+                                                        Event was marked as completed
+                                                      </td>
+                                                    </tr>
+                                                  );
+                                                }
+                                                
+                                                return activityRows;
+                                              })()}
+                                            </tbody>
+                                          </table>
+                                        </div>
+                                    </div>
+                                </TabsContent>
+                            </Tabs>
                         </div>
                     )}
 
@@ -889,6 +1165,15 @@ export default function MusicianAvailEventsPage() {
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
+            
+            {/* Booking Detail Dialog with Activity Log */}
+            <BookingDetailDialog
+              isOpen={isBookingDialogOpen}
+              onClose={() => setIsBookingDialogOpen(false)}
+              booking={selectedBooking}
+              currentUser={user}
+              onStatusUpdate={handleBookingStatusUpdate}
+            />
         </div>
     );
 } 

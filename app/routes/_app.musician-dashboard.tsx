@@ -19,11 +19,13 @@ import {
     Clock,
     DollarSign,
     AlertCircle,
-    RefreshCw
+    RefreshCw,
+    Eye
 } from "lucide-react";
 import { supabase } from "../lib/supabase";
 import type { AuthOutletContext } from "./_app";
 import { BookingActionButtons } from '../components/shared/BookingActionButtons';
+import { BookingDetailDialog } from '../components/shared/BookingDetailDialog';
 
 // Helper function to render status badges
 function getStatusBadge(status: string) {
@@ -70,50 +72,8 @@ export default function MusicianDashboard() {
     const [error, setError] = useState<string | null>(null);
     const [isRefreshing, setIsRefreshing] = useState(false);
     const [lastRefreshTime, setLastRefreshTime] = useState<Date>(new Date());
-
-    // const handleConfirmBooking = async (bookingId: string) => {
-    //     try {
-    //         const { error } = await supabase
-    //             .from('bookings')
-    //             .update({ status: 'confirmed' })
-    //             .eq('id', bookingId);
-
-    //         if (error) throw error;
-
-    //         // Update local state
-    //         setBookings(prevBookings => 
-    //             prevBookings.map(booking => 
-    //                 booking.id === bookingId 
-    //                     ? { ...booking, status: 'confirmed' }
-    //                     : booking
-    //             )
-    //         );
-    //     } catch (error) {
-    //         console.error('Error confirming booking:', error);
-    //     }
-    // };
-
-    // const handleRejectBooking = async (bookingId: string) => {
-    //     try {
-    //         const { error } = await supabase
-    //             .from('bookings')
-    //             .update({ status: 'cancelled' })
-    //             .eq('id', bookingId);
-
-    //         if (error) throw error;
-
-    //         // Update local state
-    //         setBookings(prevBookings => 
-    //             prevBookings.map(booking => 
-    //                 booking.id === bookingId 
-    //                     ? { ...booking, status: 'cancelled' }
-    //                     : booking
-    //             )
-    //         );
-    //     } catch (error) {
-    //         console.error('Error rejecting booking:', error);
-    //     }
-    // };
+    const [selectedBooking, setSelectedBooking] = useState<any>(null);
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
 
     const refreshBookings = async () => {
         if (!musician?.id) return;
@@ -132,6 +92,7 @@ export default function MusicianDashboard() {
                         start_time,
                         end_time,
                         description,
+                        created_at,
                         venue:venues (
                             id, 
                             name, 
@@ -161,6 +122,23 @@ export default function MusicianDashboard() {
         } finally {
             setIsRefreshing(false);
         }
+    };
+
+    // Handle booking click to view details
+    const handleBookingClick = (booking: any) => {
+        setSelectedBooking(booking);
+        setIsDialogOpen(true);
+    };
+
+    // Handle booking status update
+    const handleBookingStatusUpdate = (updatedBooking: any) => {
+        setBookings(prevBookings => 
+            prevBookings.map(b => 
+                b.id === updatedBooking.id 
+                    ? updatedBooking
+                    : b
+            )
+        );
     };
 
     useEffect(() => {
@@ -201,6 +179,7 @@ export default function MusicianDashboard() {
                                 start_time,
                                 end_time,
                                 description,
+                                created_at,
                                 venue:venues (
                                     id, 
                                     name, 
@@ -494,20 +473,22 @@ export default function MusicianDashboard() {
                                                 </div>
                                             )}
                                             
-                                            <BookingActionButtons 
-                                                booking={booking}
-                                                currentUser={user}
-                                                onStatusUpdate={(updatedBooking) => {
-                                                    setBookings(prevBookings => 
-                                                        prevBookings.map(b => 
-                                                            b.id === updatedBooking.id 
-                                                                ? updatedBooking
-                                                                : b
-                                                        )
-                                                    );
-                                                }}
-                                                className="mt-3"
-                                            />
+                                            <div className="flex items-center justify-between mt-3">
+                                                <BookingActionButtons 
+                                                    booking={booking}
+                                                    currentUser={user}
+                                                    onStatusUpdate={handleBookingStatusUpdate}
+                                                />
+                                                
+                                                <Button 
+                                                    variant="outline" 
+                                                    size="sm" 
+                                                    onClick={() => handleBookingClick(booking)}
+                                                >
+                                                    <Eye className="h-4 w-4 mr-2" />
+                                                    View Details
+                                                </Button>
+                                            </div>
                                             
                                             {booking.status === "confirmed" && (
                                                 <div className="mt-3">
@@ -612,6 +593,15 @@ export default function MusicianDashboard() {
                     </Card>
                 </TabsContent>
             </Tabs>
+            
+            {/* Booking Detail Dialog with Activity Log */}
+            <BookingDetailDialog
+                isOpen={isDialogOpen}
+                onClose={() => setIsDialogOpen(false)}
+                booking={selectedBooking}
+                currentUser={user}
+                onStatusUpdate={handleBookingStatusUpdate}
+            />
         </div>
     );
 } 

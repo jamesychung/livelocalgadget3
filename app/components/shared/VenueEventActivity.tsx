@@ -1,9 +1,11 @@
-import React from "react";
+import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Button } from "../ui/button";
 import { Badge } from "../ui/badge";
 import { ChevronUp, ChevronDown, Users, Clock, CheckCircle, XCircle, MessageCircle } from "lucide-react";
 import { BookingActionButtons } from "./BookingActionButtons";
+import { BookingDetailDialog } from "./BookingDetailDialog";
+import { supabase } from "../../lib/supabase";
 
 interface VenueEventActivityProps {
   bookingsData: any[];
@@ -32,6 +34,9 @@ export const VenueEventActivity: React.FC<VenueEventActivityProps> = ({
   handleCommunicateBooking,
   eventGenres
 }) => {
+  const [selectedBooking, setSelectedBooking] = useState<any>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "confirmed":
@@ -147,6 +152,72 @@ export const VenueEventActivity: React.FC<VenueEventActivityProps> = ({
         )}
       </div>
     );
+  };
+
+  // Handle booking row click to open detail dialog
+  const onBookingClick = (booking: any) => {
+    // Ensure we have all the necessary data for the activity log
+    const fetchCompleteBookingData = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('bookings')
+          .select(`
+            *,
+            event:events (
+              id,
+              title,
+              date,
+              start_time,
+              end_time,
+              description,
+              created_at
+            ),
+            musician:musicians (
+              id,
+              stage_name,
+              genre,
+              city,
+              state,
+              phone,
+              email,
+              hourly_rate,
+              profile_picture
+            )
+          `)
+          .eq('id', booking.id)
+          .single();
+          
+        if (error) {
+          console.error('Error fetching complete booking data:', error);
+          setSelectedBooking(booking);
+        } else {
+          console.log('Complete booking data for activity log:', data);
+          // Make sure we have all the necessary data for the activity log
+          const bookingWithEventData = {
+            ...data,
+            date: data.event?.date,
+            start_time: data.event?.start_time,
+            end_time: data.event?.end_time,
+            venue: booking.venue
+          };
+          setSelectedBooking(bookingWithEventData);
+        }
+        setIsDialogOpen(true);
+      } catch (err) {
+        console.error('Error:', err);
+        setSelectedBooking(booking);
+        setIsDialogOpen(true);
+      }
+    };
+    
+    fetchCompleteBookingData();
+  };
+
+  // Handle booking status update
+  const handleBookingStatusUpdate = (updatedBooking: any) => {
+    // Close the dialog and refresh the data
+    setIsDialogOpen(false);
+    window.location.reload();
   };
 
   if (bookingsLoading) {
@@ -278,7 +349,7 @@ export const VenueEventActivity: React.FC<VenueEventActivityProps> = ({
                   <tr 
                     key={booking.id} 
                     className="border-b hover:bg-gray-50 cursor-pointer transition-colors"
-                    onClick={() => handleRowClick(booking)}
+                    onClick={() => onBookingClick(booking)}
                   >
                     <td className="py-4 px-3">
                       <div className="flex items-center gap-3">
@@ -340,15 +411,29 @@ export const VenueEventActivity: React.FC<VenueEventActivityProps> = ({
                     </td>
                     <td className="py-4 px-3">
                         <div onClick={(e) => e.stopPropagation()}>
-                          <BookingActionButtons
-                            booking={booking}
-                            currentUser={{venue: { id: booking.venue_id }}}
-                            onStatusUpdate={(updatedBooking) => {
-                              // Refresh the bookings data
-                              window.location.reload();
-                            }}
-                            className="justify-start"
-                          />
+                          <div className="flex flex-col gap-2">
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              className="w-full flex items-center justify-center gap-1"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onBookingClick(booking);
+                              }}
+                            >
+                              <Clock className="h-3 w-3" />
+                              View Activity Log
+                            </Button>
+                            <BookingActionButtons
+                              booking={booking}
+                              currentUser={{venue: { id: booking.venue_id }}}
+                              onStatusUpdate={(updatedBooking) => {
+                                // Refresh the bookings data
+                                window.location.reload();
+                              }}
+                              className="justify-start"
+                            />
+                          </div>
                         </div>
                       </td>
                   </tr>
@@ -365,6 +450,15 @@ export const VenueEventActivity: React.FC<VenueEventActivityProps> = ({
             </p>
           </div>
         )}
+        
+        {/* Booking Detail Dialog with Activity Log */}
+        <BookingDetailDialog
+          isOpen={isDialogOpen}
+          onClose={() => setIsDialogOpen(false)}
+          booking={selectedBooking}
+          currentUser={{venue: { id: selectedBooking?.venue_id }}}
+          onStatusUpdate={handleBookingStatusUpdate}
+        />
       </CardContent>
     </Card>
   );
