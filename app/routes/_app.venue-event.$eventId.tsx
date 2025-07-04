@@ -1,14 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { Link, useParams } from 'react-router-dom';
-import { Button } from "../components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
-import { Badge } from "../components/ui/badge";
-import { Input } from "../components/ui/input";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
-import { 
-    ArrowLeft, 
-    Music
-} from "lucide-react";
+import { useParams } from 'react-router-dom';
+import { TabsContent } from "../components/ui/tabs";
+import { Music } from "lucide-react";
 import { api } from "../api";
 import { supabase } from "../lib/supabase";
 
@@ -20,541 +13,402 @@ import { VenueEventActivity } from "../components/shared/VenueEventActivity";
 import { VenueCommunicationsCard } from "../components/shared/VenueCommunicationsCard";
 import { VenueEventHistoryTab } from "../components/shared/VenueEventHistoryTab";
 
+// Import refactored components
+import {
+  LoadingState,
+  PageHeader,
+  EventTitleCard,
+  TabNavigation,
+  StatusBadge,
+  fetchEventData,
+  fetchBookingsData,
+  createEditFormData,
+  getEventStatus,
+  updateBookingStatus,
+  Event,
+  Booking,
+  EditFormData,
+  Message
+} from "../components/venue/event-management";
+
 export default function VenueEventManagementPage() {
-    const { eventId } = useParams();
-    const [activeTab, setActiveTab] = useState("overview");
-    const [isEditing, setIsEditing] = useState(false);
-    const [newMessage, setNewMessage] = useState("");
+  const { eventId } = useParams();
+  const [activeTab, setActiveTab] = useState("overview");
+  const [isEditing, setIsEditing] = useState(false);
+  const [newMessage, setNewMessage] = useState("");
 
-    // Sorting state for bookings table
-    const [sortColumn, setSortColumn] = useState('applied');
-    const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+  // Sorting state for bookings table
+  const [sortColumn, setSortColumn] = useState('applied');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
-    // State for real data
-    const [bookingsData, setBookingsData] = useState<any[]>([]);
-    const [bookingsLoading, setBookingsLoading] = useState(true);
-    const [event, setEvent] = useState<any>(null);
-    const [eventLoading, setEventLoading] = useState(true);
+  // State for real data
+  const [bookingsData, setBookingsData] = useState<Booking[]>([]);
+  const [bookingsLoading, setBookingsLoading] = useState(true);
+  const [event, setEvent] = useState<Event | null>(null);
+  const [eventLoading, setEventLoading] = useState(true);
 
-    // Mock form data - only initialize when event data is loaded
-    const [editFormData, setEditFormData] = useState<any>(null);
+  // Form data for editing
+  const [editFormData, setEditFormData] = useState<EditFormData | null>(null);
 
-    // Update editFormData when event data loads
-    useEffect(() => {
-        if (event) {
-            // Handle date conversion properly for timezone
-            let dateString = "";
-            if (event.date) {
-                let localDate;
-                
-                // Handle different date formats
-                if (event.date instanceof Date) {
-                    // If it's already a Date object
-                    localDate = event.date;
-                } else if (typeof event.date === 'string') {
-                    // If it's a string, parse it
-                    localDate = new Date(event.date);
-                } else {
-                    // Fallback
-                    localDate = new Date(event.date);
-                }
-                
-                // Format as YYYY-MM-DD for the date input
-                dateString = localDate.toLocaleDateString('en-CA'); // en-CA gives YYYY-MM-DD format
-            }
-            
-            setEditFormData({
-                title: event.title || "",
-                description: event.description || "",
-                date: dateString,
-                startTime: event.startTime || "",
-                endTime: event.endTime || "",
-                ticketPrice: event.ticketPrice ? event.ticketPrice.toString() : "",
-                totalCapacity: event.totalCapacity ? event.totalCapacity.toString() : "",
-                status: event.eventStatus || "",
-                genres: event.genres || []
-            });
-        }
-    }, [event]);
+  // Update editFormData when event data loads
+  useEffect(() => {
+    if (event) {
+      setEditFormData(createEditFormData(event));
+    }
+  }, [event]);
 
-    // Fetch real data on component mount
-    useEffect(() => {
-        if (eventId) {
-            fetchEventData();
-            fetchBookingsData();
-        }
-    }, [eventId]);
+  // Fetch real data on component mount
+  useEffect(() => {
+    if (eventId) {
+      loadEventData();
+      loadBookingsData();
+    }
+  }, [eventId]);
 
-    const fetchEventData = async () => {
-        if (!eventId) return;
+  const loadEventData = async () => {
+    if (!eventId) return;
+    
+    try {
+      setEventLoading(true);
+      
+      const { data, error } = await fetchEventData(eventId);
+      
+      if (error) {
+        console.error("Error fetching event:", error);
+        setEvent(null);
+      } else {
+        setEvent(data);
+      }
+    } catch (error) {
+      console.error("Error fetching event:", error);
+      setEvent(null);
+    } finally {
+      setEventLoading(false);
+    }
+  };
+
+  const loadBookingsData = async () => {
+    if (!eventId) return;
+    
+    try {
+      setBookingsLoading(true);
+      
+      const { data, error } = await fetchBookingsData(eventId);
+      
+      if (error) {
+        console.error("Error fetching bookings:", error);
+        setBookingsData([]);
+      } else {
+        setBookingsData(data || []);
+      }
+    } catch (error) {
+      console.error("Error fetching bookings:", error);
+      setBookingsData([]);
+    } finally {
+      setBookingsLoading(false);
+    }
+  };
+
+  // Mock messages data
+  const messages: Message[] = [
+    {
+      id: "msg-1",
+      content: "Hi! I'm very interested in performing at your jazz night. I have 10+ years of experience and can adapt my set to your audience.",
+      createdAt: "2024-01-15T10:30:00Z",
+      sender: "musician",
+      senderName: "Jazz Master"
+    },
+    {
+      id: "msg-2",
+      content: "Thanks for your interest! Could you tell me more about your typical set length and any specific songs you'd like to include?",
+      createdAt: "2024-01-15T14:20:00Z",
+      sender: "venue",
+      senderName: "Venue Manager"
+    }
+  ];
+
+  const handleRowClick = (booking: any) => {
+    console.log("Booking clicked:", booking);
+    // Could open a detailed view or modal
+  };
+
+  const handleSaveEvent = async () => {
+    if (!editFormData || !eventId) return;
+
+    try {
+      console.log("Saving event with data:", editFormData);
+      
+      // Prepare update data - only include defined, non-empty values
+      const updateData: any = {};
+      
+      if (editFormData.title && editFormData.title.trim()) {
+        updateData.title = editFormData.title.trim();
+      }
+      if (editFormData.description && editFormData.description.trim()) {
+        updateData.description = editFormData.description.trim();
+      }
+      if (editFormData.date && editFormData.date.trim()) {
+        // Convert date to ISO string with proper timezone handling
+        // The date input gives us a local date (e.g., 2025-07-23)
+        // We need to create a Date object at midnight in the local timezone
+        const [year, month, day] = editFormData.date.split('-').map(Number);
+        const localDate = new Date(year, month - 1, day); // month is 0-indexed
         
-        try {
-            setEventLoading(true);
-            
-            const { data: eventData, error } = await supabase
-                .from('events')
-                .select(`
-                    *,
-                    venue:venues (
-                        id, 
-                        name, 
-                        address,
-                        city,
-                        state,
-                        zip_code,
-                        phone,
-                        email,
-                        website
-                    )
-                `)
-                .eq('id', eventId)
-                .single();
-                
-            if (error) {
-                console.error("Error fetching event:", error);
-                setEvent(null);
-            } else {
-                setEvent(eventData);
-            }
-        } catch (error) {
-            console.error("Error fetching event:", error);
-            setEvent(null);
-        } finally {
-            setEventLoading(false);
-        }
-    };
+        // Convert to UTC for storage
+        updateData.date = localDate.toISOString();
+      }
+      if (editFormData.startTime && editFormData.startTime.trim()) {
+        updateData.startTime = editFormData.startTime.trim();
+      }
+      if (editFormData.endTime && editFormData.endTime.trim()) {
+        updateData.endTime = editFormData.endTime.trim();
+      }
+      if (editFormData.ticketPrice && editFormData.ticketPrice.trim()) {
+        updateData.ticketPrice = parseFloat(editFormData.ticketPrice);
+      }
+      if (editFormData.totalCapacity && editFormData.totalCapacity.trim()) {
+        updateData.totalCapacity = parseInt(editFormData.totalCapacity);
+      }
+      if (editFormData.status && editFormData.status.trim()) {
+        updateData.status = editFormData.status.trim();
+      }
+      if (editFormData.genres && Array.isArray(editFormData.genres)) {
+        updateData.genres = editFormData.genres;
+      }
 
-    const fetchBookingsData = async () => {
-        if (!eventId) return;
+      // Special handling for status changes
+      if (updateData.status) {
+        // If changing from confirmed to another status, automatically set to "open"
+        // This handles cases where a musician cancels or venue wants to reopen applications
+        if (event?.status === 'confirmed' && updateData.status !== 'confirmed') {
+          updateData.status = 'open';
+          console.log("Event status automatically changed to 'open' (was confirmed)");
+        }
+      }
+
+      // Debug: Log the status change logic
+      console.log("Status change debug:", {
+        currentEventStatus: event?.status,
+        newStatus: updateData.status,
+        editFormDataStatus: editFormData?.status,
+        shouldChangeToOpen: event?.status === 'confirmed' && updateData.status && updateData.status !== 'confirmed',
+        editFormDataKeys: Object.keys(editFormData || {}),
+        editFormDataFull: editFormData
+      });
+
+      console.log("Final update data:", updateData);
+
+      if (Object.keys(updateData).length === 0) {
+        console.log("No changes to save");
+        setIsEditing(false);
+        return;
+      }
+
+      // Use direct Supabase call instead since the API doesn't have an event update method
+      const { data: updatedEvent, error: updateError } = await supabase
+        .from('events')
+        .update(updateData)
+        .eq('id', eventId)
+        .select();
         
-        try {
-            setBookingsLoading(true);
-            
-            // Fetch bookings directly with supabase to get all fields needed for activity log
-            const { data: bookings, error } = await supabase
-                .from('bookings')
-                .select(`
-                    *,
-                    event:events (
-                        id,
-                        title,
-                        date,
-                        start_time,
-                        end_time,
-                        description,
-                        created_at
-                    ),
-                    musician:musicians (
-                        id,
-                        stage_name,
-                        genre,
-                        city,
-                        state,
-                        phone,
-                        email,
-                        hourly_rate,
-                        profile_picture
-                    )
-                `)
-                .eq('event_id', eventId);
-            
-            if (error) {
-                console.error("Error fetching bookings:", error);
-                setBookingsData([]);
-            } else {
-                setBookingsData(bookings || []);
-            }
-        } catch (error) {
-            console.error("Error fetching bookings:", error);
-            setBookingsData([]);
-        } finally {
-            setBookingsLoading(false);
-        }
-    };
+      if (updateError) {
+        throw updateError;
+      }
+      console.log("Event updated successfully:", updatedEvent);
+      
+      // Refresh event data
+      await loadEventData();
+      setIsEditing(false);
+      
+    } catch (error) {
+      console.error("Error updating event:", error);
+      alert("Failed to update event. Please try again.");
+    }
+  };
 
-    // Mock messages data
-    const messages = [
-        {
-            id: "msg-1",
-            content: "Hi! I'm very interested in performing at your jazz night. I have 10+ years of experience and can adapt my set to your audience.",
-            createdAt: "2024-01-15T10:30:00Z",
-            sender: "musician",
-            senderName: "Jazz Master"
-        },
-        {
-            id: "msg-2",
-            content: "Thanks for your interest! Could you tell me more about your typical set length and any specific songs you'd like to include?",
-            createdAt: "2024-01-15T14:20:00Z",
-            sender: "venue",
-            senderName: "Venue Manager"
-        }
-    ];
-
-    const getStatusBadge = (status: string) => {
-        switch (status) {
-            case "confirmed":
-                return <Badge className="bg-green-100 text-green-800 border-green-200">Confirmed</Badge>;
-            case "communicating":
-                return <Badge className="bg-purple-100 text-purple-800 border-purple-200">Communicating</Badge>;
-            case "applied":
-                return <Badge className="bg-blue-100 text-blue-800 border-blue-200">Applied</Badge>;
-            case "invited":
-                return <Badge className="bg-yellow-100 text-yellow-800 border-yellow-200">Invited</Badge>;
-            case "rejected":
-                return <Badge className="bg-red-100 text-red-800 border-red-200">Rejected</Badge>;
-            default:
-                return <Badge className="bg-gray-100 text-gray-800 border-gray-200">{status}</Badge>;
-        }
-    };
-
-    const getEventStatus = () => {
-        if (event?.musician) return "confirmed";
-        if (bookingsData.some(b => b.status === "communicating")) return "communicating";
-        if (bookingsData.some(b => b.status === "applied")) return "pending";
-            return "open";
-    };
-
-    const handleRowClick = (booking: any) => {
-        console.log("Booking clicked:", booking);
-        // Could open a detailed view or modal
-    };
-
-    const handleSaveEvent = async () => {
-        if (!editFormData || !eventId) return;
-
-        try {
-            console.log("Saving event with data:", editFormData);
-            
-            // Prepare update data - only include defined, non-empty values
-            const updateData: any = {};
-            
-            if (editFormData.title && editFormData.title.trim()) {
-                updateData.title = editFormData.title.trim();
-            }
-            if (editFormData.description && editFormData.description.trim()) {
-                updateData.description = editFormData.description.trim();
-            }
-            if (editFormData.date && editFormData.date.trim()) {
-                // Convert date to ISO string with proper timezone handling
-                // The date input gives us a local date (e.g., 2025-07-23)
-                // We need to create a Date object at midnight in the local timezone
-                const [year, month, day] = editFormData.date.split('-').map(Number);
-                const localDate = new Date(year, month - 1, day); // month is 0-indexed
-                
-                // Convert to UTC for storage
-                updateData.date = localDate.toISOString();
-            }
-            if (editFormData.startTime && editFormData.startTime.trim()) {
-                updateData.startTime = editFormData.startTime.trim();
-            }
-            if (editFormData.endTime && editFormData.endTime.trim()) {
-                updateData.endTime = editFormData.endTime.trim();
-            }
-            if (editFormData.ticketPrice && editFormData.ticketPrice.trim()) {
-                updateData.ticketPrice = parseFloat(editFormData.ticketPrice);
-            }
-            if (editFormData.totalCapacity && editFormData.totalCapacity.trim()) {
-                updateData.totalCapacity = parseInt(editFormData.totalCapacity);
-            }
-            if (editFormData.status && editFormData.status.trim()) {
-                updateData.status = editFormData.status.trim();
-            }
-            if (editFormData.genres && Array.isArray(editFormData.genres)) {
-                updateData.genres = editFormData.genres;
-            }
-
-            // Special handling for status changes
-            if (updateData.status) {
-                // If changing from confirmed to another status, automatically set to "open"
-                // This handles cases where a musician cancels or venue wants to reopen applications
-                if (event?.eventStatus === 'confirmed' && updateData.status !== 'confirmed') {
-                    updateData.status = 'open';
-                    console.log("Event status automatically changed to 'open' (was confirmed)");
-                }
-            }
-
-            // Debug: Log the status change logic
-            console.log("Status change debug:", {
-                currentEventStatus: event?.eventStatus,
-                newStatus: updateData.status,
-                editFormDataStatus: editFormData?.status,
-                shouldChangeToOpen: event?.eventStatus === 'confirmed' && updateData.status && updateData.status !== 'confirmed',
-                editFormDataKeys: Object.keys(editFormData || {}),
-                editFormDataFull: editFormData
-            });
-
-            console.log("Final update data:", updateData);
-
-            if (Object.keys(updateData).length === 0) {
-                console.log("No changes to save");
-                setIsEditing(false);
-                return;
-            }
-
-            const updatedEvent = await api.event.update(eventId, updateData);
-            console.log("Event updated successfully:", updatedEvent);
-            
-            // Refresh event data
-            await fetchEventData();
-            setIsEditing(false);
-            
-        } catch (error) {
-            console.error("Error updating event:", error);
-            alert("Failed to update event. Please try again.");
-        }
-    };
-
-    const handleBookMusician = async (bookingId: string) => {
-        if (!eventId) {
-            console.error("No event ID available");
-            return;
-        }
-
-        try {
-            console.log("Selecting musician for booking:", bookingId);
-            
-            // Update booking status to selected (not confirmed yet)
-            const { error: bookingError } = await supabase
-                .from('bookings')
-                .update({
-                    selected_at: new Date().toISOString()
-                })
-                .eq('id', bookingId);
-            
-            if (bookingError) {
-                throw bookingError;
-            }
-            
-            // Refresh data
-            await fetchEventData();
-            await fetchBookingsData();
-            
-            console.log("Musician selected successfully - waiting for confirmation");
-            
-        } catch (error) {
-            console.error("Error selecting musician:", error);
-            alert("Failed to select musician. Please try again.");
-        }
-    };
-
-    const handleRejectBooking = async (bookingId: string) => {
-        try {
-            console.log("Rejecting booking:", bookingId);
-            
-            // Update booking status to rejected
-            const { error: bookingError } = await supabase
-                .from('bookings')
-                .update({
-                    status: "rejected"
-                })
-                .eq('id', bookingId);
-            
-            if (bookingError) {
-                throw bookingError;
-            }
-            
-            // Refresh bookings data
-            await fetchBookingsData();
-            
-            console.log("Booking rejected successfully");
-            
-        } catch (error) {
-            console.error("Error rejecting booking:", error);
-            alert("Failed to reject booking. Please try again.");
-        }
-    };
-
-    const handleCommunicateBooking = async (bookingId: string) => {
-        try {
-            console.log("Setting booking to communicating:", bookingId);
-            
-            // Update booking status to communicating
-            const { error: bookingError } = await supabase
-                .from('bookings')
-                .update({
-                    status: "communicating"
-                })
-                .eq('id', bookingId);
-            
-            if (bookingError) {
-                throw bookingError;
-            }
-            
-            // Refresh bookings data
-            await fetchBookingsData();
-            
-            console.log("Booking set to communicating successfully");
-            
-        } catch (error) {
-            console.error("Error setting booking to communicating:", error);
-            alert("Failed to update booking status. Please try again.");
-        }
-    };
-
-    const handleSendMessage = () => {
-        if (!newMessage.trim()) return;
-        
-        console.log("Sending message:", newMessage);
-        // Here you would typically send the message via API
-        // For now, just clear the input
-        setNewMessage("");
-    };
-
-    // Early return if no eventId
+  const handleBookMusician = async (bookingId: string) => {
     if (!eventId) {
-        return (
-            <div className="container mx-auto p-6">
-                <div className="text-center">
-                    <h2 className="text-xl font-semibold mb-2">Invalid Event</h2>
-                    <p className="text-muted-foreground">No event ID provided.</p>
-                </div>
-            </div>
-        );
+      console.error("No event ID available");
+      return;
     }
 
+    try {
+      console.log("Selecting musician for booking:", bookingId);
+      
+      const { data, error } = await updateBookingStatus(bookingId, "selected");
+      
+      if (error) {
+        throw error;
+      }
+      
+      // Refresh data
+      await loadEventData();
+      await loadBookingsData();
+      
+      console.log("Musician selected successfully - waiting for confirmation");
+      
+    } catch (error) {
+      console.error("Error selecting musician:", error);
+      alert("Failed to select musician. Please try again.");
+    }
+  };
+
+  const handleRejectBooking = async (bookingId: string) => {
+    try {
+      console.log("Rejecting booking:", bookingId);
+      
+      const { data, error } = await updateBookingStatus(bookingId, "rejected");
+      
+      if (error) {
+        throw error;
+      }
+      
+      // Refresh bookings data
+      await loadBookingsData();
+      
+      console.log("Booking rejected successfully");
+      
+    } catch (error) {
+      console.error("Error rejecting booking:", error);
+      alert("Failed to reject booking. Please try again.");
+    }
+  };
+
+  const handleCommunicateBooking = async (bookingId: string) => {
+    try {
+      console.log("Setting booking to communicating:", bookingId);
+      
+      const { data, error } = await updateBookingStatus(bookingId, "communicating");
+      
+      if (error) {
+        throw error;
+      }
+      
+      // Refresh bookings data
+      await loadBookingsData();
+      
+      console.log("Booking set to communicating successfully");
+      
+    } catch (error) {
+      console.error("Error setting booking to communicating:", error);
+      alert("Failed to update booking status. Please try again.");
+    }
+  };
+
+  const handleSendMessage = () => {
+    if (!newMessage.trim()) return;
+    
+    console.log("Sending message:", newMessage);
+    // Here you would typically send the message via API
+    // For now, just clear the input
+    setNewMessage("");
+  };
+
+  // Early return if no eventId
+  if (!eventId) {
     return (
-        <div className="container mx-auto p-6 space-y-6">
-            {/* Loading State */}
-            {eventLoading || !event ? (
-                <div className="flex items-center justify-center min-h-[400px]">
-                    <div className="text-center">
-                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto mb-4"></div>
-                        <h2 className="text-xl font-semibold mb-2">Loading Event Data...</h2>
-                        <p className="text-muted-foreground">Please wait while we fetch the event information.</p>
-                    </div>
-                </div>
-            ) : (
-                <>
-            {/* Header */}
-            <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                    <Button asChild>
-                        <Link to="/venue-events">
-                            <ArrowLeft className="mr-2 h-4 w-4" />
-                            Back to Events
-                        </Link>
-                    </Button>
-                    <div>
-                        <h1 className="text-3xl font-bold">Event Management</h1>
-                        <p className="text-muted-foreground">
-                            Manage event details, bookings, and communications
-                        </p>
-                    </div>
-                </div>
-            </div>
-
-            {/* Event Title and Status */}
-            <Card>
-                <CardHeader>
-                    <div className="flex items-center justify-between">
-                        <div>
-                            {isEditing ? (
-                                <Input
-                                            value={editFormData?.title || ""}
-                                    onChange={(e) => setEditFormData({...editFormData, title: e.target.value})}
-                                    className="text-2xl font-bold border-0 p-0 h-auto"
-                                    placeholder="Event Title"
-                                />
-                            ) : (
-                                <CardTitle className="text-2xl">{event.title}</CardTitle>
-                            )}
-                            <p className="text-muted-foreground mt-2">
-                                {event.venue?.name} • {new Date(event.date).toLocaleDateString('en-US', {
-                                    weekday: 'long',
-                                    year: 'numeric',
-                                    month: 'long',
-                                    day: 'numeric'
-                                })}
-                            </p>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            {getStatusBadge(getEventStatus())}
-                            {event.musician && (
-                                <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
-                                    <Music className="mr-1 h-3 w-3" />
-                                    Musician Booked
-                                </Badge>
-                            )}
-                        </div>
-                    </div>
-                </CardHeader>
-            </Card>
-
-            {/* Main Content Tabs */}
-            <Tabs value={activeTab} onValueChange={setActiveTab}>
-                <TabsList className="grid w-full grid-cols-4">
-                            <TabsTrigger value="overview">Event Details</TabsTrigger>
-                            <TabsTrigger value="bookings">Event Activity ({bookingsData?.length || 0})</TabsTrigger>
-                    <TabsTrigger value="communications">Communications</TabsTrigger>
-                            <TabsTrigger value="history">Event History</TabsTrigger>
-                </TabsList>
-
-                        {/* Event Details Tab */}
-                <TabsContent value="overview" className="space-y-6">
-                            {eventLoading ? (
-                                <div className="flex items-center justify-center p-8">
-                                    <div className="text-center">
-                                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-4"></div>
-                                        <p>Loading event data...</p>
-                                    </div>
-                                    </div>
-                            ) : (
-                                <div className="grid gap-6 md:grid-cols-2">
-                                    {/* Event Information */}
-                                    <VenueEventDetailsCard
-                                        event={event}
-                                        isEditing={isEditing}
-                                        editFormData={editFormData}
-                                        setEditFormData={setEditFormData}
-                                        setIsEditing={setIsEditing}
-                                        handleSaveEvent={handleSaveEvent}
-                                    />
-
-                        {/* Venue Information */}
-                                    <VenueInfoCard venue={event.venue} />
-                                    </div>
-                                )}
-
-                    {/* Musician Information */}
-                            {event?.musician && (
-                                <VenueBookedMusicianCard musician={event.musician} />
-                            )}
-                </TabsContent>
-
-                {/* Bookings Tab */}
-                <TabsContent value="bookings" className="space-y-6">
-                            <VenueEventActivity
-                                bookingsData={bookingsData}
-                                bookingsLoading={bookingsLoading}
-                                sortColumn={sortColumn}
-                                sortDirection={sortDirection}
-                                setSortColumn={setSortColumn}
-                                setSortDirection={setSortDirection}
-                                handleRowClick={handleRowClick}
-                                handleBookMusician={handleBookMusician}
-                                handleRejectBooking={handleRejectBooking}
-                                handleCommunicateBooking={handleCommunicateBooking}
-                                eventGenres={event?.genres}
-                            />
-                </TabsContent>
-
-                {/* Communications Tab */}
-                <TabsContent value="communications" className="space-y-6">
-                            <VenueCommunicationsCard
-                                messages={messages}
-                                newMessage={newMessage}
-                                setNewMessage={setNewMessage}
-                                handleSendMessage={handleSendMessage}
-                            />
-                </TabsContent>
-
-                        {/* History Tab */}
-                        <TabsContent value="history" className="space-y-6">
-                            <VenueEventHistoryTab eventId={eventId} />
-                </TabsContent>
-            </Tabs>
-                                    </>
-                                )}
+      <div className="container mx-auto p-6">
+        <div className="text-center">
+          <h2 className="text-xl font-semibold mb-2">Invalid Event</h2>
+          <p className="text-muted-foreground">No event ID provided.</p>
         </div>
+      </div>
     );
+  }
+
+  // Get current event status
+  const getCurrentEventStatus = () => {
+    if (!event) return "loading";
+    return getEventStatus(event, bookingsData);
+  };
+
+  return (
+    <div className="container mx-auto p-6 space-y-6">
+      {/* Loading State */}
+      {eventLoading || !event ? (
+        <LoadingState />
+      ) : (
+        <>
+          {/* Header */}
+          <PageHeader />
+
+          {/* Event Title and Status */}
+          <EventTitleCard
+            event={event}
+            isEditing={isEditing}
+            editFormData={editFormData}
+            setEditFormData={setEditFormData}
+            getStatusBadge={(status) => <StatusBadge status={status} />}
+            getEventStatus={getCurrentEventStatus}
+          />
+
+          {/* Main Content Tabs */}
+          <TabNavigation
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+            bookingsCount={bookingsData?.length || 0}
+          >
+            {/* Event Details Tab */}
+            <TabsContent value="overview" className="space-y-6">
+              {eventLoading ? (
+                <LoadingState title="Loading event data..." message="Please wait..." />
+              ) : (
+                <div className="grid gap-6 md:grid-cols-2">
+                  {/* Event Information */}
+                  <VenueEventDetailsCard
+                    event={event}
+                    isEditing={isEditing}
+                    editFormData={editFormData}
+                    setEditFormData={setEditFormData}
+                    setIsEditing={setIsEditing}
+                    handleSaveEvent={handleSaveEvent}
+                  />
+
+                  {/* Venue Information */}
+                  <VenueInfoCard venue={event.venue} />
+                </div>
+              )}
+
+              {/* Musician Information */}
+              {event?.musician && (
+                <VenueBookedMusicianCard musician={event.musician} />
+              )}
+            </TabsContent>
+
+            {/* Bookings Tab */}
+            <TabsContent value="bookings" className="space-y-6">
+              <VenueEventActivity
+                bookingsData={bookingsData}
+                bookingsLoading={bookingsLoading}
+                sortColumn={sortColumn}
+                sortDirection={sortDirection}
+                setSortColumn={setSortColumn}
+                setSortDirection={setSortDirection}
+                handleRowClick={handleRowClick}
+                handleBookMusician={handleBookMusician}
+                handleRejectBooking={handleRejectBooking}
+                handleCommunicateBooking={handleCommunicateBooking}
+                eventGenres={event?.genres}
+              />
+            </TabsContent>
+
+            {/* Communications Tab */}
+            <TabsContent value="communications" className="space-y-6">
+              <VenueCommunicationsCard
+                messages={messages}
+                newMessage={newMessage}
+                setNewMessage={setNewMessage}
+                handleSendMessage={handleSendMessage}
+              />
+            </TabsContent>
+
+            {/* History Tab */}
+            <TabsContent value="history" className="space-y-6">
+              <VenueEventHistoryTab eventId={eventId} />
+            </TabsContent>
+          </TabNavigation>
+        </>
+      )}
+    </div>
+  );
 } 
