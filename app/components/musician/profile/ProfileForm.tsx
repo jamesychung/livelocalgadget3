@@ -16,8 +16,31 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({
   onSave,
   navigate
 }) => {
-  // Initial form data for a new musician profile
-  const initialFormData: MusicianFormData = {
+  const isEditMode = !!existingProfile;
+  
+  // Initial form data for a new musician profile or populated with existing data
+  const initialFormData: MusicianFormData = isEditMode ? {
+    firstName: user.first_name || "",
+    lastName: user.last_name || "",
+    email: user.email || "",
+    stageName: existingProfile.stage_name || "",
+    bio: existingProfile.bio || "",
+    genre: existingProfile.genre || "",
+    genres: existingProfile.genres || [],
+    instruments: existingProfile.instruments || [],
+    city: existingProfile.city || "",
+    state: existingProfile.state || "",
+    country: existingProfile.country || "",
+    phone: existingProfile.phone || "",
+    website: existingProfile.website || "",
+    experience: existingProfile.experience || "",
+    yearsExperience: existingProfile.years_experience || 0,
+    hourlyRate: existingProfile.hourly_rate || 0,
+    profilePicture: existingProfile.profile_picture || "",
+    audioFiles: existingProfile.audio_files || [],
+    socialLinks: existingProfile.social_links || [],
+    additionalPictures: existingProfile.additional_pictures || [],
+  } : {
     firstName: user.first_name || "",
     lastName: user.last_name || "",
     email: user.email || "",
@@ -55,8 +78,10 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({
           
           <Card>
             <ProfileHeader
-              title="Create Musician Profile"
-              description="Set up your musician profile to start getting bookings"
+              title={isEditMode ? "Edit Musician Profile" : "Create Musician Profile"}
+              description={isEditMode 
+                ? "Update your musician profile information" 
+                : "Set up your musician profile to start getting bookings"}
               error={error}
               success={success}
             >
