@@ -45,15 +45,8 @@ export default function VenueDashboard() {
     const { user } = useOutletContext<AuthOutletContext>();
     const navigate = useNavigate();
 
-    console.log("VenueDashboard - User:", user);
-    console.log("VenueDashboard - User ID:", user?.id);
-
     // Fetch venue profile
     const { data: venue, loading: venueLoading, error: venueError } = useVenueProfile(user?.id);
-
-    console.log("VenueDashboard - Venue data:", venue);
-    console.log("VenueDashboard - Venue loading:", venueLoading);
-    console.log("VenueDashboard - Venue error:", venueError);
 
     // Fetch bookings for this venue
     const { data: bookingsData, loading: bookingsLoading, error: bookingsError } = useSupabaseQuery(
@@ -124,19 +117,8 @@ export default function VenueDashboard() {
     const events: any[] = eventsData || [];
     const reviews: any[] = reviewsData || [];
 
-    // Debug: Log bookings with pending_cancel status
-    useEffect(() => {
-        const pendingCancelBookings = bookings.filter(b => b.status === 'pending_cancel');
-        console.log("🔍 Debug - Bookings with pending_cancel status:", pendingCancelBookings);
-        
-        // Log details of all bookings
-        console.log("🔍 Debug - All bookings:", bookings.map(b => ({
-            id: b.id,
-            status: b.status,
-            cancel_requested_by_role: b.cancel_requested_by_role,
-            musician_name: b.musician?.stage_name
-        })));
-    }, [bookings]);
+    // Filter bookings by status
+    const pendingCancelBookings = bookings.filter(b => b.status === 'pending_cancel');
 
     useEffect(() => {
         if (venueError) console.error("Error loading venue data:", venueError);

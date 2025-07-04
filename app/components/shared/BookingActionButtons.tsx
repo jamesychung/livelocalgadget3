@@ -47,21 +47,10 @@ export const BookingActionButtons: React.FC<BookingActionButtonsProps> = ({
     const actions = [];
     
     // Debug info
-    console.log("🔍 Debug - BookingActionButtons:", {
-      currentStatus,
-      isVenue,
-      isMusician,
-      userRole,
-      bookingId: booking.id,
-      cancel_requested_by_role: booking.cancel_requested_by_role,
-      musician_id: booking.musician_id,
-      venue_id: booking.venue_id,
-      currentUser
-    });
     
     // Debug info for pending_cancel bookings
     if (currentStatus === 'pending_cancel') {
-      console.log("🔍 IMPORTANT - Pending cancel booking details:", booking);
+      
     }
     
     if (currentStatus === BOOKING_STATUSES.APPLIED && isVenue) {
@@ -114,13 +103,7 @@ export const BookingActionButtons: React.FC<BookingActionButtonsProps> = ({
           : cancellationReason;
           
         // Debug info for cancel request
-        console.log("🔍 Debug - Requesting cancellation:", {
-          updateData,
-          isMusician,
-          isVenue,
-          userRole,
-          currentUser
-        });
+        
       } else if (selectedAction === BOOKING_STATUSES.CANCELLED) {
         updateData.status = BOOKING_STATUSES.CANCELLED;
         updateData.cancelled_at = new Date().toISOString();
@@ -128,14 +111,7 @@ export const BookingActionButtons: React.FC<BookingActionButtonsProps> = ({
         updateData.cancel_confirmed_by_role = isMusician ? 'musician' : 'venue';
         
         // Debug info for cancel confirmation
-        console.log("🔍 Debug - Confirming cancellation:", {
-          updateData,
-          isMusician,
-          isVenue,
-          userRole,
-          currentUser,
-          original_booking: booking
-        });
+        
       } else {
         updateData.status = selectedAction;
       }

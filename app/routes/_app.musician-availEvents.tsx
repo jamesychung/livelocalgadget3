@@ -39,15 +39,6 @@ export default function MusicianAvailEventsPage() {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    // Debug user context
-    console.log("👤 Musician Available Events - User context:", {
-        user,
-        userId: user?.id,
-        musician: user?.musician,
-        musicianId: user?.musician?.id,
-        stageName: user?.musician?.stageName
-    });
-
     // Fetch data from Supabase
     useEffect(() => {
         const fetchData = async () => {
@@ -116,15 +107,6 @@ export default function MusicianAvailEventsPage() {
                 setMusicians(musiciansData || []);
                 setBookings(bookingsData || []);
                 
-                // Debug: Log bookings statuses
-                console.log("🔍 Debug - Bookings statuses:", bookingsData?.map(b => ({
-                    id: b.id,
-                    status: b.status,
-                    event_id: b.event_id,
-                    musician_id: b.musician_id,
-                    cancel_requested_by_role: b.cancel_requested_by_role
-                })));
-                
             } catch (err: any) {
                 console.error("Error fetching data:", err);
                 setError(err.message);
@@ -146,12 +128,6 @@ export default function MusicianAvailEventsPage() {
         );
         
         if (!booking) return { status: "available" };
-        
-        console.log(`🔍 Debug - Musician application status for event ${eventId}:`, {
-            status: booking.status,
-            booking_id: booking.id,
-            cancel_requested_by_role: booking.cancel_requested_by_role
-        });
         
         return { status: booking.status, booking };
     };
@@ -213,21 +189,6 @@ export default function MusicianAvailEventsPage() {
                 };
         }
     };
-
-    // Debug: Log what we're getting from the queries
-    console.log("🔍 Debug - Events query result:", {
-        eventsCount: events.length,
-        isLoading,
-        error
-    });
-    console.log("🔍 Debug - Sample events:", events.slice(0, 3));
-    console.log("🔍 Debug - Sample events with venue_id:", events.slice(0, 3).map(e => ({
-        id: e.id,
-        title: e.title,
-        venue_id: e.venue_id,
-        venue: e.venue
-    })));
-    console.log("🔍 Debug - Sample musicians:", musicians.slice(0, 3));
 
     // Helper function to check if genres match
     const doGenresMatch = (eventGenres: string[], musicianGenres: string[]): boolean => {
@@ -393,11 +354,10 @@ export default function MusicianAvailEventsPage() {
         }
 
         try {
-            console.log("🎯 Applying to event:", selectedEvent.id);
-            console.log("👤 Musician ID:", user.musician.id);
-            console.log("💰 Proposed rate:", user.musician.hourly_rate || 0);
-            console.log("🏢 Event venue_id:", selectedEvent.venue_id);
-            console.log("🏢 Event venue object:", selectedEvent.venue);
+            
+            
+            
+            
 
             // Check if musician already has a booking for this event
             const { data: existingBooking, error: checkError } = await supabase
@@ -414,7 +374,7 @@ export default function MusicianAvailEventsPage() {
             }
 
             if (existingBooking) {
-                console.log("⚠️ Musician already has a booking for this event:", existingBooking);
+                
                 alert("You have already applied to this event. Please check your applications.");
                 setIsDialogOpen(false);
                 setSelectedEvent(null);
@@ -447,7 +407,7 @@ export default function MusicianAvailEventsPage() {
                 return;
             }
 
-            console.log("✅ Booking created successfully:", booking);
+            
             
             // Update local state to reflect the new booking
             setBookings(prev => [...prev, booking]);
