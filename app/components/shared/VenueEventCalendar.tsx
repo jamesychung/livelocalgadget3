@@ -27,6 +27,7 @@ interface Event {
     totalAmount?: number;
     notes?: string;
     // Add booking-related fields
+    bookings?: any[]; // Array of booking objects
     confirmedBookings?: number;
     pendingApplications?: number;
     hasConfirmedBooking?: boolean;
@@ -79,6 +80,7 @@ export default function VenueEventCalendar({
         
         return {
             ...event,
+            bookings: eventBookings, // Include the actual booking objects
             confirmedBookings: confirmedBookings.length,
             pendingApplications: pendingApplications.length,
             hasConfirmedBooking: confirmedBookings.length > 0
@@ -413,6 +415,49 @@ export default function VenueEventCalendar({
                         >
                             Bookings
                         </Button>
+                    </div>
+                </CardContent>
+            </Card>
+
+            {/* Status Legend */}
+            <Card>
+                <CardHeader>
+                    <CardTitle>Status Legend</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+                        <div className="flex items-center gap-2">
+                            <div className="w-3 h-3 rounded bg-green-100 border border-green-200"></div>
+                            <span>Confirmed</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <div className="w-3 h-3 rounded bg-orange-100 border border-orange-200"></div>
+                            <span>Cancel Pending</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <div className="w-3 h-3 rounded bg-red-100 border border-red-200"></div>
+                            <span>Cancelled</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <div className="w-3 h-3 rounded bg-yellow-100 border border-yellow-200"></div>
+                            <span>Selected</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <div className="w-3 h-3 rounded bg-blue-100 border border-blue-200"></div>
+                            <span>Applied</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <div className="w-3 h-3 rounded bg-purple-100 border border-purple-200"></div>
+                            <span>Completed</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <div className="w-3 h-3 rounded bg-gray-100 border border-gray-200"></div>
+                            <span>Open Event</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <div className="w-3 h-3 rounded bg-indigo-100 border border-indigo-200"></div>
+                            <span>Invited Event</span>
+                        </div>
                     </div>
                 </CardContent>
             </Card>

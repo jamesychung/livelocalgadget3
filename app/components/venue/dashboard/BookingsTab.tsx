@@ -202,6 +202,11 @@ export const BookingsTab: React.FC<BookingsTabProps> = ({ bookings, venue, event
         event={selectedEvent}
         booking={selectedBooking}
         viewMode="venue"
+        onStatusUpdate={(updatedBooking) => {
+          // For now, just refresh the page to update the data
+          // In a more sophisticated app, you'd update the state
+          window.location.reload();
+        }}
       />
     </div>
   );

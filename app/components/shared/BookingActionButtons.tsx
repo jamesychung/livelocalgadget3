@@ -75,9 +75,18 @@ export const BookingActionButtons: React.FC<BookingActionButtonsProps> = ({
     ) {
       actions.push({ value: 'pending_cancel', label: 'Cancel Booking' });
     }
-    // If pending_cancel, show the confirm cancel button to everyone
+    
+    // If pending_cancel, show the confirm cancel button ONLY to the other party
     if (currentStatus === 'pending_cancel') {
-      actions.push({ value: BOOKING_STATUSES.CANCELLED, label: 'Confirm Cancel' });
+      // Only show "Confirm Cancel" if the OTHER party can confirm
+      // If venue requested cancel, only musician can confirm
+      // If musician requested cancel, only venue can confirm
+      const cancelRequestedByVenue = booking.cancel_requested_by_role === 'venue';
+      const cancelRequestedByMusician = booking.cancel_requested_by_role === 'musician';
+      
+      if ((cancelRequestedByVenue && isMusician) || (cancelRequestedByMusician && isVenue)) {
+        actions.push({ value: BOOKING_STATUSES.CANCELLED, label: 'Confirm Cancel' });
+      }
     }
     return actions;
   };

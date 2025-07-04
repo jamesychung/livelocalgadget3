@@ -128,6 +128,7 @@ export interface OverviewTabProps {
   venue: VenueProfile;
   recentEvents: Event[];
   pendingBookings: Booking[];
+  confirmedBookings: Booking[];
   pendingCancelBookings: Booking[];
 }
 

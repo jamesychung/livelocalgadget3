@@ -13,11 +13,12 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
   venue, 
   recentEvents, 
   pendingBookings,
+  confirmedBookings,
   pendingCancelBookings 
 }) => {
+  const [isEventDialogOpen, setIsEventDialogOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
-  const [isEventDialogOpen, setIsEventDialogOpen] = useState(false);
 
   const handleEventClick = (booking: Booking) => {
     setSelectedEvent(booking.event);
@@ -31,9 +32,6 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
     setSelectedBooking(null);
   };
 
-  // Get confirmed bookings from pendingBookings data (we'll need to pass this from parent)
-  const confirmedBookings = pendingBookings.filter(booking => booking.status === 'confirmed');
-  
   return (
     <div className="space-y-6">
       {/* Confirmed Bookings - Top Priority Section */}
@@ -142,6 +140,11 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
         event={selectedEvent}
         booking={selectedBooking}
         viewMode="venue"
+        onStatusUpdate={(updatedBooking) => {
+          // For now, just refresh the page to update the data
+          // In a more sophisticated app, you'd update the state
+          window.location.reload();
+        }}
       />
     </div>
   );
@@ -235,6 +238,18 @@ const ConfirmedBookingItem: React.FC<{
 };
 
 const EventItem: React.FC<{ event: Event }> = ({ event }) => {
+  // Determine the event status to display
+  const getEventDisplayStatus = () => {
+    // If event has a status, use it
+    if (event.status) {
+      return event.status;
+    }
+    
+    // If no explicit status, determine based on context
+    // For now, default to "open" for events without a status
+    return "open";
+  };
+
   return (
     <div className="flex items-center justify-between border-b pb-2 last:border-0">
       <div>
@@ -242,7 +257,7 @@ const EventItem: React.FC<{ event: Event }> = ({ event }) => {
         <div className="flex items-center text-sm text-gray-500">
           <span>{formatDate(event.date)}</span>
           <span className="mx-2">•</span>
-          <StatusBadge status={event.status} />
+          <StatusBadge status={getEventDisplayStatus()} />
         </div>
       </div>
       <Link to={`/venue-event/${event.id}`}>

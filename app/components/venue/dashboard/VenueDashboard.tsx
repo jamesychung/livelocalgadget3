@@ -180,7 +180,8 @@ export const VenueDashboard: React.FC = () => {
           <OverviewTab 
             venue={venue}
             recentEvents={recentEvents}
-            pendingBookings={[...pendingBookings, ...confirmedBookings]}
+            pendingBookings={pendingBookings}
+            confirmedBookings={confirmedBookings}
             pendingCancelBookings={pendingCancelBookings}
           />
         </TabsContent>

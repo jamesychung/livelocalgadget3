@@ -27,9 +27,26 @@ interface StatusBadgeProps {
  * Status badge component
  */
 export const StatusBadge: React.FC<StatusBadgeProps> = ({ status }) => {
+  // Get user-friendly status text
+  const getStatusText = (status: string) => {
+    const statusLabels: Record<string, string> = {
+      pending: "Pending",
+      applied: "Applied",
+      selected: "Selected",
+      confirmed: "Confirmed",
+      cancelled: "Cancelled",
+      completed: "Completed",
+      open: "Open Event",
+      invited: "Invited Event",
+      pending_cancel: "Cancel Pending",
+    };
+    
+    return statusLabels[status?.toLowerCase()] || (status ? status.charAt(0).toUpperCase() + status.slice(1) : "Open Event");
+  };
+
   return (
     <Badge className={getStatusBadgeClass(status)}>
-      {status ? status.charAt(0).toUpperCase() + status.slice(1) : "Unknown"}
+      {getStatusText(status)}
     </Badge>
   );
 }; 

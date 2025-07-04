@@ -4,6 +4,8 @@ import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { Calendar, Clock, User, Phone, Mail, MapPin, DollarSign, Users } from "lucide-react";
+import { BookingActionButtons } from "./BookingActionButtons";
+import { useAuth } from "../../lib/auth";
 
 interface EventBookingDialogProps {
   isOpen: boolean;
@@ -11,6 +13,7 @@ interface EventBookingDialogProps {
   event: any;
   booking?: any;
   viewMode?: 'venue' | 'musician';
+  onStatusUpdate?: (updatedBooking: any) => void;
 }
 
 export const EventBookingDialog: React.FC<EventBookingDialogProps> = ({
@@ -18,8 +21,11 @@ export const EventBookingDialog: React.FC<EventBookingDialogProps> = ({
   onClose,
   event,
   booking,
-  viewMode = 'venue'
+  viewMode = 'venue',
+  onStatusUpdate
 }) => {
+  const { user } = useAuth();
+  
   const formatTime = (timeString?: string) => {
     if (!timeString) return '';
     const [hours, minutes] = timeString.split(':');
@@ -75,19 +81,29 @@ export const EventBookingDialog: React.FC<EventBookingDialogProps> = ({
       });
     }
     
+    if (booking?.cancel_requested_at) {
+      const requestedBy = booking.cancel_requested_by_role === 'venue' ? 'Venue' : 'Musician';
+      activities.push({
+        timestamp: booking.cancel_requested_at,
+        action: 'Cancellation Requested',
+        description: `${requestedBy} requested to cancel this booking${booking.cancellation_reason ? ` - ${booking.cancellation_reason}` : ''}`
+      });
+    }
+    
+    if (booking?.cancelled_at) {
+      const confirmedBy = booking.cancel_confirmed_by_role === 'venue' ? 'Venue' : 'Musician';
+      activities.push({
+        timestamp: booking.cancelled_at,
+        action: 'Booking Cancelled',
+        description: `${confirmedBy} confirmed the cancellation${booking.cancellation_reason ? ` - ${booking.cancellation_reason}` : ''}`
+      });
+    }
+    
     if (booking?.completed_at) {
       activities.push({
         timestamp: booking.completed_at,
         action: 'Event Completed',
         description: 'Event was successfully completed'
-      });
-    }
-    
-    if (booking?.cancelled_at) {
-      activities.push({
-        timestamp: booking.cancelled_at,
-        action: 'Booking Cancelled',
-        description: booking.cancellation_reason || 'Booking was cancelled'
       });
     }
     
@@ -208,6 +224,22 @@ export const EventBookingDialog: React.FC<EventBookingDialogProps> = ({
                           </Button>
                         )}
                       </div>
+                      
+                      {/* Booking Action Buttons */}
+                      {booking && user && (
+                        <div className="mt-4 pt-4 border-t">
+                          <BookingActionButtons
+                            booking={booking}
+                            currentUser={user}
+                            onStatusUpdate={(updatedBooking) => {
+                              if (onStatusUpdate) {
+                                onStatusUpdate(updatedBooking);
+                              }
+                            }}
+                            className="flex-wrap gap-2"
+                          />
+                        </div>
+                      )}
                     </div>
                   ) : (
                     <div className="space-y-3">
