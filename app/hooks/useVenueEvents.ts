@@ -84,6 +84,7 @@ export function useVenueEvents(user: any) {
                         available_tickets,
                         ticket_price,
                         venue_id,
+                        created_at,
                         venue:venues(id, name),
                         musician:musicians(id, stage_name, genre, city, state)
                     `)
@@ -159,7 +160,17 @@ export function useVenueEvents(user: any) {
                         proposed_rate,
                         musician_pitch,
                         created_at,
-                        event:events(id, title, date, venue:venues(id, name)),
+                        applied_at,
+                        selected_at,
+                        confirmed_at,
+                        cancelled_at,
+                        completed_at,
+                        cancel_requested_at,
+                        cancel_requested_by_role,
+                        cancel_confirmed_by_role,
+                        cancellation_reason,
+                        completed_by_role,
+                        event:events(id, title, date, start_time, end_time, created_at, venue:venues(id, name)),
                         musician:musicians(id, stage_name, genres, city, state, hourly_rate),
                         booked_by
                     `)

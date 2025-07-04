@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useOutletContext } from 'react-router-dom';
 import type { AuthOutletContext } from "./_app";
 import { useVenueEvents } from "../hooks/useVenueEvents";
@@ -113,11 +113,10 @@ export default function VenueEventsWorkflowBasedPage() {
     
     const eventsWithPendingApplications = getEventsWithPendingApplications();
     
-    const pastEvents = allEvents.filter(event => {
-        const eventDate = new Date(event.date);
-        const now = new Date();
-        return eventDate < now || event.eventStatus === 'completed' || event.eventStatus === 'cancelled';
-    });
+    // Only show completed or confirmed cancelled events in history
+    const pastEvents = allEvents.filter(event => 
+        event.eventStatus === 'completed' || event.eventStatus === 'cancelled'
+    );
 
     const handleViewApplications = (event: any) => {
         setSelectedEventForApplications(event);
@@ -235,6 +234,21 @@ export default function VenueEventsWorkflowBasedPage() {
                                         {activeEvents.map((event) => {
                                             const applicationCount = getApplicationCount(event.id);
                                             const pendingCount = getPendingApplications().filter(b => b.event?.id === event.id).length;
+                                            const eventBookings = allBookings.filter(b => b.event?.id === event.id);
+                                            const confirmedBookings = eventBookings.filter(b => b.status === 'confirmed');
+                                            const selectedBookings = eventBookings.filter(b => b.status === 'selected');
+                                            const isConfirmed = confirmedBookings.length > 0;
+                                            const isSelected = selectedBookings.length > 0;
+                                            
+                                            // Determine the overall event status based on bookings
+                                            let eventDisplayStatus = event.eventStatus;
+                                            if (isConfirmed) {
+                                                eventDisplayStatus = 'confirmed';
+                                            } else if (isSelected) {
+                                                eventDisplayStatus = 'selected';
+                                            } else if (pendingCount > 0) {
+                                                eventDisplayStatus = 'pending_review';
+                                            }
                                             
                                             return (
                                                 <Card key={event.id} className="hover:shadow-lg transition-shadow duration-200 cursor-pointer">
@@ -264,8 +278,9 @@ export default function VenueEventsWorkflowBasedPage() {
                                                                             </div>
                                                                         </div>
                                                                         <div className="flex items-center gap-2">
-                                                                            <EventStatusBadge status={event.eventStatus} />
-                                                                            {applicationCount > 0 && (
+                                                                            <EventStatusBadge status={eventDisplayStatus} />
+                                                                            {/* Only show applicant count if event is not confirmed */}
+                                                                            {!isConfirmed && applicationCount > 0 && (
                                                                                 <Badge variant="secondary" className="bg-blue-100 text-blue-800">
                                                                                     <Users className="h-3 w-3 mr-1" />
                                                                                     {applicationCount} {applicationCount === 1 ? 'application' : 'applications'}
@@ -290,7 +305,8 @@ export default function VenueEventsWorkflowBasedPage() {
                                                                 <Edit className="h-4 w-4" />
                                                                 Edit
                                                             </Button>
-                                                            {applicationCount > 0 && (
+                                                            {/* Show Review Applications button only if event is not confirmed and has applications */}
+                                                            {!isConfirmed && applicationCount > 0 && (
                                                                 <Button
                                                                     variant="default"
                                                                     size="sm"
@@ -299,6 +315,18 @@ export default function VenueEventsWorkflowBasedPage() {
                                                                 >
                                                                     <Users className="h-4 w-4" />
                                                                     Review Applications ({applicationCount})
+                                                                </Button>
+                                                            )}
+                                                            {/* Show View Event button for confirmed events */}
+                                                            {isConfirmed && (
+                                                                <Button
+                                                                    variant="default"
+                                                                    size="sm"
+                                                                    onClick={e => { e.stopPropagation(); handleEventClick(event); }}
+                                                                    className="flex items-center gap-1"
+                                                                >
+                                                                    <Eye className="h-4 w-4" />
+                                                                    View Event
                                                                 </Button>
                                                             )}
                                                         </div>
@@ -342,54 +370,60 @@ export default function VenueEventsWorkflowBasedPage() {
                                             const pendingCount = getPendingApplications().filter(b => b.event?.id === event.id).length;
                                             
                                             return (
-                                                <Card key={event.id} className="border-l-4 border-l-orange-500">
+                                                <Card key={event.id} className="hover:shadow-lg transition-shadow duration-200 cursor-pointer border-l-4 border-l-orange-500">
                                                     <CardContent className="pt-6">
-                                                        <div className="flex items-start justify-between">
-                                                            <div className="flex-1">
-                                                                <div className="flex items-start justify-between mb-3">
-                                                                    <div>
-                                                                        <h3 className="text-lg font-semibold text-gray-900 mb-1">
-                                                                            {event.title}
-                                                                        </h3>
-                                                                        <div className="flex items-center gap-4 text-sm text-gray-600">
-                                                                            <div className="flex items-center gap-1">
-                                                                                <Calendar className="h-4 w-4" />
-                                                                                <span>{formatDate(event.date)}</span>
-                                                                            </div>
-                                                                            <div className="flex items-center gap-1">
-                                                                                <span>
-                                                                                    {formatTime(event.startTime)} - {formatTime(event.endTime)}
-                                                                                </span>
+                                                        <div
+                                                            className="flex flex-col gap-2"
+                                                            onClick={() => { console.log('Applications card clicked', event); handleViewApplications(event); }}
+                                                            style={{ cursor: 'pointer' }}
+                                                        >
+                                                            <div className="flex items-start justify-between">
+                                                                <div className="flex-1">
+                                                                    <div className="flex items-start justify-between mb-3">
+                                                                        <div>
+                                                                            <h3 className="text-lg font-semibold text-gray-900 mb-1">
+                                                                                {event.title}
+                                                                            </h3>
+                                                                            <div className="flex items-center gap-4 text-sm text-gray-600">
+                                                                                <div className="flex items-center gap-1">
+                                                                                    <Calendar className="h-4 w-4" />
+                                                                                    <span>{formatDate(event.date)}</span>
+                                                                                </div>
+                                                                                <div className="flex items-center gap-1">
+                                                                                    <span>
+                                                                                        {formatTime(event.startTime)} - {formatTime(event.endTime)}
+                                                                                    </span>
+                                                                                </div>
                                                                             </div>
                                                                         </div>
+                                                                        <Badge variant="destructive" className="bg-orange-100 text-orange-800">
+                                                                            <AlertCircle className="h-3 w-3 mr-1" />
+                                                                            {pendingCount} pending review
+                                                                        </Badge>
                                                                     </div>
-                                                                    <Badge variant="destructive" className="bg-orange-100 text-orange-800">
-                                                                        <AlertCircle className="h-3 w-3 mr-1" />
-                                                                        {pendingCount} pending review
-                                                                    </Badge>
-                                                                </div>
-                                                                
-                                                                <div className="flex items-center gap-2">
-                                                                    <Button
-                                                                        variant="default"
-                                                                        size="sm"
-                                                                        onClick={() => handleViewApplications(event)}
-                                                                        className="flex items-center gap-1"
-                                                                    >
-                                                                        <Users className="h-4 w-4" />
-                                                                        Review Applications
-                                                                    </Button>
-                                                                    <Button
-                                                                        variant="outline"
-                                                                        size="sm"
-                                                                        onClick={() => handleEventClick(event)}
-                                                                        className="flex items-center gap-1"
-                                                                    >
-                                                                        <Eye className="h-4 w-4" />
-                                                                        View Event
-                                                                    </Button>
                                                                 </div>
                                                             </div>
+                                                        </div>
+                                                        {/* Action buttons outside clickable area */}
+                                                        <div className="flex items-center gap-2 mt-2">
+                                                            <Button
+                                                                variant="default"
+                                                                size="sm"
+                                                                onClick={e => { e.stopPropagation(); handleViewApplications(event); }}
+                                                                className="flex items-center gap-1"
+                                                            >
+                                                                <Users className="h-4 w-4" />
+                                                                Review Applications
+                                                            </Button>
+                                                            <Button
+                                                                variant="outline"
+                                                                size="sm"
+                                                                onClick={e => { e.stopPropagation(); handleEventClick(event); }}
+                                                                className="flex items-center gap-1"
+                                                            >
+                                                                <Eye className="h-4 w-4" />
+                                                                View Event
+                                                            </Button>
                                                         </div>
                                                     </CardContent>
                                                 </Card>
@@ -439,54 +473,75 @@ export default function VenueEventsWorkflowBasedPage() {
                             <CardContent>
                                 {pastEvents.length > 0 ? (
                                     <div className="space-y-4">
-                                        {pastEvents.map((event) => (
-                                            <Card key={event.id} className="border-l-4 border-l-gray-300">
-                                                <CardContent className="pt-6">
-                                                    <div className="flex items-start justify-between">
-                                                        <div className="flex-1">
-                                                            <div className="flex items-start justify-between mb-3">
-                                                                <div>
-                                                                    <h3 className="text-lg font-semibold text-gray-900 mb-1">
-                                                                        {event.title}
-                                                                    </h3>
-                                                                    <div className="flex items-center gap-4 text-sm text-gray-600">
-                                                                        <div className="flex items-center gap-1">
-                                                                            <Calendar className="h-4 w-4" />
-                                                                            <span>{formatDate(event.date)}</span>
+                                        {pastEvents.map((event) => {
+                                            const applicationCount = getApplicationCount(event.id);
+                                            const borderColor = event.eventStatus === 'completed' ? 'border-l-green-500' : 'border-l-gray-500';
+                                            
+                                            return (
+                                                <Card key={event.id} className={`hover:shadow-lg transition-shadow duration-200 cursor-pointer border-l-4 ${borderColor}`}>
+                                                    <CardContent className="pt-6">
+                                                        <div
+                                                            className="flex flex-col gap-2"
+                                                            onClick={() => { console.log('Card clicked', event); handleEventClick(event); }}
+                                                            style={{ cursor: 'pointer' }}
+                                                        >
+                                                            <div className="flex items-start justify-between">
+                                                                <div className="flex-1">
+                                                                    <div className="flex items-start justify-between mb-3">
+                                                                        <div>
+                                                                            <h3 className="text-lg font-semibold text-gray-900 mb-1">
+                                                                                {event.title}
+                                                                            </h3>
+                                                                            <div className="flex items-center gap-4 text-sm text-gray-600">
+                                                                                <div className="flex items-center gap-1">
+                                                                                    <Calendar className="h-4 w-4" />
+                                                                                    <span>{formatDate(event.date)}</span>
+                                                                                </div>
+                                                                                <div className="flex items-center gap-1">
+                                                                                    <span>
+                                                                                        {formatTime(event.startTime)} - {formatTime(event.endTime)}
+                                                                                    </span>
+                                                                                </div>
+                                                                            </div>
                                                                         </div>
-                                                                        <div className="flex items-center gap-1">
-                                                                            <span>
-                                                                                {formatTime(event.startTime)} - {formatTime(event.endTime)}
-                                                                            </span>
+                                                                        <div className="flex items-center gap-2">
+                                                                            <EventStatusBadge status={event.eventStatus} />
+                                                                            {applicationCount > 0 && (
+                                                                                <Badge variant="secondary" className="bg-gray-100 text-gray-800">
+                                                                                    <Users className="h-3 w-3 mr-1" />
+                                                                                    {applicationCount} {applicationCount === 1 ? 'application' : 'applications'}
+                                                                                </Badge>
+                                                                            )}
                                                                         </div>
                                                                     </div>
                                                                 </div>
-                                                                <EventStatusBadge status={event.eventStatus} />
                                                             </div>
-                                                            
-                                                            <div className="flex items-center gap-2">
+                                                        </div>
+                                                        {/* Action buttons outside clickable area */}
+                                                        <div className="flex items-center gap-2 mt-2">
+                                                            {applicationCount > 0 && (
                                                                 <Button
                                                                     variant="outline"
                                                                     size="sm"
-                                                                    onClick={() => handleEventClick(event)}
+                                                                    onClick={e => { e.stopPropagation(); handleViewApplications(event); }}
                                                                     className="flex items-center gap-1"
                                                                 >
-                                                                    <Eye className="h-4 w-4" />
-                                                                    View Details
+                                                                    <Users className="h-4 w-4" />
+                                                                    View Applications ({applicationCount})
                                                                 </Button>
-                                                            </div>
+                                                            )}
                                                         </div>
-                                                    </div>
-                                                </CardContent>
-                                            </Card>
-                                        ))}
+                                                    </CardContent>
+                                                </Card>
+                                            );
+                                        })}
                                     </div>
                                 ) : (
                                     <div className="text-center py-8">
                                         <Clock className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                                         <h3 className="text-lg font-medium mb-2">No Past Events</h3>
                                         <p className="text-muted-foreground">
-                                            Your event history will appear here once you have completed events.
+                                            Your event history will appear here once you have completed or cancelled events.
                                         </p>
                                     </div>
                                 )}
@@ -510,7 +565,7 @@ export default function VenueEventsWorkflowBasedPage() {
                     open={applicationsDialogOpen}
                     onOpenChange={setApplicationsDialogOpen}
                     selectedEvent={selectedEventForApplications}
-                    getEventApplications={(eventId) => venueBookings.filter(b => b.event?.id === eventId)}
+                    getEventApplications={(eventId) => allBookings.filter(b => b.event?.id === eventId)}
                     onAcceptApplication={(bookingId) => handleBookApplication(bookingId, selectedEventForApplications?.id || '')}
                     onRejectApplication={handleRejectApplication}
                 />
@@ -529,7 +584,16 @@ export default function VenueEventsWorkflowBasedPage() {
                     handleMessageVenue={() => {}}
                     handleViewBookingDetails={() => {}}
                     handleBookingStatusUpdate={() => {}}
-                    getMusicianApplicationStatus={() => ({ status: "none" })}
+                    getMusicianApplicationStatus={(eventId) => {
+                        // For venue view, we want to show all bookings for this event
+                        // Since this is a venue viewing their own event, we'll show the first booking as an example
+                        const eventBookings = allBookings.filter(b => b.event?.id === eventId);
+                        const firstBooking = eventBookings.length > 0 ? eventBookings[0] : null;
+                        return { 
+                            status: firstBooking?.status || "none", 
+                            booking: firstBooking 
+                        };
+                    }}
                     getMatchingMusicians={() => []}
                 />
         </div>

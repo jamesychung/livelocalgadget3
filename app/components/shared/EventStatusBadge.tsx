@@ -25,6 +25,14 @@ export function EventStatusBadge({
                 className: "bg-green-100 text-green-800",
                 text: "Confirmed"
             },
+            selected: {
+                className: "bg-yellow-100 text-yellow-800", 
+                text: "Musician Selected"
+            },
+            pending_review: {
+                className: "bg-orange-100 text-orange-800",
+                text: "Pending Review"
+            },
             proposed: {
                 className: "bg-yellow-100 text-yellow-800", 
                 text: "Proposed"
@@ -80,6 +88,14 @@ export function getStatusBadge(status: string | null | undefined) {
             confirmed: {
                 className: "bg-green-100 text-green-800",
                 text: "Confirmed"
+            },
+            selected: {
+                className: "bg-yellow-100 text-yellow-800", 
+                text: "Musician Selected"
+            },
+            pending_review: {
+                className: "bg-orange-100 text-orange-800",
+                text: "Pending Review"
             },
             proposed: {
                 className: "bg-yellow-100 text-yellow-800", 

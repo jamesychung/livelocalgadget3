@@ -5,6 +5,7 @@ import { Badge } from "../ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { Calendar, Clock, User, MapPin, DollarSign, MessageSquare, History } from "lucide-react";
 import { BookingActionButtons } from "./BookingActionButtons";
+import { ActivityLog, generateBookingActivityItems } from "./ActivityLog";
 
 interface BookingDetailDialogProps {
   isOpen: boolean;
@@ -29,81 +30,7 @@ export const BookingDetailDialog: React.FC<BookingDetailDialogProps> = ({
     return new Date(dateString).toLocaleString();
   };
 
-  // Generate activity log items from booking timestamps
-  const generateActivityItems = () => {
-    const activityItems = [];
-    
-    // Add event creation as the first activity
-    if (booking.event?.created_at) {
-      activityItems.push({
-        timestamp: new Date(booking.event.created_at),
-        action: "Event created",
-        actor: "Venue",
-        details: `Event "${booking.event.title}" was created`
-      });
-    }
-    
-    if (booking.applied_at) {
-      activityItems.push({
-        timestamp: new Date(booking.applied_at),
-        action: "Applied to event",
-        actor: "Musician",
-        details: `Applied with rate: $${booking.proposed_rate || 'Not specified'}`
-      });
-    }
-    
-    if (booking.selected_at) {
-      activityItems.push({
-        timestamp: new Date(booking.selected_at),
-        action: "Selected by venue",
-        actor: "Venue",
-        details: "Venue selected this musician for the event"
-      });
-    }
-    
-    if (booking.confirmed_at) {
-      activityItems.push({
-        timestamp: new Date(booking.confirmed_at),
-        action: "Booking confirmed",
-        actor: "Musician",
-        details: "Musician confirmed the booking"
-      });
-    }
-    
-    if (booking.cancel_requested_at) {
-      const requestedBy = booking.cancel_requested_by_role === 'venue' ? 'Venue' : 'Musician';
-      activityItems.push({
-        timestamp: new Date(booking.cancel_requested_at),
-        action: "Cancellation requested",
-        actor: requestedBy,
-        details: booking.cancellation_reason ? `Reason: ${booking.cancellation_reason}` : "No reason provided"
-      });
-    }
-    
-    if (booking.cancelled_at) {
-      const confirmedBy = booking.cancel_confirmed_by_role === 'venue' ? 'Venue' : 'Musician';
-      activityItems.push({
-        timestamp: new Date(booking.cancelled_at),
-        action: "Cancellation confirmed",
-        actor: confirmedBy,
-        details: "Booking was cancelled"
-      });
-    }
-    
-    if (booking.completed_at) {
-      activityItems.push({
-        timestamp: new Date(booking.completed_at),
-        action: "Event completed",
-        actor: booking.completed_by_role ? (booking.completed_by_role === 'venue' ? 'Venue' : 'Musician') : "System",
-        details: "Event was marked as completed"
-      });
-    }
-    
-    // Sort by timestamp, oldest first for chronological order
-    return activityItems.sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
-  };
-
-  const activityItems = generateActivityItems();
+  const activityItems = generateBookingActivityItems(booking);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -179,52 +106,7 @@ export const BookingDetailDialog: React.FC<BookingDetailDialogProps> = ({
           </TabsContent>
           
           <TabsContent value="activity" className="pt-4">
-            <div className="space-y-4">
-              <h3 className="font-semibold mb-2 flex items-center gap-2">
-                <History className="h-4 w-4" />
-                Activity Log
-              </h3>
-              
-              {activityItems.length > 0 ? (
-                <div className="overflow-x-auto">
-                  <table className="w-full border-collapse">
-                    <thead>
-                      <tr className="border-b">
-                        <th className="text-left py-2 px-3 text-sm font-medium text-muted-foreground">Date & Time</th>
-                        <th className="text-left py-2 px-3 text-sm font-medium text-muted-foreground">Action</th>
-                        <th className="text-left py-2 px-3 text-sm font-medium text-muted-foreground">By</th>
-                        <th className="text-left py-2 px-3 text-sm font-medium text-muted-foreground">Details</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {activityItems.map((item, index) => (
-                        <tr key={index} className={index % 2 === 0 ? "bg-gray-50" : "bg-white"}>
-                          <td className="py-2 px-3 text-sm text-muted-foreground">
-                            {item.timestamp.toLocaleString()}
-                          </td>
-                          <td className="py-2 px-3 text-sm font-medium">
-                            {item.action}
-                          </td>
-                          <td className="py-2 px-3">
-                            <Badge variant="outline" className="text-xs">
-                              {item.actor}
-                            </Badge>
-                          </td>
-                          <td className="py-2 px-3 text-sm">
-                            {item.details}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              ) : (
-                <div className="text-center py-6 text-muted-foreground">
-                  <History className="h-8 w-8 mx-auto mb-2" />
-                  <p>No activity recorded yet</p>
-                </div>
-              )}
-            </div>
+            <ActivityLog activities={activityItems} />
           </TabsContent>
         </Tabs>
         

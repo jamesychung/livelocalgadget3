@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../ui/tabs";
 import { Calendar, Users, Clock, Eye, X, MessageSquare, Check } from "lucide-react";
 import { Link } from 'react-router-dom';
 import { BookingActionButtons } from '../../shared/BookingActionButtons';
+import { ActivityLog, generateEventActivityItems } from '../../shared/ActivityLog';
 import { EventDetailDialogProps } from './types';
 
 export const EventDetailDialog: React.FC<EventDetailDialogProps> = ({
@@ -175,188 +176,24 @@ export const EventDetailDialog: React.FC<EventDetailDialogProps> = ({
             </TabsContent>
             
             <TabsContent value="activity" className="pt-4">
-              <div className="space-y-4">
-                <h3 className="font-semibold mb-2 flex items-center gap-2">
-                  <Clock className="h-4 w-4" />
-                  Event Timeline
-                </h3>
+              {(() => {
+                const { booking } = getMusicianApplicationStatus(selectedEvent.id);
+                console.log('🔍 EventDetailDialog Debug:');
+                console.log('selectedEvent:', selectedEvent);
+                console.log('booking from getMusicianApplicationStatus:', booking);
+                console.log('bookings prop:', bookings);
                 
-                <div className="overflow-x-auto">
-                  <table className="w-full border-collapse">
-                    <thead>
-                      <tr className="border-b">
-                        <th className="text-left py-2 px-3 text-sm font-medium text-muted-foreground">Date & Time</th>
-                        <th className="text-left py-2 px-3 text-sm font-medium text-muted-foreground">Action</th>
-                        <th className="text-left py-2 px-3 text-sm font-medium text-muted-foreground">By</th>
-                        <th className="text-left py-2 px-3 text-sm font-medium text-muted-foreground">Details</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {/* Event Creation */}
-                      <tr className="bg-gray-50">
-                        <td className="py-2 px-3 text-sm text-muted-foreground">
-                          {selectedEvent.created_at ? new Date(selectedEvent.created_at).toLocaleString() : "Unknown"}
-                        </td>
-                        <td className="py-2 px-3 text-sm font-medium">
-                          Event Created
-                        </td>
-                        <td className="py-2 px-3">
-                          <Badge variant="outline" className="text-xs">
-                            Venue
-                          </Badge>
-                        </td>
-                        <td className="py-2 px-3 text-sm">
-                          Event "{selectedEvent.title}" was created
-                        </td>
-                      </tr>
-                      
-                      {/* Booking Activities */}
-                      {(() => {
-                        const { booking } = getMusicianApplicationStatus(selectedEvent.id);
-                        if (!booking) return null;
-                        
-                        const activityRows = [];
-                        
-                        // Application
-                        if (booking.applied_at) {
-                          activityRows.push(
-                            <tr key="applied" className={activityRows.length % 2 === 0 ? "bg-white" : "bg-gray-50"}>
-                              <td className="py-2 px-3 text-sm text-muted-foreground">
-                                {new Date(booking.applied_at).toLocaleString()}
-                              </td>
-                              <td className="py-2 px-3 text-sm font-medium">
-                                Applied to Event
-                              </td>
-                              <td className="py-2 px-3">
-                                <Badge variant="outline" className="text-xs">
-                                  Musician
-                                </Badge>
-                              </td>
-                              <td className="py-2 px-3 text-sm">
-                                Applied with rate: ${booking.proposed_rate || 'Not specified'}
-                              </td>
-                            </tr>
-                          );
-                        }
-                        
-                        // Selection
-                        if (booking.selected_at) {
-                          activityRows.push(
-                            <tr key="selected" className={activityRows.length % 2 === 0 ? "bg-white" : "bg-gray-50"}>
-                              <td className="py-2 px-3 text-sm text-muted-foreground">
-                                {new Date(booking.selected_at).toLocaleString()}
-                              </td>
-                              <td className="py-2 px-3 text-sm font-medium">
-                                Selected by Venue
-                              </td>
-                              <td className="py-2 px-3">
-                                <Badge variant="outline" className="text-xs">
-                                  Venue
-                                </Badge>
-                              </td>
-                              <td className="py-2 px-3 text-sm">
-                                Venue selected this musician for the event
-                              </td>
-                            </tr>
-                          );
-                        }
-                        
-                        // Confirmation
-                        if (booking.confirmed_at) {
-                          activityRows.push(
-                            <tr key="confirmed" className={activityRows.length % 2 === 0 ? "bg-white" : "bg-gray-50"}>
-                              <td className="py-2 px-3 text-sm text-muted-foreground">
-                                {new Date(booking.confirmed_at).toLocaleString()}
-                              </td>
-                              <td className="py-2 px-3 text-sm font-medium">
-                                Booking Confirmed
-                              </td>
-                              <td className="py-2 px-3">
-                                <Badge variant="outline" className="text-xs">
-                                  Musician
-                                </Badge>
-                              </td>
-                              <td className="py-2 px-3 text-sm">
-                                Musician confirmed the booking
-                              </td>
-                            </tr>
-                          );
-                        }
-                        
-                        // Cancel Request
-                        if (booking.cancel_requested_at) {
-                          const requestedBy = booking.cancel_requested_by_role === 'venue' ? 'Venue' : 'Musician';
-                          activityRows.push(
-                            <tr key="cancel_requested" className={activityRows.length % 2 === 0 ? "bg-white" : "bg-gray-50"}>
-                              <td className="py-2 px-3 text-sm text-muted-foreground">
-                                {new Date(booking.cancel_requested_at).toLocaleString()}
-                              </td>
-                              <td className="py-2 px-3 text-sm font-medium">
-                                Cancellation Requested
-                              </td>
-                              <td className="py-2 px-3">
-                                <Badge variant="outline" className="text-xs">
-                                  {requestedBy}
-                                </Badge>
-                              </td>
-                              <td className="py-2 px-3 text-sm">
-                                {booking.cancellation_reason ? `Reason: ${booking.cancellation_reason}` : "No reason provided"}
-                              </td>
-                            </tr>
-                          );
-                        }
-                        
-                        // Cancellation Confirmation
-                        if (booking.cancelled_at) {
-                          const confirmedBy = booking.cancel_confirmed_by_role === 'venue' ? 'Venue' : 'Musician';
-                          activityRows.push(
-                            <tr key="cancelled" className={activityRows.length % 2 === 0 ? "bg-white" : "bg-gray-50"}>
-                              <td className="py-2 px-3 text-sm text-muted-foreground">
-                                {new Date(booking.cancelled_at).toLocaleString()}
-                              </td>
-                              <td className="py-2 px-3 text-sm font-medium">
-                                Cancellation Confirmed
-                              </td>
-                              <td className="py-2 px-3">
-                                <Badge variant="outline" className="text-xs">
-                                  {confirmedBy}
-                                </Badge>
-                              </td>
-                              <td className="py-2 px-3 text-sm">
-                                Booking was cancelled
-                              </td>
-                            </tr>
-                          );
-                        }
-                        
-                        // Completion
-                        if (booking.completed_at) {
-                          activityRows.push(
-                            <tr key="completed" className={activityRows.length % 2 === 0 ? "bg-white" : "bg-gray-50"}>
-                              <td className="py-2 px-3 text-sm text-muted-foreground">
-                                {new Date(booking.completed_at).toLocaleString()}
-                              </td>
-                              <td className="py-2 px-3 text-sm font-medium">
-                                Event Completed
-                              </td>
-                              <td className="py-2 px-3">
-                                <Badge variant="outline" className="text-xs">
-                                  {booking.completed_by_role ? (booking.completed_by_role === 'venue' ? 'Venue' : 'Musician') : "System"}
-                                </Badge>
-                              </td>
-                              <td className="py-2 px-3 text-sm">
-                                Event was marked as completed
-                              </td>
-                            </tr>
-                          );
-                        }
-                        
-                        return activityRows;
-                      })()}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
+                // Convert single booking to array for generateEventActivityItems
+                const applications = booking ? [booking] : [];
+                const activityItems = generateEventActivityItems(selectedEvent, applications);
+                console.log('Generated event activity items:', activityItems);
+                
+                return (
+                  <ActivityLog
+                    activities={activityItems}
+                  />
+                );
+              })()}
             </TabsContent>
           </Tabs>
         </div>
