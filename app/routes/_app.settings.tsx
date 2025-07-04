@@ -10,7 +10,7 @@ import {
   AccountSettingsTab, 
   NotificationSettingsTab, 
   SecuritySettingsTab,
-  StatusMessage as StatusMessageComponent,
+  StatusMessageComponent,
   AccountSettings,
   NotificationSettings,
   initializeAccountSettings,
@@ -27,7 +27,8 @@ import type { AuthOutletContext } from "./_app";
 import { User } from "@supabase/supabase-js";
 
 export default function SettingsPage() {
-  const { user } = useOutletContext<AuthOutletContext>();
+  const context = useOutletContext<AuthOutletContext>();
+  const user = context?.user;
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState<StatusMessage | null>(null);
 
@@ -37,9 +38,14 @@ export default function SettingsPage() {
   // Fetch venue data
   const { data: venue, loading: venueLoading } = useVenueProfile(user?.id);
 
+  // Safely cast data types
+  const typedUser = user as User;
+  const typedMusician = musician as MusicianProfile | null;
+  const typedVenue = venue as VenueProfile | null;
+
   // Account settings state
   const [accountSettings, setAccountSettings] = useState<AccountSettings>(
-    initializeAccountSettings(user as User, musician as MusicianProfile | null, venue as VenueProfile | null)
+    initializeAccountSettings(typedUser, typedMusician, typedVenue)
   );
 
   // Notification settings state
@@ -55,11 +61,13 @@ export default function SettingsPage() {
   // Update account settings when venue/musician data loads
   useEffect(() => {
     if (user && (musician || venue)) {
-      setAccountSettings(initializeAccountSettings(user as User, musician as MusicianProfile | null, venue as VenueProfile | null));
+      setAccountSettings(initializeAccountSettings(typedUser, typedMusician, typedVenue));
     }
-  }, [user, musician, venue]);
+  }, [user, musician, venue, typedUser, typedMusician, typedVenue]);
 
   const handleAccountUpdate = async (settings: AccountSettings) => {
+    if (!user?.id) return;
+    
     setIsLoading(true);
     setMessage(null);
     
@@ -72,8 +80,8 @@ export default function SettingsPage() {
       });
 
       // Update musician data if exists
-      if (musician?.id) {
-        await updateMusicianData(musician.id, {
+      if (typedMusician?.id) {
+        await updateMusicianData(typedMusician.id, {
           stage_name: settings.stageName,
           phone: settings.phone,
           city: settings.city,
@@ -83,8 +91,8 @@ export default function SettingsPage() {
       }
 
       // Update venue data if exists
-      if (venue?.id) {
-        await updateVenueData(venue.id, {
+      if (typedVenue?.id) {
+        await updateVenueData(typedVenue.id, {
           name: settings.venueName,
           phone: settings.phone,
           email: settings.venueEmail,
@@ -176,9 +184,9 @@ export default function SettingsPage() {
 
         <TabsContent value="account">
           <AccountSettingsTab 
-            user={user as User}
-            musician={musician as MusicianProfile | null}
-            venue={venue as VenueProfile | null}
+            user={typedUser}
+            musician={typedMusician}
+            venue={typedVenue}
             isLoading={isLoading}
             onUpdate={handleAccountUpdate}
           />
@@ -193,7 +201,7 @@ export default function SettingsPage() {
         </TabsContent>
 
         <TabsContent value="security">
-          <SecuritySettingsTab user={user as User} />
+          <SecuritySettingsTab user={typedUser} />
         </TabsContent>
       </Tabs>
     </div>

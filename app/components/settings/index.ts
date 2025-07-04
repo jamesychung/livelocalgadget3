@@ -3,4 +3,4 @@ export * from './utils';
 export * from './AccountSettings';
 export * from './NotificationSettings';
 export * from './SecuritySettings';
-export * from './StatusMessage';
+export { StatusMessage as StatusMessageComponent } from './StatusMessage';
