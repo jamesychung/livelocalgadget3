@@ -61,6 +61,7 @@ export function VenueEventsTabs({
 
             <TabsContent value="applications" className="space-y-4">
                 <VenueEventsWithApplications
+                    key={`applications-${venueBookings.length}-${JSON.stringify(venueBookings.map(b => ({ id: b.id, status: b.status })))}`}
                     events={allEvents}
                     bookings={venueBookings}
                     onAcceptApplication={handleBookApplication}

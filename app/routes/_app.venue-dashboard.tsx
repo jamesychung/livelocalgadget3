@@ -16,7 +16,7 @@ function getStatusBadge(status: string) {
     const statusColors: Record<string, string> = {
         pending: "bg-yellow-100 text-yellow-800",
         applied: "bg-blue-100 text-blue-800",
-        booked: "bg-orange-100 text-orange-800",
+        selected: "bg-orange-100 text-orange-800",
         confirmed: "bg-green-100 text-green-800",
         cancelled: "bg-red-100 text-red-800",
         completed: "bg-blue-100 text-blue-800",

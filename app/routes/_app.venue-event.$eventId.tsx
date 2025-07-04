@@ -10,6 +10,7 @@ import {
     Music
 } from "lucide-react";
 import { api } from "../api";
+import { supabase } from "../lib/supabase";
 
 // Import venue-specific components
 import { VenueEventDetailsCard } from "../components/shared/VenueEventDetailsCard";
@@ -349,27 +350,29 @@ export default function VenueEventManagementPage() {
         }
 
         try {
-            console.log("Confirming booking:", bookingId);
+            console.log("Selecting musician for booking:", bookingId);
             
-            // Update booking status to confirmed
-            await api.booking.update(bookingId, {
-                status: "confirmed"
-            } as any);
+            // Update booking status to selected (not confirmed yet)
+            const { error: bookingError } = await supabase
+                .from('bookings')
+                .update({
+                    selected_at: new Date().toISOString()
+                })
+                .eq('id', bookingId);
             
-            // Update event status to confirmed
-            await api.event.update(eventId, {
-                status: "confirmed"
-            } as any);
+            if (bookingError) {
+                throw bookingError;
+            }
             
             // Refresh data
             await fetchEventData();
             await fetchBookingsData();
             
-            console.log("Booking confirmed and event status updated successfully");
+            console.log("Musician selected successfully - waiting for confirmation");
             
         } catch (error) {
-            console.error("Error confirming booking:", error);
-            alert("Failed to confirm booking. Please try again.");
+            console.error("Error selecting musician:", error);
+            alert("Failed to select musician. Please try again.");
         }
     };
 
@@ -378,9 +381,16 @@ export default function VenueEventManagementPage() {
             console.log("Rejecting booking:", bookingId);
             
             // Update booking status to rejected
-            await api.booking.update(bookingId, {
-                status: "rejected"
-            } as any);
+            const { error: bookingError } = await supabase
+                .from('bookings')
+                .update({
+                    status: "rejected"
+                })
+                .eq('id', bookingId);
+            
+            if (bookingError) {
+                throw bookingError;
+            }
             
             // Refresh bookings data
             await fetchBookingsData();
@@ -398,9 +408,16 @@ export default function VenueEventManagementPage() {
             console.log("Setting booking to communicating:", bookingId);
             
             // Update booking status to communicating
-            await api.booking.update(bookingId, {
-                status: "communicating"
-            } as any);
+            const { error: bookingError } = await supabase
+                .from('bookings')
+                .update({
+                    status: "communicating"
+                })
+                .eq('id', bookingId);
+            
+            if (bookingError) {
+                throw bookingError;
+            }
             
             // Refresh bookings data
             await fetchBookingsData();

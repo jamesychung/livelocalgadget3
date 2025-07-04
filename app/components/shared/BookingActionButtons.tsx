@@ -47,10 +47,10 @@ export const BookingActionButtons: React.FC<BookingActionButtonsProps> = ({
     const actions = [];
     
     if (currentStatus === BOOKING_STATUSES.APPLIED && isVenue) {
-      actions.push({ value: BOOKING_STATUSES.BOOKED, label: 'Select This Musician' });
+      actions.push({ value: BOOKING_STATUSES.SELECTED, label: 'Select This Musician' });
     }
     
-    if (currentStatus === BOOKING_STATUSES.BOOKED && isMusician) {
+    if (currentStatus === BOOKING_STATUSES.SELECTED && isMusician) {
       actions.push({ value: BOOKING_STATUSES.CONFIRMED, label: 'Confirm Booking' });
     }
     
@@ -110,7 +110,7 @@ export const BookingActionButtons: React.FC<BookingActionButtonsProps> = ({
       
       // Show success message
       const actionLabels: Record<string, string> = {
-        [BOOKING_STATUSES.BOOKED]: 'Musician selected successfully!',
+        [BOOKING_STATUSES.SELECTED]: 'Musician selected successfully!',
         [BOOKING_STATUSES.CONFIRMED]: 'Booking confirmed!',
         [BOOKING_STATUSES.COMPLETED]: 'Event marked as completed!',
         [BOOKING_STATUSES.CANCELLED]: 'Booking cancelled successfully.'
@@ -192,7 +192,7 @@ export const BookingActionButtons: React.FC<BookingActionButtonsProps> = ({
               </>
             ) : (
               <p>
-                Are you sure you want to {selectedAction === BOOKING_STATUSES.BOOKED ? 'select this musician' :
+                Are you sure you want to {selectedAction === BOOKING_STATUSES.SELECTED ? 'select this musician' :
                   selectedAction === BOOKING_STATUSES.CONFIRMED ? 'confirm this booking' :
                   selectedAction === BOOKING_STATUSES.COMPLETED ? 'mark this event as completed' : 
                   'update this booking'}?

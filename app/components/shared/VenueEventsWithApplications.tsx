@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Button } from "../ui/button";
 import { Badge } from "../ui/badge";
@@ -23,6 +23,12 @@ export function VenueEventsWithApplications({
     onAcceptApplication, 
     onRejectApplication 
 }: VenueEventsWithApplicationsProps) {
+    console.log('VenueEventsWithApplications rendered with bookings:', bookings.map(b => ({ id: b.id, status: b.status, event: b.event?.title })));
+    
+    useEffect(() => {
+        console.log('VenueEventsWithApplications bookings updated:', bookings.map(b => ({ id: b.id, status: b.status, event: b.event?.title })));
+    }, [bookings]);
+    
     const [sortField, setSortField] = useState<SortField>('date');
     const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
     const [selectedEvent, setSelectedEvent] = useState<any>(null);
@@ -98,9 +104,19 @@ export function VenueEventsWithApplications({
         setIsDialogOpen(true);
     };
 
-    // Handle accept application
+    // Handle accept application (venue selects musician)
     const handleAccept = async (bookingId: string) => {
-        await onAcceptApplication(bookingId, selectedEvent.id);
+        console.log('🎯 handleAccept called with bookingId:', bookingId);
+        console.log('🎯 selectedEvent:', selectedEvent);
+        console.log('🎯 calling onAcceptApplication with:', { bookingId, eventId: selectedEvent.id });
+        
+        try {
+            await onAcceptApplication(bookingId, selectedEvent.id);
+            console.log('✅ onAcceptApplication completed successfully');
+        } catch (error) {
+            console.error('❌ onAcceptApplication failed:', error);
+        }
+        
         setIsDialogOpen(false);
     };
 
@@ -298,10 +314,14 @@ export function VenueEventsWithApplications({
                                                         </div>
                                                         <Badge variant={
                                                             booking.status === "applied" ? "default" :
+                                                            booking.status === "selected" ? "secondary" :
                                                             booking.status === "confirmed" ? "default" :
                                                             "secondary"
                                                         }>
-                                                            {booking.status}
+                                                            {booking.status === "applied" ? "📝 Applied" :
+                                                             booking.status === "selected" ? "⭐ Selected" :
+                                                             booking.status === "confirmed" ? "✅ Confirmed" :
+                                                             booking.status}
                                                         </Badge>
                                                     </div>
                                                     
@@ -351,11 +371,15 @@ export function VenueEventsWithApplications({
                                                     <div className="flex gap-2 ml-4">
                                                         <Button
                                                             size="sm"
-                                                            onClick={() => handleAccept(booking.id)}
+                                                            onClick={() => {
+                                                                console.log('🎯 Select Musician button clicked for booking:', booking.id);
+                                                                console.log('🎯 Booking details:', booking);
+                                                                handleAccept(booking.id);
+                                                            }}
                                                             className="bg-green-600 hover:bg-green-700"
                                                         >
                                                             <Check className="h-4 w-4 mr-2" />
-                                                            Accept
+                                                            Select Musician
                                                         </Button>
                                                         <Button
                                                             size="sm"
@@ -365,6 +389,22 @@ export function VenueEventsWithApplications({
                                                             <X className="h-4 w-4 mr-2" />
                                                             Reject
                                                         </Button>
+                                                    </div>
+                                                )}
+                                                
+                                                {booking.status === "selected" && (
+                                                    <div className="flex gap-2 ml-4">
+                                                        <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">
+                                                            ⭐ Awaiting Musician Confirmation
+                                                        </Badge>
+                                                    </div>
+                                                )}
+                                                
+                                                {booking.status === "confirmed" && (
+                                                    <div className="flex gap-2 ml-4">
+                                                        <Badge variant="default" className="bg-green-100 text-green-800">
+                                                            ✅ Booking Confirmed
+                                                        </Badge>
                                                     </div>
                                                 )}
                                             </div>

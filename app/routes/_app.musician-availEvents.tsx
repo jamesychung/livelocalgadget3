@@ -67,6 +67,7 @@ export default function MusicianAvailEventsPage() {
                         event_status,
                         rate,
                         genres,
+                        venue_id,
                         venue:venues(id, name, city, state)
                     `)
                     .in('event_status', ['open', 'invited']);
@@ -143,7 +144,7 @@ export default function MusicianAvailEventsPage() {
                     className: "bg-blue-100 text-blue-800",
                     icon: "📝"
                 };
-            case "booked":
+            case "selected":
                 return {
                     label: "Venue Selected You - Please Confirm",
                     variant: "default" as const,
@@ -190,6 +191,12 @@ export default function MusicianAvailEventsPage() {
         error
     });
     console.log("🔍 Debug - Sample events:", events.slice(0, 3));
+    console.log("🔍 Debug - Sample events with venue_id:", events.slice(0, 3).map(e => ({
+        id: e.id,
+        title: e.title,
+        venue_id: e.venue_id,
+        venue: e.venue
+    })));
     console.log("🔍 Debug - Sample musicians:", musicians.slice(0, 3));
 
     // Helper function to check if genres match
@@ -359,6 +366,30 @@ export default function MusicianAvailEventsPage() {
             console.log("🎯 Applying to event:", selectedEvent.id);
             console.log("👤 Musician ID:", user.musician.id);
             console.log("💰 Proposed rate:", user.musician.hourly_rate || 0);
+            console.log("🏢 Event venue_id:", selectedEvent.venue_id);
+            console.log("🏢 Event venue object:", selectedEvent.venue);
+
+            // Check if musician already has a booking for this event
+            const { data: existingBooking, error: checkError } = await supabase
+                .from('bookings')
+                .select('*')
+                .eq('event_id', selectedEvent.id)
+                .eq('musician_id', user.musician.id)
+                .single();
+
+            if (checkError && checkError.code !== 'PGRST116') { // PGRST116 = no rows returned
+                console.error("❌ Error checking existing booking:", checkError);
+                alert("Failed to check existing application. Please try again.");
+                return;
+            }
+
+            if (existingBooking) {
+                console.log("⚠️ Musician already has a booking for this event:", existingBooking);
+                alert("You have already applied to this event. Please check your applications.");
+                setIsDialogOpen(false);
+                setSelectedEvent(null);
+                return;
+            }
 
             // Create a booking record with status 'applied'
             const { data: booking, error } = await supabase

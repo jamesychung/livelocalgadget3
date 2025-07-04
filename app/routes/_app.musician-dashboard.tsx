@@ -18,7 +18,10 @@ import {
     TrendingUp,
     Clock,
     DollarSign,
-    AlertCircle
+    AlertCircle,
+    Check,
+    X,
+    RefreshCw
 } from "lucide-react";
 import { supabase } from "../lib/supabase";
 import type { AuthOutletContext } from "./_app";
@@ -26,14 +29,24 @@ import type { AuthOutletContext } from "./_app";
 // Helper function to render status badges
 function getStatusBadge(status: string) {
     const statusColors: Record<string, string> = {
-        pending: "bg-yellow-100 text-yellow-800",
+        applied: "bg-blue-100 text-blue-800",
+        selected: "bg-yellow-100 text-yellow-800",
         confirmed: "bg-green-100 text-green-800",
         cancelled: "bg-red-100 text-red-800",
-        completed: "bg-blue-100 text-blue-800",
+        completed: "bg-gray-100 text-gray-800",
     };
+    
+    const statusLabels: Record<string, string> = {
+        applied: "📝 Applied",
+        selected: "⭐ Venue Selected You",
+        confirmed: "✅ Confirmed",
+        cancelled: "❌ Cancelled",
+        completed: "🎉 Completed",
+    };
+    
     return (
         <Badge className={statusColors[status?.toLowerCase()] || "bg-gray-100 text-gray-800"}>
-            {status ? status.charAt(0).toUpperCase() + status.slice(1) : "Unknown"}
+            {statusLabels[status?.toLowerCase()] || (status ? status.charAt(0).toUpperCase() + status.slice(1) : "Unknown")}
         </Badge>
     );
 }
@@ -54,6 +67,100 @@ export default function MusicianDashboard() {
     const [musician, setMusician] = useState<any>(null);
     const [bookings, setBookings] = useState<any[]>([]);
     const [error, setError] = useState<string | null>(null);
+    const [isRefreshing, setIsRefreshing] = useState(false);
+    const [lastRefreshTime, setLastRefreshTime] = useState<Date>(new Date());
+
+    const handleConfirmBooking = async (bookingId: string) => {
+        try {
+            const { error } = await supabase
+                .from('bookings')
+                .update({ status: 'confirmed' })
+                .eq('id', bookingId);
+
+            if (error) throw error;
+
+            // Update local state
+            setBookings(prevBookings => 
+                prevBookings.map(booking => 
+                    booking.id === bookingId 
+                        ? { ...booking, status: 'confirmed' }
+                        : booking
+                )
+            );
+        } catch (error) {
+            console.error('Error confirming booking:', error);
+        }
+    };
+
+    const handleRejectBooking = async (bookingId: string) => {
+        try {
+            const { error } = await supabase
+                .from('bookings')
+                .update({ status: 'cancelled' })
+                .eq('id', bookingId);
+
+            if (error) throw error;
+
+            // Update local state
+            setBookings(prevBookings => 
+                prevBookings.map(booking => 
+                    booking.id === bookingId 
+                        ? { ...booking, status: 'cancelled' }
+                        : booking
+                )
+            );
+        } catch (error) {
+            console.error('Error rejecting booking:', error);
+        }
+    };
+
+    const refreshBookings = async () => {
+        if (!musician?.id) return;
+        
+        console.log('Refreshing bookings for musician:', musician.id);
+        setIsRefreshing(true);
+        try {
+            const { data: bookingsData, error: bookingsError } = await supabase
+                .from('bookings')
+                .select(`
+                    *,
+                    event:events (
+                        id,
+                        title,
+                        date,
+                        start_time,
+                        end_time,
+                        description,
+                        venue:venues (
+                            id, 
+                            name, 
+                            address,
+                            city,
+                            state
+                        )
+                    ),
+                    musician:musicians (
+                        id,
+                        stage_name,
+                        email
+                    )
+                `)
+                .eq('musician_id', musician.id);
+
+            if (bookingsError) {
+                console.error("Error refreshing bookings data:", bookingsError);
+            } else {
+                console.log('Bookings refreshed successfully:', bookingsData);
+                console.log('Current bookings statuses:', bookingsData?.map(b => ({ id: b.id, status: b.status, event: b.event?.title })));
+                setBookings(bookingsData || []);
+                setLastRefreshTime(new Date());
+            }
+        } catch (error) {
+            console.error('Error refreshing bookings:', error);
+        } finally {
+            setIsRefreshing(false);
+        }
+    };
 
     useEffect(() => {
         const fetchData = async () => {
@@ -86,12 +193,25 @@ export default function MusicianDashboard() {
                         .from('bookings')
                         .select(`
                             *,
-                            venue:venues (
-                                id, 
-                                name, 
-                                address,
-                                city,
-                                state
+                            event:events (
+                                id,
+                                title,
+                                date,
+                                start_time,
+                                end_time,
+                                description,
+                                venue:venues (
+                                    id, 
+                                    name, 
+                                    address,
+                                    city,
+                                    state
+                                )
+                            ),
+                            musician:musicians (
+                                id,
+                                stage_name,
+                                email
                             )
                         `)
                         .eq('musician_id', musicianData.id);
@@ -100,6 +220,7 @@ export default function MusicianDashboard() {
                         console.error("Error loading bookings data:", bookingsError);
                     } else {
                         setBookings(bookingsData || []);
+                        setLastRefreshTime(new Date());
                     }
                 }
             } catch (err) {
@@ -112,6 +233,17 @@ export default function MusicianDashboard() {
 
         fetchData();
     }, [user]);
+
+    // Auto-refresh bookings every 30 seconds to check for status updates
+    useEffect(() => {
+        if (!musician?.id) return;
+
+        const interval = setInterval(() => {
+            refreshBookings();
+        }, 30000); // 30 seconds
+
+        return () => clearInterval(interval);
+    }, [musician?.id]);
 
     // Show loading state while fetching
     if (isLoading) {
@@ -159,7 +291,8 @@ export default function MusicianDashboard() {
         );
     }
     
-    const upcomingEvents = bookings.filter((b: any) => b.date && new Date(b.date) > new Date()) ?? [];
+    const upcomingEvents = bookings.filter((b: any) => b.event?.date && new Date(b.event.date) > new Date()) ?? [];
+    const bookingsNeedingAttention = bookings.filter((b: any) => b.status === 'selected').length;
 
     return (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-6">
@@ -169,8 +302,25 @@ export default function MusicianDashboard() {
                     <p className="text-muted-foreground">
                         Welcome back, {musician.stage_name || user?.first_name}!
                     </p>
+                    <p className="text-xs text-muted-foreground">
+                        Last updated: {lastRefreshTime.toLocaleTimeString()}
+                        {bookingsNeedingAttention > 0 && (
+                            <span className="ml-2 text-orange-600 font-medium">
+                                • {bookingsNeedingAttention} booking{bookingsNeedingAttention > 1 ? 's' : ''} need{bookingsNeedingAttention > 1 ? '' : 's'} your attention
+                            </span>
+                        )}
+                    </p>
                 </div>
                 <div className="flex gap-2 self-start">
+                    <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={refreshBookings}
+                        disabled={isRefreshing}
+                    >
+                        <RefreshCw className={`mr-2 h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+                        {isRefreshing ? 'Refreshing...' : 'Refresh'}
+                    </Button>
                     <Button asChild variant="outline" size="sm">
                         <Link to="/availability">
                             <Calendar className="mr-2 h-4 w-4" />
@@ -210,10 +360,10 @@ export default function MusicianDashboard() {
                 </Card>
                 <Card className="shadow-sm">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Pending Bookings</CardTitle>
+                        <CardTitle className="text-sm font-medium">Awaiting Confirmation</CardTitle>
                         <AlertCircle className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
-                    <CardContent><div className="text-2xl font-bold">{bookings.filter(b => b.status === 'pending').length ?? 0}</div></CardContent>
+                    <CardContent><div className="text-2xl font-bold">{bookings.filter(b => b.status === 'selected').length ?? 0}</div></CardContent>
                 </Card>
             </div>
 
@@ -237,8 +387,10 @@ export default function MusicianDashboard() {
                                         {upcomingEvents.slice(0, 3).map((booking: any) => (
                                             <div key={booking.id} className="flex justify-between items-center border-b pb-2">
                                                 <div>
-                                                    <p className="font-medium">{booking.venue?.name || "Unnamed Venue"}</p>
-                                                    <p className="text-sm text-muted-foreground">{formatDateTime(booking.date)}</p>
+                                                    <p className="font-medium">{booking.event?.title || "Untitled Event"}</p>
+                                                    <p className="text-sm text-muted-foreground">
+                                                        {booking.event?.venue?.name} • {booking.event?.date ? new Date(booking.event.date).toLocaleDateString() : "No date"}
+                                                    </p>
                                                 </div>
                                                 {getStatusBadge(booking.status)}
                                             </div>
@@ -290,23 +442,85 @@ export default function MusicianDashboard() {
                 <TabsContent value="bookings">
                     <Card className="shadow-sm">
                         <CardHeader>
-                            <CardTitle>All Bookings</CardTitle>
-                            <CardDescription>Manage your performance schedule</CardDescription>
+                            <CardTitle>My Bookings</CardTitle>
+                            <CardDescription>Manage your performance schedule and confirm bookings</CardDescription>
                         </CardHeader>
                         <CardContent>
                             {bookings.length > 0 ? (
                                 <div className="space-y-4">
                                     {bookings.map((booking: any) => (
-                                        <div key={booking.id} className="flex justify-between items-center border-b pb-4">
-                                            <div>
-                                                <p className="font-medium">{booking.venue?.name || "Unnamed Venue"}</p>
-                                                <p className="text-sm text-muted-foreground">{formatDateTime(booking.date)}</p>
-                                                <p className="text-sm">{booking.notes || "No additional notes"}</p>
+                                        <div key={booking.id} className="border rounded-lg p-4">
+                                            <div className="flex justify-between items-start mb-3">
+                                                <div>
+                                                    <h3 className="font-medium text-lg">{booking.event?.title || "Untitled Event"}</h3>
+                                                    <p className="text-sm text-muted-foreground">
+                                                        {booking.event?.venue?.name || "Unknown Venue"}
+                                                    </p>
+                                                </div>
+                                                <div className="text-right">
+                                                    {getStatusBadge(booking.status)}
+                                                </div>
                                             </div>
-                                            <div className="text-right">
-                                                <div className="mb-2">{getStatusBadge(booking.status)}</div>
-                                                <p className="text-sm font-medium">${booking.totalAmount || 0}</p>
+                                            
+                                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-3">
+                                                <div className="flex items-center gap-2">
+                                                    <Calendar className="h-4 w-4 text-muted-foreground" />
+                                                    <span className="text-sm">
+                                                        {booking.event?.date ? new Date(booking.event.date).toLocaleDateString() : "No date"}
+                                                    </span>
+                                                </div>
+                                                <div className="flex items-center gap-2">
+                                                    <Clock className="h-4 w-4 text-muted-foreground" />
+                                                    <span className="text-sm">
+                                                        {booking.event?.start_time && booking.event?.end_time 
+                                                            ? `${booking.event.start_time} - ${booking.event.end_time}`
+                                                            : "Time TBD"
+                                                        }
+                                                    </span>
+                                                </div>
+                                                <div className="flex items-center gap-2">
+                                                    <DollarSign className="h-4 w-4 text-muted-foreground" />
+                                                    <span className="text-sm">
+                                                        ${booking.proposed_rate || booking.musician?.hourly_rate || 0}/hr
+                                                    </span>
+                                                </div>
                                             </div>
+                                            
+                                            {booking.musician_pitch && (
+                                                <div className="mb-3">
+                                                    <p className="text-sm font-medium text-muted-foreground mb-1">Your Pitch:</p>
+                                                    <p className="text-sm bg-muted p-2 rounded">{booking.musician_pitch}</p>
+                                                </div>
+                                            )}
+                                            
+                                            {booking.status === "selected" && (
+                                                <div className="flex gap-2 mt-3">
+                                                    <Button
+                                                        size="sm"
+                                                        onClick={() => handleConfirmBooking(booking.id)}
+                                                        className="bg-green-600 hover:bg-green-700"
+                                                    >
+                                                        <Check className="h-4 w-4 mr-2" />
+                                                        Confirm Booking
+                                                    </Button>
+                                                    <Button
+                                                        size="sm"
+                                                        variant="outline"
+                                                        onClick={() => handleRejectBooking(booking.id)}
+                                                    >
+                                                        <X className="h-4 w-4 mr-2" />
+                                                        Decline
+                                                    </Button>
+                                                </div>
+                                            )}
+                                            
+                                            {booking.status === "confirmed" && (
+                                                <div className="mt-3">
+                                                    <Badge variant="default" className="bg-green-100 text-green-800">
+                                                        ✅ Booking Confirmed
+                                                    </Badge>
+                                                </div>
+                                            )}
                                         </div>
                                     ))}
                                 </div>

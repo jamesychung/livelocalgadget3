@@ -35,15 +35,19 @@ export default function () {
         // Check user type and redirect accordingly
         if (user.userType === "musician") {
           // Check if user has a musician profile, create if not
-          const { data: musicianProfile } = await supabase
+          const { data: musicianProfile, error: musicianError } = await supabase
             .from('musicians')
             .select('*')
-            .eq('email', user.email)
+            .eq('user_id', user.id)
             .single();
+          
+          if (musicianError) {
+            console.error("Error checking musician profile:", musicianError);
+          }
           
           if (!musicianProfile) {
             // Create musician profile
-            await supabase
+            const { error: insertError } = await supabase
               .from('musicians')
               .insert({
                 user_id: user.id,
@@ -53,6 +57,10 @@ export default function () {
                 created_at: new Date().toISOString(),
                 updated_at: new Date().toISOString()
               });
+            
+            if (insertError) {
+              console.error("Error creating musician profile:", insertError);
+            }
           }
           
           navigate("/musician-dashboard");
@@ -61,15 +69,19 @@ export default function () {
 
         if (user.userType === "venue_owner") {
           // Check if user has a venue profile, create if not
-          const { data: venueProfile } = await supabase
+          const { data: venueProfile, error: venueError } = await supabase
             .from('venues')
             .select('*')
-            .eq('email', user.email)
+            .eq('owner_id', user.id)
             .single();
+          
+          if (venueError) {
+            console.error("Error checking venue profile:", venueError);
+          }
           
           if (!venueProfile) {
             // Create venue profile
-            await supabase
+            const { error: insertError } = await supabase
               .from('venues')
               .insert({
                 owner_id: user.id,
@@ -78,6 +90,10 @@ export default function () {
                 created_at: new Date().toISOString(),
                 updated_at: new Date().toISOString()
               });
+            
+            if (insertError) {
+              console.error("Error creating venue profile:", insertError);
+            }
           }
           
           navigate("/venue-dashboard");

@@ -37,8 +37,8 @@ export const AppliedBadge: React.FC<{ booking?: any; className?: string }> = ({ 
   <BookingStatusBadge status={BOOKING_STATUSES.APPLIED} booking={booking} className={className} />
 );
 
-export const BookedBadge: React.FC<{ booking?: any; className?: string }> = ({ booking, className }) => (
-  <BookingStatusBadge status={BOOKING_STATUSES.BOOKED} booking={booking} className={className} />
+export const SelectedBadge: React.FC<{ booking?: any; className?: string }> = ({ booking, className }) => (
+  <BookingStatusBadge status={BOOKING_STATUSES.SELECTED} booking={booking} className={className} />
 );
 
 export const ConfirmedBadge: React.FC<{ booking?: any; className?: string }> = ({ booking, className }) => (

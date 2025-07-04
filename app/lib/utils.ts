@@ -8,7 +8,7 @@ export function cn(...inputs: ClassValue[]) {
 // Booking Status Management
 export const BOOKING_STATUSES = {
   APPLIED: 'applied',
-  BOOKED: 'booked', 
+  SELECTED: 'selected', 
   CONFIRMED: 'confirmed',
   CANCELLED: 'cancelled',
   COMPLETED: 'completed'
@@ -18,7 +18,7 @@ export type BookingStatus = typeof BOOKING_STATUSES[keyof typeof BOOKING_STATUSE
 
 export const BOOKING_STATUS_LABELS: Record<BookingStatus, string> = {
   [BOOKING_STATUSES.APPLIED]: 'Application Submitted',
-  [BOOKING_STATUSES.BOOKED]: 'Venue Selected You - Please Confirm',
+  [BOOKING_STATUSES.SELECTED]: 'Venue Selected You - Please Confirm',
   [BOOKING_STATUSES.CONFIRMED]: 'Booking Confirmed',
   [BOOKING_STATUSES.CANCELLED]: 'Cancelled',
   [BOOKING_STATUSES.COMPLETED]: 'Event Completed'
@@ -26,7 +26,7 @@ export const BOOKING_STATUS_LABELS: Record<BookingStatus, string> = {
 
 export const BOOKING_STATUS_COLORS: Record<BookingStatus, string> = {
   [BOOKING_STATUSES.APPLIED]: 'bg-blue-100 text-blue-800',
-  [BOOKING_STATUSES.BOOKED]: 'bg-yellow-100 text-yellow-800',
+  [BOOKING_STATUSES.SELECTED]: 'bg-yellow-100 text-yellow-800',
   [BOOKING_STATUSES.CONFIRMED]: 'bg-green-100 text-green-800',
   [BOOKING_STATUSES.CANCELLED]: 'bg-red-100 text-red-800',
   [BOOKING_STATUSES.COMPLETED]: 'bg-gray-100 text-gray-800'
@@ -34,7 +34,7 @@ export const BOOKING_STATUS_COLORS: Record<BookingStatus, string> = {
 
 export const BOOKING_STATUS_ICONS: Record<BookingStatus, string> = {
   [BOOKING_STATUSES.APPLIED]: '📝',
-  [BOOKING_STATUSES.BOOKED]: '⭐',
+  [BOOKING_STATUSES.SELECTED]: '⭐',
   [BOOKING_STATUSES.CONFIRMED]: '✅',
   [BOOKING_STATUSES.CANCELLED]: '❌',
   [BOOKING_STATUSES.COMPLETED]: '🎉'
@@ -42,8 +42,8 @@ export const BOOKING_STATUS_ICONS: Record<BookingStatus, string> = {
 
 // Booking Status Transitions
 export const ALLOWED_STATUS_TRANSITIONS: Record<BookingStatus, BookingStatus[]> = {
-  [BOOKING_STATUSES.APPLIED]: [BOOKING_STATUSES.BOOKED, BOOKING_STATUSES.CANCELLED],
-  [BOOKING_STATUSES.BOOKED]: [BOOKING_STATUSES.CONFIRMED, BOOKING_STATUSES.CANCELLED],
+  [BOOKING_STATUSES.APPLIED]: [BOOKING_STATUSES.SELECTED, BOOKING_STATUSES.CANCELLED],
+  [BOOKING_STATUSES.SELECTED]: [BOOKING_STATUSES.CONFIRMED, BOOKING_STATUSES.CANCELLED],
   [BOOKING_STATUSES.CONFIRMED]: [BOOKING_STATUSES.COMPLETED, BOOKING_STATUSES.CANCELLED],
   [BOOKING_STATUSES.CANCELLED]: [], // Terminal state
   [BOOKING_STATUSES.COMPLETED]: [] // Terminal state

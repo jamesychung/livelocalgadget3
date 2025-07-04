@@ -18,6 +18,7 @@ export function useVenueEvents(user: any) {
         musicianId: "none",
         status: ""
     });
+    const [refreshTrigger, setRefreshTrigger] = useState(0);
 
     // State for data fetching
     const [venue, setVenue] = useState<any>(null);
@@ -88,7 +89,7 @@ export function useVenueEvents(user: any) {
                     `)
                     .eq('venue_id', venue.id);
                 
-                console.log("🔍 Events query result:", { eventsData, error, venueId: venue.id });
+
 
                 if (error) {
                     setEventsError(error);
@@ -190,15 +191,7 @@ export function useVenueEvents(user: any) {
         fetchBookings();
     }, [venue?.id]);
 
-                    // Debug logging
-                console.log("=== VENUE EVENTS DEBUG ===");
-                console.log("User ID:", user?.id);
-                console.log("Venue:", venue);
-                console.log("Venue ID:", venue?.id);
-                console.log("All Events:", allEvents);
-                console.log("Events Fetching:", eventsFetching);
-                console.log("Events Error:", eventsError);
-                console.log("All Bookings:", allBookings);
+
 
     // Filter bookings for this venue's events
     const venueBookings = allBookings.filter(booking => {
@@ -274,15 +267,23 @@ export function useVenueEvents(user: any) {
 
     const updateBooking = async (data: any) => {
         try {
-            const { error } = await supabase
+            console.log('Attempting to update booking:', data);
+            
+            const { data: updateResult, error } = await supabase
                 .from('bookings')
                 .update({
                     status: data.status,
                     proposed_rate: data.proposedRate
                 })
-                .eq('id', data.id);
+                .eq('id', data.id)
+                .select();
 
-            if (error) throw error;
+            if (error) {
+                console.error("Supabase error updating booking:", error);
+                throw error;
+            }
+            
+            console.log('Booking update result:', updateResult);
             return { id: data.id };
         } catch (error) {
             console.error("Error updating booking:", error);
@@ -306,7 +307,7 @@ export function useVenueEvents(user: any) {
 
     const getPendingApplications = () => {
         const appliedBookings = allBookings.filter((booking: any) => 
-            booking.status === "applied" || booking.status === "pending_confirmation"
+            booking.status === "applied"
         );
         return appliedBookings;
     };
@@ -316,25 +317,26 @@ export function useVenueEvents(user: any) {
         return allEvents.filter(event => pendingAppEventIds.includes(event.id));
     };
 
-    // Debug logging for bookings and applications
-    console.log("Venue Bookings (filtered):", venueBookings);
-    console.log("Pending Applications:", getPendingApplications());
-    console.log("Events with Applications:", getEventsWithApplications());
+
 
     // Event handlers
     const handleUpdateEvent = async (eventId: string, updates: any) => {
         try {
-            console.log("Updating event:", eventId, updates);
             await updateEvent({ id: eventId, ...updates });
-            // Refresh data
-            window.location.reload();
+            // Update local state immediately
+            setAllEvents((prevEvents: any[]) => 
+                prevEvents.map((event: any) => 
+                    event.id === eventId 
+                        ? { ...event, ...updates }
+                        : event
+                )
+            );
         } catch (error) {
             console.error("Error updating event:", error);
         }
     };
 
     const handleEventClick = (event: any) => {
-        console.log("Event clicked:", event);
         // Navigate to event detail page or open edit dialog
     };
 
@@ -374,8 +376,24 @@ export function useVenueEvents(user: any) {
 
             setEditDialogOpen(false);
             setEditingEvent(null);
-            // Refresh data
-            window.location.reload();
+            // Update local state immediately
+            setAllEvents((prevEvents: any[]) => 
+                prevEvents.map((event: any) => 
+                    event.id === editingEvent.id 
+                        ? { 
+                            ...event, 
+                            title: editFormData.title,
+                            description: editFormData.description,
+                            date: editFormData.date,
+                            startTime: editFormData.startTime,
+                            endTime: editFormData.endTime,
+                            ticketPrice: parseFloat(editFormData.ticketPrice) || 0,
+                            totalCapacity: parseInt(editFormData.totalCapacity) || 0,
+                            eventStatus: editFormData.status
+                        }
+                        : event
+                )
+            );
         } catch (error) {
             console.error("Error updating event:", error);
         }
@@ -383,10 +401,9 @@ export function useVenueEvents(user: any) {
 
     const handleAddEvent = async (eventData: any) => {
         try {
-            console.log("Adding event:", eventData);
-            await createEvent(eventData);
-            // Refresh data
-            window.location.reload();
+            const newEvent = await createEvent(eventData);
+            // Add to local state immediately
+            setAllEvents((prevEvents: any[]) => [...prevEvents, newEvent]);
         } catch (error) {
             console.error("Error adding event:", error);
         }
@@ -401,15 +418,26 @@ export function useVenueEvents(user: any) {
         }
         
         const statusColors: Record<string, string> = {
+            applied: "bg-blue-100 text-blue-800",
+            booked: "bg-yellow-100 text-yellow-800",
             confirmed: "bg-green-100 text-green-800",
-            proposed: "bg-yellow-100 text-yellow-800",
             cancelled: "bg-red-100 text-red-800",
+            completed: "bg-gray-100 text-gray-800",
             open: "bg-blue-100 text-blue-800",
+        };
+        
+        const statusLabels: Record<string, string> = {
+            applied: "📝 Applied",
+            booked: "⭐ Selected",
+            confirmed: "✅ Confirmed",
+            cancelled: "❌ Cancelled",
+            completed: "🎉 Completed",
+            open: "Open",
         };
         
         return {
             className: statusColors[status] || "bg-gray-100 text-gray-800",
-            text: status.charAt(0).toUpperCase() + status.slice(1)
+            text: statusLabels[status] || status.charAt(0).toUpperCase() + status.slice(1)
         };
     };
 
@@ -425,13 +453,138 @@ export function useVenueEvents(user: any) {
 
     const handleBookApplication = async (applicationId: string, eventId: string) => {
         try {
-            console.log("Booking application:", applicationId, "for event:", eventId);
-            await updateBooking({
-                id: applicationId,
-                status: "confirmed"
+            console.log('Venue selecting musician for booking:', applicationId);
+            console.log('Current user:', user);
+            console.log('Current venue:', venue);
+            
+            // First, let's check if the booking exists and get its current data
+            const { data: currentBooking, error: fetchError } = await supabase
+                .from('bookings')
+                .select('*')
+                .eq('id', applicationId)
+                .single();
+                
+            if (fetchError) {
+                console.error('Error fetching current booking:', fetchError);
+                return;
+            }
+            
+            console.log('Current booking data:', currentBooking);
+            console.log('Booking venue_id:', currentBooking.venue_id);
+            console.log('Current venue id:', venue?.id);
+            console.log('Are they the same?', currentBooking.venue_id === venue?.id);
+            console.log('Booking booked_by:', currentBooking.booked_by);
+            console.log('Current user id:', user?.id);
+            console.log('Are they the same?', currentBooking.booked_by === user?.id);
+            
+            // Try to update the booking status first (using booked_by field for RLS)
+            console.log('Updating booking status...');
+            console.log('Update data:', { status: 'selected' });
+            console.log('Booking ID:', applicationId);
+            console.log('Current user ID:', user.id);
+            
+            // Update venue_id and set selected_at timestamp (trigger will set status to 'selected')
+            console.log('Updating booking venue_id and selected_at...');
+            const { data: updateResult, error: updateError } = await supabase
+                .from('bookings')
+                .update({ 
+                    venue_id: venue.id,
+                    selected_at: new Date().toISOString()
+                })
+                .eq('id', applicationId)
+                .select();
+                
+            if (updateError) {
+                console.error('Failed to update booking:', updateError);
+                console.error('Error details:', {
+                    message: updateError.message,
+                    details: updateError.details,
+                    hint: updateError.hint,
+                    code: updateError.code
+                });
+                return;
+            } else {
+                console.log('Successfully updated booking:', updateResult);
+            }
+            
+            console.log('Booking updated in database, updating local state...');
+            
+            // Update local state immediately
+            setAllBookings((prevBookings: any[]) => {
+                const updatedBookings = prevBookings.map((booking: any) => 
+                    booking.id === applicationId 
+                        ? { ...booking, status: 'selected', venue_id: venue.id }
+                        : booking
+                );
+                console.log('Updated bookings in local state:', updatedBookings.filter(b => b.id === applicationId));
+                return updatedBookings;
             });
-            // Refresh data
-            window.location.reload();
+            
+            // Force re-render of components
+            setRefreshTrigger(prev => prev + 1);
+            
+            console.log('Local state updated successfully');
+            
+            // Trigger a refetch of bookings to ensure we have the latest data
+            setTimeout(() => {
+                // Re-fetch bookings to ensure we have the latest data
+                const refetchBookings = async () => {
+                    try {
+                        const { data: refetchData, error: refetchError } = await supabase
+                            .from('bookings')
+                            .select(`
+                                *,
+                                event:events (
+                                    id,
+                                    title,
+                                    date,
+                                    start_time,
+                                    end_time,
+                                    description,
+                                    venue:venues (
+                                        id, 
+                                        name, 
+                                        address,
+                                        city,
+                                        state
+                                    )
+                                ),
+                                musician:musicians (
+                                    id,
+                                    stage_name,
+                                    email,
+                                    profile_picture
+                                )
+                            `)
+                            .eq('venue_id', venue?.id);
+
+                        if (refetchError) {
+                            console.error("Error refetching bookings:", refetchError);
+                        } else {
+                            console.log('Refetched bookings:', refetchData);
+                            setAllBookings(refetchData || []);
+                        }
+                    } catch (error) {
+                        console.error("Error refetching bookings:", error);
+                    }
+                };
+                refetchBookings();
+            }, 500);
+            
+            // Verify the update by fetching the booking again
+            setTimeout(async () => {
+                const { data: verifyBooking, error: verifyError } = await supabase
+                    .from('bookings')
+                    .select('*')
+                    .eq('id', applicationId)
+                    .single();
+                    
+                if (verifyError) {
+                    console.error('Error verifying booking update:', verifyError);
+                } else {
+                    console.log('Verified booking in database:', verifyBooking);
+                }
+            }, 1000);
         } catch (error) {
             console.error("Error booking application:", error);
         }
@@ -439,13 +592,24 @@ export function useVenueEvents(user: any) {
 
     const handleRejectApplication = async (applicationId: string) => {
         try {
-            console.log("Rejecting application:", applicationId);
-            await updateBooking({
-                id: applicationId,
-                status: "rejected"
-            });
-            // Refresh data
-            window.location.reload();
+            const { error } = await supabase
+                .from('bookings')
+                .update({ cancelled_at: new Date().toISOString() })
+                .eq('id', applicationId);
+                
+            if (error) throw error;
+            
+            // Update local state immediately
+            setAllBookings((prevBookings: any[]) => 
+                prevBookings.map((booking: any) => 
+                    booking.id === applicationId 
+                        ? { ...booking, status: 'cancelled' }
+                        : booking
+                )
+            );
+            
+            // Force re-render of components
+            setRefreshTrigger(prev => prev + 1);
         } catch (error) {
             console.error("Error rejecting application:", error);
         }
@@ -464,6 +628,8 @@ export function useVenueEvents(user: any) {
         expandedApplications,
         editFormData,
         setEditFormData,
+        refreshTrigger,
+        setRefreshTrigger,
 
         // Data
         venue,

@@ -8,6 +8,7 @@ import { VenueEventsHeader } from "../components/shared/VenueEventsHeader";
 import { VenueEventsStats } from "../components/shared/VenueEventsStats";
 import { VenueEventsTabs } from "../components/shared/VenueEventsTabs";
 import { VenueEventEditDialog } from "../components/shared/VenueEventEditDialog";
+import { RefreshCw } from "lucide-react";
 
 export default function VenueEventsPage() {
     const { user } = useOutletContext<AuthOutletContext>();
@@ -25,6 +26,8 @@ export default function VenueEventsPage() {
         expandedApplications,
         editFormData,
         setEditFormData,
+        refreshTrigger,
+        setRefreshTrigger,
 
         // Data
         venue,
@@ -92,7 +95,17 @@ export default function VenueEventsPage() {
     return (
         <div className="container mx-auto p-6 space-y-6">
             {/* Header */}
-            <VenueEventsHeader venueName={(venue as any)?.name || "your venue"} />
+            <div className="flex justify-between items-center">
+                <VenueEventsHeader venueName={(venue as any)?.name || "your venue"} />
+                <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => setRefreshTrigger((prev: number) => prev + 1)}
+                >
+                    <RefreshCw className="mr-2 h-4 w-4" />
+                    Refresh
+                </Button>
+            </div>
 
             {/* Quick Stats */}
             <VenueEventsStats
@@ -105,6 +118,7 @@ export default function VenueEventsPage() {
 
             {/* Main Content Tabs */}
             <VenueEventsTabs
+                key={`tabs-${refreshTrigger}`}
                 activeTab={activeTab}
                 setActiveTab={setActiveTab}
                 allEvents={allEvents}
