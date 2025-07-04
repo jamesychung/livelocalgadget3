@@ -3,21 +3,39 @@ import { Button } from "../components/ui/button";
 import { Card } from "../components/ui/card";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
-import { useActionForm } from "@gadgetinc/react";
+import { useState } from "react";
 import { CheckCircle, ArrowLeft, Mail } from "lucide-react";
 import { Link } from 'react-router-dom';
-import { api } from "../api";
+import { supabase } from "../lib/supabase";
 
-export default function () {
-  const {
-    submit,
-    register,
-    formState: { errors, isSubmitSuccessful, isSubmitting },
-  } = useActionForm(api.user.sendVerifyEmail, {
-    onSuccess: () => {
-      // This will send a verification email which can help users find their account
-    },
-  });
+export default function ForgotUserId() {
+  const [email, setEmail] = useState("");
+  const [errors, setErrors] = useState<any>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitSuccessful, setIsSubmitSuccessful] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setErrors({});
+
+    try {
+      // Send a password reset email which will help users find their account
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`
+      });
+
+      if (error) {
+        setErrors({ root: error.message });
+      } else {
+        setIsSubmitSuccessful(true);
+      }
+    } catch (error: any) {
+      setErrors({ root: error.message });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <div className="w-[420px]">
@@ -41,7 +59,7 @@ export default function () {
               </div>
             </div>
           ) : (
-            <form onSubmit={submit}>
+            <form onSubmit={handleSubmit}>
               <div className="space-y-6">
                 <div className="space-y-2">
                   <h1 className="text-3xl font-bold tracking-tight">Find your account</h1>
@@ -55,20 +73,22 @@ export default function () {
                       <Label htmlFor="email">Email address</Label>
                       <Input 
                         id="email" 
+                        name="email"
                         type="email" 
                         placeholder="Enter your email" 
                         autoComplete="email"
-                        {...register("email")}
-                        className={errors?.user?.email?.message ? "border-destructive" : ""}
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className={errors?.email ? "border-destructive" : ""}
                       />
-                      {errors?.user?.email?.message && (
-                        <p className="text-sm text-destructive">{errors.user.email.message}</p>
+                      {errors?.email && (
+                        <p className="text-sm text-destructive">{errors.email}</p>
                       )}
                     </div>
                   </div>
-                  {errors?.root?.message && (
+                  {errors?.root && (
                     <Alert variant="destructive">
-                      <AlertDescription>{errors.root.message}</AlertDescription>
+                      <AlertDescription>{errors.root}</AlertDescription>
                     </Alert>
                   )}
                   <Button className="w-full" size="lg" disabled={isSubmitting} type="submit">

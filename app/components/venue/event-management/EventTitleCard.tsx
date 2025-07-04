@@ -1,7 +1,7 @@
 import React from "react";
-import { Card, CardHeader, CardTitle } from "../../../components/ui/card";
-import { Badge } from "../../../components/ui/badge";
-import { Input } from "../../../components/ui/input";
+import { Card, CardHeader, CardTitle } from "../../ui/card";
+import { Badge } from "../../ui/badge";
+import { Input } from "../../ui/input";
 import { Music } from "lucide-react";
 import { Event } from "./types";
 

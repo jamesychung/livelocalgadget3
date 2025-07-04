@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../../../lib/auth";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../../components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../ui/tabs";
 import { DashboardHeader } from "./DashboardHeader";
 import { OverviewTab } from "./OverviewTab";
 import { VenueProfile, Event, Booking, Review, DashboardStats } from "./types";
@@ -69,7 +69,7 @@ export const VenueDashboard: React.FC = () => {
 
   // Get pending bookings
   const pendingBookings = bookings.filter(booking => 
-    booking.status === 'applied' || booking.status === 'invited'
+    booking.status === 'applied' || booking.status === 'selected'
   );
 
   // Get pending cancel bookings

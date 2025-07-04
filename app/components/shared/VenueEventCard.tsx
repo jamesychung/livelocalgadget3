@@ -1,8 +1,8 @@
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
-import { Button } from "../ui/button";
 import { Badge } from "../ui/badge";
-import { Calendar, Clock, MapPin, Users, Edit, Eye } from "lucide-react";
+import { Calendar, Clock, MapPin, Users } from "lucide-react";
+import { EventActions } from "./EventActions";
 
 interface VenueEventCardProps {
     event: {
@@ -130,26 +130,10 @@ export const VenueEventCard: React.FC<VenueEventCardProps> = ({
                         )}
                     </div>
                     
-                    <div className="flex items-center gap-2">
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => onEventClick(event)}
-                            className="flex items-center gap-1"
-                        >
-                            <Eye className="h-4 w-4" />
-                            View
-                        </Button>
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => onEditEvent(event)}
-                            className="flex items-center gap-1"
-                        >
-                            <Edit className="h-4 w-4" />
-                            Edit
-                        </Button>
-                    </div>
+                    <EventActions
+                        onView={() => onEventClick(event)}
+                        onEdit={() => onEditEvent(event)}
+                    />
                 </div>
             </CardContent>
         </Card>

@@ -137,7 +137,7 @@ export function useVenues(filter?: any) {
       let query = supabase.from('venues').select('*');
       
       if (filter?.user?.id?.equals) {
-        query = query.eq('user_id', filter.user.id.equals);
+        query = query.eq('owner_id', filter.user.id.equals);
       }
       
       return await query;

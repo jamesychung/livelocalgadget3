@@ -1,5 +1,5 @@
 import React from "react";
-import { Button } from "../../../components/ui/button";
+import { Button } from "../../ui/button";
 import { SimpleCreateFormProps } from "./types";
 
 export const SimpleCreateForm: React.FC<SimpleCreateFormProps> = ({ saving, onSubmit }) => {

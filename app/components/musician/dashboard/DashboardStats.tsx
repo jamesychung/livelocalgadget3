@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card, CardHeader, CardTitle, CardContent } from "../../../components/ui/card";
+import { Card, CardHeader, CardTitle, CardContent } from "../../ui/card";
 import { Calendar, Star, DollarSign, AlertCircle } from "lucide-react";
 import { DashboardStatsProps } from './types';
 

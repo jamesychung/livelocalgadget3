@@ -1,5 +1,5 @@
 import React from "react";
-import { CardHeader, CardTitle, CardDescription } from "../../../components/ui/card";
+import { CardHeader, CardTitle, CardDescription } from "../../ui/card";
 import { ProfileHeaderProps } from "./types";
 
 export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ 

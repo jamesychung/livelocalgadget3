@@ -9,10 +9,18 @@ interface SwitchProps extends React.InputHTMLAttributes<HTMLInputElement> {
 
 const Switch = React.forwardRef<HTMLInputElement, SwitchProps>(
   ({ className, checked, onCheckedChange, ...props }, ref) => {
+    const id = props.id || Math.random().toString(36).slice(2);
     return (
-      <div className={cn("relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer", 
-        checked ? "bg-primary" : "bg-input", className)}>
+      <label
+        htmlFor={id}
+        className={cn(
+          "relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer",
+          checked ? "bg-primary" : "bg-input",
+          className
+        )}
+      >
         <input
+          id={id}
           type="checkbox"
           ref={ref}
           checked={checked}
@@ -20,11 +28,13 @@ const Switch = React.forwardRef<HTMLInputElement, SwitchProps>(
           className="sr-only"
           {...props}
         />
-        <div className={cn(
-          "pointer-events-none block h-5 w-5 rounded-full bg-background shadow-lg ring-0 transition-transform",
-          checked ? "translate-x-5" : "translate-x-0"
-        )} />
-      </div>
+        <div
+          className={cn(
+            "pointer-events-none block h-5 w-5 rounded-full bg-background shadow-lg ring-0 transition-transform",
+            checked ? "translate-x-5" : "translate-x-0"
+          )}
+        />
+      </label>
     )
   }
 )

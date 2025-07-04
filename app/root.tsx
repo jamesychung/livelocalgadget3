@@ -32,12 +32,15 @@ import Settings from "./routes/_app.settings";
 import Availability from "./routes/_app.availability";
 import Profile from "./routes/_app.profile";
 import VenueEvents from "./routes/_app.venue-events";
+import VenueEventsCurrent from "./routes/_app.venue-events.current";
+import VenueEventsEventCentric from "./routes/_app.venue-events.event-centric";
+import VenueEventsWorkflowBased from "./routes/_app.venue-events.workflow-based";
 import CreateEvent from "./routes/_app.create-event";
 import VenueEventDetail from "./routes/_app.venue-event.$eventId";
 import VenueHowTo from "./routes/_app.venue-how-to";
 import VenueProfileEdit from "./routes/_app.venue-profile.edit";
 import VenueProfileCreate from "./routes/_app.venue-profile.create";
-import MusicianProfile from "./routes/_app.musician-profile";
+import MusicianProfilePage from "./routes/_app.musician-profile";
 
 // Define root context type
 export type RootOutletContext = {
@@ -78,7 +81,7 @@ export default function App() {
                 
                 {/* Musician routes */}
                 <Route path="musician-dashboard" element={<MusicianDashboard />} />
-                <Route path="musician-profile" element={<MusicianProfile />} />
+                <Route path="musician-profile" element={<MusicianProfilePage />} />
                 <Route path="musician-profile/edit" element={<MusicianProfileEdit />} />
                 <Route path="musician-profile/create" element={<MusicianProfileCreate />} />
                 <Route path="musician-reviews" element={<MusicianReviews />} />
@@ -90,6 +93,9 @@ export default function App() {
                 <Route path="venue-dashboard" element={<VenueDashboard />} />
                 <Route path="venue-musicians" element={<VenueMusicians />} />
                 <Route path="venue-events" element={<VenueEvents />} />
+                <Route path="venue-events/current" element={<VenueEventsCurrent />} />
+                <Route path="venue-events/event-centric" element={<VenueEventsEventCentric />} />
+                <Route path="venue-events/workflow-based" element={<VenueEventsWorkflowBased />} />
                 <Route path="create-event" element={<CreateEvent />} />
                 <Route path="venue-event/:eventId" element={<VenueEventDetail />} />
                 <Route path="venue-how-to" element={<VenueHowTo />} />

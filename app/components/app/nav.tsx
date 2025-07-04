@@ -103,9 +103,9 @@ const navigationItems: NavItem[] = [
     roles: ["venue_owner"],
   },
   {
-    title: "Venue Events",
-    path: "/venue-events",
-    icon: Star,
+    title: "Manage Events",
+    path: "/venue-events/workflow-based",
+    icon: Calendar,
     roles: ["venue_owner"],
   },
   {

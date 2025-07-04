@@ -3,34 +3,62 @@ import { Button } from "../components/ui/button";
 import { Card } from "../components/ui/card";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
-import { useActionForm } from "@gadgetinc/react";
+import { useState } from "react";
 import { CheckCircle, ArrowLeft } from "lucide-react";
-import { Link, useLocation, useNavigate, useOutletContext } from 'react-router-dom';
-import { api } from "../api";
-import type { RootOutletContext } from "../root";
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { supabase } from "../lib/supabase";
 
-export default function () {
+export default function ResetPassword() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { gadgetConfig } = useOutletContext<RootOutletContext>();
-
-  const {
-    submit,
-    register,
-    formState: { errors, isSubmitSuccessful, isSubmitting },
-  } = useActionForm(api.user.resetPassword, {
-    defaultValues: {
-      code: new URLSearchParams(location.search).get("code"),
-      password: "",
-      confirmPassword: "",
-    },
-    onSuccess: () => {
-      // Redirect to sign-in after successful password reset
-      setTimeout(() => {
-        navigate("/sign-in");
-      }, 2000);
-    },
+  const [formData, setFormData] = useState({
+    code: new URLSearchParams(location.search).get("code") || "",
+    password: "",
+    confirmPassword: "",
   });
+  const [errors, setErrors] = useState<any>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitSuccessful, setIsSubmitSuccessful] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setErrors({});
+
+    // Validate passwords match
+    if (formData.password !== formData.confirmPassword) {
+      setErrors({ confirmPassword: "Passwords do not match" });
+      setIsSubmitting(false);
+      return;
+    }
+
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password: formData.password
+      });
+
+      if (error) {
+        setErrors({ root: error.message });
+      } else {
+        setIsSubmitSuccessful(true);
+        // Redirect to sign-in after successful password reset
+        setTimeout(() => {
+          navigate("/sign-in");
+        }, 2000);
+      }
+    } catch (error: any) {
+      setErrors({ root: error.message });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData(prev => ({
+      ...prev,
+      [e.target.name]: e.target.value
+    }));
+  };
 
   return (
     <div className="w-[420px]">
@@ -54,7 +82,7 @@ export default function () {
               </div>
             </div>
           ) : (
-            <form onSubmit={submit}>
+            <form onSubmit={handleSubmit}>
               <div className="space-y-6">
                 <div className="space-y-2">
                   <h1 className="text-3xl font-bold tracking-tight">Reset Password</h1>
@@ -68,14 +96,16 @@ export default function () {
                       <Label htmlFor="password">New password</Label>
                       <Input
                         id="password"
+                        name="password"
                         type="password"
                         placeholder="Enter new password"
                         autoComplete="new-password"
-                        {...register("password")}
-                        className={errors?.user?.password?.message ? "border-destructive" : ""}
+                        value={formData.password}
+                        onChange={handleInputChange}
+                        className={errors?.password ? "border-destructive" : ""}
                       />
-                      {errors?.user?.password?.message && (
-                        <p className="text-sm text-destructive">{errors.user.password.message}</p>
+                      {errors?.password && (
+                        <p className="text-sm text-destructive">{errors.password}</p>
                       )}
                     </div>
                   </div>
@@ -84,20 +114,22 @@ export default function () {
                       <Label htmlFor="confirmPassword">Confirm password</Label>
                       <Input
                         id="confirmPassword"
+                        name="confirmPassword"
                         type="password"
                         placeholder="Confirm new password"
                         autoComplete="new-password"
-                        {...register("confirmPassword")}
-                        className={errors?.confirmPassword?.message ? "border-destructive" : ""}
+                        value={formData.confirmPassword}
+                        onChange={handleInputChange}
+                        className={errors?.confirmPassword ? "border-destructive" : ""}
                       />
-                      {errors?.confirmPassword?.message && (
-                        <p className="text-sm text-destructive">{errors.confirmPassword.message}</p>
+                      {errors?.confirmPassword && (
+                        <p className="text-sm text-destructive">{errors.confirmPassword}</p>
                       )}
                     </div>
                   </div>
-                  {errors?.root?.message && (
+                  {errors?.root && (
                     <Alert variant="destructive">
-                      <AlertDescription>{errors.root.message}</AlertDescription>
+                      <AlertDescription>{errors.root}</AlertDescription>
                     </Alert>
                   )}
                   <Button className="w-full" size="lg" disabled={isSubmitting} type="submit">

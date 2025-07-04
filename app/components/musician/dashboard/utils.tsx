@@ -1,5 +1,5 @@
 import React from "react";
-import { Badge } from "../../../components/ui/badge";
+import { Badge } from "../../ui/badge";
 
 // Helper function to render status badges
 export function getStatusBadge(status: string) {

@@ -10,7 +10,7 @@ import {
   fetchMusicianProfile
 } from "../components/musician/profile";
 
-export default function MusicianProfile() {
+export default function MusicianProfilePage() {
   const context = useOutletContext<AuthOutletContext>();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);

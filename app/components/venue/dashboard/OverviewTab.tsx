@@ -1,10 +1,10 @@
 import React from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "../../../ui/card";
-import { Button } from "../../../ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "../../ui/card";
+import { Button } from "../../ui/button";
 import { OverviewTabProps, Booking, Event } from "./types";
 import { formatDate } from "./utils";
 import { StatusBadge } from "./StatusBadge";
-import { Link } from "@remix-run/react";
+import { Link } from "react-router-dom";
 
 export const OverviewTab: React.FC<OverviewTabProps> = ({ 
   venue, 

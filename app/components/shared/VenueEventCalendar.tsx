@@ -9,6 +9,8 @@ import { Clock, Plus, X, Save, Settings, Calendar as CalendarIcon, ChevronLeft, 
 import { format } from "date-fns";
 import { cn } from "../../lib/utils";
 import { Link } from 'react-router-dom';
+import { EventStatusBadge } from "./EventStatusBadge";
+import { CalendarDayCell } from "./CalendarDayCell";
 
 interface Event {
     id: string;
@@ -64,27 +66,7 @@ export default function VenueEventCalendar({
         return event.eventStatus === eventTypeFilter;
     });
 
-    const getStatusBadge = (status: string | null | undefined) => {
-        if (!status) {
-            return (
-                <Badge className="bg-gray-100 text-gray-800">
-                    No Status
-                </Badge>
-            );
-        }
-        
-        const statusColors: Record<string, string> = {
-            confirmed: "bg-green-100 text-green-800",
-            proposed: "bg-yellow-100 text-yellow-800",
-            cancelled: "bg-red-100 text-red-800",
-            open: "bg-blue-100 text-blue-800",
-        };
-        return (
-            <Badge className={statusColors[status] || "bg-gray-100 text-gray-800"}>
-                {status.charAt(0).toUpperCase() + status.slice(1)}
-            </Badge>
-        );
-    };
+    // Status badge logic is now handled by EventStatusBadge component
 
     const getWeekDates = (startDate: Date) => {
         const dates = [];
@@ -214,74 +196,16 @@ export default function VenueEventCalendar({
                         {weekDates.map((date, index) => {
                             const dayEvents = getEventsForDate(date);
                             const isTodayDate = isToday(date);
-                            
+                            // Weekly view: always current month for all days in week
                             return (
-                                <div key={index} className="border rounded-lg p-4">
-                                    <div className="flex items-center justify-between mb-3">
-                                        <div className="flex items-center gap-2">
-                                            <h3 className="font-medium">
-                                                {date.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
-                                            </h3>
-                                            {isTodayDate && (
-                                                <Badge variant="secondary">Today</Badge>
-                                            )}
-                                        </div>
-                                        <div className="text-sm text-muted-foreground">
-                                            {dayEvents.length} event{dayEvents.length !== 1 ? 's' : ''}
-                                        </div>
-                                    </div>
-                                    
-                                    {dayEvents.length > 0 ? (
-                                        <div className="space-y-2">
-                                            {dayEvents.map((event) => (
-                                                <div 
-                                                    key={event.id} 
-                                                    className={`
-                                                        p-3 border rounded-lg cursor-pointer transition-colors
-                                                        ${event.eventStatus === 'confirmed' ? 'bg-green-50 border-green-200' : 
-                                                          event.eventStatus === 'proposed' ? 'bg-yellow-50 border-yellow-200' : 
-                                                          'bg-gray-50 border-gray-200'}
-                                                        hover:shadow-md
-                                                    `}
-                                                    onClick={() => onEditEvent?.(event)}
-                                                >
-                                                    <div className="flex items-start justify-between">
-                                                        <div>
-                                                            <p className="font-medium">{event.title}</p>
-                                                            <p className="text-sm text-muted-foreground">
-                                                                {event.startTime} - {event.endTime}
-                                                            </p>
-                                                            {event.musician && (
-                                                                <p className="text-sm text-muted-foreground">
-                                                                    <Link 
-                                                                        to={`/musician/${event.musician.id}`}
-                                                                        className="text-blue-600 hover:text-blue-800 hover:underline"
-                                                                        onClick={(e) => e.stopPropagation()}
-                                                                    >
-                                                                        {event.musician.stageName}
-                                                                    </Link>
-                                                                </p>
-                                                            )}
-                                                        </div>
-                                                        <div className="flex items-center gap-2">
-                                                            {getStatusBadge(event.eventStatus)}
-                                                            {event.totalAmount && (
-                                                                <Badge variant="outline">
-                                                                    ${event.totalAmount}
-                                                                </Badge>
-                                                            )}
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    ) : (
-                                        <div className="text-center py-4 text-muted-foreground">
-                                            <CalendarIcon className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                                            <p>No events scheduled</p>
-                                        </div>
-                                    )}
-                                </div>
+                                <CalendarDayCell
+                                    key={index}
+                                    date={date}
+                                    dayEvents={dayEvents}
+                                    isToday={isTodayDate}
+                                    isCurrentMonth={true}
+                                    onEventClick={onEditEvent}
+                                />
                             );
                         })}
                     </div>
@@ -344,64 +268,15 @@ export default function VenueEventCalendar({
                         const dayEvents = getEventsForDate(date);
                         const isTodayDate = isToday(date);
                         const isCurrentMonthDate = isCurrentMonth(date);
-                        
                         return (
-                            <div
+                            <CalendarDayCell
                                 key={index}
-                                className={`
-                                    min-h-[100px] p-2 border rounded-lg transition-colors
-                                    ${isCurrentMonthDate ? 'bg-white' : 'bg-gray-50'}
-                                    ${isTodayDate ? 'ring-2 ring-blue-500' : ''}
-                                    ${dayEvents.length > 0 ? 'bg-blue-50 border-blue-200' : ''}
-                                `}
-                            >
-                                <div className="flex items-center justify-between mb-1">
-                                    <span className={`
-                                        text-sm font-medium
-                                        ${isCurrentMonthDate ? 'text-gray-900' : 'text-gray-400'}
-                                        ${isTodayDate ? 'text-blue-600 font-bold' : ''}
-                                    `}>
-                                        {date.getDate()}
-                                    </span>
-                                    {dayEvents.length > 0 && (
-                                        <Badge variant="secondary" className="text-xs">
-                                            {dayEvents.length}
-                                        </Badge>
-                                    )}
-                                </div>
-                                {dayEvents.length > 0 && (
-                                    <div className="space-y-1">
-                                        {dayEvents.slice(0, 2).map((event) => (
-                                            <div 
-                                                key={event.id} 
-                                                className="text-xs p-1 bg-white rounded border cursor-pointer hover:bg-gray-50"
-                                                onClick={() => onEditEvent?.(event)}
-                                            >
-                                                <div className="font-medium truncate">{event.title}</div>
-                                                <div className="text-muted-foreground truncate">
-                                                    {event.startTime} - {event.musician && (
-                                                        <Link 
-                                                            to={`/musician/${event.musician.id}`}
-                                                            className="text-blue-600 hover:text-blue-800 hover:underline"
-                                                            onClick={(e) => e.stopPropagation()}
-                                                        >
-                                                            {event.musician.stageName}
-                                                        </Link>
-                                                    )}
-                                                </div>
-                                                <div className="flex items-center gap-1">
-                                                    {getStatusBadge(event.eventStatus)}
-                                                </div>
-                                            </div>
-                                        ))}
-                                        {dayEvents.length > 2 && (
-                                            <div className="text-xs text-muted-foreground text-center">
-                                                +{dayEvents.length - 2} more
-                                            </div>
-                                        )}
-                                    </div>
-                                )}
-                            </div>
+                                date={date}
+                                dayEvents={dayEvents}
+                                isToday={isTodayDate}
+                                isCurrentMonth={isCurrentMonthDate}
+                                onEventClick={onEditEvent}
+                            />
                         );
                     })}
                 </div>

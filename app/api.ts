@@ -101,7 +101,7 @@ export const api = {
         .from('venues')
         .insert([
           {
-            user_id: data.owner?._link,
+            owner_id: data.owner?._link,
             name: data.name,
             email: data.email
           }
@@ -119,7 +119,7 @@ export const api = {
         // Handle filters if needed
         const filters = options.filter;
         if (filters.owner?.id?.equals) {
-          query = query.eq('user_id', filters.owner.id.equals);
+          query = query.eq('owner_id', filters.owner.id.equals);
         }
       }
       

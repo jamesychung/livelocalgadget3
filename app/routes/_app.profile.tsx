@@ -3,16 +3,14 @@ import { Button } from "../components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../components/ui/dialog";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
-import { useActionForm } from "@gadgetinc/react";
 import { useState } from "react";
-import { useOutletContext, useRevalidator } from 'react-router-dom';
-import { api } from "../api";
+import { useOutletContext } from 'react-router-dom';
+import { supabase } from "../lib/supabase";
 import type { AuthOutletContext } from "./_app";
 
-export default function () {
+export default function Profile() {
   const { user } = useOutletContext<AuthOutletContext>();
 
-  const revalidator = useRevalidator();
   const [isEditing, setIsEditing] = useState(false);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
 
@@ -32,11 +30,9 @@ export default function () {
             </div>
           </div>
           <div className="flex gap-2">
-            {!user.googleProfileId && (
-              <Button variant="ghost" onClick={() => setIsChangingPassword(true)}>
-                Change password
-              </Button>
-            )}
+            <Button variant="ghost" onClick={() => setIsChangingPassword(true)}>
+              Change password
+            </Button>
             <Button variant="ghost" onClick={() => setIsEditing(true)}>
               Edit
             </Button>
@@ -45,17 +41,11 @@ export default function () {
       </div>
       <EditProfileModal
         open={isEditing}
-        onClose={() => {
-          setIsEditing(false);
-          revalidator.revalidate();
-        }}
+        onClose={() => setIsEditing(false)}
       />
       <ChangePasswordModal
         open={isChangingPassword}
-        onClose={() => {
-          setIsChangingPassword(false);
-          revalidator.revalidate();
-        }}
+        onClose={() => setIsChangingPassword(false)}
       />
     </div>
   );
@@ -63,16 +53,33 @@ export default function () {
 
 const EditProfileModal = (props: { open: boolean; onClose: () => void }) => {
   const { user } = useOutletContext<AuthOutletContext>();
-
-  const {
-    register,
-    submit,
-    formState: { isSubmitting },
-  } = useActionForm(api.user.update, {
-    defaultValues: user,
-    onSuccess: props.onClose,
-    send: ["firstName", "lastName"],
+  const [formData, setFormData] = useState({
+    firstName: user.firstName || "",
+    lastName: user.lastName || ""
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    
+    try {
+      const { error } = await supabase
+        .from('users')
+        .update({
+          first_name: formData.firstName,
+          last_name: formData.lastName
+        })
+        .eq('id', user.id);
+      
+      if (error) throw error;
+      props.onClose();
+    } catch (error: any) {
+      console.error('Error updating profile:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <Dialog open={props.open} onOpenChange={props.onClose}>
@@ -80,15 +87,23 @@ const EditProfileModal = (props: { open: boolean; onClose: () => void }) => {
         <DialogHeader>
           <DialogTitle>Edit profile</DialogTitle>
         </DialogHeader>
-        <form onSubmit={submit}>
+        <form onSubmit={handleSubmit}>
           <div className="space-y-4">
             <div>
               <Label>First Name</Label>
-              <Input placeholder="First name" {...register("firstName")} />
+              <Input 
+                placeholder="First name" 
+                value={formData.firstName}
+                onChange={(e) => setFormData(prev => ({ ...prev, firstName: e.target.value }))}
+              />
             </div>
             <div>
               <Label>Last Name</Label>
-              <Input placeholder="Last name" {...register("lastName")} />
+              <Input 
+                placeholder="Last name" 
+                value={formData.lastName}
+                onChange={(e) => setFormData(prev => ({ ...prev, lastName: e.target.value }))}
+              />
             </div>
           </div>
           <div className="flex justify-end gap-2 pt-4">
@@ -106,20 +121,38 @@ const EditProfileModal = (props: { open: boolean; onClose: () => void }) => {
 };
 
 const ChangePasswordModal = (props: { open: boolean; onClose: () => void }) => {
-  const { user } = useOutletContext<AuthOutletContext>();
-
-  const {
-    register,
-    submit,
-    reset,
-    formState: { errors, isSubmitting },
-  } = useActionForm(api.user.changePassword, {
-    defaultValues: user,
-    onSuccess: props.onClose,
+  const [formData, setFormData] = useState({
+    currentPassword: "",
+    newPassword: ""
   });
+  const [errors, setErrors] = useState<any>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setErrors({});
+    
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password: formData.newPassword
+      });
+      
+      if (error) {
+        setErrors({ root: error.message });
+      } else {
+        props.onClose();
+      }
+    } catch (error: any) {
+      setErrors({ root: error.message });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const onClose = () => {
-    reset();
+    setFormData({ currentPassword: "", newPassword: "" });
+    setErrors({});
     props.onClose();
   };
 
@@ -129,19 +162,26 @@ const ChangePasswordModal = (props: { open: boolean; onClose: () => void }) => {
         <DialogHeader>
           <DialogTitle>Change password</DialogTitle>
         </DialogHeader>
-        <form onSubmit={submit}>
+        <form onSubmit={handleSubmit}>
           <div className="space-y-4">
             <div>
               <Label>Current Password</Label>
-              <Input type="password" autoComplete="off" {...register("currentPassword")} />
-              {errors?.root?.message && <p className="text-red-500 text-sm mt-1">{errors.root.message}</p>}
+              <Input 
+                type="password" 
+                autoComplete="off" 
+                value={formData.currentPassword}
+                onChange={(e) => setFormData(prev => ({ ...prev, currentPassword: e.target.value }))}
+              />
+              {errors?.root && <p className="text-red-500 text-sm mt-1">{errors.root}</p>}
             </div>
             <div>
               <Label>New Password</Label>
-              <Input type="password" autoComplete="off" {...register("newPassword")} />
-              {errors?.user?.password?.message && (
-                <p className="text-red-500 text-sm mt-1">New password {errors.user.password.message}</p>
-              )}
+              <Input 
+                type="password" 
+                autoComplete="off" 
+                value={formData.newPassword}
+                onChange={(e) => setFormData(prev => ({ ...prev, newPassword: e.target.value }))}
+              />
             </div>
           </div>
           <div className="flex justify-end gap-2 pt-4">

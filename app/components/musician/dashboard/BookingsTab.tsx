@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "../../../components/ui/card";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "../../ui/card";
 import { Calendar } from "lucide-react";
 import { BookingsTabProps } from './types';
 import { BookingCard } from './BookingCard';

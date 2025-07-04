@@ -1,8 +1,8 @@
 import React from "react";
-import { Input } from "../../../components/ui/input";
-import { Label } from "../../../components/ui/label";
-import { Textarea } from "../../../components/ui/textarea";
-import { Button } from "../../../components/ui/button";
+import { Input } from "../../ui/input";
+import { Label } from "../../ui/label";
+import { Textarea } from "../../ui/textarea";
+import { Button } from "../../ui/button";
 import { Building, MapPin, Phone, Globe, Image } from "lucide-react";
 import { FileUpload } from "../../shared/FileUpload";
 import { MultipleImageUpload } from "../../shared/MultipleImageUpload";

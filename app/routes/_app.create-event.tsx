@@ -224,8 +224,8 @@ export default function CreateEventPage() {
 
     const handleInputChange = (field: string, value: string | boolean | string[] | number) => {
         setEventForm(prev => ({
-            ...prev,
-            [field]: value
+                ...prev,
+                [field]: value
         }));
     };
 

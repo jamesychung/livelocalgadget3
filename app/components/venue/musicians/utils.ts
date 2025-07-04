@@ -59,8 +59,7 @@ export const fetchVenueEvents = async (venueId: string): Promise<{ data: Event[]
           name
         )
       `)
-      .eq('venue_id', venueId)
-      .eq('status', 'invited');
+      .eq('venue_id', venueId);
 
     if (error) {
       console.error("Error fetching venue events:", error);

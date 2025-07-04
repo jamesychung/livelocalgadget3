@@ -306,9 +306,15 @@ export function useVenueEvents(user: any) {
     };
 
     const getPendingApplications = () => {
-        const appliedBookings = allBookings.filter((booking: any) => 
-            booking.status === "applied"
+        console.log('🔍 All booking statuses:', venueBookings.map(b => ({ id: b.id, status: b.status, eventId: b.event?.id, eventTitle: b.event?.title })));
+        
+        const appliedBookings = venueBookings.filter((booking: any) => 
+            booking.status === "applied" || booking.status === "selected"
         );
+        
+        console.log('🔍 Pending applications found:', appliedBookings.length);
+        console.log('🔍 All available statuses:', [...new Set(venueBookings.map(b => b.status))]);
+        console.log('🔍 Applied bookings details:', appliedBookings.map(b => ({ id: b.id, status: b.status, eventTitle: b.event?.title })));
         return appliedBookings;
     };
 

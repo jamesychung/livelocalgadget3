@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "../../../components/ui/card";
-import { Button } from "../../../components/ui/button";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "../../ui/card";
+import { Button } from "../../ui/button";
 import { Edit } from "lucide-react";
 import { ProfileTabProps } from './types';
 

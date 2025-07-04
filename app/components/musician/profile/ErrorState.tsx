@@ -1,6 +1,6 @@
 import React from "react";
-import { Card, CardHeader, CardContent, CardTitle } from "../../../components/ui/card";
-import { Button } from "../../../components/ui/button";
+import { Card, CardHeader, CardContent, CardTitle } from "../../ui/card";
+import { Button } from "../../ui/button";
 
 interface ErrorStateProps {
   error: string | null;

@@ -1,8 +1,8 @@
 import React from "react";
-import { Card, CardHeader, CardContent, CardTitle } from "../../../components/ui/card";
-import { Label } from "../../../components/ui/label";
-import { Input } from "../../../components/ui/input";
-import { Checkbox } from "../../../components/ui/checkbox";
+import { Card, CardHeader, CardContent, CardTitle } from "../../ui/card";
+import { Label } from "../../ui/label";
+import { Input } from "../../ui/input";
+import { Checkbox } from "../../ui/checkbox";
 import { Search } from "lucide-react";
 
 interface SearchAndFilterProps {

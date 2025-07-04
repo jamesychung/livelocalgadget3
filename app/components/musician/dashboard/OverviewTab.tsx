@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "../../../components/ui/card";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "../../ui/card";
 import { Music, MapPin, Phone, Mail, ExternalLink } from "lucide-react";
 import { OverviewTabProps } from './types';
 import { getStatusBadge } from './utils';

@@ -52,7 +52,7 @@ interface BookingData {
   };
 }
 
-export default function MusicianProfile() {
+export default function MusicianPublicProfile() {
   const { musicianId } = useParams();
   const [currentTime, setCurrentTime] = useState<string>("");
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);

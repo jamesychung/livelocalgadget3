@@ -1,5 +1,5 @@
 import React, { ReactNode } from "react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../../components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../ui/tabs";
 
 interface TabNavigationProps {
   activeTab: string;
