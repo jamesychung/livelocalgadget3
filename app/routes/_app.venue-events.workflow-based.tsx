@@ -18,13 +18,19 @@ import { Link } from "react-router-dom";
 import { EventStatusBadge } from "../components/shared/EventStatusBadge";
 import { ApplicationDetailDialog } from "../components/shared/ApplicationDetailDialog";
 import VenueEventCalendar from "../components/shared/VenueEventCalendar";
+import { EventDetailDialog } from "../components/musician/events/EventDetailDialog";
 
 export default function VenueEventsWorkflowBasedPage() {
+    console.log("VenueEventsWorkflowBasedPage render");
     const { user } = useOutletContext<AuthOutletContext>();
     const [activeWorkflowTab, setActiveWorkflowTab] = useState("my-events");
     const [selectedEventForApplications, setSelectedEventForApplications] = useState<any>(null);
     const [applicationsDialogOpen, setApplicationsDialogOpen] = useState(false);
     const [showStatsSettings, setShowStatsSettings] = useState(false);
+    
+    // Add separate state for event detail dialog
+    const [selectedEvent, setSelectedEvent] = useState<any>(null);
+    const [isEventDetailDialogOpen, setIsEventDetailDialogOpen] = useState(false);
     
     // Default selected stats (can be stored in user preferences later)
     const [selectedStatIds, setSelectedStatIds] = useState<string[]>([
@@ -71,7 +77,7 @@ export default function VenueEventsWorkflowBasedPage() {
 
         // Event handlers
         handleUpdateEvent,
-        handleEventClick,
+        handleEventClick: originalHandleEventClick,
         handleEditEvent,
         handleEditSubmit,
         handleAddEvent,
@@ -80,24 +86,18 @@ export default function VenueEventsWorkflowBasedPage() {
         handleRejectApplication,
     } = useVenueEvents(user);
 
+    // Override handleEventClick to use our new state
+    const handleEventClick = (event: any) => {
+        console.log("Set selectedEvent:", event);
+        setSelectedEvent(event);
+        setIsEventDetailDialogOpen(true);
+    };
+
     // Calculate stats using the custom hook - MUST be called before any conditional returns
     const pendingApplicationsList = getPendingApplications();
     const stats = useVenueEventsStats(allEvents, venueBookings, pendingApplicationsList);
     const allAvailableStats = createVenueEventStats(stats);
     const selectedStats = allAvailableStats.filter(stat => selectedStatIds.includes(stat.id));
-
-    // Debug logging
-    console.log('🔍 Venue Events Stats Debug:', {
-        allEvents: allEvents.length,
-        allBookings: allBookings.length,
-        venueBookings: venueBookings.length,
-        pendingApplicationsList: pendingApplicationsList.length,
-        stats,
-        selectedStats: selectedStats.map(s => ({ id: s.id, value: s.value, title: s.title })),
-        allAvailableStats: allAvailableStats.map(s => ({ id: s.id, value: s.value, title: s.title })),
-        bookingStatuses: venueBookings.map(b => ({ id: b.id, status: b.status, eventId: b.event?.id })),
-        eventsWithDates: allEvents.map(e => ({ id: e.id, title: e.title, date: e.date, status: e.eventStatus }))
-    });
 
     // If no venue profile found, show a message with option to create one
     if (!venue) {
@@ -237,73 +237,70 @@ export default function VenueEventsWorkflowBasedPage() {
                                             const pendingCount = getPendingApplications().filter(b => b.event?.id === event.id).length;
                                             
                                             return (
-                                                <Card key={event.id} className="hover:shadow-lg transition-shadow duration-200">
+                                                <Card key={event.id} className="hover:shadow-lg transition-shadow duration-200 cursor-pointer">
                                                     <CardContent className="pt-6">
-                                                        <div className="flex items-start justify-between">
-                                                            <div className="flex-1">
-                                                                <div className="flex items-start justify-between mb-3">
-                                                                    <div>
-                                                                        <h3 className="text-lg font-semibold text-gray-900 mb-1">
-                                                                            {event.title}
-                                                                        </h3>
-                                                                        <div className="flex items-center gap-4 text-sm text-gray-600">
-                                                                            <div className="flex items-center gap-1">
-                                                                                <Calendar className="h-4 w-4" />
-                                                                                <span>{formatDate(event.date)}</span>
-                                                                            </div>
-                                                                            <div className="flex items-center gap-1">
-                                                                                <span>
-                                                                                    {formatTime(event.startTime)} - {formatTime(event.endTime)}
-                                                                                </span>
+                                                        <div
+                                                            className="flex flex-col gap-2"
+                                                            onClick={() => { console.log('Card clicked', event); handleEventClick(event); }}
+                                                            style={{ cursor: 'pointer' }}
+                                                        >
+                                                            <div className="flex items-start justify-between">
+                                                                <div className="flex-1">
+                                                                    <div className="flex items-start justify-between mb-3">
+                                                                        <div>
+                                                                            <h3 className="text-lg font-semibold text-gray-900 mb-1">
+                                                                                {event.title}
+                                                                            </h3>
+                                                                            <div className="flex items-center gap-4 text-sm text-gray-600">
+                                                                                <div className="flex items-center gap-1">
+                                                                                    <Calendar className="h-4 w-4" />
+                                                                                    <span>{formatDate(event.date)}</span>
+                                                                                </div>
+                                                                                <div className="flex items-center gap-1">
+                                                                                    <span>
+                                                                                        {formatTime(event.startTime)} - {formatTime(event.endTime)}
+                                                                                    </span>
+                                                                                </div>
                                                                             </div>
                                                                         </div>
+                                                                        <div className="flex items-center gap-2">
+                                                                            <EventStatusBadge status={event.eventStatus} />
+                                                                            {applicationCount > 0 && (
+                                                                                <Badge variant="secondary" className="bg-blue-100 text-blue-800">
+                                                                                    <Users className="h-3 w-3 mr-1" />
+                                                                                    {applicationCount} {applicationCount === 1 ? 'application' : 'applications'}
+                                                                                    {pendingCount > 0 && (
+                                                                                        <span className="ml-1">({pendingCount} pending)</span>
+                                                                                    )}
+                                                                                </Badge>
+                                                                            )}
+                                                                        </div>
                                                                     </div>
-                                                                    <div className="flex items-center gap-2">
-                                                                        <EventStatusBadge status={event.eventStatus} />
-                                                                        {applicationCount > 0 && (
-                                                                            <Badge variant="secondary" className="bg-blue-100 text-blue-800">
-                                                                                <Users className="h-3 w-3 mr-1" />
-                                                                                {applicationCount} {applicationCount === 1 ? 'application' : 'applications'}
-                                                                                {pendingCount > 0 && (
-                                                                                    <span className="ml-1">({pendingCount} pending)</span>
-                                                                                )}
-                                                                            </Badge>
-                                                                        )}
-                                                                    </div>
-                                                                </div>
-                                                                
-                                                                <div className="flex items-center gap-2">
-                                                                    <Button
-                                                                        variant="outline"
-                                                                        size="sm"
-                                                                        onClick={() => handleEventClick(event)}
-                                                                        className="flex items-center gap-1"
-                                                                    >
-                                                                        <Eye className="h-4 w-4" />
-                                                                        View Details
-                                                                    </Button>
-                                                                    <Button
-                                                                        variant="outline"
-                                                                        size="sm"
-                                                                        onClick={() => handleEditEvent(event)}
-                                                                        className="flex items-center gap-1"
-                                                                    >
-                                                                        <Edit className="h-4 w-4" />
-                                                                        Edit
-                                                                    </Button>
-                                                                    {applicationCount > 0 && (
-                                                                        <Button
-                                                                            variant="default"
-                                                                            size="sm"
-                                                                            onClick={() => handleViewApplications(event)}
-                                                                            className="flex items-center gap-1"
-                                                                        >
-                                                                            <Users className="h-4 w-4" />
-                                                                            Review Applications ({pendingCount > 0 ? pendingCount : applicationCount})
-                                                                        </Button>
-                                                                    )}
                                                                 </div>
                                                             </div>
+                                                        </div>
+                                                        {/* Action buttons outside clickable area */}
+                                                        <div className="flex items-center gap-2 mt-2">
+                                                            <Button
+                                                                variant="outline"
+                                                                size="sm"
+                                                                onClick={e => { e.stopPropagation(); handleEditEvent(event); }}
+                                                                className="flex items-center gap-1"
+                                                            >
+                                                                <Edit className="h-4 w-4" />
+                                                                Edit
+                                                            </Button>
+                                                            {applicationCount > 0 && (
+                                                                <Button
+                                                                    variant="default"
+                                                                    size="sm"
+                                                                    onClick={e => { e.stopPropagation(); handleViewApplications(event); }}
+                                                                    className="flex items-center gap-1"
+                                                                >
+                                                                    <Users className="h-4 w-4" />
+                                                                    Review Applications ({applicationCount})
+                                                                </Button>
+                                                            )}
                                                         </div>
                                                     </CardContent>
                                                 </Card>
@@ -516,6 +513,24 @@ export default function VenueEventsWorkflowBasedPage() {
                     getEventApplications={(eventId) => venueBookings.filter(b => b.event?.id === eventId)}
                     onAcceptApplication={(bookingId) => handleBookApplication(bookingId, selectedEventForApplications?.id || '')}
                     onRejectApplication={handleRejectApplication}
+                />
+                {/* Event Detail Dialog */}
+                {selectedEvent && <div style={{position: 'fixed', top: 0, left: 0, zIndex: 9999, background: 'yellow'}}>Dialog Open</div>}
+                {console.log("Rendering EventDetailDialog", { selectedEvent })}
+                <EventDetailDialog
+                    isOpen={isEventDetailDialogOpen}
+                    setIsOpen={setIsEventDetailDialogOpen}
+                    selectedEvent={selectedEvent}
+                    user={user}
+                    bookings={allBookings}
+                    musicians={musiciansData}
+                    handleApply={() => {}}
+                    handleNotInterested={() => {}}
+                    handleMessageVenue={() => {}}
+                    handleViewBookingDetails={() => {}}
+                    handleBookingStatusUpdate={() => {}}
+                    getMusicianApplicationStatus={() => ({ status: "none" })}
+                    getMatchingMusicians={() => []}
                 />
         </div>
     );
