@@ -2,6 +2,8 @@ export * from './types';
 export * from './LoadingState';
 export * from './ExistingProfileState';
 export * from './NoProfileState';
+export * from './ErrorState';
 export * from './ProfileHeader';
 export * from './ProfileForm';
+export * from './ProfileView';
 export * from './utils'; 
