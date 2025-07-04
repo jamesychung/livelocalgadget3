@@ -10,6 +10,7 @@ import { supabase } from "../lib/supabase";
 import type { AuthOutletContext } from "./_app";
 import { ClickableImage } from "../components/shared/ClickableImage";
 import VenueSystemFlowchart from "../components/shared/VenueSystemFlowchart";
+import { BookingActionButtons } from "../components/shared/BookingActionButtons";
 
 // Helper function to render status badges
 function getStatusBadge(status: string) {
@@ -22,6 +23,7 @@ function getStatusBadge(status: string) {
         completed: "bg-blue-100 text-blue-800",
         open: "bg-green-100 text-green-800",
         invited: "bg-purple-100 text-purple-800",
+        pending_cancel: "bg-orange-100 text-orange-800",
     };
     return (
         <Badge className={statusColors[status?.toLowerCase()] || "bg-gray-100 text-gray-800"}>
@@ -121,6 +123,20 @@ export default function VenueDashboard() {
     const bookings: any[] = bookingsData || [];
     const events: any[] = eventsData || [];
     const reviews: any[] = reviewsData || [];
+
+    // Debug: Log bookings with pending_cancel status
+    useEffect(() => {
+        const pendingCancelBookings = bookings.filter(b => b.status === 'pending_cancel');
+        console.log("🔍 Debug - Bookings with pending_cancel status:", pendingCancelBookings);
+        
+        // Log details of all bookings
+        console.log("🔍 Debug - All bookings:", bookings.map(b => ({
+            id: b.id,
+            status: b.status,
+            cancel_requested_by_role: b.cancel_requested_by_role,
+            musician_name: b.musician?.stage_name
+        })));
+    }, [bookings]);
 
     useEffect(() => {
         if (venueError) console.error("Error loading venue data:", venueError);
@@ -321,6 +337,15 @@ export default function VenueDashboard() {
                                                     <strong>Notes:</strong> {booking.notes}
                                                 </div>
                                             )}
+                                            <BookingActionButtons
+                                                booking={booking}
+                                                currentUser={user}
+                                                onStatusUpdate={(updatedBooking) => {
+                                                    // TODO: Replace with your setBookings or equivalent state update function
+                                                    // setBookings(prev => prev.map(b => b.id === updatedBooking.id ? updatedBooking : b));
+                                                }}
+                                                className="mt-3"
+                                            />
                                         </div>
                                     ))}
                                 </div>

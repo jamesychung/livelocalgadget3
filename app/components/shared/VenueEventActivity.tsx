@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Button } from "../ui/button";
 import { Badge } from "../ui/badge";
 import { ChevronUp, ChevronDown, Users, Clock, CheckCircle, XCircle, MessageCircle } from "lucide-react";
+import { BookingActionButtons } from "./BookingActionButtons";
 
 interface VenueEventActivityProps {
   bookingsData: any[];
@@ -338,138 +339,18 @@ export const VenueEventActivity: React.FC<VenueEventActivityProps> = ({
                       </div>
                     </td>
                     <td className="py-4 px-3">
-                      <div className="flex items-center gap-2">
-                        {booking.status === "applied" && (
-                          <>
-                            <Button
-                              size="sm"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleBookMusician(booking.id);
-                              }}
-                              disabled={hasConfirmedBooking}
-                              className={`h-8 px-3 text-xs ${
-                                hasConfirmedBooking 
-                                  ? "opacity-50 cursor-not-allowed bg-gray-300 text-gray-500" 
-                                  : "bg-green-600 hover:bg-green-700"
-                              }`}
-                              title={hasConfirmedBooking ? "Another musician is already confirmed for this event" : "Confirm this musician"}
-                            >
-                              <CheckCircle className="mr-1 h-3 w-3" />
-                              Confirm
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleCommunicateBooking(booking.id);
-                              }}
-                              className="h-8 px-3 text-xs"
-                              title="Start communicating with this musician"
-                            >
-                              <MessageCircle className="mr-1 h-3 w-3" />
-                              Message
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleRejectBooking(booking.id);
-                              }}
-                              className="h-8 px-3 text-xs text-red-600 border-red-200 hover:bg-red-50"
-                              title="Reject this application"
-                            >
-                              <XCircle className="mr-1 h-3 w-3" />
-                              Reject
-                            </Button>
-                          </>
-                        )}
-                        {booking.status === "rejected" && (
-                          <div className="flex items-center gap-2">
-                            <Button
-                              size="sm"
-                              disabled={true}
-                              className="h-8 px-3 text-xs opacity-50 cursor-not-allowed bg-gray-300 text-gray-500"
-                              title="Cannot confirm a rejected booking"
-                            >
-                              <CheckCircle className="mr-1 h-3 w-3" />
-                              Confirm
-                            </Button>
-                            <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">
-                              Rejected
-                            </Badge>
-                          </div>
-                        )}
-                        {booking.status === "confirmed" && (
-                          <div className="flex items-center gap-2">
-                            <Badge className="bg-green-100 text-green-800 border-green-200">
-                              <CheckCircle className="mr-1 h-3 w-3" />
-                              Confirmed
-                            </Badge>
-                            <Button
-                              size="sm"
-                              disabled={true}
-                              className="h-8 px-3 text-xs opacity-50 cursor-not-allowed bg-gray-300 text-gray-500"
-                              title="Cannot reject a confirmed booking"
-                            >
-                              <XCircle className="mr-1 h-3 w-3" />
-                              Reject
-                            </Button>
-                          </div>
-                        )}
-                        {booking.status === "invited" && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              console.log("Resending invitation for booking:", booking.id);
+                        <div onClick={(e) => e.stopPropagation()}>
+                          <BookingActionButtons
+                            booking={booking}
+                            currentUser={{venue: { id: booking.venue_id }}}
+                            onStatusUpdate={(updatedBooking) => {
+                              // Refresh the bookings data
+                              window.location.reload();
                             }}
-                            className="h-8 px-3 text-xs"
-                            title="Resend invitation to this musician"
-                          >
-                            <Users className="mr-1 h-3 w-3" />
-                            Resend Invite
-                          </Button>
-                        )}
-                        {booking.status === "communicating" && (
-                          <>
-                            <Button
-                              size="sm"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleBookMusician(booking.id);
-                              }}
-                              disabled={hasConfirmedBooking}
-                              className={`h-8 px-3 text-xs ${
-                                hasConfirmedBooking 
-                                  ? "opacity-50 cursor-not-allowed bg-gray-300 text-gray-500" 
-                                  : "bg-green-600 hover:bg-green-700"
-                              }`}
-                              title={hasConfirmedBooking ? "Another musician is already confirmed for this event" : "Confirm this musician"}
-                            >
-                              <CheckCircle className="mr-1 h-3 w-3" />
-                              Confirm
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleRejectBooking(booking.id);
-                              }}
-                              className="h-8 px-3 text-xs text-red-600 border-red-200 hover:bg-red-50"
-                              title="Reject this application"
-                            >
-                              <XCircle className="mr-1 h-3 w-3" />
-                              Reject
-                            </Button>
-                          </>
-                        )}
-                      </div>
-                    </td>
+                            className="justify-start"
+                          />
+                        </div>
+                      </td>
                   </tr>
                 ))}
               </tbody>

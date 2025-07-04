@@ -100,7 +100,14 @@ export default function MusicianAvailEventsPage() {
                         id,
                         status,
                         event_id,
-                        musician_id
+                        musician_id,
+                        cancel_requested_at,
+                        cancel_requested_by,
+                        cancel_requested_by_role,
+                        cancelled_at,
+                        cancelled_by,
+                        cancel_confirmed_by_role,
+                        cancellation_reason
                     `);
 
                 if (bookingsError) throw bookingsError;
@@ -108,6 +115,15 @@ export default function MusicianAvailEventsPage() {
                 setEvents(eventsData || []);
                 setMusicians(musiciansData || []);
                 setBookings(bookingsData || []);
+                
+                // Debug: Log bookings statuses
+                console.log("🔍 Debug - Bookings statuses:", bookingsData?.map(b => ({
+                    id: b.id,
+                    status: b.status,
+                    event_id: b.event_id,
+                    musician_id: b.musician_id,
+                    cancel_requested_by_role: b.cancel_requested_by_role
+                })));
                 
             } catch (err: any) {
                 console.error("Error fetching data:", err);
@@ -130,6 +146,12 @@ export default function MusicianAvailEventsPage() {
         );
         
         if (!booking) return { status: "available" };
+        
+        console.log(`🔍 Debug - Musician application status for event ${eventId}:`, {
+            status: booking.status,
+            booking_id: booking.id,
+            cancel_requested_by_role: booking.cancel_requested_by_role
+        });
         
         return { status: booking.status, booking };
     };
@@ -158,8 +180,16 @@ export default function MusicianAvailEventsPage() {
                     className: "bg-green-100 text-green-800",
                     icon: "✅"
                 };
+            case "pending_cancel":
+                const cancelRequestedBy = booking?.cancel_requested_by_role === 'venue' ? 'Venue' : 'You';
+                return {
+                    label: `Cancel Requested by ${cancelRequestedBy} - Awaiting Confirmation`,
+                    variant: "default" as const,
+                    className: "bg-orange-100 text-orange-800",
+                    icon: "⏳"
+                };
             case "cancelled":
-                const cancelledBy = booking?.cancelled_by_role === 'venue' ? 'Venue' : 'You';
+                const cancelledBy = booking?.cancel_confirmed_by_role === 'venue' ? 'Venue' : 'You';
                 const reason = booking?.cancellation_reason ? ` - ${booking.cancellation_reason}` : '';
                 return {
                     label: `Cancelled by ${cancelledBy}${reason}`,
@@ -852,6 +882,26 @@ export default function MusicianAvailEventsPage() {
                                     </div>
                                 )}
                             </div>
+
+                            {/* Musician Booking Actions */}
+                            {(() => {
+                              const { status, booking } = getMusicianApplicationStatus(selectedEvent.id);
+                              if (booking) {
+                                return (
+                                  <BookingActionButtons
+                                    booking={booking}
+                                    currentUser={user}
+                                    onStatusUpdate={(updatedBooking) => {
+                                      setBookings(prev =>
+                                        prev.map(b => b.id === updatedBooking.id ? updatedBooking : b)
+                                      );
+                                    }}
+                                    className="mb-4"
+                                  />
+                                );
+                              }
+                              return null;
+                            })()}
                         </div>
                     )}
 
@@ -864,10 +914,18 @@ export default function MusicianAvailEventsPage() {
                             <MessageSquare className="h-4 w-4 mr-2" />
                             Message Venue
                         </Button>
-                        <Button onClick={handleApply}>
-                            <Check className="h-4 w-4 mr-2" />
-                            Apply
-                        </Button>
+                        {(() => {
+                          const { status, booking } = selectedEvent ? getMusicianApplicationStatus(selectedEvent.id) : { status: "available" };
+                          if (status === "available" && !booking) {
+                            return (
+                              <Button onClick={handleApply}>
+                                <Check className="h-4 w-4 mr-2" />
+                                Apply
+                              </Button>
+                            );
+                          }
+                          return null;
+                        })()}
                     </DialogFooter>
                 </DialogContent>
             </Dialog>

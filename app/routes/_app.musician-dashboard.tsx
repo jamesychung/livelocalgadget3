@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { useOutletContext, Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useOutletContext } from 'react-router-dom';
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../components/ui/card";
 import { Badge } from "../components/ui/badge";
@@ -19,12 +19,11 @@ import {
     Clock,
     DollarSign,
     AlertCircle,
-    Check,
-    X,
     RefreshCw
 } from "lucide-react";
 import { supabase } from "../lib/supabase";
 import type { AuthOutletContext } from "./_app";
+import { BookingActionButtons } from '../components/shared/BookingActionButtons';
 
 // Helper function to render status badges
 function getStatusBadge(status: string) {
@@ -34,6 +33,7 @@ function getStatusBadge(status: string) {
         confirmed: "bg-green-100 text-green-800",
         cancelled: "bg-red-100 text-red-800",
         completed: "bg-gray-100 text-gray-800",
+        pending_cancel: "bg-orange-100 text-orange-800",
     };
     
     const statusLabels: Record<string, string> = {
@@ -42,6 +42,7 @@ function getStatusBadge(status: string) {
         confirmed: "✅ Confirmed",
         cancelled: "❌ Cancelled",
         completed: "🎉 Completed",
+        pending_cancel: "⏳ Cancel Requested",
     };
     
     return (
@@ -70,49 +71,49 @@ export default function MusicianDashboard() {
     const [isRefreshing, setIsRefreshing] = useState(false);
     const [lastRefreshTime, setLastRefreshTime] = useState<Date>(new Date());
 
-    const handleConfirmBooking = async (bookingId: string) => {
-        try {
-            const { error } = await supabase
-                .from('bookings')
-                .update({ status: 'confirmed' })
-                .eq('id', bookingId);
+    // const handleConfirmBooking = async (bookingId: string) => {
+    //     try {
+    //         const { error } = await supabase
+    //             .from('bookings')
+    //             .update({ status: 'confirmed' })
+    //             .eq('id', bookingId);
 
-            if (error) throw error;
+    //         if (error) throw error;
 
-            // Update local state
-            setBookings(prevBookings => 
-                prevBookings.map(booking => 
-                    booking.id === bookingId 
-                        ? { ...booking, status: 'confirmed' }
-                        : booking
-                )
-            );
-        } catch (error) {
-            console.error('Error confirming booking:', error);
-        }
-    };
+    //         // Update local state
+    //         setBookings(prevBookings => 
+    //             prevBookings.map(booking => 
+    //                 booking.id === bookingId 
+    //                     ? { ...booking, status: 'confirmed' }
+    //                     : booking
+    //             )
+    //         );
+    //     } catch (error) {
+    //         console.error('Error confirming booking:', error);
+    //     }
+    // };
 
-    const handleRejectBooking = async (bookingId: string) => {
-        try {
-            const { error } = await supabase
-                .from('bookings')
-                .update({ status: 'cancelled' })
-                .eq('id', bookingId);
+    // const handleRejectBooking = async (bookingId: string) => {
+    //     try {
+    //         const { error } = await supabase
+    //             .from('bookings')
+    //             .update({ status: 'cancelled' })
+    //             .eq('id', bookingId);
 
-            if (error) throw error;
+    //         if (error) throw error;
 
-            // Update local state
-            setBookings(prevBookings => 
-                prevBookings.map(booking => 
-                    booking.id === bookingId 
-                        ? { ...booking, status: 'cancelled' }
-                        : booking
-                )
-            );
-        } catch (error) {
-            console.error('Error rejecting booking:', error);
-        }
-    };
+    //         // Update local state
+    //         setBookings(prevBookings => 
+    //             prevBookings.map(booking => 
+    //                 booking.id === bookingId 
+    //                     ? { ...booking, status: 'cancelled' }
+    //                     : booking
+    //             )
+    //         );
+    //     } catch (error) {
+    //         console.error('Error rejecting booking:', error);
+    //     }
+    // };
 
     const refreshBookings = async () => {
         if (!musician?.id) return;
@@ -493,26 +494,20 @@ export default function MusicianDashboard() {
                                                 </div>
                                             )}
                                             
-                                            {booking.status === "selected" && (
-                                                <div className="flex gap-2 mt-3">
-                                                    <Button
-                                                        size="sm"
-                                                        onClick={() => handleConfirmBooking(booking.id)}
-                                                        className="bg-green-600 hover:bg-green-700"
-                                                    >
-                                                        <Check className="h-4 w-4 mr-2" />
-                                                        Confirm Booking
-                                                    </Button>
-                                                    <Button
-                                                        size="sm"
-                                                        variant="outline"
-                                                        onClick={() => handleRejectBooking(booking.id)}
-                                                    >
-                                                        <X className="h-4 w-4 mr-2" />
-                                                        Decline
-                                                    </Button>
-                                                </div>
-                                            )}
+                                            <BookingActionButtons 
+                                                booking={booking}
+                                                currentUser={user}
+                                                onStatusUpdate={(updatedBooking) => {
+                                                    setBookings(prevBookings => 
+                                                        prevBookings.map(b => 
+                                                            b.id === updatedBooking.id 
+                                                                ? updatedBooking
+                                                                : b
+                                                        )
+                                                    );
+                                                }}
+                                                className="mt-3"
+                                            />
                                             
                                             {booking.status === "confirmed" && (
                                                 <div className="mt-3">
