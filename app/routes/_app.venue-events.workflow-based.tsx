@@ -13,12 +13,12 @@ import { Button } from "../components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Badge } from "../components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
-import { Plus, Calendar, Users, Clock, CheckCircle, AlertCircle, Eye, Edit } from "lucide-react";
+import { Plus, Calendar, Users, Clock, CheckCircle, AlertCircle, Eye, Edit, MessageCircle } from "lucide-react";
 import { Link } from "react-router-dom";
 import { EventStatusBadge } from "../components/shared/EventStatusBadge";
 import { ApplicationDetailDialog } from "../components/shared/ApplicationDetailDialog";
 import VenueEventCalendar from "../components/shared/VenueEventCalendar";
-import { EventDetailDialog } from "../components/musician/events/EventDetailDialog";
+import { EventBookingDialog } from "../components/shared/EventBookingDialog";
 
 export default function VenueEventsWorkflowBasedPage() {
     const { user } = useOutletContext<AuthOutletContext>();
@@ -293,41 +293,66 @@ export default function VenueEventsWorkflowBasedPage() {
                                                             </div>
                                                         </div>
                                                         {/* Action buttons outside clickable area */}
-                                                        <div className="flex items-center gap-2 mt-2">
-                                                            <Button
-                                                                variant="outline"
-                                                                size="sm"
-                                                                onClick={e => { e.stopPropagation(); handleEditEvent(event); }}
-                                                                className="flex items-center gap-1"
-                                                            >
-                                                                <Edit className="h-4 w-4" />
-                                                                Edit
-                                                            </Button>
-                                                            {/* Show Review Applications button only if event is not confirmed and has applications */}
-                                                            {!isConfirmed && applicationCount > 0 && (
-                                                                <Button
-                                                                    variant="default"
-                                                                    size="sm"
-                                                                    onClick={e => { e.stopPropagation(); handleViewApplications(event); }}
-                                                                    className="flex items-center gap-1"
-                                                                >
-                                                                    <Users className="h-4 w-4" />
-                                                                    Review Applications ({applicationCount})
-                                                                </Button>
-                                                            )}
-                                                            {/* Show View Event button for confirmed events */}
-                                                            {isConfirmed && (
-                                                                <Button
-                                                                    variant="default"
-                                                                    size="sm"
-                                                                    onClick={e => { e.stopPropagation(); handleEventClick(event); }}
-                                                                    className="flex items-center gap-1"
-                                                                >
-                                                                    <Eye className="h-4 w-4" />
-                                                                    View Event
-                                                                </Button>
-                                                            )}
-                                                        </div>
+                                        <div className="flex items-center gap-2 mt-2">
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={e => { e.stopPropagation(); handleEditEvent(event); }}
+                                                className="flex items-center gap-1"
+                                            >
+                                                <Edit className="h-4 w-4" />
+                                                Edit
+                                            </Button>
+                                            
+                                            {/* Actions for open events (no applications yet) */}
+                                            {!isConfirmed && applicationCount === 0 && (
+                                                <>
+                                                    <Button
+                                                        variant="default"
+                                                        size="sm"
+                                                        onClick={e => { e.stopPropagation(); /* TODO: Implement invite musicians */ }}
+                                                        className="flex items-center gap-1"
+                                                    >
+                                                        <Users className="h-4 w-4" />
+                                                        Invite Musicians
+                                                    </Button>
+                                                    <Button
+                                                        variant="secondary"
+                                                        size="sm"
+                                                        onClick={e => { e.stopPropagation(); /* TODO: Implement promote event */ }}
+                                                        className="flex items-center gap-1"
+                                                    >
+                                                        <MessageCircle className="h-4 w-4" />
+                                                        Promote Event
+                                                    </Button>
+                                                </>
+                                            )}
+                                            
+                                            {/* Show Review Applications button only if event is not confirmed and has applications */}
+                                            {!isConfirmed && applicationCount > 0 && (
+                                                <Button
+                                                    variant="default"
+                                                    size="sm"
+                                                    onClick={e => { e.stopPropagation(); handleViewApplications(event); }}
+                                                    className="flex items-center gap-1"
+                                                >
+                                                    <Users className="h-4 w-4" />
+                                                    Review Applications ({applicationCount})
+                                                </Button>
+                                            )}
+                                            {/* Show View Event button for confirmed events */}
+                                            {isConfirmed && (
+                                                <Button
+                                                    variant="default"
+                                                    size="sm"
+                                                    onClick={e => { e.stopPropagation(); handleEventClick(event); }}
+                                                    className="flex items-center gap-1"
+                                                >
+                                                    <Eye className="h-4 w-4" />
+                                                    View Event
+                                                </Button>
+                                            )}
+                                        </div>
                                                     </CardContent>
                                                 </Card>
                                             );
@@ -577,29 +602,19 @@ export default function VenueEventsWorkflowBasedPage() {
                     onRejectApplication={handleRejectApplication}
                 />
                 {/* Event Detail Dialog */}
-                <EventDetailDialog
+                <EventBookingDialog
                     isOpen={isEventDetailDialogOpen}
-                    setIsOpen={setIsEventDetailDialogOpen}
-                    selectedEvent={selectedEvent}
-                    user={user}
-                    bookings={allBookings}
-                    musicians={musiciansData}
-                    handleApply={() => {}}
-                    handleNotInterested={() => {}}
-                    handleMessageVenue={() => {}}
-                    handleViewBookingDetails={() => {}}
-                    handleBookingStatusUpdate={() => {}}
-                    getMusicianApplicationStatus={(eventId) => {
-                        // For venue view, we want to show all bookings for this event
-                        // Since this is a venue viewing their own event, we'll show the first booking as an example
-                        const eventBookings = allBookings.filter(b => b.event?.id === eventId);
-                        const firstBooking = eventBookings.length > 0 ? eventBookings[0] : null;
-                        return { 
-                            status: firstBooking?.status || "none", 
-                            booking: firstBooking 
-                        };
+                    onClose={() => setIsEventDetailDialogOpen(false)}
+                    event={selectedEvent}
+                    viewMode="venue"
+                    applicationCount={selectedEvent ? getApplicationCount(selectedEvent.id) : 0}
+                    onReviewApplications={(event) => {
+                        setIsEventDetailDialogOpen(false);
+                        handleViewApplications(event);
                     }}
-                    getMatchingMusicians={() => []}
+                    onStatusUpdate={() => {
+                        setRefreshTrigger(prev => prev + 1);
+                    }}
                 />
         </div>
     );

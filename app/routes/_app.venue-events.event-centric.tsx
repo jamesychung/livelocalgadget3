@@ -17,12 +17,17 @@ import { Plus, Calendar, Users, Eye, Edit } from "lucide-react";
 import { Link } from "react-router-dom";
 import { EventStatusBadge } from "../components/shared/EventStatusBadge";
 import { ApplicationDetailDialog } from "../components/shared/ApplicationDetailDialog";
+import { EventBookingDialog } from "../components/shared/EventBookingDialog";
 
 export default function VenueEventsEventCentricPage() {
     const { user } = useOutletContext<AuthOutletContext>();
     const [statusFilter, setStatusFilter] = useState<string>("all");
     const [selectedEventForApplications, setSelectedEventForApplications] = useState<any>(null);
     const [applicationsDialogOpen, setApplicationsDialogOpen] = useState(false);
+    
+    // Add state for event detail dialog
+    const [selectedEvent, setSelectedEvent] = useState<any>(null);
+    const [isEventDetailDialogOpen, setIsEventDetailDialogOpen] = useState(false);
     
     const {
         // State
@@ -90,6 +95,12 @@ export default function VenueEventsEventCentricPage() {
     const handleViewApplications = (event: any) => {
         setSelectedEventForApplications(event);
         setApplicationsDialogOpen(true);
+    };
+
+    // Override handleEventClick to open event detail dialog
+    const handleEventClickOverride = (event: any) => {
+        setSelectedEvent(event);
+        setIsEventDetailDialogOpen(true);
     };
 
     const formatDate = (dateString: string) => {
@@ -240,7 +251,7 @@ export default function VenueEventsEventCentricPage() {
                                                             <Button
                                                                 variant="outline"
                                                                 size="sm"
-                                                                onClick={() => handleEventClick(event)}
+                                                                onClick={() => handleEventClickOverride(event)}
                                                                 className="flex items-center gap-1"
                                                             >
                                                                 <Eye className="h-4 w-4" />
@@ -315,6 +326,22 @@ export default function VenueEventsEventCentricPage() {
                     getEventApplications={(eventId) => venueBookings.filter(b => b.event?.id === eventId)}
                     onAcceptApplication={(bookingId) => handleBookApplication(bookingId, selectedEventForApplications?.id || '')}
                     onRejectApplication={handleRejectApplication}
+                />
+
+                {/* Event Detail Dialog */}
+                <EventBookingDialog
+                    isOpen={isEventDetailDialogOpen}
+                    onClose={() => setIsEventDetailDialogOpen(false)}
+                    event={selectedEvent}
+                    viewMode="venue"
+                    applicationCount={selectedEvent ? getApplicationCount(selectedEvent.id) : 0}
+                    onReviewApplications={(event) => {
+                        setIsEventDetailDialogOpen(false);
+                        handleViewApplications(event);
+                    }}
+                    onStatusUpdate={() => {
+                        setRefreshTrigger(prev => prev + 1);
+                    }}
                 />
             </div>
         </div>

@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
-import { Calendar, Clock, User, Phone, Mail, MapPin, DollarSign, Users } from "lucide-react";
+import { Calendar, Clock, User, Phone, Mail, MapPin, DollarSign, Users, MessageCircle } from "lucide-react";
 import { BookingActionButtons } from "./BookingActionButtons";
 import { useAuth } from "../../lib/auth";
 
@@ -14,6 +14,8 @@ interface EventBookingDialogProps {
   booking?: any;
   viewMode?: 'venue' | 'musician';
   onStatusUpdate?: (updatedBooking: any) => void;
+  onReviewApplications?: (event: any) => void;
+  applicationCount?: number;
 }
 
 export const EventBookingDialog: React.FC<EventBookingDialogProps> = ({
@@ -22,7 +24,9 @@ export const EventBookingDialog: React.FC<EventBookingDialogProps> = ({
   event,
   booking,
   viewMode = 'venue',
-  onStatusUpdate
+  onStatusUpdate,
+  onReviewApplications,
+  applicationCount = 0
 }) => {
   const { user } = useAuth();
   
@@ -240,6 +244,94 @@ export const EventBookingDialog: React.FC<EventBookingDialogProps> = ({
                           />
                         </div>
                       )}
+                    </div>
+                  ) : viewMode === 'venue' && !booking && applicationCount > 0 ? (
+                    <div className="space-y-3">
+                      <div className="text-center py-6 bg-blue-50 rounded-lg">
+                        <Users className="h-12 w-12 text-blue-600 mx-auto mb-3" />
+                        <h4 className="font-medium mb-2">Applications Received</h4>
+                        <p className="text-sm text-gray-600 mb-4">
+                          {applicationCount} musician{applicationCount !== 1 ? 's have' : ' has'} applied for this event. Review and select the best fit.
+                        </p>
+                        
+                        <div className="flex flex-col gap-2">
+                          <Button 
+                            size="sm" 
+                            className="flex items-center gap-2"
+                            onClick={() => {
+                              if (onReviewApplications) {
+                                onReviewApplications(event);
+                              }
+                            }}
+                          >
+                            <Users className="h-4 w-4" />
+                            Review Applications ({applicationCount})
+                          </Button>
+                          
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            className="flex items-center gap-2"
+                            onClick={() => {
+                              // TODO: Implement bulk reject functionality
+                              console.log('Reject all applications clicked');
+                            }}
+                          >
+                            <Clock className="h-4 w-4" />
+                            Reject All Applications
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  ) : viewMode === 'venue' && !booking && applicationCount === 0 ? (
+                    <div className="space-y-3">
+                      <div className="text-center py-6 bg-gray-50 rounded-lg">
+                        <Users className="h-12 w-12 text-gray-400 mx-auto mb-3" />
+                        <h4 className="font-medium mb-2">Open Event</h4>
+                        <p className="text-sm text-gray-600 mb-4">
+                          This event is open for applications. Take action to attract musicians.
+                        </p>
+                        
+                        <div className="flex flex-col gap-2">
+                          <Button 
+                            size="sm" 
+                            className="flex items-center gap-2"
+                            onClick={() => {
+                              // TODO: Implement invite musicians functionality
+                              console.log('Invite musicians clicked');
+                            }}
+                          >
+                            <Users className="h-4 w-4" />
+                            Invite Musicians
+                          </Button>
+                          
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            className="flex items-center gap-2"
+                            onClick={() => {
+                              // TODO: Implement promote event functionality
+                              console.log('Promote event clicked');
+                            }}
+                          >
+                            <MessageCircle className="h-4 w-4" />
+                            Promote Event
+                          </Button>
+                          
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            className="flex items-center gap-2"
+                            onClick={() => {
+                              // TODO: Implement close applications functionality
+                              console.log('Close applications clicked');
+                            }}
+                          >
+                            <Clock className="h-4 w-4" />
+                            Close Applications
+                          </Button>
+                        </div>
+                      </div>
                     </div>
                   ) : (
                     <div className="space-y-3">

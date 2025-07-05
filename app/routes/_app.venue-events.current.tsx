@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useOutletContext } from 'react-router-dom';
 import type { AuthOutletContext } from "./_app";
 import { useVenueEvents } from "../hooks/useVenueEvents";
@@ -10,9 +10,14 @@ import { VenueEventEditDialog } from "../components/shared/VenueEventEditDialog"
 import { VenueProfilePrompt } from "../components/shared/VenueProfilePrompt";
 import { RefreshButton } from "../components/shared/RefreshButton";
 import { WorkflowSelector } from "../components/shared/WorkflowSelector";
+import { EventBookingDialog } from "../components/shared/EventBookingDialog";
 
 export default function VenueEventsCurrentPage() {
     const { user } = useOutletContext<AuthOutletContext>();
+    
+    // Add state for event detail dialog
+    const [selectedEvent, setSelectedEvent] = useState<any>(null);
+    const [isEventDetailDialogOpen, setIsEventDetailDialogOpen] = useState(false);
     
     const {
         // State
@@ -71,6 +76,12 @@ export default function VenueEventsCurrentPage() {
     const pendingApplicationsList = getPendingApplications();
     const stats = useVenueEventsStats(allEvents, venueBookings, pendingApplicationsList);
 
+    // Override handleEventClick to open event detail dialog
+    const handleEventClickOverride = (event: any) => {
+        setSelectedEvent(event);
+        setIsEventDetailDialogOpen(true);
+    };
+
     return (
         <div className="flex gap-6 p-6">
             {/* Side Panel */}
@@ -103,7 +114,7 @@ export default function VenueEventsCurrentPage() {
                     allEvents={allEvents}
                     venueBookings={allBookings}
                     getApplicationCount={getApplicationCount}
-                    onEventClick={handleEventClick}
+                    onEventClick={handleEventClickOverride}
                     onEditEvent={handleEditEvent}
                     getStatusBadge={getStatusBadge}
                     expandedApplications={expandedApplications}
@@ -120,6 +131,24 @@ export default function VenueEventsCurrentPage() {
                     editFormData={editFormData}
                     onEditFormDataChange={setEditFormData}
                     onSubmit={handleEditSubmit}
+                />
+
+                {/* Event Detail Dialog */}
+                <EventBookingDialog
+                    isOpen={isEventDetailDialogOpen}
+                    onClose={() => setIsEventDetailDialogOpen(false)}
+                    event={selectedEvent}
+                    viewMode="venue"
+                    applicationCount={selectedEvent ? getApplicationCount(selectedEvent.id) : 0}
+                    onReviewApplications={(event) => {
+                        setIsEventDetailDialogOpen(false);
+                        // Note: This page doesn't have a review applications handler
+                        // Could redirect to applications tab or implement a handler
+                        console.log('Review applications for event:', event);
+                    }}
+                    onStatusUpdate={() => {
+                        setRefreshTrigger(prev => prev + 1);
+                    }}
                 />
             </div>
         </div>
