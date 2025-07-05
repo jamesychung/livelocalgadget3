@@ -1,8 +1,6 @@
-export * from './types';
-export * from './utils';
-export * from './DashboardHeader';
-export * from './DashboardStats';
-export * from './OverviewTab';
-export * from './BookingsTab';
-export * from './ProfileTab';
-export * from './BookingCard'; 
+export { DashboardHeader } from './DashboardHeader';
+export { OverviewTab } from './OverviewTab';
+export { BookingsTab } from './BookingsTab';
+export { ProfileTab } from './ProfileTab';
+export { MusicianDashboard } from './MusicianDashboard';
+export * from './types'; 

@@ -5,8 +5,10 @@ import { Link, useOutletContext } from 'react-router-dom';
 import { supabase } from "../lib/supabase";
 import type { AuthOutletContext } from "./_app";
 import { BookingDetailDialog } from '../components/shared/BookingDetailDialog';
+import { MusicianEventsSummaryDashboard } from '../components/shared/MusicianEventsSummaryDashboard';
+import { MusicianStatsSettings } from '../components/shared/MusicianStatsSettings';
+import { useMusicianAvailableEventsStats, createAvailableEventsStats } from '../hooks/useMusicianAvailableEventsStats';
 import {
-  EventSummary,
   EventSearchFilter,
   EventsTable,
   EventDetailDialog,
@@ -25,21 +27,62 @@ export default function MusicianAvailEventsPage() {
     const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
     const [selectedEvent, setSelectedEvent] = useState<any>(null);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [selectedBooking, setSelectedBooking] = useState<any>(null);
-  const [isBookingDialogOpen, setIsBookingDialogOpen] = useState(false);
+    const [selectedBooking, setSelectedBooking] = useState<any>(null);
+    const [isBookingDialogOpen, setIsBookingDialogOpen] = useState(false);
     
     // State for data
     const [events, setEvents] = useState<any[]>([]);
     const [musicians, setMusicians] = useState<any[]>([]);
     const [bookings, setBookings] = useState<any[]>([]);
+    const [musicianProfile, setMusicianProfile] = useState<any>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+
+    // Stats customization state with localStorage persistence
+    const [showStatsSettings, setShowStatsSettings] = useState(false);
+    const [selectedStatIds, setSelectedStatIds] = useState<string[]>(() => {
+        // Load from localStorage on initial render
+        if (typeof window !== 'undefined') {
+            const saved = localStorage.getItem('musician-available-events-stats');
+            if (saved) {
+                try {
+                    return JSON.parse(saved);
+                } catch (error) {
+                    console.error('Error parsing saved stats:', error);
+                }
+            }
+        }
+        // Default stats if nothing saved
+        return ['totalEvents', 'openEvents', 'myApplications', 'matchingGenreEvents', 'upcomingEvents', 'averageEventRate'];
+    });
+
+    // Save to localStorage whenever selectedStatIds changes
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            localStorage.setItem('musician-available-events-stats', JSON.stringify(selectedStatIds));
+        }
+    }, [selectedStatIds]);
 
     // Fetch data from Supabase
     useEffect(() => {
         const fetchData = async () => {
             try {
                 setIsLoading(true);
+                
+                // Fetch musician profile first
+                let musicianData = null;
+                if (user?.email) {
+                    const { data: profileData, error: profileError } = await supabase
+                        .from('musicians')
+                        .select('*')
+                        .eq('email', user.email)
+                        .single();
+                    
+                    if (!profileError && profileData) {
+                        musicianData = profileData;
+                        setMusicianProfile(profileData);
+                    }
+                }
                 
                 // Fetch events
                 const { data: eventsData, error: eventsError } = await supabase
@@ -54,7 +97,7 @@ export default function MusicianAvailEventsPage() {
                         event_status,
                         rate,
                         genres,
-            created_at,
+                        created_at,
                         venue_id,
                         venue:venues(id, name, city, state)
                     `)
@@ -152,6 +195,16 @@ export default function MusicianAvailEventsPage() {
     const totalEvents = events.length;
     const openEvents = events.filter(event => event.event_status === 'open').length;
     const invitedEvents = events.filter(event => event.event_status === 'invited').length;
+
+    // Calculate stats using the available events stats hook
+    const availableEventsStats = useMusicianAvailableEventsStats(
+        events,
+        bookings,
+        musicianProfile?.id,
+        musicianProfile?.genres
+    );
+    const allAvailableStats = createAvailableEventsStats(availableEventsStats);
+    const selectedStats = allAvailableStats.filter(stat => selectedStatIds.includes(stat.id));
 
     // Filter events based on search and status
     const filteredEvents = events.filter(event => {
@@ -353,12 +406,32 @@ export default function MusicianAvailEventsPage() {
                 </div>
             </div>
 
-            {/* Summary Cards */}
-      <EventSummary 
-        invitedEvents={invitedEvents}
-        openEvents={openEvents}
-        totalEvents={totalEvents}
-      />
+            {/* Customizable Stats Dashboard */}
+            <div className="flex flex-col gap-2">
+                <div className="flex items-center justify-between">
+                    <h2 className="text-lg font-semibold">Event Stats</h2>
+                    <Button size="sm" variant="outline" onClick={() => setShowStatsSettings(!showStatsSettings)}>
+                        Customize
+                    </Button>
+                </div>
+                <MusicianEventsSummaryDashboard
+                    stats={selectedStats}
+                    maxStats={8}
+                />
+                {showStatsSettings && (
+                    <div className="mt-2">
+                        <MusicianStatsSettings
+                            availableStats={allAvailableStats}
+                            selectedStatIds={selectedStatIds}
+                            onStatsChange={setSelectedStatIds}
+                            maxStats={8}
+                            onClose={() => setShowStatsSettings(false)}
+                        />
+                    </div>
+                )}
+            </div>
+
+
 
             {/* Search and Filter */}
       <EventSearchFilter

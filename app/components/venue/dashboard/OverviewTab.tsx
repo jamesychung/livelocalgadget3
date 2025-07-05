@@ -8,6 +8,7 @@ import { StatusBadge } from "./StatusBadge";
 import { Link } from "react-router-dom";
 import { Calendar, Clock, MapPin, Phone, Mail } from "lucide-react";
 import { ApplicationDetailDialog } from "../../shared/ApplicationDetailDialog";
+import { RecentMessagesCard } from "../../shared/RecentMessagesCard";
 
 export const OverviewTab: React.FC<OverviewTabProps> = ({ 
   venue, 
@@ -111,6 +112,9 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
               )}
             </CardContent>
           </Card>
+
+          {/* Recent Messages Card */}
+          <RecentMessagesCard />
 
           {pendingCancelBookings.length > 0 && (
             <Card className="border-orange-200">

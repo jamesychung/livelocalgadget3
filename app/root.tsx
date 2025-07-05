@@ -43,6 +43,8 @@ import MusicianHowTo from "./routes/_app.musician-how-to";
 import VenueProfileEdit from "./routes/_app.venue-profile.edit";
 import VenueProfileCreate from "./routes/_app.venue-profile.create";
 import MusicianProfilePage from "./routes/_app.musician-profile";
+import MusicianMessages from "./routes/_app.musician-messages";
+import Messages from "./routes/_app.messages";
 
 // Define root context type
 export type RootOutletContext = {
@@ -51,98 +53,81 @@ export type RootOutletContext = {
 
 export default function App() {
   return (
-    <html lang="en">
-      <head>
-        <meta charSet="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <title>LiveLocal - Connect Musicians & Venues</title>
-        <link rel="stylesheet" href="https://assets.gadget.dev/assets/reset.min.css" />
-      </head>
-      <body>
-        <AuthProvider>
-          <Suspense fallback={<div>Loading...</div>}>
-            <Routes>
-              {/* Public routes */}
-              <Route path="/" element={<PublicLayout />}>
-                <Route index element={<PublicIndex />} />
-              </Route>
-              
-              {/* Auth routes */}
-              <Route path="/" element={<AuthLayout />}>
-                <Route path="sign-in" element={<SignIn />} />
-                <Route path="sign-up" element={<SignUp />} />
-                <Route path="forgot-password" element={<ForgotPassword />} />
-              </Route>
-              
-              {/* App routes (authenticated) */}
-              <Route path="/" element={<AppLayout />}>
-                <Route path="signed-in" element={<SignedIn />} />
-                <Route path="profile-setup" element={<ProfileSetup />} />
-                <Route path="profile" element={<Profile />} />
-                <Route path="settings" element={<Settings />} />
-                
-                {/* Musician routes */}
-                <Route path="musician-dashboard" element={<MusicianDashboard />} />
-                <Route path="musician-profile" element={<MusicianProfilePage />} />
-                <Route path="musician-profile/edit" element={<MusicianProfileEdit />} />
-                <Route path="musician-profile/create" element={<MusicianProfileCreate />} />
-                <Route path="musician-reviews" element={<MusicianReviews />} />
-                <Route path="musicians" element={<Musicians />} />
-                <Route path="musician-availEvents" element={<MusicianAvailEvents />} />
-                <Route path="availability" element={<Availability />} />
-                <Route path="musician-how-to" element={<MusicianHowTo />} />
-                
-                {/* Venue routes */}
-                <Route path="venue-dashboard" element={<VenueDashboard />} />
-                <Route path="venue-musicians" element={<VenueMusicians />} />
-                <Route path="venue-events" element={<VenueEvents />} />
-                <Route path="venue-events/current" element={<VenueEventsCurrent />} />
-                <Route path="venue-events/event-centric" element={<VenueEventsEventCentric />} />
-                <Route path="venue-events/workflow-based" element={<VenueEventsWorkflowBased />} />
-                <Route path="create-event" element={<CreateEvent />} />
-                <Route path="venue-event/:eventId" element={<VenueEventDetail />} />
-                <Route path="venue-history" element={<VenueHistory />} />
-                <Route path="venue-how-to" element={<VenueHowTo />} />
-                <Route path="venue-profile/edit" element={<VenueProfileEdit />} />
-                <Route path="venue-profile/create" element={<VenueProfileCreate />} />
-                
-                {/* Search routes */}
-                <Route path="search/musicians" element={<SearchMusicians />} />
-              </Route>
-              
-              {/* Dynamic routes */}
-              <Route path="/event/:eventId" element={<EventPage />} />
-              <Route path="/musician/:musicianId" element={<MusicianPage />} />
-              <Route path="/venue/:venueId" element={<VenuePage />} />
-              <Route path="/test-email" element={<TestEmail />} />
-              
-              {/* Catch all */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </Suspense>
-        </AuthProvider>
-      </body>
-    </html>
+    <AuthProvider>
+      <Suspense fallback={<div>Loading...</div>}>
+        <Routes>
+          {/* Public routes */}
+          <Route path="/" element={<PublicLayout />}>
+            <Route index element={<PublicIndex />} />
+          </Route>
+          
+          {/* Auth routes */}
+          <Route path="/" element={<AuthLayout />}>
+            <Route path="sign-in" element={<SignIn />} />
+            <Route path="sign-up" element={<SignUp />} />
+            <Route path="forgot-password" element={<ForgotPassword />} />
+          </Route>
+          
+          {/* App routes (authenticated) */}
+          <Route path="/" element={<AppLayout />}>
+            <Route path="signed-in" element={<SignedIn />} />
+            <Route path="profile-setup" element={<ProfileSetup />} />
+            <Route path="profile" element={<Profile />} />
+            <Route path="settings" element={<Settings />} />
+            
+            {/* Musician routes */}
+            <Route path="musician-dashboard" element={<MusicianDashboard />} />
+            <Route path="musician-profile" element={<MusicianProfilePage />} />
+            <Route path="musician-profile/edit" element={<MusicianProfileEdit />} />
+            <Route path="musician-profile/create" element={<MusicianProfileCreate />} />
+            <Route path="musician-reviews" element={<MusicianReviews />} />
+            <Route path="musicians" element={<Musicians />} />
+            <Route path="musician-availEvents" element={<MusicianAvailEvents />} />
+            <Route path="musician-messages" element={<MusicianMessages />} />
+            <Route path="availability" element={<Availability />} />
+            <Route path="musician-how-to" element={<MusicianHowTo />} />
+            
+            {/* Venue routes */}
+            <Route path="venue-dashboard" element={<VenueDashboard />} />
+            <Route path="venue-musicians" element={<VenueMusicians />} />
+            <Route path="venue-events" element={<VenueEvents />} />
+            <Route path="venue-events/current" element={<VenueEventsCurrent />} />
+            <Route path="venue-events/event-centric" element={<VenueEventsEventCentric />} />
+            <Route path="venue-events/workflow-based" element={<VenueEventsWorkflowBased />} />
+            <Route path="create-event" element={<CreateEvent />} />
+            <Route path="venue-event/:eventId" element={<VenueEventDetail />} />
+            <Route path="venue-history" element={<VenueHistory />} />
+            <Route path="venue-how-to" element={<VenueHowTo />} />
+            <Route path="venue-profile/edit" element={<VenueProfileEdit />} />
+            <Route path="venue-profile/create" element={<VenueProfileCreate />} />
+            <Route path="messages" element={<Messages />} />
+            
+            {/* Search routes */}
+            <Route path="search/musicians" element={<SearchMusicians />} />
+          </Route>
+          
+          {/* Dynamic routes */}
+          <Route path="/event/:eventId" element={<EventPage />} />
+          <Route path="/musician/:musicianId" element={<MusicianPage />} />
+          <Route path="/venue/:venueId" element={<VenuePage />} />
+          <Route path="/test-email" element={<TestEmail />} />
+          
+          {/* Catch all */}
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </Suspense>
+    </AuthProvider>
   );
 }
 
 export function ErrorBoundary({ error }: { error: Error }) {
   return (
-    <html>
-      <head>
-        <title>Error!</title>
-        <meta charSet="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-      </head>
-      <body>
-        <div style={{ padding: "2rem", maxWidth: "800px", margin: "0 auto" }}>
-          <h1 style={{ color: "red" }}>Application Error</h1>
-          <pre style={{ padding: "1rem", backgroundColor: "#f7f7f7", borderRadius: "0.5rem", overflow: "auto" }}>
-            {error.message}
-          </pre>
-          <p>The application encountered an unexpected error.</p>
-        </div>
-      </body>
-    </html>
+    <div style={{ padding: "2rem", maxWidth: "800px", margin: "0 auto" }}>
+      <h1 style={{ color: "red" }}>Application Error</h1>
+      <pre style={{ padding: "1rem", backgroundColor: "#f7f7f7", borderRadius: "0.5rem", overflow: "auto" }}>
+        {error.message}
+      </pre>
+      <p>The application encountered an unexpected error.</p>
+    </div>
   );
 }

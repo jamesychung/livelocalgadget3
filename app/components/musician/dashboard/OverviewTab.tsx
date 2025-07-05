@@ -1,13 +1,22 @@
 import React from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "../../ui/card";
-import { Music, MapPin, Phone, Mail, ExternalLink } from "lucide-react";
 import { OverviewTabProps } from './types';
 import { getStatusBadge } from './utils';
+import { RecentMessagesCard } from './RecentMessagesCard';
+import { useMessaging } from '../../../hooks/useMessaging';
+import { useAuth } from '../../../lib/auth';
 
 export const OverviewTab: React.FC<OverviewTabProps> = ({
   musician,
   upcomingEvents
 }) => {
+  const { user } = useAuth();
+  const { getRecentMessages, getTotalUnreadCount } = useMessaging(user);
+
+  // Get recent messages for this musician
+  const recentMessages = getRecentMessages(3);
+  const unreadCount = getTotalUnreadCount();
+
   return (
     <div className="grid gap-6 md:grid-cols-2">
       <Card className="shadow-sm">
@@ -36,40 +45,12 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
         </CardContent>
       </Card>
 
-      <Card className="shadow-sm">
-        <CardHeader>
-          <CardTitle>Profile Summary</CardTitle>
-          <CardDescription>Your musician profile information</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-2">
-            <div className="flex items-center">
-              <Music className="h-4 w-4 mr-2 text-muted-foreground" />
-              <span className="text-sm">Genres: {musician.genres?.join(', ') || 'Not specified'}</span>
-            </div>
-            <div className="flex items-center">
-              <MapPin className="h-4 w-4 mr-2 text-muted-foreground" />
-              <span className="text-sm">Location: {[musician.city, musician.state].filter(Boolean).join(', ') || 'Not specified'}</span>
-            </div>
-            <div className="flex items-center">
-              <Phone className="h-4 w-4 mr-2 text-muted-foreground" />
-              <span className="text-sm">Contact: {musician.phone || 'Not provided'}</span>
-            </div>
-            <div className="flex items-center">
-              <Mail className="h-4 w-4 mr-2 text-muted-foreground" />
-              <span className="text-sm">Email: {musician.email}</span>
-            </div>
-            {musician.website && (
-              <div className="flex items-center">
-                <ExternalLink className="h-4 w-4 mr-2 text-muted-foreground" />
-                <a href={musician.website} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 hover:underline">
-                  Website
-                </a>
-              </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+
+
+      <RecentMessagesCard 
+        messages={recentMessages} 
+        unreadCount={unreadCount} 
+      />
     </div>
   );
 }; 

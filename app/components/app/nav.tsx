@@ -25,7 +25,7 @@ import { useState } from "react";
 import { Link, useLocation, useOutletContext } from 'react-router-dom';
 import { supabase } from "../../lib/supabase";
 import { NavDrawer } from "../shared/NavDrawer";
-import { Home, User, LogOut, Calendar, Music, Settings, Clock, Star, Users, History } from "lucide-react";
+import { Home, User, LogOut, Calendar, Music, Settings, Clock, Star, Users, History, MessageCircle } from "lucide-react";
 import { Button } from "../ui/button";
 import {
   DropdownMenu,
@@ -33,6 +33,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
+import { NotificationBadge } from "../shared/NotificationBadge";
 import type { AuthOutletContext } from "../../routes/_app";
 
 interface NavItem {
@@ -54,7 +55,7 @@ const navigationItems: NavItem[] = [
     icon: Home,
   },
   {
-    title: "Dashboard",
+    title: "Musician Dashboard",
     path: "/musician-dashboard",
     icon: Music,
     roles: ["musician"],
@@ -75,6 +76,12 @@ const navigationItems: NavItem[] = [
     title: "Available Events",
     path: "/musician-availEvents",
     icon: Star,
+    roles: ["musician"],
+  },
+  {
+    title: "Messages",
+    path: "/musician-messages",
+    icon: MessageCircle,
     roles: ["musician"],
   },
   {
@@ -100,6 +107,12 @@ const navigationItems: NavItem[] = [
     title: "Invite Musicians",
     path: "/venue-musicians",
     icon: Users,
+    roles: ["venue_owner"],
+  },
+  {
+    title: "Messages",
+    path: "/messages",
+    icon: MessageCircle,
     roles: ["venue_owner"],
   },
   {
@@ -162,6 +175,9 @@ const secondaryNavigationItems: NavItem[] = [
 export const Navigation = ({ onLinkClick, user }: { onLinkClick?: () => void, user: any }) => {
   const location = useLocation();
 
+  // Mock unread messages count - in real app, this would come from your state management
+  const unreadMessagesCount = 3; // This would be fetched from your messaging system
+
   // Filter navigation items based on user roles
   const filteredNavigationItems = navigationItems.filter(item => {
     // If no role restriction, show the item
@@ -198,7 +214,7 @@ export const Navigation = ({ onLinkClick, user }: { onLinkClick?: () => void, us
           <Link
             key={item.title}
             to={item.path}
-            className={`flex items-center px-4 py-2 text-sm rounded-md transition-colors
+            className={`flex items-center px-4 py-2 text-sm rounded-md transition-colors relative
               ${
                 location.pathname === item.path
                   ? "bg-accent text-accent-foreground"
@@ -208,6 +224,10 @@ export const Navigation = ({ onLinkClick, user }: { onLinkClick?: () => void, us
           >
             <item.icon className="mr-3 h-4 w-4" />
             {item.title}
+            {/* Show notification badge for Messages */}
+            {item.path === "/messages" && unreadMessagesCount > 0 && (
+              <NotificationBadge count={unreadMessagesCount} />
+            )}
           </Link>
         ))}
       </nav>
