@@ -74,6 +74,19 @@ export const EventsTable: React.FC<EventsTableProps> = ({
                 </TableHead>
                 <TableHead 
                   className="cursor-pointer hover:bg-gray-50"
+                  onClick={() => handleSort('title')}
+                >
+                  <div className="flex items-center gap-2">
+                    Event Name
+                    {sortField === 'title' && (
+                      <span className="text-xs">
+                        {sortDirection === 'asc' ? '↑' : '↓'}
+                      </span>
+                    )}
+                  </div>
+                </TableHead>
+                <TableHead 
+                  className="cursor-pointer hover:bg-gray-50"
                   onClick={() => handleSort('rate')}
                 >
                   <div className="flex items-center gap-2">
@@ -136,6 +149,11 @@ export const EventsTable: React.FC<EventsTableProps> = ({
                             {event.venue.city}, {event.venue.state}
                           </div>
                         )}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="font-medium">
+                        {event.title || 'Untitled Event'}
                       </div>
                     </TableCell>
                     <TableCell>

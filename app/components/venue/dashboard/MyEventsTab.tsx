@@ -40,6 +40,7 @@ export const MyEventsTab: React.FC<MyEventsTabProps> = ({ user, venue, events, b
 
     // Helper functions
     getApplicationCount,
+    getPendingApplicationCount,
     getPendingApplications,
     getEventsWithPendingApplications,
 
@@ -59,6 +60,10 @@ export const MyEventsTab: React.FC<MyEventsTabProps> = ({ user, venue, events, b
   // Filter events by status
   const activeEvents = allEvents.filter(event => 
     event.eventStatus === 'open' || event.eventStatus === 'confirmed'
+  );
+  
+  const completedEvents = allEvents.filter(event => 
+    event.eventStatus === 'completed'
   );
   
   const eventsWithPendingApplications = getEventsWithPendingApplications();
@@ -166,7 +171,8 @@ export const MyEventsTab: React.FC<MyEventsTabProps> = ({ user, venue, events, b
             <div className="space-y-4">
               {activeEvents.map((event) => {
                 const applicationCount = getApplicationCount(event.id);
-                const hasPendingApps = applicationCount > 0;
+                const pendingApplicationCount = getPendingApplicationCount(event.id);
+                const hasPendingApps = pendingApplicationCount > 0;
                 const borderColor = hasPendingApps 
                   ? 'border-l-orange-500' 
                   : event.eventStatus === 'confirmed' 
@@ -208,7 +214,10 @@ export const MyEventsTab: React.FC<MyEventsTabProps> = ({ user, venue, events, b
                                     className={hasPendingApps ? "bg-orange-100 text-orange-800" : "bg-blue-100 text-blue-800"}
                                   >
                                     <Users className="h-3 w-3 mr-1" />
-                                    {applicationCount} {applicationCount === 1 ? 'application' : 'applications'}
+                                    {hasPendingApps 
+                                      ? `${pendingApplicationCount} pending` 
+                                      : `${applicationCount} ${applicationCount === 1 ? 'application' : 'applications'}`
+                                    }
                                     {hasPendingApps && ' - Review Needed'}
                                   </Badge>
                                 )}
@@ -236,7 +245,7 @@ export const MyEventsTab: React.FC<MyEventsTabProps> = ({ user, venue, events, b
                             className={`flex items-center gap-1 ${hasPendingApps ? 'bg-orange-600 hover:bg-orange-700' : ''}`}
                           >
                             <Users className="h-4 w-4" />
-                            {hasPendingApps ? 'Review Applications' : 'View Applications'} ({applicationCount})
+                            {hasPendingApps ? 'Review Applications' : 'View Applications'} ({hasPendingApps ? pendingApplicationCount : applicationCount})
                           </Button>
                         )}
                         <Button
@@ -271,6 +280,95 @@ export const MyEventsTab: React.FC<MyEventsTabProps> = ({ user, venue, events, b
           )}
         </CardContent>
       </Card>
+
+      {/* Completed Events Section */}
+      {completedEvents.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Completed Events</CardTitle>
+            <p className="text-sm text-muted-foreground">
+              Events that have been completed
+            </p>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {completedEvents.map((event) => {
+                const applicationCount = getApplicationCount(event.id);
+                
+                return (
+                  <Card key={event.id} className="hover:shadow-lg transition-shadow duration-200 cursor-pointer border-l-4 border-l-emerald-500">
+                    <CardContent className="pt-6">
+                      <div
+                        className="flex flex-col gap-2"
+                        onClick={() => handleEventClick(event)}
+                        style={{ cursor: 'pointer' }}
+                      >
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-start justify-between mb-3">
+                              <div>
+                                <h3 className="text-lg font-semibold text-gray-900 mb-1">
+                                  {event.title}
+                                </h3>
+                                <div className="flex items-center gap-4 text-sm text-gray-600">
+                                  <div className="flex items-center gap-1">
+                                    <Calendar className="h-4 w-4" />
+                                    <span>{formatDate(event.date)}</span>
+                                  </div>
+                                  <div className="flex items-center gap-1">
+                                    <span>
+                                      {formatTime(event.startTime)} - {formatTime(event.endTime)}
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <EventStatusBadge status={event.eventStatus} />
+                                {applicationCount > 0 && (
+                                  <Badge 
+                                    variant="secondary" 
+                                    className="bg-emerald-100 text-emerald-800"
+                                  >
+                                    <Users className="h-3 w-3 mr-1" />
+                                    {applicationCount} {applicationCount === 1 ? 'application' : 'applications'}
+                                  </Badge>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      {/* Action buttons outside clickable area */}
+                      <div className="flex items-center gap-2 mt-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={e => { e.stopPropagation(); handleEventClick(event); }}
+                          className="flex items-center gap-1"
+                        >
+                          <Eye className="h-4 w-4" />
+                          View Details
+                        </Button>
+                        {applicationCount > 0 && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={e => { e.stopPropagation(); handleViewApplications(event); }}
+                            className="flex items-center gap-1"
+                          >
+                            <Users className="h-4 w-4" />
+                            View Applications ({applicationCount})
+                          </Button>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Edit Event Dialog */}
       <VenueEventEditDialog

@@ -110,7 +110,7 @@ export default function VenueHistoryPage() {
             <div className="space-y-4">
               {pastEvents.map((event) => {
                 const applicationCount = getApplicationCount(event.id);
-                const borderColor = event.eventStatus === 'completed' ? 'border-l-green-500' : 'border-l-gray-500';
+                const borderColor = event.eventStatus === 'completed' ? 'border-l-emerald-500' : 'border-l-gray-500';
                 
                 return (
                   <Card key={event.id} className={`hover:shadow-lg transition-shadow duration-200 cursor-pointer border-l-4 ${borderColor}`}>

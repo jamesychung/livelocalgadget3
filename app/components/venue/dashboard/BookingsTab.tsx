@@ -4,11 +4,12 @@ import { Button } from "../../ui/button";
 import { Badge } from "../../ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../ui/select";
-import { Calendar, List, Filter, Phone, Mail, MapPin, Clock, User, DollarSign, CheckCircle, Users, X, Plus, ChevronLeft, ChevronRight } from "lucide-react";
+import { Calendar, List, Filter, Phone, Mail, MapPin, Clock, User, DollarSign, CheckCircle, Users, X, Plus, ChevronLeft, ChevronRight, AlertCircle } from "lucide-react";
 import { Booking, VenueProfile } from "./types";
 import { formatDate } from "./utils";
 import { Link } from "react-router-dom";
 import { ApplicationDetailDialog } from "../../shared/ApplicationDetailDialog";
+import { BookingDetailDialog } from "../../shared/BookingDetailDialog";
 import { format } from "date-fns";
 
 interface BookingsTabProps {
@@ -24,17 +25,31 @@ export const BookingsTab: React.FC<BookingsTabProps> = ({ bookings, venue, event
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [isEventDialogOpen, setIsEventDialogOpen] = useState(false);
+  const [isBookingDialogOpen, setIsBookingDialogOpen] = useState(false);
 
   const handleEventClick = (event: any) => {
     // Find the corresponding booking for this event
     const eventBooking = bookings.find(booking => booking.event?.id === event.id);
+    const confirmedBooking = bookings.find(booking => 
+      booking.event?.id === event.id && booking.status === 'confirmed'
+    );
+    
     setSelectedEvent(event);
     setSelectedBooking(eventBooking || null);
-    setIsEventDialogOpen(true);
+    
+    // If there's any booking (applied, selected, confirmed), show BookingDetailDialog
+    // Only show ApplicationDetailDialog if there are no bookings at all
+    if (eventBooking) {
+      setSelectedBooking(eventBooking);
+      setIsBookingDialogOpen(true);
+    } else {
+      setIsEventDialogOpen(true);
+    }
   };
 
   const closeEventDialog = () => {
     setIsEventDialogOpen(false);
+    setIsBookingDialogOpen(false);
     setSelectedEvent(null);
     setSelectedBooking(null);
   };
@@ -43,18 +58,48 @@ export const BookingsTab: React.FC<BookingsTabProps> = ({ bookings, venue, event
   const allEventsWithBookingInfo = events.map(event => {
     const eventBookings = bookings.filter(booking => booking.event?.id === event.id);
     const confirmedBookings = eventBookings.filter(booking => booking.status === 'confirmed');
-    const pendingApplications = eventBookings.filter(booking => 
-      booking.status === 'applied' || booking.status === 'selected'
-    );
+    const completedBookings = eventBookings.filter(booking => booking.status === 'completed');
+    const cancelledBookings = eventBookings.filter(booking => booking.status === 'cancelled');
+    const selectedBookings = eventBookings.filter(booking => booking.status === 'selected');
+    const appliedBookings = eventBookings.filter(booking => booking.status === 'applied');
+    const cancelRequestedBookings = eventBookings.filter(booking => booking.status === 'pending_cancel');
+    
+    // Determine event status based on booking states (priority order)
+    let eventStatus = event.eventStatus || 'open';
+    if (completedBookings.length > 0) {
+      eventStatus = 'completed';
+    } else if (cancelledBookings.length > 0 && confirmedBookings.length === 0) {
+      eventStatus = 'cancelled';
+    } else if (cancelRequestedBookings.length > 0) {
+      eventStatus = 'cancel_requested';
+    } else if (confirmedBookings.length > 0) {
+      eventStatus = 'confirmed';
+    } else if (selectedBookings.length > 0) {
+      eventStatus = 'selected';
+    } else if (appliedBookings.length > 0) {
+      eventStatus = 'application_received';
+    } else if (event.eventStatus === 'invited') {
+      eventStatus = 'invited';
+    }
     
     const eventWithBookingInfo = {
       ...event,
       type: 'event',
       bookings: eventBookings,
       confirmedBookings: confirmedBookings.length,
-      pendingApplications: pendingApplications.length,
+      completedBookings: completedBookings.length,
+      cancelledBookings: cancelledBookings.length,
+      selectedBookings: selectedBookings.length,
+      appliedBookings: appliedBookings.length,
+      cancelRequestedBookings: cancelRequestedBookings.length,
+      pendingApplications: appliedBookings.length + selectedBookings.length, // For backward compatibility
       hasConfirmedBooking: confirmedBookings.length > 0,
-      eventStatus: event.eventStatus || (confirmedBookings.length > 0 ? 'confirmed' : 'open'), // Use proper eventStatus
+      hasCompletedBooking: completedBookings.length > 0,
+      hasCancelledBooking: cancelledBookings.length > 0,
+      hasSelectedBooking: selectedBookings.length > 0,
+      hasAppliedBooking: appliedBookings.length > 0,
+      hasCancelRequestedBooking: cancelRequestedBookings.length > 0,
+      eventStatus: eventStatus,
       // Map field names to match VenueEventCalendar expectations
       startTime: event.start_time,
       endTime: event.end_time
@@ -65,19 +110,30 @@ export const BookingsTab: React.FC<BookingsTabProps> = ({ bookings, venue, event
 
   // Filter based on status
   const filteredItems = allEventsWithBookingInfo.filter(item => {
-    if (statusFilter === "all") return true;
-    if (statusFilter === "confirmed") return item.hasConfirmedBooking;
+    if (statusFilter === "all") return !item.hasCompletedBooking && item.eventStatus !== 'cancelled'; // Exclude completed and cancelled from "all"
     if (statusFilter === "open") return item.eventStatus === 'open';
     if (statusFilter === "invited") return item.eventStatus === 'invited';
-    if (statusFilter === "completed") return item.eventStatus === 'completed';
+    if (statusFilter === "application_received") return item.eventStatus === 'application_received';
+    if (statusFilter === "selected") return item.eventStatus === 'selected';
+    if (statusFilter === "confirmed") return item.eventStatus === 'confirmed';
+    if (statusFilter === "cancel_requested") return item.eventStatus === 'cancel_requested';
     if (statusFilter === "cancelled") return item.eventStatus === 'cancelled';
+    if (statusFilter === "completed") return item.eventStatus === 'completed';
     return true;
   });
 
-  // Get confirmed bookings for stats
-  const confirmedItems = filteredItems.filter(item => item.hasConfirmedBooking);
-  const openEvents = filteredItems.filter(item => item.eventStatus === 'open');
-  const invitedEvents = filteredItems.filter(item => item.eventStatus === 'invited');
+  // For calendar view, use filtered items but show all events when filter is "all"
+  const calendarItems = statusFilter === "all" ? allEventsWithBookingInfo : filteredItems;
+
+  // Get stats for all event states
+  const openEvents = allEventsWithBookingInfo.filter(item => item.eventStatus === 'open');
+  const applicationReceivedEvents = allEventsWithBookingInfo.filter(item => item.eventStatus === 'application_received');
+  const selectedEvents = allEventsWithBookingInfo.filter(item => item.eventStatus === 'selected');
+  const confirmedEvents = allEventsWithBookingInfo.filter(item => item.eventStatus === 'confirmed');
+  const cancelRequestedEvents = allEventsWithBookingInfo.filter(item => item.eventStatus === 'cancel_requested');
+  const cancelledEvents = allEventsWithBookingInfo.filter(item => item.eventStatus === 'cancelled');
+  const completedEvents = allEventsWithBookingInfo.filter(item => item.eventStatus === 'completed');
+  const invitedEvents = allEventsWithBookingInfo.filter(item => item.eventStatus === 'invited');
 
   // Calendar navigation functions
   const navigateMonth = (direction: 'prev' | 'next') => {
@@ -113,7 +169,7 @@ export const BookingsTab: React.FC<BookingsTabProps> = ({ bookings, venue, event
 
   const getEventsForDate = (date: Date) => {
     const dateStr = format(date, 'yyyy-MM-dd');
-    return filteredItems.filter(item => {
+    return calendarItems.filter(item => {
       const itemDate = new Date(item.date);
       return format(itemDate, 'yyyy-MM-dd') === dateStr;
     });
@@ -226,11 +282,23 @@ export const BookingsTab: React.FC<BookingsTabProps> = ({ bookings, venue, event
                         key={eventIndex}
                         onClick={() => handleEventClick(event)}
                         className={`text-xs p-2 rounded cursor-pointer transition-colors ${
-                          event.hasConfirmedBooking 
-                            ? 'bg-green-100 text-green-800 hover:bg-green-200 border border-green-200' 
-                            : event.eventStatus === 'open'
-                              ? 'bg-blue-100 text-blue-800 hover:bg-blue-200 border border-blue-200'
-                              : 'bg-gray-100 text-gray-800 hover:bg-gray-200 border border-gray-200'
+                          event.eventStatus === 'completed'
+                            ? 'bg-emerald-100 text-emerald-800 hover:bg-emerald-200 border border-emerald-200' 
+                            : event.eventStatus === 'cancelled'
+                              ? 'bg-red-100 text-red-800 hover:bg-red-200 border border-red-200'
+                              : event.eventStatus === 'cancel_requested'
+                                ? 'bg-orange-100 text-orange-800 hover:bg-orange-200 border border-orange-200'
+                                : event.eventStatus === 'confirmed' 
+                                  ? 'bg-green-100 text-green-800 hover:bg-green-200 border border-green-200'
+                                  : event.eventStatus === 'selected'
+                                    ? 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200 border border-yellow-200'
+                                    : event.eventStatus === 'application_received'
+                                      ? 'bg-purple-100 text-purple-800 hover:bg-purple-200 border border-purple-200'
+                                      : event.eventStatus === 'invited'
+                                        ? 'bg-indigo-100 text-indigo-800 hover:bg-indigo-200 border border-indigo-200'
+                                        : event.eventStatus === 'open'
+                                          ? 'bg-blue-100 text-blue-800 hover:bg-blue-200 border border-blue-200'
+                                          : 'bg-gray-100 text-gray-800 hover:bg-gray-200 border border-gray-200'
                         }`}
                         title={formatEventDisplay(event)} // Full text on hover
                       >
@@ -276,11 +344,14 @@ export const BookingsTab: React.FC<BookingsTabProps> = ({ bookings, venue, event
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Events</SelectItem>
-                  <SelectItem value="confirmed">Confirmed</SelectItem>
-                  <SelectItem value="completed">Completed</SelectItem>
-                  <SelectItem value="cancelled">Cancelled</SelectItem>
                   <SelectItem value="open">Open Events</SelectItem>
                   <SelectItem value="invited">Invited Events</SelectItem>
+                  <SelectItem value="application_received">Application Received</SelectItem>
+                  <SelectItem value="selected">Musician Selected</SelectItem>
+                  <SelectItem value="confirmed">Confirmed</SelectItem>
+                  <SelectItem value="cancel_requested">Cancel Requested</SelectItem>
+                  <SelectItem value="cancelled">Cancelled</SelectItem>
+                  <SelectItem value="completed">Completed</SelectItem>
                 </SelectContent>
               </Select>
 
@@ -309,41 +380,81 @@ export const BookingsTab: React.FC<BookingsTabProps> = ({ bookings, venue, event
           </div>
 
           {/* Stats Row */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                <Calendar className="h-5 w-5 text-blue-600" />
+          <div className="grid grid-cols-2 gap-3 mt-6">
+            <div className="bg-white rounded-lg border p-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="w-6 h-6 bg-blue-100 rounded flex items-center justify-center">
+                    <Calendar className="h-3 w-3 text-blue-600" />
+                  </div>
+                  <span className="text-xs font-medium text-gray-600">Open</span>
+                </div>
+                <span className="text-sm font-bold text-blue-600">{openEvents.length}</span>
               </div>
-              <div>
-                <p className="text-sm text-gray-500">Total Events</p>
-                <p className="text-xl font-bold">{filteredItems.length}</p>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="w-6 h-6 bg-purple-100 rounded flex items-center justify-center">
+                    <Users className="h-3 w-3 text-purple-600" />
+                  </div>
+                  <span className="text-xs font-medium text-gray-600">Applications</span>
+                </div>
+                <span className="text-sm font-bold text-purple-600">{applicationReceivedEvents.length}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="w-6 h-6 bg-yellow-100 rounded flex items-center justify-center">
+                    <CheckCircle className="h-3 w-3 text-yellow-600" />
+                  </div>
+                  <span className="text-xs font-medium text-gray-600">Selected</span>
+                </div>
+                <span className="text-sm font-bold text-yellow-600">{selectedEvents.length}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="w-6 h-6 bg-green-100 rounded flex items-center justify-center">
+                    <CheckCircle className="h-3 w-3 text-green-600" />
+                  </div>
+                  <span className="text-xs font-medium text-gray-600">Confirmed</span>
+                </div>
+                <span className="text-sm font-bold text-green-600">{confirmedEvents.length}</span>
               </div>
             </div>
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                <CheckCircle className="h-5 w-5 text-green-600" />
+            <div className="bg-white rounded-lg border p-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="w-6 h-6 bg-orange-100 rounded flex items-center justify-center">
+                    <AlertCircle className="h-3 w-3 text-orange-600" />
+                  </div>
+                  <span className="text-xs font-medium text-gray-600">Cancel Requests</span>
+                </div>
+                <span className="text-sm font-bold text-orange-600">{cancelRequestedEvents.length}</span>
               </div>
-              <div>
-                <p className="text-sm text-gray-500">Confirmed</p>
-                <p className="text-xl font-bold text-green-600">{confirmedItems.length}</p>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="w-6 h-6 bg-red-100 rounded flex items-center justify-center">
+                    <CheckCircle className="h-3 w-3 text-red-600" />
+                  </div>
+                  <span className="text-xs font-medium text-gray-600">Cancelled</span>
+                </div>
+                <span className="text-sm font-bold text-red-600">{cancelledEvents.length}</span>
               </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                <Users className="h-5 w-5 text-blue-600" />
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="w-6 h-6 bg-emerald-100 rounded flex items-center justify-center">
+                    <CheckCircle className="h-3 w-3 text-emerald-600" />
+                  </div>
+                  <span className="text-xs font-medium text-gray-600">Completed</span>
+                </div>
+                <span className="text-sm font-bold text-emerald-600">{completedEvents.length}</span>
               </div>
-              <div>
-                <p className="text-sm text-gray-500">Open Events</p>
-                <p className="text-xl font-bold text-blue-600">{openEvents.length}</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                <Mail className="h-5 w-5 text-purple-600" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-500">Invited Events</p>
-                <p className="text-xl font-bold text-purple-600">{invitedEvents.length}</p>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="w-6 h-6 bg-indigo-100 rounded flex items-center justify-center">
+                    <Mail className="h-3 w-3 text-indigo-600" />
+                  </div>
+                  <span className="text-xs font-medium text-gray-600">Invited</span>
+                </div>
+                <span className="text-sm font-bold text-indigo-600">{invitedEvents.length}</span>
               </div>
             </div>
           </div>
@@ -374,6 +485,17 @@ export const BookingsTab: React.FC<BookingsTabProps> = ({ bookings, venue, event
         onRejectApplication={(bookingId) => {
           // Handle reject - this is for dashboard view so might not need implementation  
           console.log('Reject application:', bookingId);
+        }}
+      />
+
+      <BookingDetailDialog
+        isOpen={isBookingDialogOpen}
+        onClose={() => setIsBookingDialogOpen(false)}
+        booking={selectedBooking}
+        currentUser={{ venue: { id: venue.id } }}
+        onStatusUpdate={(updatedBooking) => {
+          // Refresh the page to get updated data
+          window.location.reload();
         }}
       />
     </div>
@@ -425,17 +547,38 @@ const BookingList: React.FC<{
                 </div>
               </div>
               <div className="text-right">
-                <Badge variant={item.hasConfirmedBooking ? 'default' : 'secondary'}>
-                  {item.hasConfirmedBooking ? 'Confirmed' : 
-                   item.eventStatus === 'open' ? 'Open' :
+                <Badge variant="default" className={
+                  item.eventStatus === 'completed' ? 'bg-emerald-100 text-emerald-800 hover:bg-emerald-200' :
+                  item.eventStatus === 'cancelled' ? 'bg-red-100 text-red-800 hover:bg-red-200' :
+                  item.eventStatus === 'cancel_requested' ? 'bg-orange-100 text-orange-800 hover:bg-orange-200' :
+                  item.eventStatus === 'confirmed' ? 'bg-green-100 text-green-800 hover:bg-green-200' :
+                  item.eventStatus === 'selected' ? 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200' :
+                  item.eventStatus === 'application_received' ? 'bg-purple-100 text-purple-800 hover:bg-purple-200' :
+                  item.eventStatus === 'invited' ? 'bg-indigo-100 text-indigo-800 hover:bg-indigo-200' :
+                  item.eventStatus === 'open' ? 'bg-blue-100 text-blue-800 hover:bg-blue-200' :
+                  'bg-gray-100 text-gray-800 hover:bg-gray-200'
+                }>
+                  {item.eventStatus === 'completed' ? 'Completed' :
+                   item.eventStatus === 'cancelled' ? 'Cancelled' :
+                   item.eventStatus === 'cancel_requested' ? 'Cancel Requested' :
+                   item.eventStatus === 'confirmed' ? 'Confirmed' :
+                   item.eventStatus === 'selected' ? 'Musician Selected' :
+                   item.eventStatus === 'application_received' ? 'Application Received' :
                    item.eventStatus === 'invited' ? 'Invited' :
+                   item.eventStatus === 'open' ? 'Open' :
                    item.eventStatus}
                 </Badge>
                 {item.pendingApplications > 0 && (
                   <p className="text-xs text-orange-600 mt-1">{item.pendingApplications} pending</p>
                 )}
-                {item.confirmedBookings > 0 && (
+                {item.confirmedBookings > 0 && !item.hasCompletedBooking && item.eventStatus !== 'cancelled' && (
                   <p className="text-xs text-green-600 mt-1">{item.confirmedBookings} confirmed</p>
+                )}
+                {item.completedBookings > 0 && (
+                  <p className="text-xs text-emerald-600 mt-1">{item.completedBookings} completed</p>
+                )}
+                {item.cancelledBookings > 0 && (
+                  <p className="text-xs text-red-600 mt-1">{item.cancelledBookings} cancelled</p>
                 )}
               </div>
             </div>

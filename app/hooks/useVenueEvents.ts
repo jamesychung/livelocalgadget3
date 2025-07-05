@@ -312,6 +312,12 @@ export function useVenueEvents(user: any) {
         return venueBookings.filter(booking => booking.event?.id === eventId).length;
     };
 
+    const getPendingApplicationCount = (eventId: string) => {
+        return venueBookings.filter(booking => 
+            booking.event?.id === eventId && booking.status === "applied"
+        ).length;
+    };
+
     const getEventsWithApplications = () => {
         return allEvents.filter(event => getApplicationCount(event.id) > 0);
     };
@@ -319,8 +325,9 @@ export function useVenueEvents(user: any) {
     const getPendingApplications = () => {
         console.log('🔍 All booking statuses:', venueBookings.map(b => ({ id: b.id, status: b.status, eventId: b.event?.id, eventTitle: b.event?.title })));
         
+        // Only show bookings that are still "applied" - once they're "selected", they're no longer pending
         const appliedBookings = venueBookings.filter((booking: any) => 
-            booking.status === "applied" || booking.status === "selected"
+            booking.status === "applied"
         );
         
         console.log('🔍 Pending applications found:', appliedBookings.length);
@@ -530,7 +537,12 @@ export function useVenueEvents(user: any) {
             setAllBookings((prevBookings: any[]) => {
                 const updatedBookings = prevBookings.map((booking: any) => 
                     booking.id === applicationId 
-                        ? { ...booking, status: 'selected', venue_id: venue.id }
+                        ? { 
+                            ...booking, 
+                            status: 'selected', 
+                            venue_id: venue.id,
+                            selected_at: new Date().toISOString()
+                        }
                         : booking
                 );
                 console.log('Updated bookings in local state:', updatedBookings.filter(b => b.id === applicationId));
@@ -547,39 +559,67 @@ export function useVenueEvents(user: any) {
                 // Re-fetch bookings to ensure we have the latest data
                 const refetchBookings = async () => {
                     try {
+                        // First get all events for this venue
+                        const { data: venueEvents, error: eventsError } = await supabase
+                            .from('events')
+                            .select('id')
+                            .eq('venue_id', venue.id);
+
+                        if (eventsError) {
+                            console.error("Error fetching venue events:", eventsError);
+                            return;
+                        }
+
+                        const venueEventIds = venueEvents?.map(event => event.id) || [];
+
+                        if (venueEventIds.length === 0) {
+                            setAllBookings([]);
+                            return;
+                        }
+
+                        // Then get all bookings for those events
                         const { data: refetchData, error: refetchError } = await supabase
                             .from('bookings')
                             .select(`
-                                *,
-                                event:events (
-                                    id,
-                                    title,
-                                    date,
-                                    start_time,
-                                    end_time,
-                                    description,
-                                    venue:venues (
-                                        id, 
-                                        name, 
-                                        address,
-                                        city,
-                                        state
-                                    )
-                                ),
-                                musician:musicians (
-                                    id,
-                                    stage_name,
-                                    email,
-                                    profile_picture
-                                )
+                                id,
+                                status,
+                                proposed_rate,
+                                musician_pitch,
+                                created_at,
+                                applied_at,
+                                selected_at,
+                                confirmed_at,
+                                cancelled_at,
+                                completed_at,
+                                cancel_requested_at,
+                                cancel_requested_by_role,
+                                cancel_confirmed_by_role,
+                                cancellation_reason,
+                                completed_by_role,
+                                event:events(id, title, date, start_time, end_time, created_at, venue:venues(id, name)),
+                                musician:musicians(id, stage_name, genres, city, state, hourly_rate),
+                                booked_by
                             `)
-                            .eq('venue_id', venue?.id);
+                            .in('event_id', venueEventIds);
 
                         if (refetchError) {
                             console.error("Error refetching bookings:", refetchError);
                         } else {
                             console.log('Refetched bookings:', refetchData);
-                            setAllBookings(refetchData || []);
+                            console.log('Specific booking after refetch:', refetchData?.find(b => b.id === applicationId));
+                            
+                            // Transform data to match expected format
+                            const transformedBookings = refetchData?.map(booking => ({
+                                ...booking,
+                                proposedRate: booking.proposed_rate,
+                                musicianPitch: booking.musician_pitch,
+                                createdAt: booking.created_at
+                            })) || [];
+
+                            setAllBookings(transformedBookings);
+                            
+                            // Force another re-render after refetch
+                            setRefreshTrigger(prev => prev + 1);
                         }
                     } catch (error) {
                         console.error("Error refetching bookings:", error);
@@ -662,6 +702,7 @@ export function useVenueEvents(user: any) {
 
         // Helper functions
         getApplicationCount,
+        getPendingApplicationCount,
         getEventsWithApplications,
         getPendingApplications,
         getEventsWithPendingApplications,

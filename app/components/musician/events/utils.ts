@@ -187,6 +187,10 @@ export const sortEvents = (
         aValue = a.venue?.name || '';
         bValue = b.venue?.name || '';
         break;
+      case 'title':
+        aValue = a.title || '';
+        bValue = b.title || '';
+        break;
       case 'rate':
         aValue = a.rate || 0;
         bValue = b.rate || 0;

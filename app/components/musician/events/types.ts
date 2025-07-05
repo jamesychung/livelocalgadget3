@@ -6,7 +6,7 @@ export interface TimeSlot {
   recurringEndDate?: string;
 }
 
-export type SortField = 'date' | 'venue' | 'rate' | 'musicianStatus';
+export type SortField = 'date' | 'venue' | 'title' | 'rate' | 'musicianStatus';
 export type SortDirection = 'asc' | 'desc';
 
 export interface EventSummaryProps {

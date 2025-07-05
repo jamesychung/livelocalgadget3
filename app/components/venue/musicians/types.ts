@@ -37,6 +37,7 @@ export interface InvitationData {
   musician_id: string;
   venue_id: string;
   status: string;
+  invited_at?: string;
   created_at: string;
   updated_at: string;
 } 

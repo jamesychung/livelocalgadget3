@@ -46,13 +46,6 @@ export const BookingActionButtons: React.FC<BookingActionButtonsProps> = ({
   const getAvailableActions = () => {
     const actions = [];
     
-    // Debug info
-    
-    // Debug info for pending_cancel bookings
-    if (currentStatus === 'pending_cancel') {
-      
-    }
-    
     if (currentStatus === BOOKING_STATUSES.APPLIED && isVenue) {
       actions.push({ value: BOOKING_STATUSES.SELECTED, label: 'Select This Musician' });
     }
@@ -151,6 +144,32 @@ export const BookingActionButtons: React.FC<BookingActionButtonsProps> = ({
         console.error('Failed to update booking:', error);
         alert('Failed to update booking status. Please try again.');
         return;
+      }
+
+      // If booking is marked as completed, also update the event status
+      if (selectedAction === BOOKING_STATUSES.COMPLETED && booking.event?.id) {
+        const { error: eventError } = await supabase
+          .from('events')
+          .update({ event_status: 'completed' })
+          .eq('id', booking.event.id);
+          
+        if (eventError) {
+          console.error('Failed to update event status:', eventError);
+          // Don't fail the whole operation if event update fails
+        }
+      }
+
+      // If booking is cancelled, also update the event status
+      if (selectedAction === BOOKING_STATUSES.CANCELLED && booking.event?.id) {
+        const { error: eventError } = await supabase
+          .from('events')
+          .update({ event_status: 'cancelled' })
+          .eq('id', booking.event.id);
+          
+        if (eventError) {
+          console.error('Failed to update event status:', eventError);
+          // Don't fail the whole operation if event update fails
+        }
       }
       
       onStatusUpdate(updatedBooking);

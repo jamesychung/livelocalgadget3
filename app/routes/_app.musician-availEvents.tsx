@@ -265,6 +265,7 @@ export default function MusicianAvailEventsPage() {
                         venue_id: selectedEvent.venue_id,
                         booked_by: user.id,
                         status: "applied",
+                        applied_at: new Date().toISOString(),
                         proposed_rate: user.musician.hourly_rate || 0,
                         musician_pitch: `I'm excited to perform at ${selectedEvent.venue?.name || 'your venue'}! I have experience in ${user.musician.genres?.join(', ') || 'various genres'} and would love to contribute to your event.`,
                         date: selectedEvent.date,

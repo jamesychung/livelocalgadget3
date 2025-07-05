@@ -34,6 +34,7 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import { NotificationBadge } from "../shared/NotificationBadge";
+import { useMessaging } from "../../hooks/useMessaging";
 import type { AuthOutletContext } from "../../routes/_app";
 
 interface NavItem {
@@ -50,26 +51,9 @@ interface NavItem {
 
 const navigationItems: NavItem[] = [
   {
-    title: "Home",
-    path: "/signed-in",
-    icon: Home,
-  },
-  {
     title: "Musician Dashboard",
     path: "/musician-dashboard",
     icon: Music,
-    roles: ["musician"],
-  },
-  {
-    title: "Profile",
-    path: "/musician-profile",
-    icon: User,
-    roles: ["musician"],
-  },
-  {
-    title: "Availability",
-    path: "/availability",
-    icon: Clock,
     roles: ["musician"],
   },
   {
@@ -79,9 +63,21 @@ const navigationItems: NavItem[] = [
     roles: ["musician"],
   },
   {
+    title: "Availability",
+    path: "/availability",
+    icon: Clock,
+    roles: ["musician"],
+  },
+  {
     title: "Messages",
     path: "/musician-messages",
     icon: MessageCircle,
+    roles: ["musician"],
+  },
+  {
+    title: "Profile",
+    path: "/musician-profile",
+    icon: User,
     roles: ["musician"],
   },
   {
@@ -90,17 +86,17 @@ const navigationItems: NavItem[] = [
     icon: Star,
     roles: ["musician"],
   },
+  {
+    title: "Settings",
+    path: "/settings",
+    icon: Settings,
+    roles: ["musician"],
+  },
   // Venue Owner Navigation - Reorganized Order
   {
     title: "Venue Dashboard",
     path: "/venue-dashboard",
     icon: Music,
-    roles: ["venue_owner"],
-  },
-  {
-    title: "Venue Profile",
-    path: "/venue-profile/edit",
-    icon: User,
     roles: ["venue_owner"],
   },
   {
@@ -116,9 +112,9 @@ const navigationItems: NavItem[] = [
     roles: ["venue_owner"],
   },
   {
-    title: "How to for Venues",
-    path: "/venue-how-to",
-    icon: Star,
+    title: "Venue Profile",
+    path: "/venue-profile/edit",
+    icon: User,
     roles: ["venue_owner"],
   },
   {
@@ -128,9 +124,16 @@ const navigationItems: NavItem[] = [
     roles: ["venue_owner"],
   },
   {
+    title: "How to for Venues",
+    path: "/venue-how-to",
+    icon: Star,
+    roles: ["venue_owner"],
+  },
+  {
     title: "Settings",
     path: "/settings",
     icon: Settings,
+    roles: ["venue_owner"],
   },
 ];
 
@@ -174,9 +177,10 @@ const secondaryNavigationItems: NavItem[] = [
 
 export const Navigation = ({ onLinkClick, user }: { onLinkClick?: () => void, user: any }) => {
   const location = useLocation();
+  const { getTotalUnreadCount } = useMessaging(user);
 
-  // Mock unread messages count - in real app, this would come from your state management
-  const unreadMessagesCount = 3; // This would be fetched from your messaging system
+  // Get real unread messages count
+  const unreadMessagesCount = getTotalUnreadCount();
 
   // Filter navigation items based on user roles
   const filteredNavigationItems = navigationItems.filter(item => {
@@ -225,7 +229,7 @@ export const Navigation = ({ onLinkClick, user }: { onLinkClick?: () => void, us
             <item.icon className="mr-3 h-4 w-4" />
             {item.title}
             {/* Show notification badge for Messages */}
-            {item.path === "/messages" && unreadMessagesCount > 0 && (
+            {(item.path === "/messages" || item.path === "/musician-messages") && unreadMessagesCount > 0 && (
               <NotificationBadge count={unreadMessagesCount} />
             )}
           </Link>

@@ -43,7 +43,7 @@ export default function VenueMusiciansPage() {
   const { data: venue, loading: venueLoading } = useVenueProfile(user?.id);
 
   // Fetch all musicians
-  const { data: musiciansData, loading: musiciansLoading } = useSupabaseQuery(
+  const { data: musiciansData, loading: musiciansLoading } = useSupabaseQuery<Musician>(
     async () => {
       return await fetchMusicians();
     },
@@ -51,12 +51,12 @@ export default function VenueMusiciansPage() {
   );
 
   // Fetch venue's events
-  const { data: eventsData, loading: eventsLoading } = useSupabaseQuery(
+  const { data: eventsData, loading: eventsLoading } = useSupabaseQuery<Event>(
     async () => {
-      if (!venue?.id) return { data: null, error: null };
-      return await fetchVenueEvents(venue.id);
+      if (!(venue as any)?.id) return { data: null, error: null };
+      return await fetchVenueEvents((venue as any).id);
     },
-    [venue?.id]
+    [(venue as any)?.id]
   );
 
   // Mutation hook for creating bookings
@@ -128,8 +128,9 @@ export default function VenueMusiciansPage() {
             invitations.push({
               event_id: eventId,
               musician_id: musicianId,
-              venue_id: venue?.id || '',
-              status: "applied",
+              venue_id: (venue as any)?.id || '',
+              status: "invited",
+              invited_at: new Date().toISOString(),
               created_at: new Date().toISOString(),
               updated_at: new Date().toISOString()
             });

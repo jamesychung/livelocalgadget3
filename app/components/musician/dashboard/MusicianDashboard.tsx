@@ -10,6 +10,7 @@ import { ProfileTab } from "./ProfileTab";
 import { MusicianEventsSummaryDashboard } from "../../shared/MusicianEventsSummaryDashboard";
 import { useMusicianEventsStats, createMusicianEventStats } from "../../../hooks/useMusicianEventsStats";
 import { supabase } from "../../../lib/supabase";
+import { Booking } from "./types";
 
 interface MusicianProfile {
   id: string;
@@ -28,28 +29,7 @@ interface MusicianProfile {
 
 
 
-interface Booking {
-  id: string;
-  event_id: string;
-  status: string;
-  proposed_rate?: number;
-  musician_pitch?: string;
-  created_at: string;
-  event?: {
-    id: string;
-    title: string;
-    date: string;
-    start_time?: string;
-    end_time?: string;
-    description?: string;
-    venue?: {
-      id: string;
-      name: string;
-      city?: string;
-      state?: string;
-    };
-  };
-}
+
 
 interface DashboardStats {
   totalApplications: number;
@@ -181,10 +161,23 @@ export const MusicianDashboard: React.FC = () => {
     return new Date(booking.event.date) > new Date();
   });
 
-  // Get recent bookings (sorted by creation date)
+  // Get recent bookings (sorted by applied date)
   const recentBookings = [...bookings]
-    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+    .sort((a, b) => {
+      const aDate = a.applied_at ? new Date(a.applied_at).getTime() : 0;
+      const bDate = b.applied_at ? new Date(b.applied_at).getTime() : 0;
+      return bDate - aDate;
+    })
     .slice(0, 5);
+
+  // Handle booking updates
+  const handleBookingUpdate = (updatedBooking: Booking) => {
+    setBookings(prev => 
+      prev.map(booking => 
+        booking.id === updatedBooking.id ? updatedBooking : booking
+      )
+    );
+  };
 
   // Calculate stats using a musician-specific stats hook (to be created)
   const musicianEventsStats = useMusicianEventsStats(bookings, confirmedBookings, pendingBookings);
@@ -266,7 +259,11 @@ export const MusicianDashboard: React.FC = () => {
         </TabsContent>
 
         <TabsContent value="bookings" className="mt-6">
-          <BookingsTab bookings={bookings} />
+          <BookingsTab 
+            bookings={bookings} 
+            currentUser={{...user, musician: musician}} 
+            onBookingUpdate={handleBookingUpdate} 
+          />
         </TabsContent>
 
         <TabsContent value="profile" className="mt-6">

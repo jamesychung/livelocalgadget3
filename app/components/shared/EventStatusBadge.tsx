@@ -54,7 +54,7 @@ export function EventStatusBadge({
                 text: "Pending Cancel"
             },
             completed: {
-                className: "bg-purple-100 text-purple-800",
+                className: "bg-emerald-100 text-emerald-800",
                 text: "Completed"
             }
         };
@@ -118,7 +118,7 @@ export function getStatusBadge(status: string | null | undefined) {
                 text: "Pending Cancel"
             },
             completed: {
-                className: "bg-purple-100 text-purple-800",
+                className: "bg-emerald-100 text-emerald-800",
                 text: "Completed"
             }
         };

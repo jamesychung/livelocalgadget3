@@ -5,36 +5,33 @@ import { Badge } from '../../ui/badge';
 import { Alert, AlertDescription } from '../../ui/alert';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../ui/tabs';
 import { Calendar, ChevronLeft, ChevronRight, MapPin, Clock, DollarSign, AlertCircle, CheckCircle, MessageSquare, Users } from 'lucide-react';
-
-interface Booking {
-  id: string;
-  status: string;
-  proposed_rate?: number;
-  musician_pitch?: string;
-  created_at: string;
-  event?: {
-    id: string;
-    title: string;
-    date: string;
-    start_time?: string;
-    end_time?: string;
-    description?: string;
-    venue?: {
-      id: string;
-      name: string;
-      city?: string;
-      state?: string;
-    };
-  };
-}
+import { BookingDetailDialog } from '../../shared/BookingDetailDialog';
+import { Booking } from './types';
 
 interface BookingsTabProps {
   bookings: Booking[];
+  currentUser?: any;
+  onBookingUpdate?: (updatedBooking: Booking) => void;
 }
 
-export const BookingsTab: React.FC<BookingsTabProps> = ({ bookings }) => {
+export const BookingsTab: React.FC<BookingsTabProps> = ({ bookings, currentUser, onBookingUpdate }) => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [view, setView] = useState<'calendar' | 'list'>('calendar');
+  const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  const handleBookingClick = (booking: Booking) => {
+    setSelectedBooking(booking);
+    setIsDialogOpen(true);
+  };
+
+  const handleStatusUpdate = (updatedBooking: any) => {
+    // Update the booking in the parent component if callback provided
+    if (onBookingUpdate) {
+      onBookingUpdate(updatedBooking);
+    }
+    setIsDialogOpen(false);
+  };
 
   const navigateMonth = (direction: 'prev' | 'next') => {
     setCurrentDate(prev => {
@@ -178,7 +175,8 @@ export const BookingsTab: React.FC<BookingsTabProps> = ({ bookings }) => {
                     {dayBookings.map((booking, bookingIndex) => (
                       <div
                         key={bookingIndex}
-                        className={`text-xs p-1 mb-1 rounded text-white ${getStatusColor(booking.status)}`}
+                        className={`text-xs p-1 mb-1 rounded text-white cursor-pointer hover:opacity-80 transition-opacity ${getStatusColor(booking.status)}`}
+                        onClick={() => handleBookingClick(booking)}
                       >
                         <div className="font-medium truncate">
                           {booking.event?.title}
@@ -209,7 +207,7 @@ export const BookingsTab: React.FC<BookingsTabProps> = ({ bookings }) => {
     return (
       <div className="space-y-4">
         {sortedBookings.map((booking) => (
-          <Card key={booking.id} className="hover:shadow-md transition-shadow">
+          <Card key={booking.id} className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => handleBookingClick(booking)}>
             <CardContent className="p-4">
               <div className="flex items-start justify-between">
                 <div className="flex-1">
@@ -261,7 +259,7 @@ export const BookingsTab: React.FC<BookingsTabProps> = ({ bookings }) => {
                 
                 <div className="text-right">
                   <p className="text-xs text-gray-500">
-                    Applied {new Date(booking.created_at).toLocaleDateString()}
+                    Applied {booking.applied_at ? new Date(booking.applied_at).toLocaleDateString() : 'N/A'}
                   </p>
                 </div>
               </div>
@@ -286,6 +284,14 @@ export const BookingsTab: React.FC<BookingsTabProps> = ({ bookings }) => {
   return (
     <div className="space-y-6">
       {view === 'calendar' ? renderCalendar() : renderList()}
+      
+      <BookingDetailDialog
+        isOpen={isDialogOpen}
+        onClose={() => setIsDialogOpen(false)}
+        booking={selectedBooking}
+        currentUser={currentUser}
+        onStatusUpdate={handleStatusUpdate}
+      />
     </div>
   );
 }; 
