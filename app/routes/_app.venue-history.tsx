@@ -45,8 +45,43 @@ export default function VenueHistoryPage() {
     );
   }
 
+  // Enhance events with correct status based on booking states
+  const allEventsWithBookingInfo = allEvents.map(event => {
+    const eventBookings = allBookings.filter(booking => booking.event?.id === event.id);
+    const completedBookings = eventBookings.filter(booking => booking.status === 'completed');
+    const cancelledBookings = eventBookings.filter(booking => booking.status === 'cancelled');
+    const confirmedBookings = eventBookings.filter(booking => booking.status === 'confirmed');
+    const selectedBookings = eventBookings.filter(booking => booking.status === 'selected');
+    const appliedBookings = eventBookings.filter(booking => booking.status === 'applied');
+    const cancelRequestedBookings = eventBookings.filter(booking => booking.status === 'pending_cancel');
+    
+    // Determine event status based on booking states (same logic as BookingsTab)
+    let eventStatus = event.eventStatus || 'open';
+    if (completedBookings.length > 0) {
+      eventStatus = 'completed';
+    } else if (cancelledBookings.length > 0 && confirmedBookings.length === 0) {
+      eventStatus = 'cancelled';
+    } else if (cancelRequestedBookings.length > 0) {
+      eventStatus = 'cancel_requested';
+    } else if (confirmedBookings.length > 0) {
+      eventStatus = 'confirmed';
+    } else if (selectedBookings.length > 0) {
+      eventStatus = 'selected';
+    } else if (appliedBookings.length > 0) {
+      eventStatus = 'application_received';
+    } else if (event.eventStatus === 'invited') {
+      eventStatus = 'invited';
+    }
+    
+    return {
+      ...event,
+      eventStatus: eventStatus,
+      bookings: eventBookings
+    };
+  });
+
   // Only show completed or cancelled events in history
-  const pastEvents = allEvents.filter(event => 
+  const pastEvents = allEventsWithBookingInfo.filter(event => 
     event.eventStatus === 'completed' || event.eventStatus === 'cancelled'
   );
 
@@ -92,9 +127,17 @@ export default function VenueHistoryPage() {
             </p>
           </div>
         </div>
-        <Badge variant="secondary" className="text-lg px-4 py-2">
-          {pastEvents.length} Past Events
-        </Badge>
+        <div className="flex items-center gap-2">
+          <Badge variant="secondary" className="text-lg px-4 py-2">
+            {pastEvents.length} Past Events
+          </Badge>
+          <Badge variant="outline" className="text-sm px-3 py-1 bg-emerald-50 text-emerald-700">
+            {pastEvents.filter(e => e.eventStatus === 'completed').length} Completed
+          </Badge>
+          <Badge variant="outline" className="text-sm px-3 py-1 bg-red-50 text-red-700">
+            {pastEvents.filter(e => e.eventStatus === 'cancelled').length} Cancelled
+          </Badge>
+        </div>
       </div>
 
       {/* Event History */}
@@ -110,7 +153,7 @@ export default function VenueHistoryPage() {
             <div className="space-y-4">
               {pastEvents.map((event) => {
                 const applicationCount = getApplicationCount(event.id);
-                const borderColor = event.eventStatus === 'completed' ? 'border-l-emerald-500' : 'border-l-gray-500';
+                const borderColor = event.eventStatus === 'completed' ? 'border-l-emerald-500' : 'border-l-red-500';
                 
                 return (
                   <Card key={event.id} className={`hover:shadow-lg transition-shadow duration-200 cursor-pointer border-l-4 ${borderColor}`}>

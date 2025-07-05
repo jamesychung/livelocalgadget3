@@ -22,6 +22,22 @@ interface BookingActionButtonsProps {
   className?: string;
 }
 
+// Helper function to properly parse UTC timestamps from database
+const parseUTCTimestamp = (timestamp: string | Date): Date => {
+  if (timestamp instanceof Date) {
+    return timestamp;
+  }
+  
+  // If the timestamp doesn't end with 'Z', it's likely a UTC timestamp without the timezone indicator
+  // Add 'Z' to ensure it's parsed as UTC
+  const timestampString = timestamp.toString();
+  if (timestampString && !timestampString.endsWith('Z') && !timestampString.includes('+') && !timestampString.includes('-', 10)) {
+    return new Date(timestampString + 'Z');
+  }
+  
+  return new Date(timestamp);
+};
+
 export const BookingActionButtons: React.FC<BookingActionButtonsProps> = ({
   booking,
   currentUser,
@@ -206,14 +222,30 @@ export const BookingActionButtons: React.FC<BookingActionButtonsProps> = ({
       {(currentStatus === 'pending_cancel' || currentStatus === BOOKING_STATUSES.CANCELLED) && (
         <div className="mb-2 text-sm text-muted-foreground">
           <div>
-            <b>Cancel requested by:</b> {booking.cancel_requested_by_role || 'Unknown'} on {booking.cancel_requested_at ? new Date(booking.cancel_requested_at).toLocaleString() : 'Unknown date'}
+            <b>Cancel requested by:</b> {booking.cancel_requested_by_role || 'Unknown'} on {booking.cancel_requested_at ? parseUTCTimestamp(booking.cancel_requested_at).toLocaleString('en-US', {
+              month: 'short',
+              day: 'numeric',
+              year: 'numeric',
+              hour: 'numeric',
+              minute: '2-digit',
+              hour12: true,
+              timeZone: 'America/Los_Angeles'
+            }) : 'Unknown date'}
           </div>
           {booking.cancellation_reason && (
             <div><b>Reason:</b> {booking.cancellation_reason}</div>
           )}
           {currentStatus === BOOKING_STATUSES.CANCELLED && (
             <div>
-              <b>Cancel confirmed by:</b> {booking.cancel_confirmed_by_role || 'Unknown'} on {booking.cancelled_at ? new Date(booking.cancelled_at).toLocaleString() : 'Unknown date'}
+              <b>Cancel confirmed by:</b> {booking.cancel_confirmed_by_role || 'Unknown'} on {booking.cancelled_at ? parseUTCTimestamp(booking.cancelled_at).toLocaleString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric',
+                hour: 'numeric',
+                minute: '2-digit',
+                hour12: true,
+                timeZone: 'America/Los_Angeles'
+              }) : 'Unknown date'}
             </div>
           )}
         </div>

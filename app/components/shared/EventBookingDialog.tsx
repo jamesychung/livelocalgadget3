@@ -1,11 +1,15 @@
-import React from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
-import { Badge } from "../ui/badge";
+import React, { useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "../ui/dialog";
 import { Button } from "../ui/button";
+import { Badge } from "../ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
-import { Calendar, Clock, User, Phone, Mail, MapPin, DollarSign, Users, MessageCircle } from "lucide-react";
+import { Calendar, Clock, DollarSign, User, MapPin, Phone, Mail, MessageCircle, Users } from "lucide-react";
 import { BookingActionButtons } from "./BookingActionButtons";
-import { useAuth } from "../../lib/auth";
 
 interface EventBookingDialogProps {
   isOpen: boolean;
@@ -28,19 +32,38 @@ export const EventBookingDialog: React.FC<EventBookingDialogProps> = ({
   onReviewApplications,
   applicationCount = 0
 }) => {
-  const { user } = useAuth();
-  
+  const [user] = useState(() => {
+    // Get user from context or props
+    return null; // This should be passed from parent component
+  });
+
+  // Helper function to properly parse UTC timestamps from database
+  const parseUTCTimestamp = (timestamp: string | Date): Date => {
+    if (timestamp instanceof Date) {
+      return timestamp;
+    }
+    
+    // If the timestamp doesn't end with 'Z', it's likely a UTC timestamp without the timezone indicator
+    // Add 'Z' to ensure it's parsed as UTC
+    const timestampString = timestamp.toString();
+    if (timestampString && !timestampString.endsWith('Z') && !timestampString.includes('+') && !timestampString.includes('-', 10)) {
+      return new Date(timestampString + 'Z');
+    }
+    
+    return new Date(timestamp);
+  };
+
   const formatTime = (timeString?: string) => {
     if (!timeString) return '';
     const [hours, minutes] = timeString.split(':');
     const hour = parseInt(hours);
     const ampm = hour >= 12 ? 'PM' : 'AM';
     const displayHour = hour % 12 || 12;
-    return `${displayHour}:${minutes} ${ampm}`;
+    return `${displayHour}:${minutes}${ampm}`;
   };
 
   const formatDate = (dateString?: string) => {
-    if (!dateString) return 'No date provided';
+    if (!dateString) return '';
     return new Date(dateString).toLocaleDateString('en-US', {
       weekday: 'short',
       month: 'short',
@@ -248,7 +271,7 @@ export const EventBookingDialog: React.FC<EventBookingDialogProps> = ({
                   ) : viewMode === 'venue' && !booking && applicationCount > 0 ? (
                     <div className="space-y-3">
                       <div className="text-center py-6 bg-blue-50 rounded-lg">
-                        <Users className="h-12 w-12 text-blue-600 mx-auto mb-3" />
+                        <Users className="h-12 w-12 text-blue-500 mx-auto mb-3" />
                         <h4 className="font-medium mb-2">Applications Received</h4>
                         <p className="text-sm text-gray-600 mb-4">
                           {applicationCount} musician{applicationCount !== 1 ? 's have' : ' has'} applied for this event. Review and select the best fit.
@@ -419,11 +442,14 @@ export const EventBookingDialog: React.FC<EventBookingDialogProps> = ({
                           <div className="flex items-center justify-between">
                             <h5 className="font-medium text-sm">{activity.action}</h5>
                             <span className="text-xs text-gray-500">
-                              {new Date(activity.timestamp).toLocaleDateString('en-US', {
+                              {parseUTCTimestamp(activity.timestamp).toLocaleString('en-US', {
                                 month: 'short',
                                 day: 'numeric',
+                                year: 'numeric',
                                 hour: 'numeric',
-                                minute: '2-digit'
+                                minute: '2-digit',
+                                hour12: true,
+                                timeZone: 'America/Los_Angeles'
                               })}
                             </span>
                           </div>

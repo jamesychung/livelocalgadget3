@@ -15,6 +15,22 @@ interface BookingDetailDialogProps {
   onStatusUpdate: (updatedBooking: any) => void;
 }
 
+// Helper function to properly parse UTC timestamps from database
+const parseUTCTimestamp = (timestamp: string | Date): Date => {
+  if (timestamp instanceof Date) {
+    return timestamp;
+  }
+  
+  // If the timestamp doesn't end with 'Z', it's likely a UTC timestamp without the timezone indicator
+  // Add 'Z' to ensure it's parsed as UTC
+  const timestampString = timestamp.toString();
+  if (timestampString && !timestampString.endsWith('Z') && !timestampString.includes('+') && !timestampString.includes('-', 10)) {
+    return new Date(timestampString + 'Z');
+  }
+  
+  return new Date(timestamp);
+};
+
 export const BookingDetailDialog: React.FC<BookingDetailDialogProps> = ({
   isOpen,
   onClose,
@@ -27,7 +43,15 @@ export const BookingDetailDialog: React.FC<BookingDetailDialogProps> = ({
   // Format date for display
   const formatDate = (dateString: string) => {
     if (!dateString) return "N/A";
-    return new Date(dateString).toLocaleString();
+    return parseUTCTimestamp(dateString).toLocaleString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true,
+      timeZone: 'America/Los_Angeles'
+    });
   };
 
   const activityItems = generateBookingActivityItems(booking);

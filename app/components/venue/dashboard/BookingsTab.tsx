@@ -343,15 +343,78 @@ export const BookingsTab: React.FC<BookingsTabProps> = ({ bookings, venue, event
                   <SelectValue placeholder="Filter by status" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Events</SelectItem>
-                  <SelectItem value="open">Open Events</SelectItem>
-                  <SelectItem value="invited">Invited Events</SelectItem>
-                  <SelectItem value="application_received">Application Received</SelectItem>
-                  <SelectItem value="selected">Musician Selected</SelectItem>
-                  <SelectItem value="confirmed">Confirmed</SelectItem>
-                  <SelectItem value="cancel_requested">Cancel Requested</SelectItem>
-                  <SelectItem value="cancelled">Cancelled</SelectItem>
-                  <SelectItem value="completed">Completed</SelectItem>
+                  <SelectItem value="all">
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 bg-gray-100 rounded flex items-center justify-center">
+                        <Filter className="h-2.5 w-2.5 text-gray-600" />
+                      </div>
+                      <span>All Events</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="open">
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 bg-blue-100 rounded flex items-center justify-center">
+                        <Calendar className="h-2.5 w-2.5 text-blue-600" />
+                      </div>
+                      <span>Open Events</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="invited">
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 bg-indigo-100 rounded flex items-center justify-center">
+                        <Mail className="h-2.5 w-2.5 text-indigo-600" />
+                      </div>
+                      <span>Invited Events</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="application_received">
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 bg-purple-100 rounded flex items-center justify-center">
+                        <Users className="h-2.5 w-2.5 text-purple-600" />
+                      </div>
+                      <span>Application Received</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="selected">
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 bg-yellow-100 rounded flex items-center justify-center">
+                        <CheckCircle className="h-2.5 w-2.5 text-yellow-600" />
+                      </div>
+                      <span>Musician Selected</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="confirmed">
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 bg-green-100 rounded flex items-center justify-center">
+                        <CheckCircle className="h-2.5 w-2.5 text-green-600" />
+                      </div>
+                      <span>Confirmed</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="cancel_requested">
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 bg-orange-100 rounded flex items-center justify-center">
+                        <AlertCircle className="h-2.5 w-2.5 text-orange-600" />
+                      </div>
+                      <span>Cancel Requested</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="cancelled">
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 bg-red-100 rounded flex items-center justify-center">
+                        <CheckCircle className="h-2.5 w-2.5 text-red-600" />
+                      </div>
+                      <span>Cancelled</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="completed">
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 bg-emerald-100 rounded flex items-center justify-center">
+                        <CheckCircle className="h-2.5 w-2.5 text-emerald-600" />
+                      </div>
+                      <span>Completed</span>
+                    </div>
+                  </SelectItem>
                 </SelectContent>
               </Select>
 

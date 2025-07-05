@@ -11,6 +11,22 @@ interface VenueCommunicationsCardProps {
   handleSendMessage: () => void;
 }
 
+// Helper function to properly parse UTC timestamps from database
+const parseUTCTimestamp = (timestamp: string | Date): Date => {
+  if (timestamp instanceof Date) {
+    return timestamp;
+  }
+  
+  // If the timestamp doesn't end with 'Z', it's likely a UTC timestamp without the timezone indicator
+  // Add 'Z' to ensure it's parsed as UTC
+  const timestampString = timestamp.toString();
+  if (timestampString && !timestampString.endsWith('Z') && !timestampString.includes('+') && !timestampString.includes('-', 10)) {
+    return new Date(timestampString + 'Z');
+  }
+  
+  return new Date(timestamp);
+};
+
 export const VenueCommunicationsCard: React.FC<VenueCommunicationsCardProps> = ({
   messages = [],
   newMessage,
@@ -48,7 +64,15 @@ export const VenueCommunicationsCard: React.FC<VenueCommunicationsCardProps> = (
                   <div className="text-xs opacity-75 mb-1">{message.senderName}</div>
                   <div className="text-sm">{message.content}</div>
                   <div className="text-xs opacity-75 mt-1">
-                    {new Date(message.createdAt).toLocaleString()}
+                    {parseUTCTimestamp(message.createdAt).toLocaleString('en-US', {
+                      month: 'short',
+                      day: 'numeric',
+                      year: 'numeric',
+                      hour: 'numeric',
+                      minute: '2-digit',
+                      hour12: true,
+                      timeZone: 'America/Los_Angeles'
+                    })}
                   </div>
                 </div>
               </div>
