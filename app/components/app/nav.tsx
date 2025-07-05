@@ -81,6 +81,12 @@ const navigationItems: NavItem[] = [
     roles: ["musician"],
   },
   {
+    title: "History",
+    path: "/musician-history",
+    icon: History,
+    roles: ["musician"],
+  },
+  {
     title: "How to for Musicians",
     path: "/musician-how-to",
     icon: Star,

@@ -40,6 +40,7 @@ export interface Booking {
   cancelled_by?: string;
   cancel_confirmed_by_role?: string;
   cancellation_reason?: string;
+  created_at: string;
   event?: {
     id: string;
     title: string;

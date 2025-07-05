@@ -45,6 +45,7 @@ export const MusicianDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState("overview");
   const [musician, setMusician] = useState<MusicianProfile | null>(null);
   const [bookings, setBookings] = useState<Booking[]>([]);
+  const [events, setEvents] = useState<any[]>([]);
   const [stats, setStats] = useState<DashboardStats>({
     totalApplications: 0,
     confirmedBookings: 0,
@@ -117,6 +118,15 @@ export const MusicianDashboard: React.FC = () => {
           .eq('musician_id', musicianData.id)
           .order('created_at', { ascending: false });
 
+        // Fetch all events for the musician's location (for the BookingsTab)
+        const { data: eventsData, error: eventsError } = await supabase
+          .from('events')
+          .select(`
+            *,
+            venue:venues(id, name, city, state, profile_picture)
+          `)
+          .order('date', { ascending: true });
+
         if (!bookingsError && bookingsData) {
           setBookings(bookingsData);
           
@@ -141,6 +151,10 @@ export const MusicianDashboard: React.FC = () => {
             averageRate: averageRate,
             totalEarnings: totalEarnings
           });
+        }
+
+        if (!eventsError && eventsData) {
+          setEvents(eventsData);
         }
       } catch (error) {
         console.error("Error loading dashboard data:", error);
@@ -251,18 +265,14 @@ export const MusicianDashboard: React.FC = () => {
           <OverviewTab 
             musician={musician}
             upcomingEvents={upcomingBookings}
-            recentBookings={recentBookings}
-            confirmedBookings={confirmedBookings}
-            pendingBookings={pendingBookings}
-            selectedBookings={selectedBookings}
           />
         </TabsContent>
 
         <TabsContent value="bookings" className="mt-6">
           <BookingsTab 
             bookings={bookings} 
-            currentUser={{...user, musician: musician}} 
-            onBookingUpdate={handleBookingUpdate} 
+            musician={musician}
+            events={events}
           />
         </TabsContent>
 

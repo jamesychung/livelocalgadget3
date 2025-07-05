@@ -38,6 +38,7 @@ import VenueEventsWorkflowBased from "./routes/_app.venue-events.workflow-based"
 import CreateEvent from "./routes/_app.create-event";
 import VenueEventDetail from "./routes/_app.venue-event.$eventId";
 import VenueHistory from "./routes/_app.venue-history";
+import MusicianHistory from "./routes/_app.musician-history";
 import VenueHowTo from "./routes/_app.venue-how-to";
 import MusicianHowTo from "./routes/_app.musician-how-to";
 import VenueProfileEdit from "./routes/_app.venue-profile.edit";
@@ -84,6 +85,7 @@ export default function App() {
             <Route path="musicians" element={<Musicians />} />
             <Route path="musician-availEvents" element={<MusicianAvailEvents />} />
             <Route path="musician-messages" element={<MusicianMessages />} />
+            <Route path="musician-history" element={<MusicianHistory />} />
             <Route path="availability" element={<Availability />} />
             <Route path="musician-how-to" element={<MusicianHowTo />} />
             
