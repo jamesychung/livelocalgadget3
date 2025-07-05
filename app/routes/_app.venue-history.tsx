@@ -8,15 +8,16 @@ import { Badge } from "../components/ui/badge";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
-import { Calendar, Users, Eye, ArrowLeft, Filter, X, CalendarIcon } from "lucide-react";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "../components/ui/command";
+import { Popover, PopoverContent, PopoverTrigger } from "../components/ui/popover";
+import { Calendar, Users, Eye, ArrowLeft, Filter, X, CalendarIcon, Check, ChevronsUpDown } from "lucide-react";
 import { Link } from "react-router-dom";
 import { EventStatusBadge } from "../components/shared/EventStatusBadge";
 import { ApplicationDetailDialog } from "../components/shared/ApplicationDetailDialog";
 import { VenueProfilePrompt } from "../components/shared/VenueProfilePrompt";
 import { CANCELLATION_REASON_LABELS } from "../lib/utils";
 
-export default function VenueHistoryPage() {
-  const { user } = useOutletContext<AuthOutletContext>();
+function VenueHistoryContent({ user, venue, allEvents, allBookings, getApplicationCount, handleBookApplication, handleRejectApplication }: any) {
   const [selectedEventForApplications, setSelectedEventForApplications] = useState<any>(null);
   const [applicationsDialogOpen, setApplicationsDialogOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
@@ -32,33 +33,14 @@ export default function VenueHistoryPage() {
     venue: '',
     cancellationReason: 'all'
   });
-
-  const {
-    // Data
-    venue,
-    allEvents,
-    allBookings,
-
-    // Helper functions
-    getApplicationCount,
-
-    // Event handlers
-    handleBookApplication,
-    handleRejectApplication,
-  } = useVenueEvents(user);
+  const [musicianPopoverOpen, setMusicianPopoverOpen] = useState(false);
+  const [venuePopoverOpen, setVenuePopoverOpen] = useState(false);
 
   // Override handleEventClick to use our new state
   const handleEventClick = (event: any) => {
     setSelectedEvent(event);
     setIsEventDetailDialogOpen(true);
   };
-
-  // If no venue profile found, show a message with option to create one
-  if (!venue) {
-    return (
-      <VenueProfilePrompt onCreateProfile={() => {}} />
-    );
-  }
 
   // Enhance events with correct status based on booking states
   const allEventsWithBookingInfo = allEvents.map(event => {
@@ -145,7 +127,7 @@ export default function VenueHistoryPage() {
       // Musician filter
       if (filters.musician) {
         const hasMatchingMusician = event.bookings.some((booking: any) => 
-          booking.musician?.stage_name?.toLowerCase().includes(filters.musician.toLowerCase())
+          booking.musician?.stage_name === filters.musician
         );
         if (!hasMatchingMusician) return false;
       }
@@ -153,7 +135,7 @@ export default function VenueHistoryPage() {
       // Venue filter
       if (filters.venue) {
         const eventVenueName = event.venue?.name || '';
-        if (!eventVenueName.toLowerCase().includes(filters.venue.toLowerCase())) {
+        if (eventVenueName !== filters.venue) {
           return false;
         }
       }
@@ -180,6 +162,8 @@ export default function VenueHistoryPage() {
       venue: '',
       cancellationReason: 'all'
     });
+    setMusicianPopoverOpen(false);
+    setVenuePopoverOpen(false);
   };
 
   // Check if any filters are active
@@ -314,21 +298,111 @@ export default function VenueHistoryPage() {
               {/* Musician Filter */}
               <div className="space-y-2">
                 <Label>Musician</Label>
-                <Input
-                  placeholder="Search musician..."
-                  value={filters.musician}
-                  onChange={(e) => setFilters(prev => ({ ...prev, musician: e.target.value }))}
-                />
+                <Popover open={musicianPopoverOpen} onOpenChange={setMusicianPopoverOpen}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      role="combobox"
+                      aria-expanded={musicianPopoverOpen}
+                      className="w-full justify-between"
+                    >
+                      {filters.musician || "Select musician..."}
+                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-full p-0">
+                    <Command>
+                      <CommandInput placeholder="Search musicians..." />
+                      <CommandList>
+                        <CommandEmpty>No musician found.</CommandEmpty>
+                        <CommandGroup>
+                          <CommandItem
+                            value=""
+                            onSelect={() => {
+                              setFilters(prev => ({ ...prev, musician: '' }));
+                              setMusicianPopoverOpen(false);
+                            }}
+                          >
+                            <Check
+                              className={`mr-2 h-4 w-4 ${filters.musician === '' ? "opacity-100" : "opacity-0"}`}
+                            />
+                            All Musicians
+                          </CommandItem>
+                          {uniqueMusicians.map((musician) => (
+                            <CommandItem
+                              key={musician}
+                              value={musician}
+                              onSelect={() => {
+                                setFilters(prev => ({ ...prev, musician: musician }));
+                                setMusicianPopoverOpen(false);
+                              }}
+                            >
+                              <Check
+                                className={`mr-2 h-4 w-4 ${filters.musician === musician ? "opacity-100" : "opacity-0"}`}
+                              />
+                              {musician}
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
               </div>
 
               {/* Venue Filter */}
               <div className="space-y-2">
                 <Label>Venue</Label>
-                <Input
-                  placeholder="Search venue..."
-                  value={filters.venue}
-                  onChange={(e) => setFilters(prev => ({ ...prev, venue: e.target.value }))}
-                />
+                <Popover open={venuePopoverOpen} onOpenChange={setVenuePopoverOpen}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      role="combobox"
+                      aria-expanded={venuePopoverOpen}
+                      className="w-full justify-between"
+                    >
+                      {filters.venue || "Select venue..."}
+                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-full p-0">
+                    <Command>
+                      <CommandInput placeholder="Search venues..." />
+                      <CommandList>
+                        <CommandEmpty>No venue found.</CommandEmpty>
+                        <CommandGroup>
+                          <CommandItem
+                            value=""
+                            onSelect={() => {
+                              setFilters(prev => ({ ...prev, venue: '' }));
+                              setVenuePopoverOpen(false);
+                            }}
+                          >
+                            <Check
+                              className={`mr-2 h-4 w-4 ${filters.venue === '' ? "opacity-100" : "opacity-0"}`}
+                            />
+                            All Venues
+                          </CommandItem>
+                          {uniqueVenues.map((venue) => (
+                            <CommandItem
+                              key={venue}
+                              value={venue}
+                              onSelect={() => {
+                                setFilters(prev => ({ ...prev, venue: venue }));
+                                setVenuePopoverOpen(false);
+                              }}
+                            >
+                              <Check
+                                className={`mr-2 h-4 w-4 ${filters.venue === venue ? "opacity-100" : "opacity-0"}`}
+                              />
+                              {venue}
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
               </div>
 
               {/* Cancellation Reason Filter */}
@@ -548,4 +622,41 @@ export default function VenueHistoryPage() {
       />
     </div>
   );
-} 
+}
+
+export default function VenueHistoryPage() {
+  const { user } = useOutletContext<AuthOutletContext>();
+  
+  const {
+    // Data
+    venue,
+    allEvents,
+    allBookings,
+
+    // Helper functions
+    getApplicationCount,
+
+    // Event handlers
+    handleBookApplication,
+    handleRejectApplication,
+  } = useVenueEvents(user);
+
+  // If no venue profile found, show a message with option to create one
+  if (!venue) {
+    return (
+      <VenueProfilePrompt onCreateProfile={() => {}} />
+    );
+  }
+
+  return (
+    <VenueHistoryContent
+      user={user}
+      venue={venue}
+      allEvents={allEvents}
+      allBookings={allBookings}
+      getApplicationCount={getApplicationCount}
+      handleBookApplication={handleBookApplication}
+      handleRejectApplication={handleRejectApplication}
+    />
+  );
+}
