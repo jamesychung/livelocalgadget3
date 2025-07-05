@@ -2,12 +2,12 @@ import React, { useEffect, useState } from "react";
 import { useAuth } from "../../../lib/auth";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../ui/tabs";
 import { Button } from "../../ui/button";
+import { Badge } from "../../ui/badge";
 import { DashboardHeader } from "./DashboardHeader";
 import { OverviewTab } from "./OverviewTab";
 import { BookingsTab } from "./BookingsTab";
 import { ProfileTab } from "./ProfileTab";
 import { MusicianEventsSummaryDashboard } from "../../shared/MusicianEventsSummaryDashboard";
-import { MusicianStatsSettings } from "../../shared/MusicianStatsSettings";
 import { useMusicianEventsStats, createMusicianEventStats } from "../../../hooks/useMusicianEventsStats";
 import { supabase } from "../../../lib/supabase";
 
@@ -25,6 +25,8 @@ interface MusicianProfile {
   base_rate?: number;
   travel_radius?: number;
 }
+
+
 
 interface Booking {
   id: string;
@@ -220,13 +222,7 @@ export const MusicianDashboard: React.FC = () => {
         />
         {showStatsSettings && (
           <div className="mt-2">
-            <MusicianStatsSettings
-              availableStats={allAvailableStats}
-              selectedStatIds={selectedStatIds}
-              onStatsChange={setSelectedStatIds}
-              maxStats={8}
-              onClose={() => setShowStatsSettings(false)}
-            />
+            {/* MusicianStatsSettings component was removed, so this block is now empty */}
           </div>
         )}
       </div>
@@ -241,9 +237,14 @@ export const MusicianDashboard: React.FC = () => {
           </TabsTrigger>
           <TabsTrigger 
             value="bookings" 
-            className="data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm font-medium"
+            className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm font-medium"
           >
             Bookings
+            {(pendingBookings.length > 0 || selectedBookings.length > 0) && (
+              <Badge variant="secondary" className="bg-blue-100 text-blue-800 border-blue-200">
+                {pendingBookings.length + selectedBookings.length}
+              </Badge>
+            )}
           </TabsTrigger>
           <TabsTrigger 
             value="profile" 

@@ -2,7 +2,9 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../../ui/card';
 import { Button } from '../../ui/button';
 import { Badge } from '../../ui/badge';
-import { Calendar, ChevronLeft, ChevronRight, MapPin, Clock, DollarSign } from 'lucide-react';
+import { Alert, AlertDescription } from '../../ui/alert';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../ui/tabs';
+import { Calendar, ChevronLeft, ChevronRight, MapPin, Clock, DollarSign, AlertCircle, CheckCircle, MessageSquare, Users } from 'lucide-react';
 
 interface Booking {
   id: string;
@@ -91,10 +93,12 @@ export const BookingsTab: React.FC<BookingsTabProps> = ({ bookings }) => {
       current.setDate(current.getDate() + 1);
     }
 
-    // Group bookings by date
+    // Group bookings by date - normalize both booking dates and calendar dates
     const bookingsByDate = bookings.reduce((acc, booking) => {
       if (booking.event?.date) {
-        const dateKey = booking.event.date;
+        // Normalize the booking date to YYYY-MM-DD format
+        const bookingDate = new Date(booking.event.date);
+        const dateKey = bookingDate.toISOString().split('T')[0];
         if (!acc[dateKey]) acc[dateKey] = [];
         acc[dateKey].push(booking);
       }
@@ -111,6 +115,9 @@ export const BookingsTab: React.FC<BookingsTabProps> = ({ bookings }) => {
                 <h3 className="text-lg font-semibold">
                   {currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
                 </h3>
+                <div className="text-sm text-gray-500">
+                  {bookings.length} total bookings
+                </div>
                 <div className="flex gap-2">
                   <Button variant="outline" size="sm" onClick={() => navigateMonth('prev')}>
                     <ChevronLeft className="h-4 w-4" />
