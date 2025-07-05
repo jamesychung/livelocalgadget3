@@ -9,7 +9,7 @@ import { Booking, VenueProfile } from "./types";
 import { formatDate } from "./utils";
 import { Link } from "react-router-dom";
 import VenueEventCalendar from "../../shared/VenueEventCalendar";
-import { EventBookingDialog } from "../../shared/EventBookingDialog";
+import { ApplicationDetailDialog } from "../../shared/ApplicationDetailDialog";
 
 interface BookingsTabProps {
   bookings: Booking[];
@@ -196,12 +196,12 @@ export const BookingsTab: React.FC<BookingsTabProps> = ({ bookings, venue, event
         </Card>
       </div>
 
-      <EventBookingDialog
+      <ApplicationDetailDialog
         isOpen={isEventDialogOpen}
         onClose={closeEventDialog}
-        event={selectedEvent}
         booking={selectedBooking}
-        viewMode="venue"
+        event={selectedEvent}
+        venue={venue}
         onStatusUpdate={(updatedBooking) => {
           // For now, just refresh the page to update the data
           // In a more sophisticated app, you'd update the state

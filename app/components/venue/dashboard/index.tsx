@@ -5,11 +5,13 @@ import { VenueDashboard } from './VenueDashboard';
 import * as utils from './utils';
 import * as types from './types';
 
+export { VenueDashboard } from './VenueDashboard';
+export { DashboardHeader } from './DashboardHeader';
+export { OverviewTab } from './OverviewTab';
+export { BookingsTab } from './BookingsTab';
+export { MyEventsTab } from './MyEventsTab';
 export {
-  DashboardHeader,
-  OverviewTab,
   StatusBadge,
-  VenueDashboard,
   utils,
   types
 }; 

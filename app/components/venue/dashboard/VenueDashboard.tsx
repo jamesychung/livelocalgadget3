@@ -2,9 +2,11 @@ import React, { useEffect, useState } from "react";
 import { useAuth } from "../../../lib/auth";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../ui/tabs";
 import { Button } from "../../ui/button";
+import { Badge } from "../../ui/badge";
 import { DashboardHeader } from "./DashboardHeader";
 import { OverviewTab } from "./OverviewTab";
 import { BookingsTab } from "./BookingsTab";
+import { MyEventsTab } from "./MyEventsTab";
 import { VenueEventsSummaryDashboard } from "../../shared/VenueEventsSummaryDashboard";
 import { VenueStatsSettings } from "../../shared/VenueStatsSettings";
 import { useVenueEventsStats, createVenueEventStats } from "../../../hooks/useVenueEventsStats";
@@ -121,6 +123,28 @@ export const VenueDashboard: React.FC = () => {
     })
     .slice(0, 5);
 
+  // Calculate active events count (not past, cancelled, or expired)
+  const activeEventsCount = events.filter(event => {
+    // Exclude cancelled events
+    if (event.status === 'cancelled') return false;
+    
+    // Exclude completed/past events
+    if (event.status === 'completed') return false;
+    
+    // If event has a date, check if it's in the future
+    if (event.date) {
+      const eventDate = new Date(event.date);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0); // Reset time to start of day
+      
+      // Exclude past events
+      if (eventDate < today) return false;
+    }
+    
+    // Include all other events (open, confirmed, invited, etc.)
+    return true;
+  }).length;
+
   // Calculate stats using the venue events stats hook
   const venueEventsStats = useVenueEventsStats(events, bookings, pendingBookings);
   const allAvailableStats = createVenueEventStats(venueEventsStats);
@@ -169,11 +193,36 @@ export const VenueDashboard: React.FC = () => {
       </div>
       
       <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-6">
-        <TabsList>
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="events">Events</TabsTrigger>
-          <TabsTrigger value="bookings">Bookings</TabsTrigger>
-          <TabsTrigger value="profile">Profile</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-4 bg-gray-100 p-1 rounded-lg">
+          <TabsTrigger 
+            value="overview" 
+            className="data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm font-medium"
+          >
+            Overview
+          </TabsTrigger>
+          <TabsTrigger 
+            value="events" 
+            className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm font-medium"
+          >
+            My Events
+            {activeEventsCount > 0 && (
+              <Badge variant="secondary" className="bg-blue-100 text-blue-800 border-blue-200">
+                {activeEventsCount}
+              </Badge>
+            )}
+          </TabsTrigger>
+          <TabsTrigger 
+            value="bookings" 
+            className="data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm font-medium"
+          >
+            Bookings
+          </TabsTrigger>
+          <TabsTrigger 
+            value="profile" 
+            className="data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm font-medium"
+          >
+            Profile
+          </TabsTrigger>
         </TabsList>
         
         <TabsContent value="overview" className="mt-6">
@@ -187,8 +236,12 @@ export const VenueDashboard: React.FC = () => {
         </TabsContent>
         
         <TabsContent value="events" className="mt-6">
-          {/* Events tab content will be implemented separately */}
-          <p>Events tab content</p>
+          <MyEventsTab 
+            user={user}
+            venue={venue}
+            events={events}
+            bookings={bookings}
+          />
         </TabsContent>
         
         <TabsContent value="bookings" className="mt-6">

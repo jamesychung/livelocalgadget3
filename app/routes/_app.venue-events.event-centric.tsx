@@ -329,19 +329,13 @@ export default function VenueEventsEventCentricPage() {
                 />
 
                 {/* Event Detail Dialog */}
-                <EventBookingDialog
-                    isOpen={isEventDetailDialogOpen}
-                    onClose={() => setIsEventDetailDialogOpen(false)}
-                    event={selectedEvent}
-                    viewMode="venue"
-                    applicationCount={selectedEvent ? getApplicationCount(selectedEvent.id) : 0}
-                    onReviewApplications={(event) => {
-                        setIsEventDetailDialogOpen(false);
-                        handleViewApplications(event);
-                    }}
-                    onStatusUpdate={() => {
-                        setRefreshTrigger(prev => prev + 1);
-                    }}
+                <ApplicationDetailDialog
+                    open={isEventDetailDialogOpen}
+                    onOpenChange={setIsEventDetailDialogOpen}
+                    selectedEvent={selectedEvent}
+                    getEventApplications={(eventId) => venueBookings.filter(b => b.event?.id === eventId)}
+                    onAcceptApplication={(bookingId) => handleBookApplication(bookingId, selectedEvent?.id || '')}
+                    onRejectApplication={handleRejectApplication}
                 />
             </div>
         </div>

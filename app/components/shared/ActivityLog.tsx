@@ -69,9 +69,11 @@ export function generateBookingActivityItems(booking: any): ActivityItem[] {
   }
 
   // Application submitted
-  if (booking.applied_at) {
+  if (booking.applied_at || booking.status === 'applied') {
+    // Use applied_at if available, otherwise fall back to created_at for applied bookings
+    const timestamp = booking.applied_at ? new Date(booking.applied_at) : new Date(booking.created_at);
     activities.push({
-      timestamp: new Date(booking.applied_at),
+      timestamp,
       action: "Application Submitted",
       actor: "Musician",
       details: booking.musician_pitch ? `Pitch: ${booking.musician_pitch}` : undefined
@@ -142,9 +144,11 @@ export function generateApplicationsActivityItems(applications: any[]): Activity
     const musicianStageName = booking.musician?.stage_name || booking.musician?.name;
     
     // Application submitted
-    if (booking.applied_at) {
+    if (booking.applied_at || booking.status === 'applied') {
+      // Use applied_at if available, otherwise fall back to created_at for applied bookings
+      const timestamp = booking.applied_at ? new Date(booking.applied_at) : new Date(booking.created_at);
       activities.push({
-        timestamp: new Date(booking.applied_at),
+        timestamp,
         action: "Application Submitted",
         actor: "Musician",
         details: musicianStageName ? `${musicianStageName}${booking.musician_pitch ? ` - Pitch: ${booking.musician_pitch}` : ''}` : (booking.musician_pitch ? `Pitch: ${booking.musician_pitch}` : undefined)

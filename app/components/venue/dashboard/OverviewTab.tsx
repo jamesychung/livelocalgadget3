@@ -7,7 +7,7 @@ import { formatDate } from "./utils";
 import { StatusBadge } from "./StatusBadge";
 import { Link } from "react-router-dom";
 import { Calendar, Clock, MapPin, Phone, Mail } from "lucide-react";
-import { EventBookingDialog } from "../../shared/EventBookingDialog";
+import { ApplicationDetailDialog } from "../../shared/ApplicationDetailDialog";
 
 export const OverviewTab: React.FC<OverviewTabProps> = ({ 
   venue, 
@@ -134,16 +134,18 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
         </div>
       </div>
 
-      <EventBookingDialog
-        isOpen={isEventDialogOpen}
-        onClose={closeEventDialog}
-        event={selectedEvent}
-        booking={selectedBooking}
-        viewMode="venue"
-        onStatusUpdate={(updatedBooking) => {
-          // For now, just refresh the page to update the data
-          // In a more sophisticated app, you'd update the state
-          window.location.reload();
+      <ApplicationDetailDialog
+        open={isEventDialogOpen}
+        onOpenChange={setIsEventDialogOpen}
+        selectedEvent={selectedEvent}
+        getEventApplications={(eventId) => selectedBooking ? [selectedBooking] : []}
+        onAcceptApplication={(bookingId) => {
+          // Handle accept - this is for dashboard view so might not need implementation
+          console.log('Accept application:', bookingId);
+        }}
+        onRejectApplication={(bookingId) => {
+          // Handle reject - this is for dashboard view so might not need implementation  
+          console.log('Reject application:', bookingId);
         }}
       />
     </div>

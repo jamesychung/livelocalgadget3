@@ -25,7 +25,7 @@ import { useState } from "react";
 import { Link, useLocation, useOutletContext } from 'react-router-dom';
 import { supabase } from "../../lib/supabase";
 import { NavDrawer } from "../shared/NavDrawer";
-import { Home, User, LogOut, Calendar, Music, Settings, Clock, Star, Users } from "lucide-react";
+import { Home, User, LogOut, Calendar, Music, Settings, Clock, Star, Users, History } from "lucide-react";
 import { Button } from "../ui/button";
 import {
   DropdownMenu,
@@ -109,15 +109,21 @@ const navigationItems: NavItem[] = [
     roles: ["venue_owner"],
   },
   {
+    title: "Settings",
+    path: "/settings",
+    icon: Settings,
+  },
+  {
+    title: "History",
+    path: "/venue-history",
+    icon: History,
+    roles: ["venue_owner"],
+  },
+  {
     title: "Invite Musicians",
     path: "/venue-musicians",
     icon: Users,
     roles: ["venue_owner"],
-  },
-  {
-    title: "Settings",
-    path: "/settings",
-    icon: Settings,
   },
 ];
 

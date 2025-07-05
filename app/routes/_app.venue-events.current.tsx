@@ -10,7 +10,7 @@ import { VenueEventEditDialog } from "../components/shared/VenueEventEditDialog"
 import { VenueProfilePrompt } from "../components/shared/VenueProfilePrompt";
 import { RefreshButton } from "../components/shared/RefreshButton";
 import { WorkflowSelector } from "../components/shared/WorkflowSelector";
-import { EventBookingDialog } from "../components/shared/EventBookingDialog";
+import { ApplicationDetailDialog } from "../components/shared/ApplicationDetailDialog";
 
 export default function VenueEventsCurrentPage() {
     const { user } = useOutletContext<AuthOutletContext>();
@@ -134,21 +134,13 @@ export default function VenueEventsCurrentPage() {
                 />
 
                 {/* Event Detail Dialog */}
-                <EventBookingDialog
-                    isOpen={isEventDetailDialogOpen}
-                    onClose={() => setIsEventDetailDialogOpen(false)}
-                    event={selectedEvent}
-                    viewMode="venue"
-                    applicationCount={selectedEvent ? getApplicationCount(selectedEvent.id) : 0}
-                    onReviewApplications={(event) => {
-                        setIsEventDetailDialogOpen(false);
-                        // Note: This page doesn't have a review applications handler
-                        // Could redirect to applications tab or implement a handler
-                        console.log('Review applications for event:', event);
-                    }}
-                    onStatusUpdate={() => {
-                        setRefreshTrigger(prev => prev + 1);
-                    }}
+                <ApplicationDetailDialog
+                    open={isEventDetailDialogOpen}
+                    onOpenChange={setIsEventDetailDialogOpen}
+                    selectedEvent={selectedEvent}
+                    getEventApplications={(eventId) => allBookings.filter(b => b.event?.id === eventId)}
+                    onAcceptApplication={(bookingId) => handleBookApplication(bookingId, selectedEvent?.id || '')}
+                    onRejectApplication={handleRejectApplication}
                 />
             </div>
         </div>
