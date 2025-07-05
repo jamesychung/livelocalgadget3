@@ -77,17 +77,17 @@ const navigationItems: NavItem[] = [
     icon: Star,
     roles: ["musician"],
   },
-  // Venue Owner Navigation
+  {
+    title: "How to for Musicians",
+    path: "/musician-how-to",
+    icon: Star,
+    roles: ["musician"],
+  },
+  // Venue Owner Navigation - Reorganized Order
   {
     title: "Venue Dashboard",
     path: "/venue-dashboard",
     icon: Music,
-    roles: ["venue_owner"],
-  },
-  {
-    title: "How to for Venues",
-    path: "/venue-how-to",
-    icon: Star,
     roles: ["venue_owner"],
   },
   {
@@ -97,9 +97,16 @@ const navigationItems: NavItem[] = [
     roles: ["venue_owner"],
   },
   {
-    title: "Settings",
-    path: "/settings",
-    icon: Settings,
+    title: "Invite Musicians",
+    path: "/venue-musicians",
+    icon: Users,
+    roles: ["venue_owner"],
+  },
+  {
+    title: "How to for Venues",
+    path: "/venue-how-to",
+    icon: Star,
+    roles: ["venue_owner"],
   },
   {
     title: "History",
@@ -108,10 +115,9 @@ const navigationItems: NavItem[] = [
     roles: ["venue_owner"],
   },
   {
-    title: "Invite Musicians",
-    path: "/venue-musicians",
-    icon: Users,
-    roles: ["venue_owner"],
+    title: "Settings",
+    path: "/settings",
+    icon: Settings,
   },
 ];
 
@@ -272,3 +278,5 @@ export const SecondaryNavigation = ({ icon }: { icon: ReactNode }) => {
 // To extend: add to navigationItems or secondaryNavigationItems. For custom rendering,
 // edit the Navigation or SecondaryNavigation components.
 // --------------------------------------------------------------------------------------
+
+

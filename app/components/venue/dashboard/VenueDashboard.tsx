@@ -7,6 +7,7 @@ import { DashboardHeader } from "./DashboardHeader";
 import { OverviewTab } from "./OverviewTab";
 import { BookingsTab } from "./BookingsTab";
 import { MyEventsTab } from "./MyEventsTab";
+import { ProfileTab } from "./ProfileTab";
 import { VenueEventsSummaryDashboard } from "../../shared/VenueEventsSummaryDashboard";
 import { VenueStatsSettings } from "../../shared/VenueStatsSettings";
 import { useVenueEventsStats, createVenueEventStats } from "../../../hooks/useVenueEventsStats";
@@ -253,8 +254,10 @@ export const VenueDashboard: React.FC = () => {
         </TabsContent>
         
         <TabsContent value="profile" className="mt-6">
-          {/* Profile tab content will be implemented separately */}
-          <p>Profile tab content</p>
+          <ProfileTab 
+            venue={venue}
+            reviews={reviews}
+          />
         </TabsContent>
       </Tabs>
     </div>
