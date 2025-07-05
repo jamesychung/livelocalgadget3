@@ -5,14 +5,13 @@ import { EventMessagingDialog } from "../components/shared/EventMessagingDialog"
 import { useMessaging } from "../hooks/useMessaging";
 import { useAuth } from "../lib/auth";
 import {
+  MessagesPageHeader,
   MessagesPageControls,
-  MessagesCalendarView,
   MessagesListView,
   MessagesLoadingState,
   MessagesErrorState
 } from "../components/messages";
-import { Badge } from "../components/ui/badge";
-import { Mail } from "lucide-react";
+import VenueEventCalendar from "../components/shared/VenueEventCalendar";
 
 export default function MusicianMessagesPage() {
   const { user } = useAuth();
@@ -23,20 +22,30 @@ export default function MusicianMessagesPage() {
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
   const [isEventDialogOpen, setIsEventDialogOpen] = useState(false);
 
-  // Filter events based on status - musicians see events they're involved in
+  // Filter events based on status and messaging capability
   const filteredEvents = events.filter(event => {
+    // For musicians: they should see all events they're involved in (they already have bookings)
+    // No need to check messaging capability since they got here through bookings
+    
+    // Apply status filter
     if (statusFilter === "all") return true;
     if (statusFilter === "with_messages") return (event.unread_count || 0) > 0;
     return event.status === statusFilter || event.booking_status === statusFilter;
   });
 
+
+
   // Calculate total unread messages
   const totalUnreadMessages = getTotalUnreadCount();
 
   const handleEventClick = (event: any) => {
-    // Musicians can message for events they're involved in
-    setSelectedEvent(event);
-    setIsEventDialogOpen(true);
+    // Allow messaging for events with musicians, applications, or past musicians
+    if (event.musician || 
+        (event.applications && event.applications.length > 0) ||
+        (event.allPastMusicians && event.allPastMusicians.length > 0)) {
+      setSelectedEvent(event);
+      setIsEventDialogOpen(true);
+    }
   };
 
   const closeEventDialog = () => {
@@ -57,18 +66,7 @@ export default function MusicianMessagesPage() {
   return (
     <div className="p-6 max-w-7xl mx-auto">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Messages</h1>
-          <p className="text-gray-600">Communicate with venues about your bookings</p>
-        </div>
-        {totalUnreadMessages > 0 && (
-          <Badge variant="destructive" className="flex items-center gap-1">
-            <Mail className="h-4 w-4" />
-            {totalUnreadMessages} unread
-          </Badge>
-        )}
-      </div>
+      <MessagesPageHeader totalUnreadMessages={totalUnreadMessages} userType="musician" />
 
       {/* Controls */}
       <MessagesPageControls
@@ -83,11 +81,22 @@ export default function MusicianMessagesPage() {
         <CardContent className="p-6">
           <Tabs value={viewMode} className="w-full">
             <TabsContent value="calendar" className="mt-0">
-              <MessagesCalendarView
-                currentDate={currentDate}
-                setCurrentDate={setCurrentDate}
-                filteredEvents={filteredEvents}
-                onEventClick={handleEventClick}
+              <VenueEventCalendar
+                events={filteredEvents.map(event => ({
+                  id: event.id,
+                  title: event.title,
+                  date: event.date,
+                  startTime: event.start_time,
+                  endTime: event.end_time,
+                  eventStatus: event.status as 'confirmed' | 'proposed' | 'cancelled' | 'open' | null,
+                  bookings: event.applications || [],
+                  confirmedBookings: event.applications?.filter(app => app.status === 'confirmed').length || 0,
+                  pendingApplications: event.applications?.filter(app => app.status === 'applied').length || 0,
+                  hasConfirmedBooking: !!event.musician
+                }))}
+                onEditEvent={handleEventClick}
+                title="Musician Messages Calendar"
+                description="Your events with messaging capability"
               />
             </TabsContent>
             <TabsContent value="list" className="mt-0">

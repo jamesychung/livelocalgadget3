@@ -7,11 +7,11 @@ import { useAuth } from "../lib/auth";
 import {
   MessagesPageHeader,
   MessagesPageControls,
-  MessagesCalendarView,
   MessagesListView,
   MessagesLoadingState,
   MessagesErrorState
 } from "../components/messages";
+import VenueEventCalendar from "../components/shared/VenueEventCalendar";
 
 export default function MessagesPage() {
   const { user } = useAuth();
@@ -22,8 +22,16 @@ export default function MessagesPage() {
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
   const [isEventDialogOpen, setIsEventDialogOpen] = useState(false);
 
-  // Filter events based on status
+  // Filter events based on status and messaging capability
   const filteredEvents = events.filter(event => {
+    // Only show events with messaging capability (have any musicians attached)
+    // This includes: current applications, confirmed musicians, or ANY past musicians
+    const hasMessagingCapability = event.musician || 
+                                  (event.applications && event.applications.length > 0) ||
+                                  (event.allPastMusicians && event.allPastMusicians.length > 0);
+    if (!hasMessagingCapability) return false;
+    
+    // Then apply status filter
     if (statusFilter === "all") return true;
     if (statusFilter === "with_messages") return (event.unread_count || 0) > 0;
     return event.status === statusFilter;
@@ -33,8 +41,10 @@ export default function MessagesPage() {
   const totalUnreadMessages = getTotalUnreadCount();
 
   const handleEventClick = (event: any) => {
-    // Allow messaging for events with musicians or applications
-    if (event.musician || (event.applications && event.applications.length > 0)) {
+    // Allow messaging for events with musicians, applications, or past musicians
+    if (event.musician || 
+        (event.applications && event.applications.length > 0) ||
+        (event.allPastMusicians && event.allPastMusicians.length > 0)) {
       setSelectedEvent(event);
       setIsEventDialogOpen(true);
     }
@@ -73,11 +83,22 @@ export default function MessagesPage() {
         <CardContent className="p-6">
           <Tabs value={viewMode} className="w-full">
             <TabsContent value="calendar" className="mt-0">
-              <MessagesCalendarView
-                currentDate={currentDate}
-                setCurrentDate={setCurrentDate}
-                filteredEvents={filteredEvents}
-                onEventClick={handleEventClick}
+              <VenueEventCalendar
+                events={filteredEvents.map(event => ({
+                  id: event.id,
+                  title: event.title,
+                  date: event.date,
+                  startTime: event.start_time,
+                  endTime: event.end_time,
+                  eventStatus: event.status as 'confirmed' | 'proposed' | 'cancelled' | 'open' | null,
+                  bookings: event.applications || [],
+                  confirmedBookings: event.applications?.filter(app => app.status === 'confirmed').length || 0,
+                  pendingApplications: event.applications?.filter(app => app.status === 'applied').length || 0,
+                  hasConfirmedBooking: !!event.musician
+                }))}
+                onEditEvent={handleEventClick}
+                title="Messages Calendar"
+                description="Events with messaging capability"
               />
             </TabsContent>
             <TabsContent value="list" className="mt-0">

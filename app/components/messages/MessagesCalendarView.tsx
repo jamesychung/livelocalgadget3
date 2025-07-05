@@ -14,6 +14,7 @@ interface Event {
   unread_count?: number;
   musician?: any;
   applications?: any[];
+  allPastMusicians?: any[];
 }
 
 interface MessagesCalendarViewProps {
@@ -165,7 +166,9 @@ export function MessagesCalendarView({
                 <div className="space-y-1">
                   {dateEvents.slice(0, 3).map((event, eventIndex) => {
                     const eventUnreadCount = event.unread_count || 0;
-                    const isClickable = event.musician || (event.applications && event.applications.length > 0);
+                    const isClickable = event.musician || 
+                                       (event.applications && event.applications.length > 0) ||
+                                       (event.allPastMusicians && event.allPastMusicians.length > 0);
                     
                     return (
                       <div

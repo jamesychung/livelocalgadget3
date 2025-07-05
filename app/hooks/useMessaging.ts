@@ -47,6 +47,12 @@ export interface EventWithMessaging {
     stage_name: string;
     profile_picture?: string;
   };
+  allPastMusicians?: Array<{
+    id: string;
+    stage_name: string;
+    profile_picture?: string;
+    user_id: string;
+  }>;
   applications?: Array<{
     id: string;
     status: string;
@@ -282,15 +288,21 @@ export function useMessaging(user: any) {
             musician: booking.musician
           }));
 
-          // Set musician for confirmed/selected events
+          // Set musician for confirmed/selected events (primary musician)
           const confirmedBooking = eventBookings.find(booking => 
             booking.status === 'confirmed' || booking.status === 'selected'
           );
+
+          // Also track all past musicians for messaging capability
+          const allPastMusicians = eventBookings
+            .filter(booking => booking.musician)
+            .map(booking => booking.musician);
 
           return {
             ...event,
             applications,
             musician: confirmedBooking?.musician || null,
+            allPastMusicians, // Include all past musicians for messaging capability
             messages: eventMessages,
             unread_count: unreadCount,
             status: event.event_status || event.booking_status, // Map to expected field name
@@ -349,13 +361,27 @@ export function useMessaging(user: any) {
         throw error;
       }
 
-      // Refresh messages after sending
-      const { data: { user: authUser } } = await supabase.auth.getUser();
-      if (authUser) {
-        // Trigger a refresh of the events data
-        setVenue((prev: any) => ({ ...prev })); // This will trigger the useEffect
-        setMusician((prev: any) => ({ ...prev })); // This will trigger the useEffect
-      }
+      // Immediately update local state with the new message
+      const newMessage = {
+        ...data,
+        sender_role: senderRole,
+        recipient_role: recipientRole
+      } as MessageData;
+
+      // Update messages array
+      setMessages(prev => [...prev, newMessage]);
+
+      // Update the specific event with the new message
+      setEvents(prev => prev.map(event => {
+        if (event.id === messageData.event_id) {
+          const updatedMessages = [...(event.messages || []), newMessage];
+          return {
+            ...event,
+            messages: updatedMessages
+          };
+        }
+        return event;
+      }));
 
       return data;
     } catch (error) {

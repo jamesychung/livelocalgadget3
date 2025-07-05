@@ -22,6 +22,10 @@ interface Event {
       stage_name: string;
     };
   }>;
+  allPastMusicians?: Array<{
+    id: string;
+    stage_name: string;
+  }>;
   messages?: Array<{
     content: string;
     sent_date_time: string;
@@ -67,7 +71,9 @@ export function MessagesListView({ filteredEvents, statusFilter, onEventClick }:
     <div className="space-y-4">
       {filteredEvents.map((event) => {
         const eventUnreadCount = event.unread_count || 0;
-        const isClickable = event.musician || (event.applications && event.applications.length > 0);
+        const isClickable = event.musician || 
+                           (event.applications && event.applications.length > 0) ||
+                           (event.allPastMusicians && event.allPastMusicians.length > 0);
         const lastMessage = event.messages && event.messages.length > 0 
           ? event.messages[event.messages.length - 1] 
           : null;

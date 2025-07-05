@@ -48,8 +48,7 @@ interface VenueEventCalendarProps {
     onViewBookingDetails?: (eventId: string) => void;
 }
 
-type ViewMode = 'weekly' | 'monthly';
-type EventType = 'all' | 'confirmed' | 'proposed' | 'bookings';
+type EventType = 'all' | 'confirmed' | 'proposed' | 'bookings' | 'open';
 
 export default function VenueEventCalendar({
     events,
@@ -64,9 +63,7 @@ export default function VenueEventCalendar({
     bookings = [],
     onViewBookingDetails
 }: VenueEventCalendarProps) {
-    const [viewMode, setViewMode] = useState<ViewMode>('weekly');
     const [currentMonth, setCurrentMonth] = useState(new Date());
-    const [currentWeek, setCurrentWeek] = useState(new Date());
     const [eventTypeFilter, setEventTypeFilter] = useState<EventType>('all');
     const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
 
@@ -96,32 +93,7 @@ export default function VenueEventCalendar({
 
     // Status badge logic is now handled by EventStatusBadge component
 
-    const getWeekDates = (startDate: Date) => {
-        const dates = [];
-        const startOfWeek = new Date(startDate);
-        // Adjust to start of week (Sunday)
-        const dayOfWeek = startOfWeek.getDay();
-        startOfWeek.setDate(startOfWeek.getDate() - dayOfWeek);
-        
-        for (let i = 0; i < 7; i++) {
-            const date = new Date(startOfWeek);
-            date.setDate(startOfWeek.getDate() + i);
-            dates.push(date);
-        }
-        return dates;
-    };
 
-    const navigateWeek = (direction: 'prev' | 'next') => {
-        setCurrentWeek(prev => {
-            const newWeek = new Date(prev);
-            if (direction === 'prev') {
-                newWeek.setDate(prev.getDate() - 7);
-            } else {
-                newWeek.setDate(prev.getDate() + 7);
-            }
-            return newWeek;
-        });
-    };
 
     const getMonthDates = () => {
         const year = currentMonth.getFullYear();
@@ -171,178 +143,181 @@ export default function VenueEventCalendar({
                date.getFullYear() === currentMonth.getFullYear();
     };
 
-    const renderWeeklyView = () => {
-        const weekDates = getWeekDates(currentWeek);
-        const startDate = weekDates[0];
-        const endDate = weekDates[6];
+
+
+    const renderMonthlyView = () => {
+        const monthDates = getMonthDates();
+        
+        // Helper function to format time
+        const formatTime = (timeString?: string) => {
+            if (!timeString) return '';
+            const [hours, minutes] = timeString.split(':');
+            const hour = parseInt(hours);
+            const ampm = hour >= 12 ? 'PM' : 'AM';
+            const displayHour = hour % 12 || 12;
+            return `${displayHour}:${minutes}${ampm}`;
+        };
+
+        // Helper function to format event display
+        const formatEventDisplay = (event: Event) => {
+            const startTime = formatTime(event.startTime);
+            const endTime = formatTime(event.endTime);
+            const timeRange = startTime && endTime ? `${startTime}-${endTime}` : startTime || endTime || '';
+            const showName = event.title || 'Event';
+            
+            if (timeRange) {
+                return `${timeRange} - ${showName}`;
+            }
+            return showName;
+        };
         
         return (
             <Card>
-                <CardHeader>
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <CardTitle>Weekly Events</CardTitle>
-                            <CardDescription>
-                                Your venue's events for {startDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - {endDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                            </CardDescription>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => navigateWeek('prev')}
-                            >
-                                <ChevronLeft className="h-4 w-4" />
-                            </Button>
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => setCurrentWeek(new Date())}
-                            >
-                                Today
-                            </Button>
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => navigateWeek('next')}
-                            >
-                                <ChevronRight className="h-4 w-4" />
-                            </Button>
-                            {isEditing && onAddEvent && (
-                                <Button asChild>
-                                    <Link to="/create-event">
-                                        <Plus className="mr-2 h-4 w-4" />
-                                        Add Event
-                                    </Link>
-                                </Button>
-                            )}
-                        </div>
-                    </div>
-                </CardHeader>
-                <CardContent>
+                <CardContent className="p-6">
                     <div className="space-y-4">
-                        {weekDates.map((date, index) => {
-                            const dayEvents = getEventsForDate(date);
-                            const isTodayDate = isToday(date);
-                            // Weekly view: always current month for all days in week
-                            return (
-                                <CalendarDayCell
-                                    key={index}
-                                    date={date}
-                                    dayEvents={dayEvents}
-                                    isToday={isTodayDate}
-                                    isCurrentMonth={true}
-                                    onEventClick={onEditEvent}
-                                />
-                            );
-                        })}
+                        {/* Calendar Header */}
+                        <div className="flex items-center justify-between">
+                            <h3 className="text-lg font-semibold">
+                                {currentMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                            </h3>
+                            <div className="flex items-center gap-2">
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => navigateMonth('prev')}
+                                >
+                                    <ChevronLeft className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => setCurrentMonth(new Date())}
+                                >
+                                    Today
+                                </Button>
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => navigateMonth('next')}
+                                >
+                                    <ChevronRight className="h-4 w-4" />
+                                </Button>
+                            </div>
+                        </div>
+
+                        {/* Calendar Grid */}
+                        <div className="border rounded-lg overflow-hidden">
+                            {/* Day headers */}
+                            <div className="grid grid-cols-7 bg-gray-50 border-b">
+                                {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
+                                    <div key={day} className="p-3 text-center text-sm font-medium text-gray-600">
+                                        {day}
+                                    </div>
+                                ))}
+                            </div>
+                            
+                            {/* Calendar days */}
+                            <div className="grid grid-cols-7">
+                                {monthDates.map((date, index) => {
+                                    const dayEvents = getEventsForDate(date);
+                                    const isTodayDate = isToday(date);
+                                    const isCurrentMonthDate = isCurrentMonth(date);
+                                    
+                                    return (
+                                        <div
+                                            key={index}
+                                            className={`min-h-[140px] p-2 border-r border-b ${
+                                                !isCurrentMonthDate 
+                                                    ? 'bg-gray-50 text-gray-400' 
+                                                    : isTodayDate 
+                                                        ? 'bg-blue-50' 
+                                                        : 'bg-white hover:bg-gray-50'
+                                            }`}
+                                        >
+                                            <div className={`text-sm font-medium mb-2 ${
+                                                isTodayDate ? 'text-blue-600' : isCurrentMonthDate ? 'text-gray-900' : 'text-gray-400'
+                                            }`}>
+                                                {date.getDate()}
+                                            </div>
+                                            <div className="space-y-1">
+                                                {dayEvents.slice(0, 3).map((event, eventIndex) => (
+                                                    <div
+                                                        key={eventIndex}
+                                                        onClick={() => onEditEvent && onEditEvent(event)}
+                                                        className={`text-xs p-2 rounded cursor-pointer transition-colors ${
+                                                            event.hasConfirmedBooking 
+                                                                ? 'bg-green-100 text-green-800 hover:bg-green-200 border border-green-200' 
+                                                                : event.eventStatus === 'open'
+                                                                    ? 'bg-blue-100 text-blue-800 hover:bg-blue-200 border border-blue-200'
+                                                                    : 'bg-gray-100 text-gray-800 hover:bg-gray-200 border border-gray-200'
+                                                        }`}
+                                                        title={formatEventDisplay(event)} // Full text on hover
+                                                    >
+                                                        <div className="font-medium leading-tight">
+                                                            {formatEventDisplay(event)}
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                                {dayEvents.length > 3 && (
+                                                    <div className="text-xs text-gray-500 px-2 py-1">
+                                                        +{dayEvents.length - 3} more
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
                     </div>
                 </CardContent>
             </Card>
         );
     };
 
-    const renderMonthlyView = () => (
-        <Card>
-            <CardHeader>
-                <div className="flex items-center justify-between">
-                    <div>
-                        <CardTitle>Monthly Events</CardTitle>
-                        <CardDescription>
-                            Overview of your venue's events for {currentMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
-                        </CardDescription>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => navigateMonth('prev')}
-                        >
-                            <ChevronLeft className="h-4 w-4" />
-                        </Button>
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setCurrentMonth(new Date())}
-                        >
-                            Today
-                        </Button>
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => navigateMonth('next')}
-                        >
-                            <ChevronRight className="h-4 w-4" />
-                        </Button>
-                        <Button asChild>
-                            <Link to="/create-event">
-                                <Plus className="mr-2 h-4 w-4" />
-                                Create Event
-                            </Link>
-                        </Button>
-                    </div>
-                </div>
-            </CardHeader>
-            <CardContent>
-                <div className="grid grid-cols-7 gap-1 mb-2">
-                    {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
-                        <div key={day} className="text-center text-sm font-medium text-muted-foreground p-2">
-                            {day}
-                        </div>
-                    ))}
-                </div>
-                <div className="grid grid-cols-7 gap-1">
-                    {getMonthDates().map((date, index) => {
-                        const dayEvents = getEventsForDate(date);
-                        const isTodayDate = isToday(date);
-                        const isCurrentMonthDate = isCurrentMonth(date);
-                        return (
-                            <CalendarDayCell
-                                key={index}
-                                date={date}
-                                dayEvents={dayEvents}
-                                isToday={isTodayDate}
-                                isCurrentMonth={isCurrentMonthDate}
-                                onEventClick={onEditEvent}
-                            />
-                        );
-                    })}
-                </div>
-            </CardContent>
-        </Card>
-    );
-
     return (
         <div className="space-y-6">
-            {/* Header */}
+            {/* Compact Header with Stats and Controls */}
             <Card>
-                <CardHeader>
-                    <div className="flex items-center justify-between">
+                <CardContent className="p-6">
+                    <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                        {/* Title and Description */}
                         <div>
-                            <CardTitle className="flex items-center gap-2">
-                                <Building className="h-5 w-5" />
-                                {title}
-                            </CardTitle>
-                            <CardDescription>
-                                {description}
-                            </CardDescription>
+                            <h2 className="text-2xl font-bold">{title}</h2>
+                            <p className="text-gray-600">{description}</p>
                         </div>
-                        <div className="flex gap-2">
-                            {isEditing ? (
-                                <>
-                                    <Button 
-                                        variant="outline" 
-                                        onClick={onEditToggle}
-                                    >
-                                        <X className="mr-2 h-4 w-4" />
-                                        Cancel
-                                    </Button>
-                                    <Button>
-                                        <Save className="mr-2 h-4 w-4" />
-                                        Save Changes
-                                    </Button>
-                                </>
-                            ) : (
+                        
+                        {/* Controls */}
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                            {/* Event Type Filter */}
+                            <div className="flex gap-2">
+                                <Button
+                                    variant={eventTypeFilter === 'all' ? 'default' : 'outline'}
+                                    size="sm"
+                                    onClick={() => setEventTypeFilter('all')}
+                                >
+                                    All Events
+                                </Button>
+                                <Button
+                                    variant={eventTypeFilter === 'confirmed' ? 'default' : 'outline'}
+                                    size="sm"
+                                    onClick={() => setEventTypeFilter('confirmed')}
+                                >
+                                    Confirmed
+                                </Button>
+                                <Button
+                                    variant={eventTypeFilter === 'open' ? 'default' : 'outline'}
+                                    size="sm"
+                                    onClick={() => setEventTypeFilter('open')}
+                                >
+                                    Open
+                                </Button>
+                            </div>
+
+
+
+                            {/* Create Event Button - only show if editing is enabled */}
+                            {onAddEvent && (
                                 <Button asChild>
                                     <Link to="/create-event">
                                         <Plus className="mr-2 h-4 w-4" />
@@ -352,150 +327,51 @@ export default function VenueEventCalendar({
                             )}
                         </div>
                     </div>
-                </CardHeader>
-            </Card>
 
-            {/* View Mode Toggle */}
-            <Card>
-                <CardHeader>
-                    <div className="flex items-center justify-between">
-                        <CardTitle>Calendar View</CardTitle>
-                        <div className="flex gap-2">
-                            <Button
-                                variant={viewMode === 'weekly' ? 'default' : 'outline'}
-                                size="sm"
-                                onClick={() => setViewMode('weekly')}
-                            >
-                                Weekly
-                            </Button>
-                            <Button
-                                variant={viewMode === 'monthly' ? 'default' : 'outline'}
-                                size="sm"
-                                onClick={() => setViewMode('monthly')}
-                            >
-                                Monthly
-                            </Button>
+                    {/* Stats Row */}
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                                <CalendarIcon className="h-5 w-5 text-blue-600" />
+                            </div>
+                            <div>
+                                <p className="text-sm text-gray-500">Total Events</p>
+                                <p className="text-xl font-bold">{filteredEvents.length}</p>
+                            </div>
                         </div>
-                    </div>
-                </CardHeader>
-            </Card>
-
-            {/* Event Type Filter */}
-            <Card>
-                <CardHeader>
-                    <CardTitle>Event Filter</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <div className="flex gap-2">
-                        <Button
-                            variant={eventTypeFilter === 'all' ? 'default' : 'outline'}
-                            size="sm"
-                            onClick={() => setEventTypeFilter('all')}
-                        >
-                            All Events
-                        </Button>
-                        <Button
-                            variant={eventTypeFilter === 'confirmed' ? 'default' : 'outline'}
-                            size="sm"
-                            onClick={() => setEventTypeFilter('confirmed')}
-                        >
-                            Confirmed
-                        </Button>
-                        <Button
-                            variant={eventTypeFilter === 'proposed' ? 'default' : 'outline'}
-                            size="sm"
-                            onClick={() => setEventTypeFilter('proposed')}
-                        >
-                            Proposed
-                        </Button>
-                        <Button
-                            variant={eventTypeFilter === 'bookings' ? 'default' : 'outline'}
-                            size="sm"
-                            onClick={() => setEventTypeFilter('bookings')}
-                        >
-                            Bookings
-                        </Button>
-                    </div>
-                </CardContent>
-            </Card>
-
-            {/* Status Legend */}
-            <Card>
-                <CardHeader>
-                    <CardTitle>Status Legend</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
-                        <div className="flex items-center gap-2">
-                            <div className="w-3 h-3 rounded bg-green-100 border border-green-200"></div>
-                            <span>Confirmed</span>
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                                <CheckCircle className="h-5 w-5 text-green-600" />
+                            </div>
+                            <div>
+                                <p className="text-sm text-gray-500">Confirmed</p>
+                                <p className="text-xl font-bold text-green-600">{filteredEvents.filter(e => e.hasConfirmedBooking).length}</p>
+                            </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                            <div className="w-3 h-3 rounded bg-orange-100 border border-orange-200"></div>
-                            <span>Cancel Pending</span>
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                                <Users className="h-5 w-5 text-blue-600" />
+                            </div>
+                            <div>
+                                <p className="text-sm text-gray-500">Open Events</p>
+                                <p className="text-xl font-bold text-blue-600">{filteredEvents.filter(e => e.eventStatus === 'open').length}</p>
+                            </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                            <div className="w-3 h-3 rounded bg-red-100 border border-red-200"></div>
-                            <span>Cancelled</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <div className="w-3 h-3 rounded bg-yellow-100 border border-yellow-200"></div>
-                            <span>Selected</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <div className="w-3 h-3 rounded bg-blue-100 border border-blue-200"></div>
-                            <span>Applied</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <div className="w-3 h-3 rounded bg-purple-100 border border-purple-200"></div>
-                            <span>Completed</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <div className="w-3 h-3 rounded bg-gray-100 border border-gray-200"></div>
-                            <span>Open Event</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <div className="w-3 h-3 rounded bg-indigo-100 border border-indigo-200"></div>
-                            <span>Invited Event</span>
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                                <Music className="h-5 w-5 text-purple-600" />
+                            </div>
+                            <div>
+                                <p className="text-sm text-gray-500">Applications</p>
+                                <p className="text-xl font-bold text-purple-600">{filteredEvents.reduce((sum, e) => sum + (e.pendingApplications || 0), 0)}</p>
+                            </div>
                         </div>
                     </div>
                 </CardContent>
             </Card>
 
             {/* Calendar View */}
-            {viewMode === 'weekly' ? renderWeeklyView() : renderMonthlyView()}
-
-            {/* Event Summary */}
-            <Card>
-                <CardHeader>
-                    <CardTitle>Event Summary</CardTitle>
-                    <CardDescription>
-                        Overview of your venue's events
-                    </CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div>
-                            <h4 className="font-medium mb-2">Total Events</h4>
-                            <div className="text-2xl font-bold text-blue-600">
-                                {events.length}
-                            </div>
-                        </div>
-                        <div>
-                            <h4 className="font-medium mb-2">Confirmed Events</h4>
-                            <div className="text-2xl font-bold text-green-600">
-                                {events.filter(e => e.eventStatus === 'confirmed').length}
-                            </div>
-                        </div>
-                        <div>
-                            <h4 className="font-medium mb-2">Proposed Events</h4>
-                            <div className="text-2xl font-bold text-yellow-600">
-                                {events.filter(e => e.eventStatus === 'proposed').length}
-                            </div>
-                        </div>
-                    </div>
-                </CardContent>
-            </Card>
+            {renderMonthlyView()}
         </div>
     );
 } 

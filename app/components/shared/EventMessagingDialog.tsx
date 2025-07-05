@@ -18,7 +18,7 @@ interface EventMessagingDialogProps {
 
 export function EventMessagingDialog({ open, onOpenChange, event, onClose }: EventMessagingDialogProps) {
   const { user } = useAuth();
-  const { sendMessage, markMessagesAsRead } = useMessaging(user);
+  const { sendMessage, markMessagesAsRead, venue, musician } = useMessaging(user);
   const [newMessage, setNewMessage] = useState("");
   const [messageCategory, setMessageCategory] = useState("general");
   const [selectedRecipient, setSelectedRecipient] = useState("all");
@@ -162,7 +162,7 @@ export function EventMessagingDialog({ open, onOpenChange, event, onClose }: Eve
           <div className="w-2/3 flex flex-col">
             <MessageThread
               messages={eventMessages}
-              currentUserRole="venue"
+              currentUserRole={venue?.id ? "venue" : "musician"}
               recipientName={getSelectedRecipientName()}
               className="flex-1"
             />
