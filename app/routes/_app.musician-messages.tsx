@@ -92,9 +92,11 @@ export default function MusicianMessagesPage() {
                   bookings: event.applications || [],
                   confirmedBookings: event.applications?.filter(app => app.status === 'confirmed').length || 0,
                   pendingApplications: event.applications?.filter(app => app.status === 'applied').length || 0,
-                  hasConfirmedBooking: !!event.musician
+                  hasConfirmedBooking: !!event.musician,
+                  // Preserve original event data for handleEventClick
+                  originalEvent: event
                 }))}
-                onEditEvent={handleEventClick}
+                onEditEvent={(mappedEvent) => handleEventClick((mappedEvent as any).originalEvent || mappedEvent)}
                 title="Musician Messages Calendar"
                 description="Your events with messaging capability"
               />

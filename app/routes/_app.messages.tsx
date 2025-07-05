@@ -40,13 +40,17 @@ export default function MessagesPage() {
   // Calculate total unread messages
   const totalUnreadMessages = getTotalUnreadCount();
 
-  const handleEventClick = (event: any) => {
-    // Allow messaging for events with musicians, applications, or past musicians
-    if (event.musician || 
-        (event.applications && event.applications.length > 0) ||
-        (event.allPastMusicians && event.allPastMusicians.length > 0)) {
-      setSelectedEvent(event);
-      setIsEventDialogOpen(true);
+  const handleEventClick = (calendarEvent: any) => {
+    // Find the original event data from the filtered events using the ID
+    const originalEvent = filteredEvents.find(e => e.id === calendarEvent.id);
+    if (originalEvent) {
+      // Allow messaging for events with musicians, applications, or past musicians
+      if (originalEvent.musician || 
+          (originalEvent.applications && originalEvent.applications.length > 0) ||
+          (originalEvent.allPastMusicians && originalEvent.allPastMusicians.length > 0)) {
+        setSelectedEvent(originalEvent);
+        setIsEventDialogOpen(true);
+      }
     }
   };
 
