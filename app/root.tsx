@@ -36,7 +36,7 @@ import VenueEventsCurrent from "./routes/_app.venue-events.current";
 import VenueEventsEventCentric from "./routes/_app.venue-events.event-centric";
 import VenueEventsWorkflowBased from "./routes/_app.venue-events.workflow-based";
 import CreateEvent from "./routes/_app.create-event";
-import VenueEventDetail from "./routes/_app.venue-event.$eventId";
+
 import VenueHistory from "./routes/_app.venue-history";
 import MusicianHistory from "./routes/_app.musician-history";
 import VenueHowTo from "./routes/_app.venue-how-to";
@@ -97,7 +97,7 @@ export default function App() {
             <Route path="venue-events/event-centric" element={<VenueEventsEventCentric />} />
             <Route path="venue-events/workflow-based" element={<VenueEventsWorkflowBased />} />
             <Route path="create-event" element={<CreateEvent />} />
-            <Route path="venue-event/:eventId" element={<VenueEventDetail />} />
+
             <Route path="venue-history" element={<VenueHistory />} />
             <Route path="venue-how-to" element={<VenueHowTo />} />
             <Route path="venue-profile/edit" element={<VenueProfileEdit />} />

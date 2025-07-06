@@ -21,6 +21,10 @@ export function EventStatusBadge({
         }
         
         const statusColors: Record<string, { className: string; text: string }> = {
+            draft: {
+                className: "bg-gray-100 text-gray-800",
+                text: "Draft"
+            },
             confirmed: {
                 className: "bg-green-100 text-green-800",
                 text: "Confirmed"
@@ -85,6 +89,10 @@ export function getStatusBadge(status: string | null | undefined) {
         }
         
         const statusColors: Record<string, { className: string; text: string }> = {
+            draft: {
+                className: "bg-gray-100 text-gray-800",
+                text: "Draft"
+            },
             confirmed: {
                 className: "bg-green-100 text-green-800",
                 text: "Confirmed"

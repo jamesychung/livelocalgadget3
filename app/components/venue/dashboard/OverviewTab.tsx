@@ -7,7 +7,7 @@ import { formatDate } from "./utils";
 import { StatusBadge } from "./StatusBadge";
 import { Link } from "react-router-dom";
 import { Calendar, Clock, MapPin, Phone, Mail } from "lucide-react";
-import { ApplicationDetailDialog } from "../../shared/ApplicationDetailDialog";
+import { EventDialog } from "../../shared/EventDialog";
 import { RecentMessagesCard } from "../../shared/RecentMessagesCard";
 
 export const OverviewTab: React.FC<OverviewTabProps> = ({ 
@@ -15,7 +15,8 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
   recentEvents, 
   pendingBookings,
   confirmedBookings,
-  pendingCancelBookings 
+  pendingCancelBookings,
+  allBookings = []
 }) => {
   const [isEventDialogOpen, setIsEventDialogOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
@@ -27,10 +28,56 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
     setIsEventDialogOpen(true);
   };
 
+  const handleRecentEventClick = (event: Event) => {
+    setSelectedEvent(event);
+    // Find the first booking for this event to show activity log
+    const eventBookings = allBookings.filter(booking => booking.event?.id === event.id);
+    setSelectedBooking(eventBookings.length > 0 ? eventBookings[0] : null);
+    setIsEventDialogOpen(true);
+  };
+
   const closeEventDialog = () => {
     setIsEventDialogOpen(false);
     setSelectedEvent(null);
     setSelectedBooking(null);
+  };
+
+  // Helper function to derive event status from booking statuses
+  const getEventStatusFromBookings = (event: Event): string => {
+    const eventBookings = allBookings.filter(booking => booking.event?.id === event.id);
+    
+    if (eventBookings.length === 0) {
+      return event.status || 'open'; // No bookings, use original event status
+    }
+
+    const confirmedBookings = eventBookings.filter(booking => booking.status === 'confirmed');
+    const completedBookings = eventBookings.filter(booking => booking.status === 'completed');
+    const cancelledBookings = eventBookings.filter(booking => booking.status === 'cancelled');
+    const selectedBookings = eventBookings.filter(booking => booking.status === 'selected');
+    const appliedBookings = eventBookings.filter(booking => booking.status === 'applied');
+    const cancelRequestedBookings = eventBookings.filter(booking => booking.status === 'pending_cancel');
+    const communicatingBookings = eventBookings.filter(booking => booking.status === 'communicating');
+
+    // Determine event status based on booking states (priority order)
+    if (completedBookings.length > 0) {
+      return 'completed';
+    } else if (cancelledBookings.length > 0 && confirmedBookings.length === 0) {
+      return 'cancelled';
+    } else if (cancelRequestedBookings.length > 0) {
+      return 'cancel_requested';
+    } else if (confirmedBookings.length > 0) {
+      return 'confirmed';
+    } else if (selectedBookings.length > 0) {
+      return 'selected';
+    } else if (communicatingBookings.length > 0) {
+      return 'communicating';
+    } else if (appliedBookings.length > 0) {
+      return 'application_received';
+    } else if (event.status === 'invited') {
+      return 'invited';
+    } else {
+      return 'open';
+    }
   };
 
   return (
@@ -76,7 +123,12 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
             {recentEvents.length > 0 ? (
               <div className="space-y-4">
                 {recentEvents.slice(0, 5).map((event) => (
-                  <EventItem key={event.id} event={event} />
+                  <EventItem 
+                    key={event.id} 
+                    event={event} 
+                    derivedStatus={getEventStatusFromBookings(event)}
+                    onEventClick={handleRecentEventClick} 
+                  />
                 ))}
               </div>
             ) : (
@@ -138,18 +190,28 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
         </div>
       </div>
 
-      <ApplicationDetailDialog
-        open={isEventDialogOpen}
-        onOpenChange={setIsEventDialogOpen}
-        selectedEvent={selectedEvent}
-        getEventApplications={(eventId) => selectedBooking ? [selectedBooking] : []}
-        onAcceptApplication={(bookingId) => {
+      <EventDialog
+        isOpen={isEventDialogOpen}
+        onClose={() => setIsEventDialogOpen(false)}
+        event={selectedEvent}
+        booking={selectedBooking}
+        bookings={selectedEvent ? allBookings.filter(booking => booking.event?.id === selectedEvent.id) : []}
+        currentUser={{ venue: { id: venue.id } }}
+        userRole="venue"
+        onStatusUpdate={(updatedBooking: any) => {
+          // Handle status update - could refresh data or update state
+          console.log('Status updated:', updatedBooking);
+        }}
+        onAcceptApplication={(bookingId: string) => {
           // Handle accept - this is for dashboard view so might not need implementation
           console.log('Accept application:', bookingId);
         }}
-        onRejectApplication={(bookingId) => {
+        onRejectApplication={(bookingId: string) => {
           // Handle reject - this is for dashboard view so might not need implementation  
           console.log('Reject application:', bookingId);
+        }}
+        onMessageOtherParty={(recipientId: string) => {
+          window.open(`/messages?recipient=${recipientId}`, '_blank');
         }}
       />
     </div>
@@ -243,32 +305,39 @@ const ConfirmedBookingItem: React.FC<{
   );
 };
 
-const EventItem: React.FC<{ event: Event }> = ({ event }) => {
-  // Determine the event status to display
-  const getEventDisplayStatus = () => {
-    // If event has a status, use it
-    if (event.status) {
-      return event.status;
-    }
-    
-    // If no explicit status, determine based on context
-    // For now, default to "open" for events without a status
-    return "open";
-  };
-
+const EventItem: React.FC<{ 
+  event: Event; 
+  derivedStatus: string;
+  onEventClick: (event: Event) => void;
+}> = ({ event, derivedStatus, onEventClick }) => {
   return (
-    <div className="flex items-center justify-between border-b pb-2 last:border-0">
-      <div>
+    <div 
+      className="flex items-center justify-between border-b pb-2 last:border-0 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors"
+      onClick={() => onEventClick(event)}
+    >
+      <div className="flex-1">
         <h4 className="font-medium">{event.title}</h4>
         <div className="flex items-center text-sm text-gray-500">
           <span>{formatDate(event.date)}</span>
           <span className="mx-2">•</span>
-          <StatusBadge status={getEventDisplayStatus()} />
+          <StatusBadge status={derivedStatus} />
+        </div>
+        <div className="text-xs text-blue-600 mt-1">
+          Click for event details and activity log
         </div>
       </div>
-      <Link to={`/venue-event/${event.id}`}>
-        <Button variant="ghost" size="sm">View</Button>
-      </Link>
+      <div className="flex items-center">
+        <Button 
+          variant="ghost" 
+          size="sm"
+          onClick={(e) => {
+            e.stopPropagation();
+            onEventClick(event);
+          }}
+        >
+          View
+        </Button>
+      </div>
     </div>
   );
 };

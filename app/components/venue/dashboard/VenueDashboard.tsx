@@ -233,6 +233,7 @@ export const VenueDashboard: React.FC = () => {
             pendingBookings={pendingBookings}
             confirmedBookings={confirmedBookings}
             pendingCancelBookings={pendingCancelBookings}
+            allBookings={bookings}
           />
         </TabsContent>
         

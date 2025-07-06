@@ -8,8 +8,7 @@ import { Calendar, List, Filter, Phone, Mail, MapPin, Clock, User, DollarSign, C
 import { Booking, VenueProfile } from "./types";
 import { formatDate } from "./utils";
 import { Link } from "react-router-dom";
-import { ApplicationDetailDialog } from "../../shared/ApplicationDetailDialog";
-import { BookingDetailDialog } from "../../shared/BookingDetailDialog";
+import { EventDialog } from "../../shared/EventDialog";
 import { format } from "date-fns";
 
 interface BookingsTabProps {
@@ -25,31 +24,18 @@ export const BookingsTab: React.FC<BookingsTabProps> = ({ bookings, venue, event
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [isEventDialogOpen, setIsEventDialogOpen] = useState(false);
-  const [isBookingDialogOpen, setIsBookingDialogOpen] = useState(false);
 
   const handleEventClick = (event: any) => {
     // Find the corresponding booking for this event
     const eventBooking = bookings.find(booking => booking.event?.id === event.id);
-    const confirmedBooking = bookings.find(booking => 
-      booking.event?.id === event.id && booking.status === 'confirmed'
-    );
     
     setSelectedEvent(event);
     setSelectedBooking(eventBooking || null);
-    
-    // If there's any booking (applied, selected, confirmed), show BookingDetailDialog
-    // Only show ApplicationDetailDialog if there are no bookings at all
-    if (eventBooking) {
-      setSelectedBooking(eventBooking);
-      setIsBookingDialogOpen(true);
-    } else {
-      setIsEventDialogOpen(true);
-    }
+    setIsEventDialogOpen(true);
   };
 
   const closeEventDialog = () => {
     setIsEventDialogOpen(false);
-    setIsBookingDialogOpen(false);
     setSelectedEvent(null);
     setSelectedBooking(null);
   };
@@ -536,29 +522,28 @@ export const BookingsTab: React.FC<BookingsTabProps> = ({ bookings, venue, event
         </CardContent>
       </Card>
 
-      <ApplicationDetailDialog
-        open={isEventDialogOpen}
-        onOpenChange={setIsEventDialogOpen}
-        selectedEvent={selectedEvent}
-        getEventApplications={(eventId) => selectedBooking ? [selectedBooking] : []}
-        onAcceptApplication={(bookingId) => {
+      <EventDialog
+        isOpen={isEventDialogOpen}
+        onClose={closeEventDialog}
+        event={selectedEvent}
+        booking={selectedBooking}
+        bookings={selectedEvent ? bookings.filter(booking => booking.event?.id === selectedEvent.id) : []}
+        currentUser={{ venue: { id: venue.id } }}
+        userRole="venue"
+        onStatusUpdate={(updatedBooking: any) => {
+          // Refresh the page to get updated data
+          window.location.reload();
+        }}
+        onAcceptApplication={(bookingId: string) => {
           // Handle accept - this is for dashboard view so might not need implementation
           console.log('Accept application:', bookingId);
         }}
-        onRejectApplication={(bookingId) => {
+        onRejectApplication={(bookingId: string) => {
           // Handle reject - this is for dashboard view so might not need implementation  
           console.log('Reject application:', bookingId);
         }}
-      />
-
-      <BookingDetailDialog
-        isOpen={isBookingDialogOpen}
-        onClose={() => setIsBookingDialogOpen(false)}
-        booking={selectedBooking}
-        currentUser={{ venue: { id: venue.id } }}
-        onStatusUpdate={(updatedBooking) => {
-          // Refresh the page to get updated data
-          window.location.reload();
+        onMessageOtherParty={(recipientId: string) => {
+          window.open(`/messages?recipient=${recipientId}`, '_blank');
         }}
       />
     </div>

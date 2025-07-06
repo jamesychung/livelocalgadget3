@@ -130,6 +130,7 @@ export interface OverviewTabProps {
   pendingBookings: Booking[];
   confirmedBookings: Booking[];
   pendingCancelBookings: Booking[];
+  allBookings?: Booking[];
 }
 
 export interface EventsTabProps {
