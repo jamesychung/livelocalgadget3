@@ -10,6 +10,30 @@ import { StatusDisplay } from "./StatusDisplay";
 import { getStatusColorClasses, getStatusLabel, deriveEventStatusFromBookings } from "../../lib/utils";
 import { Link } from "react-router-dom";
 
+// Helper function to get status border colors for dialog
+const getStatusBorderColor = (status: string): string => {
+  switch (status) {
+    case 'open':
+      return 'border-l-blue-500 border-r-blue-500';
+    case 'confirmed':
+      return 'border-l-green-500 border-r-green-500';
+    case 'invited':
+      return 'border-l-indigo-500 border-r-indigo-500';
+    case 'application_received':
+      return 'border-l-purple-500 border-r-purple-500';
+    case 'selected':
+      return 'border-l-yellow-500 border-r-yellow-500';
+    case 'cancel_requested':
+      return 'border-l-orange-500 border-r-orange-500';
+    case 'cancelled':
+      return 'border-l-red-500 border-r-red-500';
+    case 'completed':
+      return 'border-l-cyan-500 border-r-cyan-500';
+    default:
+      return 'border-l-gray-300 border-r-gray-300';
+  }
+};
+
 interface EventDialogProps {
   isOpen: boolean;
   onClose: () => void;
@@ -84,6 +108,9 @@ export const EventDialog: React.FC<EventDialogProps> = ({
 
   // Calculate the derived event status based on bookings
   const derivedEventStatus = deriveEventStatusFromBookings(dialogEvent, dialogBookings);
+  
+  // Get the status border color for the dialog
+  const statusBorderColor = getStatusBorderColor(derivedEventStatus);
 
   // Format date for display
   const formatDate = (dateString?: string) => {
@@ -372,7 +399,7 @@ export const EventDialog: React.FC<EventDialogProps> = ({
 
   return (
     <Dialog open={dialogOpen} onOpenChange={dialogClose}>
-      <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+      <DialogContent className={`max-w-4xl max-h-[80vh] overflow-y-auto ${statusBorderColor} border-l-4 border-r-4`}>
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Calendar className="h-5 w-5" />

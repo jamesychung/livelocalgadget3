@@ -71,175 +71,221 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
     setSelectedBooking(null);
   };
 
+  // Get events by status with their relevant timestamps
+  const getEventsByStatus = () => {
+    // Applications received (applied bookings)
+    const applicationEvents = allBookings
+      .filter(booking => booking.status === 'applied' && booking.event && booking.applied_at)
+      .map(booking => ({
+        booking,
+        timestamp: new Date(booking.applied_at!),
+        displayText: `Application received from ${booking.musician?.stage_name}`
+      }))
+      .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+
+    // Confirmed events
+    const confirmedEvents = allBookings
+      .filter(booking => booking.status === 'confirmed' && booking.event && booking.confirmed_at)
+      .map(booking => ({
+        booking,
+        timestamp: new Date(booking.confirmed_at!),
+        displayText: `Event confirmed with ${booking.musician?.stage_name}`
+      }))
+      .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+
+    // Cancellation requests
+    const cancellationEvents = allBookings
+      .filter(booking => booking.status === 'pending_cancel' && booking.event && booking.cancel_requested_at)
+      .map(booking => ({
+        booking,
+        timestamp: new Date(booking.cancel_requested_at!),
+        displayText: `Cancellation requested by ${(booking as any).cancelled_by_role === 'musician' ? booking.musician?.stage_name : 'venue'}`
+      }))
+      .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+
+    return { applicationEvents, confirmedEvents, cancellationEvents };
+  };
+
+  const { applicationEvents, confirmedEvents, cancellationEvents } = getEventsByStatus();
+
   return (
     <div className="space-y-6">
-      {/* Confirmed Bookings - Top Priority Section (TEMPORARILY SHOWING PENDING FOR TESTING) */}
-      {(confirmedBookings.length > 0 || pendingBookings.length > 0) && (
-        <Card className="border-green-200 bg-green-50">
+      {/* Explanatory Message */}
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <p className="text-blue-800 text-sm font-medium">
+          Overview tab highlights important events with: Applications Received, Confirmed Events, and Cancellation Requests
+        </p>
+      </div>
+
+      {/* Cancellation Requests - Highest Priority */}
+      {cancellationEvents.length > 0 && (
+        <Card className="border-orange-200 bg-orange-50">
           <CardHeader className="pb-2">
-            <CardTitle className="text-lg font-semibold text-green-800">
+            <CardTitle className="text-lg font-semibold text-orange-800">
               <div className="flex items-center gap-2">
-                <span>🎵 Confirmed Bookings - Don't Miss These! (TESTING)</span>
-                <Badge variant="secondary" className="bg-green-100 text-green-800">
-                  {(confirmedBookings.length > 0 ? confirmedBookings : pendingBookings).length} total
+                <span>⚠️ Cancellation Requests</span>
+                <Badge variant="secondary" className="bg-orange-100 text-orange-800">
+                  {cancellationEvents.length} total
                 </Badge>
               </div>
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {(confirmedBookings.length > 0 ? confirmedBookings : pendingBookings).slice(0, 5).map((booking) => (
-                <ConfirmedBookingItem 
-                  key={booking.id} 
-                  booking={booking} 
-                  onEventClick={() => handleEventClick(booking)}
+              {cancellationEvents.slice(0, 5).map((item, index) => (
+                <ImportantEventItem 
+                  key={`${item.booking.id}-cancel`}
+                  booking={item.booking}
+                  status="cancel_requested"
+                  timestamp={item.timestamp}
+                  displayText={item.displayText}
+                  onEventClick={() => handleEventClick(item.booking)}
                 />
               ))}
             </div>
           </CardContent>
-                </Card>
+        </Card>
       )}
 
-             {/* Applications Received Section */}
-       {getEventsWithPendingApplications().length > 0 && (
-         <Card className="border-purple-200 bg-purple-50">
-           <CardHeader>
-             <CardTitle className="flex items-center gap-2 text-purple-800">
-               <AlertCircle className="h-5 w-5" />
-               Applications Received - Action Required
-               <Badge variant="destructive" className="bg-purple-100 text-purple-800">
-                 {getPendingApplications().length} total
-               </Badge>
-             </CardTitle>
-             <p className="text-sm text-purple-700">
-               These events have musician applications waiting for your review
-             </p>
-           </CardHeader>
-           <CardContent>
-             <div className="space-y-3">
-               {getEventsWithPendingApplications().map((event) => {
-                 const pendingCount = getApplicationCount(event.id);
-                 
-                 return (
-                   <div key={event.id} className="bg-white border border-purple-200 rounded-lg p-4">
-                     <div className="flex items-center justify-between">
-                       <div className="flex items-center gap-3 flex-1">
-                         <div className="flex -space-x-2">
-                           {allBookings
-                             .filter(booking => booking.event?.id === event.id && booking.status === 'applied')
-                             .slice(0, 3)
-                             .map((booking, index) => (
-                               <div 
-                                 key={booking.id} 
-                                 className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center overflow-hidden border-2 border-white"
-                                 style={{ zIndex: 3 - index }}
-                               >
-                                 {booking.musician?.profile_picture ? (
-                                   <img 
-                                     src={booking.musician.profile_picture} 
-                                     alt={booking.musician.stage_name} 
-                                     className="w-full h-full object-cover"
-                                   />
-                                 ) : (
-                                   <span className="text-purple-600 font-semibold text-xs">
-                                     {booking.musician?.stage_name?.charAt(0) || "M"}
-                                   </span>
-                                 )}
-                               </div>
-                             ))
-                           }
-                           {pendingCount > 3 && (
-                             <div className="w-8 h-8 rounded-full bg-purple-200 flex items-center justify-center border-2 border-white">
-                               <span className="text-purple-700 font-semibold text-xs">
-                                 +{pendingCount - 3}
-                               </span>
-                             </div>
-                           )}
-                         </div>
-                         <div className="flex-1">
-                           <h4 className="font-medium text-gray-900">{event.title}</h4>
-                           <div className="flex items-center gap-4 text-sm text-gray-600 mt-1">
-                             <span>{formatDate(event.date)}</span>
-                             <span>{formatTime(event.startTime)} - {formatTime(event.endTime)}</span>
-                           </div>
-                         </div>
-                       </div>
-                       <div className="flex items-center gap-2">
-                         <Badge variant="destructive" className="bg-purple-100 text-purple-800">
-                           {pendingCount} pending
-                         </Badge>
-                         <Button
-                           size="sm"
-                           onClick={() => handleViewApplications(event)}
-                           className="bg-purple-600 hover:bg-purple-700"
-                         >
-                           Review Applications
-                         </Button>
-                       </div>
-                     </div>
-                   </div>
-                 );
-               })}
-             </div>
-           </CardContent>
-         </Card>
-       )}
+      {/* Applications Received */}
+      {applicationEvents.length > 0 && (
+        <Card className="border-purple-200 bg-purple-50">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg font-semibold text-purple-800">
+              <div className="flex items-center gap-2">
+                <span>📝 Applications Received</span>
+                <Badge variant="secondary" className="bg-purple-100 text-purple-800">
+                  {applicationEvents.length} total
+                </Badge>
+              </div>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {applicationEvents.slice(0, 5).map((item, index) => (
+                <ImportantEventItem 
+                  key={`${item.booking.id}-application`}
+                  booking={item.booking}
+                  status="application_received"
+                  timestamp={item.timestamp}
+                  displayText={item.displayText}
+                  onEventClick={() => handleEventClick(item.booking)}
+                />
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
-              <EventDialog
-          isOpen={isEventDialogOpen}
-          onClose={() => setIsEventDialogOpen(false)}
-          event={selectedEvent}
-          booking={selectedBooking}
-          bookings={selectedEvent ? allBookings.filter(booking => booking.event?.id === selectedEvent.id) : []}
-          currentUser={{ venue: { id: venue.id } }}
-          userRole="venue"
-          onStatusUpdate={(updatedBooking: any) => {
-            // Handle status update - could refresh data or update state
-            console.log('Status updated:', updatedBooking);
-          }}
-          onAcceptApplication={(bookingId: string) => {
-            // Handle accept - this is for dashboard view so might not need implementation
-            console.log('Accept application:', bookingId);
-          }}
-          onRejectApplication={(bookingId: string) => {
-            // Handle reject - this is for dashboard view so might not need implementation  
-            console.log('Reject application:', bookingId);
-          }}
-          onMessageOtherParty={(recipientId: string) => {
-            window.open(`/messages?recipient=${recipientId}`, '_blank');
-          }}
-        />
+      {/* Confirmed Events */}
+      {confirmedEvents.length > 0 && (
+        <Card className="border-green-200 bg-green-50">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg font-semibold text-green-800">
+              <div className="flex items-center gap-2">
+                <span>✅ Confirmed Events</span>
+                <Badge variant="secondary" className="bg-green-100 text-green-800">
+                  {confirmedEvents.length} total
+                </Badge>
+              </div>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {confirmedEvents.slice(0, 5).map((item, index) => (
+                <ImportantEventItem 
+                  key={`${item.booking.id}-confirmed`}
+                  booking={item.booking}
+                  status="confirmed"
+                  timestamp={item.timestamp}
+                  displayText={item.displayText}
+                  onEventClick={() => handleEventClick(item.booking)}
+                />
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
-        {/* Applications Dialog */}
-        <EventDialog
-          isOpen={applicationsDialogOpen}
-          onClose={() => setApplicationsDialogOpen(false)}
-          event={selectedEventForApplications}
-          bookings={selectedEventForApplications ? allBookings.filter(b => b.event?.id === selectedEventForApplications.id) : []}
-          onAcceptApplication={(bookingId: string) => handleBookApplication(bookingId, selectedEventForApplications?.id || '')}
-          onRejectApplication={handleRejectApplication}
-          currentUser={{ venue: { id: venue.id } }}
-          userRole="venue"
-          showApplicationsList={true}
-        />
+      {/* No Events Message */}
+      {cancellationEvents.length === 0 && applicationEvents.length === 0 && confirmedEvents.length === 0 && (
+        <Card className="border-gray-200">
+          <CardContent className="p-6 text-center text-gray-500">
+            <p>No important events to display at this time.</p>
+          </CardContent>
+        </Card>
+      )}
+
+      <EventDialog
+        isOpen={isEventDialogOpen}
+        onClose={() => setIsEventDialogOpen(false)}
+        event={selectedEvent}
+        booking={selectedBooking}
+        bookings={selectedEvent ? allBookings.filter(booking => booking.event?.id === selectedEvent.id) : []}
+        currentUser={{ venue: { id: venue.id } }}
+        userRole="venue"
+        onStatusUpdate={(updatedBooking: any) => {
+          // Handle status update - could refresh data or update state
+          console.log('Status updated:', updatedBooking);
+        }}
+        onAcceptApplication={(bookingId: string) => {
+          // Handle accept - this is for dashboard view so might not need implementation
+          console.log('Accept application:', bookingId);
+        }}
+        onRejectApplication={(bookingId: string) => {
+          // Handle reject - this is for dashboard view so might not need implementation  
+          console.log('Reject application:', bookingId);
+        }}
+        onMessageOtherParty={(recipientId: string) => {
+          window.open(`/messages?recipient=${recipientId}`, '_blank');
+        }}
+      />
+
+      {/* Applications Dialog */}
+      <EventDialog
+        isOpen={applicationsDialogOpen}
+        onClose={() => setApplicationsDialogOpen(false)}
+        event={selectedEventForApplications}
+        bookings={selectedEventForApplications ? allBookings.filter(b => b.event?.id === selectedEventForApplications.id) : []}
+        onAcceptApplication={(bookingId: string) => handleBookApplication(bookingId, selectedEventForApplications?.id || '')}
+        onRejectApplication={handleRejectApplication}
+        currentUser={{ venue: { id: venue.id } }}
+        userRole="venue"
+        showApplicationsList={true}
+      />
     </div>
   );
 };
 
-const ConfirmedBookingItem: React.FC<{ 
+const ImportantEventItem: React.FC<{ 
   booking: Booking; 
+  status: 'application_received' | 'confirmed' | 'cancel_requested';
+  timestamp: Date;
+  displayText: string;
   onEventClick: () => void;
-}> = ({ booking, onEventClick }) => {
+}> = ({ booking, status, timestamp, displayText, onEventClick }) => {
+  const formatTimestamp = (date: Date) => {
+    return date.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
+    });
+  };
+
   return (
     <BookingCard
       booking={booking}
       onEventClick={onEventClick}
       viewMode="venue"
-      variant="confirmed"
+      variant={status === 'confirmed' ? 'confirmed' : status === 'cancel_requested' ? 'cancelled' : 'application'}
       showStatusBadge={true}
       showActions={false}
       showPitch={false}
-      clickText="Click for event details and activity log"
+      clickText={`${displayText} • ${formatTimestamp(timestamp)}`}
+      status={status}
     />
   );
 };

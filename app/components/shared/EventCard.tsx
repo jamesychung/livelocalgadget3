@@ -3,6 +3,7 @@ import { Card, CardContent } from "../ui/card";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { Calendar, Clock, DollarSign, Edit, Users } from "lucide-react";
+import { StatusDisplay } from "./StatusDisplay";
 
 interface EventCardProps {
   event: any;
@@ -20,46 +21,27 @@ interface EventCardProps {
 const getStatusBorderColor = (status: string): string => {
   switch (status) {
     case 'open':
+      return 'border-l-blue-500 border-r-blue-500';
     case 'confirmed':
-      return 'border-l-green-500';
+      return 'border-l-green-500 border-r-green-500';
     case 'invited':
-      return 'border-l-purple-500';
+      return 'border-l-indigo-500 border-r-indigo-500';
     case 'application_received':
-      return 'border-l-blue-500';
+      return 'border-l-purple-500 border-r-purple-500';
     case 'selected':
+      return 'border-l-yellow-500 border-r-yellow-500';
     case 'cancel_requested':
-      return 'border-l-orange-500';
+      return 'border-l-orange-500 border-r-orange-500';
     case 'cancelled':
-      return 'border-l-red-500';
+      return 'border-l-red-500 border-r-red-500';
     case 'completed':
-      return 'border-l-blue-600';
+      return 'border-l-cyan-500 border-r-cyan-500';
     default:
-      return 'border-l-gray-300';
+      return 'border-l-gray-300 border-r-gray-300';
   }
 };
 
-const getStatusBadge = (status: string) => {
-  switch (status) {
-    case 'open':
-      return <Badge variant="default" className="bg-green-100 text-green-800">🎵 Open</Badge>;
-    case 'invited':
-      return <Badge variant="default" className="bg-purple-100 text-purple-800">📧 Invited</Badge>;
-    case 'application_received':
-      return <Badge variant="default" className="bg-blue-100 text-blue-800">📝 Applications</Badge>;
-    case 'selected':
-      return <Badge variant="default" className="bg-orange-100 text-orange-800">⭐ Selected</Badge>;
-    case 'confirmed':
-      return <Badge variant="default" className="bg-green-100 text-green-800">✅ Confirmed</Badge>;
-    case 'cancel_requested':
-      return <Badge variant="default" className="bg-orange-100 text-orange-800">⚠️ Cancel Requested</Badge>;
-    case 'cancelled':
-      return <Badge variant="default" className="bg-red-100 text-red-800">❌ Cancelled</Badge>;
-    case 'completed':
-      return <Badge variant="default" className="bg-blue-100 text-blue-800">🎉 Completed</Badge>;
-    default:
-      return <Badge variant="secondary">{status}</Badge>;
-  }
-};
+
 
 const formatDate = (dateString: string) => {
   const date = new Date(dateString);
@@ -95,7 +77,7 @@ export const EventCard: React.FC<EventCardProps> = ({
   const borderColor = getStatusBorderColor(event.eventStatus);
 
   return (
-    <Card className={`${borderColor} border-l-4 hover:shadow-md transition-shadow ${onEventClick ? 'cursor-pointer' : ''} ${className}`}>
+    <Card className={`${borderColor} border-l-4 border-r-4 hover:shadow-md transition-shadow ${onEventClick ? 'cursor-pointer' : ''} ${className}`}>
       <CardContent className="pt-6" onClick={onEventClick}>
         <div className="flex items-start justify-between">
           <div className="flex-1">
@@ -113,7 +95,14 @@ export const EventCard: React.FC<EventCardProps> = ({
                     : 'No Applications'}
                 </div>
               </div>
-              {showStatusBadge && getStatusBadge(event.eventStatus)}
+              {showStatusBadge && (
+                <StatusDisplay 
+                  status={event.eventStatus} 
+                  variant="badge" 
+                  showIcon={true} 
+                  showLabel={true} 
+                />
+              )}
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
