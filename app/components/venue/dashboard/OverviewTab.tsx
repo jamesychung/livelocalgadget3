@@ -14,6 +14,7 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
   venue, 
   recentEvents, 
   pendingBookings,
+  selectedBookings,
   confirmedBookings,
   pendingCancelBookings,
   allBookings = []
@@ -143,7 +144,7 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
         </Card>
 
         <div className="space-y-6">
-          <Card>
+                    <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-lg font-semibold flex justify-between items-center">
                 <span>Pending Applications</span>
@@ -156,7 +157,11 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
               {pendingBookings.length > 0 ? (
                 <div className="space-y-4">
                   {pendingBookings.slice(0, 3).map((booking) => (
-                    <BookingItem key={booking.id} booking={booking} />
+                    <BookingItem 
+                      key={booking.id} 
+                      booking={booking} 
+                      onEventClick={() => handleEventClick(booking)}
+                    />
                   ))}
                 </div>
               ) : (
@@ -164,6 +169,30 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
               )}
             </CardContent>
           </Card>
+
+          {selectedBookings.length > 0 && (
+            <Card className="border-orange-200">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-lg font-semibold flex justify-between items-center">
+                  <span>Awaiting Musician Confirmation</span>
+                  <Link to="/venue-musicians">
+                    <Button variant="ghost" size="sm">View All</Button>
+                  </Link>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {selectedBookings.slice(0, 3).map((booking) => (
+                    <BookingItem 
+                      key={booking.id} 
+                      booking={booking} 
+                      onEventClick={() => handleEventClick(booking)}
+                    />
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Recent Messages Card */}
           <RecentMessagesCard />
@@ -181,7 +210,11 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
               <CardContent>
                 <div className="space-y-4">
                   {pendingCancelBookings.slice(0, 3).map((booking) => (
-                    <BookingItem key={booking.id} booking={booking} />
+                    <BookingItem 
+                      key={booking.id} 
+                      booking={booking} 
+                      onEventClick={() => handleEventClick(booking)}
+                    />
                   ))}
                 </div>
               </CardContent>
@@ -342,9 +375,15 @@ const EventItem: React.FC<{
   );
 };
 
-const BookingItem: React.FC<{ booking: Booking }> = ({ booking }) => {
+const BookingItem: React.FC<{ 
+  booking: Booking; 
+  onEventClick: () => void;
+}> = ({ booking, onEventClick }) => {
   return (
-    <div className="flex items-center justify-between border-b pb-2 last:border-0">
+    <div 
+      className="flex items-center justify-between border-b pb-2 last:border-0 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors"
+      onClick={onEventClick}
+    >
       <div className="flex items-center">
         <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden mr-3">
           {booking.musician?.profile_picture ? (
@@ -366,11 +405,23 @@ const BookingItem: React.FC<{ booking: Booking }> = ({ booking }) => {
             <span className="mx-1">•</span>
             <StatusBadge status={booking.status} />
           </div>
+          <div className="text-xs text-blue-600 mt-1">
+            Click for event details and activity log
+          </div>
         </div>
       </div>
-      <Link to={`/venue-musicians?booking=${booking.id}`}>
-        <Button variant="ghost" size="sm">View</Button>
-      </Link>
+      <div className="flex items-center">
+        <Button 
+          variant="ghost" 
+          size="sm"
+          onClick={(e) => {
+            e.stopPropagation();
+            onEventClick();
+          }}
+        >
+          View
+        </Button>
+      </div>
     </div>
   );
 }; 

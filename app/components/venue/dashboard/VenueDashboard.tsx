@@ -100,9 +100,14 @@ export const VenueDashboard: React.FC = () => {
     loadDashboardData();
   }, [user]);
 
-  // Get pending bookings
+  // Get pending bookings - only applications that haven't been acted upon yet
   const pendingBookings = bookings.filter(booking => 
-    booking.status === 'applied' || booking.status === 'selected'
+    booking.status === 'applied'
+  );
+
+  // Get selected bookings - venue has selected musician, waiting for confirmation
+  const selectedBookings = bookings.filter(booking => 
+    booking.status === 'selected'
   );
 
   // Get confirmed bookings for the overview tab
@@ -231,6 +236,7 @@ export const VenueDashboard: React.FC = () => {
             venue={venue}
             recentEvents={recentEvents}
             pendingBookings={pendingBookings}
+            selectedBookings={selectedBookings}
             confirmedBookings={confirmedBookings}
             pendingCancelBookings={pendingCancelBookings}
             allBookings={bookings}
