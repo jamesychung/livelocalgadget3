@@ -2,16 +2,13 @@ import React, { useState, useMemo } from "react";
 import { Button } from "../ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Badge } from "../ui/badge";
-import { Input } from "../ui/input";
-import { Label } from "../ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "../ui/command";
-import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
-import { Calendar, Users, Eye, ArrowLeft, Filter, X, CalendarIcon, Check, ChevronsUpDown } from "lucide-react";
+import { Calendar, Users, Eye, ArrowLeft } from "lucide-react";
 import { Link } from "react-router-dom";
 import { EventStatusBadge } from "./EventStatusBadge";
 import { ApplicationDetailDialog } from "./ApplicationDetailDialog";
 import { CANCELLATION_REASON_LABELS } from "../../lib/utils";
+import { FilterPanel, FilterState } from "./FilterPanel";
+import { useFilters, filterFunctions } from "../../hooks/useFilters";
 
 interface EventHistoryPageProps {
   // Data props
@@ -58,18 +55,16 @@ export function EventHistoryPage({
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
   const [isEventDetailDialogOpen, setIsEventDetailDialogOpen] = useState(false);
 
-  // Filter states
-  const [showFilters, setShowFilters] = useState(false);
-  const [filters, setFilters] = useState({
+  // Filter state
+  const [filters, setFilters] = useState<FilterState>({
     dateFrom: '',
     dateTo: '',
     status: 'all',
-    musician: '',
-    venue: '',
+    search: '',
+    musician: 'all',
+    venue: 'all',
     cancellationReason: 'all'
   });
-  const [musicianPopoverOpen, setMusicianPopoverOpen] = useState(false);
-  const [venuePopoverOpen, setVenuePopoverOpen] = useState(false);
 
   // Override handleEventClick to use our new state
   const handleEventClick = (event: any) => {
@@ -138,72 +133,49 @@ export function EventHistoryPage({
     return Array.from(venues).sort();
   }, [allEvents]);
 
-  // Apply filters to past events
-  const filteredEvents = useMemo(() => {
-    return pastEvents.filter(event => {
-      // Date range filter
-      if (filters.dateFrom) {
-        const eventDate = new Date(event.date);
-        const fromDate = new Date(filters.dateFrom);
-        if (eventDate < fromDate) return false;
-      }
-      
-      if (filters.dateTo) {
-        const eventDate = new Date(event.date);
-        const toDate = new Date(filters.dateTo);
-        if (eventDate > toDate) return false;
-      }
+  // Create filter function for events
+  const eventFilterFunction = (event: any, filters: FilterState): boolean => {
+    // Date range filter
+    if (!filterFunctions.dateRange(event.date, filters)) return false;
 
-      // Status filter
-      if (filters.status !== 'all' && event.eventStatus !== filters.status) {
-        return false;
-      }
+    // Status filter
+    if (!filterFunctions.status(event.eventStatus, filters)) return false;
 
-      // Musician filter
-      if (filters.musician) {
-        const hasMatchingMusician = event.bookings.some((booking: any) => 
-          booking.musician?.stage_name === filters.musician
-        );
-        if (!hasMatchingMusician) return false;
-      }
+    // Search filter (searches title, venue name, description)
+    const searchFields = [
+      event.title,
+      event.venue?.name,
+      event.description
+    ];
+    if (!filterFunctions.search(searchFields, filters)) return false;
 
-      // Venue filter
-      if (filters.venue) {
-        const eventVenueName = event.venue?.name || '';
-        if (eventVenueName !== filters.venue) {
-          return false;
-        }
-      }
+    // Musician filter
+    if (!filterFunctions.dropdown(
+      event.bookings.find((booking: any) => booking.musician?.stage_name)?.musician?.stage_name,
+      'musician',
+      filters
+    )) return false;
 
-      // Cancellation reason filter
-      if (filters.cancellationReason !== 'all') {
-        const hasCancelledBooking = event.bookings.some((booking: any) => 
-          booking.status === 'cancelled' && booking.cancellation_reason === filters.cancellationReason
-        );
-        if (!hasCancelledBooking) return false;
-      }
+    // Venue filter
+    if (!filterFunctions.dropdown(event.venue?.name, 'venue', filters)) return false;
 
-      return true;
-    });
-  }, [pastEvents, filters]);
+    // Cancellation reason filter
+    if (filters.cancellationReason !== 'all') {
+      const hasCancelledBooking = event.bookings.some((booking: any) => 
+        booking.status === 'cancelled' && booking.cancellation_reason === filters.cancellationReason
+      );
+      if (!hasCancelledBooking) return false;
+    }
 
-  // Clear all filters
-  const clearFilters = () => {
-    setFilters({
-      dateFrom: '',
-      dateTo: '',
-      status: 'all',
-      musician: '',
-      venue: '',
-      cancellationReason: 'all'
-    });
-    setMusicianPopoverOpen(false);
-    setVenuePopoverOpen(false);
+    return true;
   };
 
-  // Check if any filters are active
-  const hasActiveFilters = filters.dateFrom || filters.dateTo || filters.status !== 'all' || 
-    filters.musician || filters.venue || filters.cancellationReason !== 'all';
+  // Use the filter hook
+  const { filteredData: filteredEvents } = useFilters({
+    data: pastEvents,
+    filters,
+    filterFunction: eventFilterFunction
+  });
 
   const handleViewApplications = (event: any) => {
     setSelectedEventForApplications(event);
@@ -261,249 +233,58 @@ export function EventHistoryPage({
       </div>
 
       {/* Filter Section */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center gap-2">
-              <Filter className="h-5 w-5" />
-              Filters
-            </CardTitle>
-            <div className="flex items-center gap-2">
-              {hasActiveFilters && (
-                <Button variant="outline" size="sm" onClick={clearFilters}>
-                  <X className="h-4 w-4 mr-2" />
-                  Clear Filters
-                </Button>
-              )}
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={() => setShowFilters(!showFilters)}
-              >
-                {showFilters ? 'Hide Filters' : 'Show Filters'}
-              </Button>
-            </div>
-          </div>
-        </CardHeader>
-        {showFilters && (
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {/* Date Range */}
-              <div className="space-y-2">
-                <Label>Date From</Label>
-                <div className="relative">
-                  <Input
-                    type="date"
-                    value={filters.dateFrom}
-                    onChange={(e) => setFilters(prev => ({ ...prev, dateFrom: e.target.value }))}
-                    className="pl-10"
-                  />
-                  <CalendarIcon className="h-4 w-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                </div>
-              </div>
-              
-              <div className="space-y-2">
-                <Label>Date To</Label>
-                <div className="relative">
-                  <Input
-                    type="date"
-                    value={filters.dateTo}
-                    onChange={(e) => setFilters(prev => ({ ...prev, dateTo: e.target.value }))}
-                    className="pl-10"
-                  />
-                  <CalendarIcon className="h-4 w-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                </div>
-              </div>
-
-              {/* Status Filter */}
-              <div className="space-y-2">
-                <Label>Status</Label>
-                <Select value={filters.status} onValueChange={(value) => setFilters(prev => ({ ...prev, status: value }))}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="All Statuses" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Statuses</SelectItem>
-                    <SelectItem value="completed">Completed</SelectItem>
-                    <SelectItem value="cancelled">Cancelled</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Musician Filter */}
-              <div className="space-y-2">
-                <Label>Musician</Label>
-                <Popover open={musicianPopoverOpen} onOpenChange={setMusicianPopoverOpen}>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      role="combobox"
-                      aria-expanded={musicianPopoverOpen}
-                      className="w-full justify-between"
-                    >
-                      {filters.musician || "Select musician..."}
-                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-full p-0">
-                    <Command>
-                      <CommandInput placeholder="Search musicians..." />
-                      <CommandList>
-                        <CommandEmpty>No musician found.</CommandEmpty>
-                        <CommandGroup>
-                          <CommandItem
-                            value=""
-                            onSelect={() => {
-                              setFilters(prev => ({ ...prev, musician: '' }));
-                              setMusicianPopoverOpen(false);
-                            }}
-                          >
-                            <Check
-                              className={`mr-2 h-4 w-4 ${filters.musician === '' ? "opacity-100" : "opacity-0"}`}
-                            />
-                            All Musicians
-                          </CommandItem>
-                          {uniqueMusicians.map((musician) => (
-                            <CommandItem
-                              key={musician}
-                              value={musician}
-                              onSelect={() => {
-                                setFilters(prev => ({ ...prev, musician: musician }));
-                                setMusicianPopoverOpen(false);
-                              }}
-                            >
-                              <Check
-                                className={`mr-2 h-4 w-4 ${filters.musician === musician ? "opacity-100" : "opacity-0"}`}
-                              />
-                              {musician}
-                            </CommandItem>
-                          ))}
-                        </CommandGroup>
-                      </CommandList>
-                    </Command>
-                  </PopoverContent>
-                </Popover>
-              </div>
-
-              {/* Venue Filter */}
-              <div className="space-y-2">
-                <Label>Venue</Label>
-                <Popover open={venuePopoverOpen} onOpenChange={setVenuePopoverOpen}>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      role="combobox"
-                      aria-expanded={venuePopoverOpen}
-                      className="w-full justify-between"
-                    >
-                      {filters.venue || "Select venue..."}
-                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-full p-0">
-                    <Command>
-                      <CommandInput placeholder="Search venues..." />
-                      <CommandList>
-                        <CommandEmpty>No venue found.</CommandEmpty>
-                        <CommandGroup>
-                          <CommandItem
-                            value=""
-                            onSelect={() => {
-                              setFilters(prev => ({ ...prev, venue: '' }));
-                              setVenuePopoverOpen(false);
-                            }}
-                          >
-                            <Check
-                              className={`mr-2 h-4 w-4 ${filters.venue === '' ? "opacity-100" : "opacity-0"}`}
-                            />
-                            All Venues
-                          </CommandItem>
-                          {uniqueVenues.map((venue) => (
-                            <CommandItem
-                              key={venue}
-                              value={venue}
-                              onSelect={() => {
-                                setFilters(prev => ({ ...prev, venue: venue }));
-                                setVenuePopoverOpen(false);
-                              }}
-                            >
-                              <Check
-                                className={`mr-2 h-4 w-4 ${filters.venue === venue ? "opacity-100" : "opacity-0"}`}
-                              />
-                              {venue}
-                            </CommandItem>
-                          ))}
-                        </CommandGroup>
-                      </CommandList>
-                    </Command>
-                  </PopoverContent>
-                </Popover>
-              </div>
-
-              {/* Cancellation Reason Filter */}
-              <div className="space-y-2">
-                <Label>Cancellation Reason</Label>
-                <Select value={filters.cancellationReason} onValueChange={(value) => setFilters(prev => ({ ...prev, cancellationReason: value }))}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="All Reasons" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Reasons</SelectItem>
-                    {Object.entries(CANCELLATION_REASON_LABELS).map(([key, label]) => (
-                      <SelectItem key={key} value={key}>{label}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            {/* Filter Summary */}
-            {hasActiveFilters && (
-              <div className="pt-4 border-t">
-                <div className="flex flex-wrap gap-2">
-                  {filters.dateFrom && (
-                    <Badge variant="secondary">
-                      From: {formatDate(filters.dateFrom)}
-                    </Badge>
-                  )}
-                  {filters.dateTo && (
-                    <Badge variant="secondary">
-                      To: {formatDate(filters.dateTo)}
-                    </Badge>
-                  )}
-                  {filters.status !== 'all' && (
-                    <Badge variant="secondary">
-                      Status: {filters.status}
-                    </Badge>
-                  )}
-                  {filters.musician && (
-                    <Badge variant="secondary">
-                      Musician: {filters.musician}
-                    </Badge>
-                  )}
-                  {filters.venue && (
-                    <Badge variant="secondary">
-                      Venue: {filters.venue}
-                    </Badge>
-                  )}
-                  {filters.cancellationReason !== 'all' && (
-                    <Badge variant="secondary">
-                      Reason: {CANCELLATION_REASON_LABELS[filters.cancellationReason as keyof typeof CANCELLATION_REASON_LABELS]}
-                    </Badge>
-                  )}
-                </div>
-              </div>
-            )}
-          </CardContent>
-        )}
-      </Card>
+      <FilterPanel
+        config={{
+          search: {
+            enabled: true,
+            placeholder: "Search events, venues, or descriptions..."
+          },
+          dateRange: {
+            enabled: true,
+            fromLabel: "Date From",
+            toLabel: "Date To"
+          },
+          status: {
+            enabled: true,
+            options: [
+              { value: 'all', label: 'All Statuses' },
+              { value: 'completed', label: 'Completed' },
+              { value: 'cancelled', label: 'Cancelled' }
+            ]
+          },
+          dropdowns: [
+            {
+              key: 'musician',
+              label: 'Musician',
+              options: uniqueMusicians,
+              searchable: true,
+              placeholder: "Select musician..."
+            },
+            {
+              key: 'venue',
+              label: 'Venue',
+              options: uniqueVenues,
+              searchable: true,
+              placeholder: "Select venue..."
+            },
+            {
+              key: 'cancellationReason',
+              label: 'Cancellation Reason',
+              options: Object.entries(CANCELLATION_REASON_LABELS).map(([key, label]) => key),
+              searchable: false,
+              placeholder: "All Reasons"
+            }
+          ]
+        }}
+        onFilterChange={setFilters}
+      />
 
       {/* Event History */}
       <Card>
         <CardHeader>
           <CardTitle>Past Events</CardTitle>
           <p className="text-sm text-muted-foreground">
-            {hasActiveFilters ? `Showing ${filteredEvents.length} filtered events` : 'Completed and cancelled events'}
+            Completed and cancelled events ({filteredEvents.length})
           </p>
         </CardHeader>
         <CardContent>
@@ -617,28 +398,18 @@ export function EventHistoryPage({
             <div className="text-center py-12">
               <Calendar className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
               <h3 className="text-xl font-medium mb-2">
-                {hasActiveFilters ? 'No Events Match Filters' : emptyStateTitle}
+                {emptyStateTitle}
               </h3>
               <p className="text-muted-foreground mb-6">
-                {hasActiveFilters 
-                  ? 'Try adjusting your filters to see more results.'
-                  : emptyStateDescription
-                }
+                {emptyStateDescription}
               </p>
-              {hasActiveFilters ? (
-                <Button onClick={clearFilters}>
-                  <X className="mr-2 h-4 w-4" />
-                  Clear Filters
+              {createEventLink && createEventText && (
+                <Button asChild>
+                  <Link to={createEventLink}>
+                    <Calendar className="mr-2 h-4 w-4" />
+                    {createEventText}
+                  </Link>
                 </Button>
-              ) : (
-                createEventLink && createEventText && (
-                  <Button asChild>
-                    <Link to={createEventLink}>
-                      <Calendar className="mr-2 h-4 w-4" />
-                      {createEventText}
-                    </Link>
-                  </Button>
-                )
               )}
             </div>
           )}
