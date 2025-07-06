@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { EventStatusBadge } from "./EventStatusBadge";
+
 import { Badge } from "../ui/badge";
 import { CheckCircle, Users, Clock, AlertTriangle, XCircle, Star } from "lucide-react";
 

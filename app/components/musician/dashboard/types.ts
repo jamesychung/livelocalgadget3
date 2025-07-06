@@ -102,9 +102,4 @@ export interface ProfileTabProps {
   musician: Musician;
 }
 
-export interface BookingCardProps {
-  booking: Booking;
-  user: User;
-  handleBookingClick: (booking: Booking) => void;
-  handleBookingStatusUpdate: (updatedBooking: Booking) => void;
-} 
+ 

@@ -1,6 +1,8 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 
+import { Calendar, Mail, Users, CheckCircle, AlertCircle, XCircle } from "lucide-react";
+
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
@@ -117,4 +119,197 @@ export const getBookingStatusDisplay = (status: BookingStatus, booking?: any) =>
   }
 
   return baseInfo;
+};
+
+/**
+ * Derive event status from booking states
+ * Based on venue events tab logic - priority order determines final status
+ */
+export const deriveEventStatusFromBookings = (
+  event: any, 
+  bookings: any[]
+): string => {
+  const eventBookings = bookings.filter(booking => booking.event?.id === event.id);
+  
+  const completedBookings = eventBookings.filter(booking => booking.status === 'completed');
+  const cancelledBookings = eventBookings.filter(booking => booking.status === 'cancelled');
+  const cancelRequestedBookings = eventBookings.filter(booking => booking.status === 'pending_cancel');
+  const confirmedBookings = eventBookings.filter(booking => booking.status === 'confirmed');
+  const selectedBookings = eventBookings.filter(booking => booking.status === 'selected');
+  const appliedBookings = eventBookings.filter(booking => booking.status === 'applied');
+  
+  // Determine event status based on booking states (priority order)
+  let eventStatus = event.eventStatus || 'open';
+  if (completedBookings.length > 0) {
+    eventStatus = 'completed';
+  } else if (cancelledBookings.length > 0 && confirmedBookings.length === 0) {
+    eventStatus = 'cancelled';
+  } else if (cancelRequestedBookings.length > 0) {
+    eventStatus = 'cancel_requested';
+  } else if (confirmedBookings.length > 0) {
+    eventStatus = 'confirmed';
+  } else if (selectedBookings.length > 0) {
+    eventStatus = 'selected';
+  } else if (appliedBookings.length > 0) {
+    eventStatus = 'application_received';
+  } else if (event.eventStatus === 'invited') {
+    eventStatus = 'invited';
+  }
+  
+  return eventStatus;
+};
+
+// Unified status configuration - single source of truth for all status displays
+export const STATUS_CONFIG: Record<string, {
+  label: string;
+  icon: any; // Lucide icon component
+  colors: {
+    background: string;
+    badge: string;
+    calendar: string;
+    legend: string; // For legend icon backgrounds
+    iconColor: string; // For legend icon colors
+  };
+}> = {
+  'completed': {
+    label: 'Completed',
+    icon: CheckCircle,
+    colors: {
+      background: 'bg-cyan-100 text-cyan-800',
+      badge: 'bg-cyan-100 text-cyan-800 hover:bg-cyan-200',
+      calendar: 'bg-cyan-100 text-cyan-800 hover:bg-cyan-200 border border-cyan-200',
+      legend: 'bg-cyan-100',
+      iconColor: 'text-cyan-600'
+    }
+  },
+  'cancelled': {
+    label: 'Cancelled',
+    icon: XCircle,
+    colors: {
+      background: 'bg-red-100 text-red-800',
+      badge: 'bg-red-100 text-red-800 hover:bg-red-200',
+      calendar: 'bg-red-100 text-red-800 hover:bg-red-200 border border-red-200',
+      legend: 'bg-red-100',
+      iconColor: 'text-red-600'
+    }
+  },
+  'cancel_requested': {
+    label: 'Cancel Requested',
+    icon: AlertCircle,
+    colors: {
+      background: 'bg-orange-100 text-orange-800',
+      badge: 'bg-orange-100 text-orange-800 hover:bg-orange-200',
+      calendar: 'bg-orange-100 text-orange-800 hover:bg-orange-200 border border-orange-200',
+      legend: 'bg-orange-100',
+      iconColor: 'text-orange-600'
+    }
+  },
+  'confirmed': {
+    label: 'Musician Confirmed',
+    icon: CheckCircle,
+    colors: {
+      background: 'bg-green-100 text-green-800',
+      badge: 'bg-green-100 text-green-800 hover:bg-green-200',
+      calendar: 'bg-green-100 text-green-800 hover:bg-green-200 border border-green-200',
+      legend: 'bg-green-100',
+      iconColor: 'text-green-600'
+    }
+  },
+  'selected': {
+    label: 'Musician Selected',
+    icon: CheckCircle,
+    colors: {
+      background: 'bg-yellow-100 text-yellow-800',
+      badge: 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200',
+      calendar: 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200 border border-yellow-200',
+      legend: 'bg-yellow-100',
+      iconColor: 'text-yellow-600'
+    }
+  },
+  'application_received': {
+    label: 'Application Received',
+    icon: Users,
+    colors: {
+      background: 'bg-purple-100 text-purple-800',
+      badge: 'bg-purple-100 text-purple-800 hover:bg-purple-200',
+      calendar: 'bg-purple-100 text-purple-800 hover:bg-purple-200 border border-purple-200',
+      legend: 'bg-purple-100',
+      iconColor: 'text-purple-600'
+    }
+  },
+  'applied': {
+    label: 'Application Received',
+    icon: Users,
+    colors: {
+      background: 'bg-purple-100 text-purple-800',
+      badge: 'bg-purple-100 text-purple-800 hover:bg-purple-200',
+      calendar: 'bg-purple-100 text-purple-800 hover:bg-purple-200 border border-purple-200',
+      legend: 'bg-purple-100',
+      iconColor: 'text-purple-600'
+    }
+  },
+  'invited': {
+    label: 'Invited Event',
+    icon: Mail,
+    colors: {
+      background: 'bg-indigo-100 text-indigo-800',
+      badge: 'bg-indigo-100 text-indigo-800 hover:bg-indigo-200',
+      calendar: 'bg-indigo-100 text-indigo-800 hover:bg-indigo-200 border border-indigo-200',
+      legend: 'bg-indigo-100',
+      iconColor: 'text-indigo-600'
+    }
+  },
+  'open': {
+    label: 'Open Event',
+    icon: Calendar,
+    colors: {
+      background: 'bg-blue-100 text-blue-800',
+      badge: 'bg-blue-100 text-blue-800 hover:bg-blue-200',
+      calendar: 'bg-blue-100 text-blue-800 hover:bg-blue-200 border border-blue-200',
+      legend: 'bg-blue-100',
+      iconColor: 'text-blue-600'
+    }
+  },
+  'available': {
+    label: 'Open Event',
+    icon: Calendar,
+    colors: {
+      background: 'bg-blue-100 text-blue-800',
+      badge: 'bg-blue-100 text-blue-800 hover:bg-blue-200',
+      calendar: 'bg-blue-100 text-blue-800 hover:bg-blue-200 border border-blue-200',
+      legend: 'bg-blue-100',
+      iconColor: 'text-blue-600'
+    }
+  }
+};
+
+// Updated utility functions to use STATUS_CONFIG
+export const getStatusConfig = (status: string) => {
+  return STATUS_CONFIG[status] || {
+    label: status,
+    icon: AlertCircle,
+    colors: {
+      background: 'bg-gray-100 text-gray-800',
+      badge: 'bg-gray-100 text-gray-800 hover:bg-gray-200',
+      calendar: 'bg-gray-100 text-gray-800 hover:bg-gray-200 border border-gray-200',
+      legend: 'bg-gray-100',
+      iconColor: 'text-gray-600'
+    }
+  };
+};
+
+// Legacy functions updated to use STATUS_CONFIG
+export const getStatusColorClasses = (status: string, variant: 'background' | 'badge' | 'calendar' = 'background') => {
+  const config = getStatusConfig(status);
+  return config.colors[variant];
+};
+
+export const getStatusLabel = (status: string): string => {
+  const config = getStatusConfig(status);
+  return config.label;
+};
+
+export const getStatusIcon = (status: string) => {
+  const config = getStatusConfig(status);
+  return config.icon;
 };

@@ -9,7 +9,10 @@ import { Booking, VenueProfile } from "./types";
 import { formatDate } from "./utils";
 import { Link } from "react-router-dom";
 import { EventDialog } from "../../shared/EventDialog";
+import { EventStatusLegend } from "../../shared/EventStatusLegend";
+import { StatusDisplay } from "../../shared/StatusDisplay";
 import { format } from "date-fns";
+import { deriveEventStatusFromBookings, getStatusColorClasses } from "../../../lib/utils";
 
 interface BookingsTabProps {
   bookings: Booking[];
@@ -50,23 +53,8 @@ export const BookingsTab: React.FC<BookingsTabProps> = ({ bookings, venue, event
     const appliedBookings = eventBookings.filter(booking => booking.status === 'applied');
     const cancelRequestedBookings = eventBookings.filter(booking => booking.status === 'pending_cancel');
     
-    // Determine event status based on booking states (priority order)
-    let eventStatus = event.eventStatus || 'open';
-    if (completedBookings.length > 0) {
-      eventStatus = 'completed';
-    } else if (cancelledBookings.length > 0 && confirmedBookings.length === 0) {
-      eventStatus = 'cancelled';
-    } else if (cancelRequestedBookings.length > 0) {
-      eventStatus = 'cancel_requested';
-    } else if (confirmedBookings.length > 0) {
-      eventStatus = 'confirmed';
-    } else if (selectedBookings.length > 0) {
-      eventStatus = 'selected';
-    } else if (appliedBookings.length > 0) {
-      eventStatus = 'application_received';
-    } else if (event.eventStatus === 'invited') {
-      eventStatus = 'invited';
-    }
+    // Use shared utility function to determine event status
+    const eventStatus = deriveEventStatusFromBookings(event, bookings);
     
     const eventWithBookingInfo = {
       ...event,
@@ -111,15 +99,7 @@ export const BookingsTab: React.FC<BookingsTabProps> = ({ bookings, venue, event
   // For calendar view, use filtered items but show all events when filter is "all"
   const calendarItems = statusFilter === "all" ? allEventsWithBookingInfo : filteredItems;
 
-  // Get stats for all event states
-  const openEvents = allEventsWithBookingInfo.filter(item => item.eventStatus === 'open');
-  const applicationReceivedEvents = allEventsWithBookingInfo.filter(item => item.eventStatus === 'application_received');
-  const selectedEvents = allEventsWithBookingInfo.filter(item => item.eventStatus === 'selected');
-  const confirmedEvents = allEventsWithBookingInfo.filter(item => item.eventStatus === 'confirmed');
-  const cancelRequestedEvents = allEventsWithBookingInfo.filter(item => item.eventStatus === 'cancel_requested');
-  const cancelledEvents = allEventsWithBookingInfo.filter(item => item.eventStatus === 'cancelled');
-  const completedEvents = allEventsWithBookingInfo.filter(item => item.eventStatus === 'completed');
-  const invitedEvents = allEventsWithBookingInfo.filter(item => item.eventStatus === 'invited');
+  // Event status stats are now handled by EventStatusLegend component
 
   // Calendar navigation functions
   const navigateMonth = (direction: 'prev' | 'next') => {
@@ -262,42 +242,30 @@ export const BookingsTab: React.FC<BookingsTabProps> = ({ bookings, venue, event
                   }`}>
                     {date.getDate()}
                   </div>
-                  <div className="space-y-1">
-                    {dayEvents.slice(0, 3).map((event, eventIndex) => (
+                  <div className="space-y-1 max-h-[100px] overflow-y-auto">
+                    {dayEvents.map((event, eventIndex) => (
                       <div
                         key={eventIndex}
                         onClick={() => handleEventClick(event)}
-                        className={`text-xs p-2 rounded cursor-pointer transition-colors ${
-                          event.eventStatus === 'completed'
-                            ? 'bg-emerald-100 text-emerald-800 hover:bg-emerald-200 border border-emerald-200' 
-                            : event.eventStatus === 'cancelled'
-                              ? 'bg-red-100 text-red-800 hover:bg-red-200 border border-red-200'
-                              : event.eventStatus === 'cancel_requested'
-                                ? 'bg-orange-100 text-orange-800 hover:bg-orange-200 border border-orange-200'
-                                : event.eventStatus === 'confirmed' 
-                                  ? 'bg-green-100 text-green-800 hover:bg-green-200 border border-green-200'
-                                  : event.eventStatus === 'selected'
-                                    ? 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200 border border-yellow-200'
-                                    : event.eventStatus === 'application_received'
-                                      ? 'bg-purple-100 text-purple-800 hover:bg-purple-200 border border-purple-200'
-                                      : event.eventStatus === 'invited'
-                                        ? 'bg-indigo-100 text-indigo-800 hover:bg-indigo-200 border border-indigo-200'
-                                        : event.eventStatus === 'open'
-                                          ? 'bg-blue-100 text-blue-800 hover:bg-blue-200 border border-blue-200'
-                                          : 'bg-gray-100 text-gray-800 hover:bg-gray-200 border border-gray-200'
-                        }`}
+                        className={`text-xs p-2 rounded cursor-pointer transition-colors ${getStatusColorClasses(event.eventStatus, 'calendar')}`}
                         title={formatEventDisplay(event)} // Full text on hover
                       >
-                        <div className="font-medium leading-tight">
-                          {formatEventDisplay(event)}
+                        <div className="space-y-1">
+                          {/* Line 1: Time */}
+                          <div className="font-medium leading-tight">
+                            {formatTime(event.startTime || event.start_time)} - {formatTime(event.endTime || event.end_time)}
+                          </div>
+                          {/* Line 2: Event Title */}
+                          <div className="leading-tight break-words">
+                            {event.title}
+                          </div>
+                          {/* Line 3: Status with icon and label */}
+                          <div className="leading-tight">
+                            <StatusDisplay status={event.eventStatus} variant="compact" />
+                          </div>
                         </div>
                       </div>
                     ))}
-                    {dayEvents.length > 3 && (
-                      <div className="text-xs text-gray-500 px-2 py-1">
-                        +{dayEvents.length - 3} more
-                      </div>
-                    )}
                   </div>
                 </div>
               );
@@ -428,85 +396,9 @@ export const BookingsTab: React.FC<BookingsTabProps> = ({ bookings, venue, event
             </div>
           </div>
 
-          {/* Stats Row */}
-          <div className="grid grid-cols-2 gap-3 mt-6">
-            <div className="bg-white rounded-lg border p-4 space-y-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="w-6 h-6 bg-blue-100 rounded flex items-center justify-center">
-                    <Calendar className="h-3 w-3 text-blue-600" />
-                  </div>
-                  <span className="text-xs font-medium text-gray-600">Open</span>
-                </div>
-                <span className="text-sm font-bold text-blue-600">{openEvents.length}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="w-6 h-6 bg-purple-100 rounded flex items-center justify-center">
-                    <Users className="h-3 w-3 text-purple-600" />
-                  </div>
-                  <span className="text-xs font-medium text-gray-600">Applications</span>
-                </div>
-                <span className="text-sm font-bold text-purple-600">{applicationReceivedEvents.length}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="w-6 h-6 bg-yellow-100 rounded flex items-center justify-center">
-                    <CheckCircle className="h-3 w-3 text-yellow-600" />
-                  </div>
-                  <span className="text-xs font-medium text-gray-600">Selected</span>
-                </div>
-                <span className="text-sm font-bold text-yellow-600">{selectedEvents.length}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="w-6 h-6 bg-green-100 rounded flex items-center justify-center">
-                    <CheckCircle className="h-3 w-3 text-green-600" />
-                  </div>
-                  <span className="text-xs font-medium text-gray-600">Confirmed</span>
-                </div>
-                <span className="text-sm font-bold text-green-600">{confirmedEvents.length}</span>
-              </div>
-            </div>
-            <div className="bg-white rounded-lg border p-4 space-y-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="w-6 h-6 bg-orange-100 rounded flex items-center justify-center">
-                    <AlertCircle className="h-3 w-3 text-orange-600" />
-                  </div>
-                  <span className="text-xs font-medium text-gray-600">Cancel Requests</span>
-                </div>
-                <span className="text-sm font-bold text-orange-600">{cancelRequestedEvents.length}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="w-6 h-6 bg-red-100 rounded flex items-center justify-center">
-                    <CheckCircle className="h-3 w-3 text-red-600" />
-                  </div>
-                  <span className="text-xs font-medium text-gray-600">Cancelled</span>
-                </div>
-                <span className="text-sm font-bold text-red-600">{cancelledEvents.length}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="w-6 h-6 bg-emerald-100 rounded flex items-center justify-center">
-                    <CheckCircle className="h-3 w-3 text-emerald-600" />
-                  </div>
-                  <span className="text-xs font-medium text-gray-600">Completed</span>
-                </div>
-                <span className="text-sm font-bold text-emerald-600">{completedEvents.length}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="w-6 h-6 bg-indigo-100 rounded flex items-center justify-center">
-                    <Mail className="h-3 w-3 text-indigo-600" />
-                  </div>
-                  <span className="text-xs font-medium text-gray-600">Invited</span>
-                </div>
-                <span className="text-sm font-bold text-indigo-600">{invitedEvents.length}</span>
-              </div>
-            </div>
-          </div>
+                      {/* Event Status Legend */}
+            {/* Stats Row */}
+          <EventStatusLegend events={allEventsWithBookingInfo} />
         </CardContent>
       </Card>
 

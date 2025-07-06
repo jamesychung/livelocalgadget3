@@ -8,8 +8,9 @@ import { Calendar, List, Filter, Phone, Mail, MapPin, Clock, User, DollarSign, C
 import { Booking, Musician } from "./types";
 import { formatDate } from "./utils";
 import { Link } from "react-router-dom";
-import { ApplicationDetailDialog } from "../../shared/ApplicationDetailDialog";
-import { BookingDetailDialog } from "../../shared/BookingDetailDialog";
+import { EventDialog } from "../../shared/EventDialog";
+import { EventStatusLegend } from "../../shared/EventStatusLegend";
+import { getStatusColorClasses, getStatusLabel } from "../../../lib/utils";
 import { format } from "date-fns";
 
 interface BookingsTabProps {
@@ -118,14 +119,7 @@ export const BookingsTab: React.FC<BookingsTabProps> = ({ bookings, musician, ev
   // For calendar view, use filtered items but show all events when filter is "all"
   const calendarItems = statusFilter === "all" ? allEventsWithBookingInfo : filteredItems;
 
-  // Get stats for all event states
-  const availableEvents = allEventsWithBookingInfo.filter(item => item.eventStatus === 'available');
-  const appliedEvents = allEventsWithBookingInfo.filter(item => item.eventStatus === 'applied');
-  const selectedEvents = allEventsWithBookingInfo.filter(item => item.eventStatus === 'selected');
-  const confirmedEvents = allEventsWithBookingInfo.filter(item => item.eventStatus === 'confirmed');
-  const cancelRequestedEvents = allEventsWithBookingInfo.filter(item => item.eventStatus === 'cancel_requested');
-  const cancelledEvents = allEventsWithBookingInfo.filter(item => item.eventStatus === 'cancelled');
-  const completedEvents = allEventsWithBookingInfo.filter(item => item.eventStatus === 'completed');
+
 
   // Calendar navigation functions
   const navigateMonth = (direction: 'prev' | 'next') => {
@@ -424,76 +418,8 @@ export const BookingsTab: React.FC<BookingsTabProps> = ({ bookings, musician, ev
             </div>
           </div>
 
-          {/* Stats Row */}
-          <div className="grid grid-cols-2 gap-3 mt-6">
-            <div className="bg-white rounded-lg border p-4 space-y-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="w-6 h-6 bg-blue-100 rounded flex items-center justify-center">
-                    <Calendar className="h-3 w-3 text-blue-600" />
-                  </div>
-                  <span className="text-xs font-medium text-gray-600">Available</span>
-                </div>
-                <span className="text-sm font-bold text-blue-600">{availableEvents.length}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="w-6 h-6 bg-purple-100 rounded flex items-center justify-center">
-                    <Users className="h-3 w-3 text-purple-600" />
-                  </div>
-                  <span className="text-xs font-medium text-gray-600">Applied</span>
-                </div>
-                <span className="text-sm font-bold text-purple-600">{appliedEvents.length}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="w-6 h-6 bg-yellow-100 rounded flex items-center justify-center">
-                    <CheckCircle className="h-3 w-3 text-yellow-600" />
-                  </div>
-                  <span className="text-xs font-medium text-gray-600">Selected</span>
-                </div>
-                <span className="text-sm font-bold text-yellow-600">{selectedEvents.length}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="w-6 h-6 bg-green-100 rounded flex items-center justify-center">
-                    <CheckCircle className="h-3 w-3 text-green-600" />
-                  </div>
-                  <span className="text-xs font-medium text-gray-600">Confirmed</span>
-                </div>
-                <span className="text-sm font-bold text-green-600">{confirmedEvents.length}</span>
-              </div>
-            </div>
-            <div className="bg-white rounded-lg border p-4 space-y-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="w-6 h-6 bg-orange-100 rounded flex items-center justify-center">
-                    <AlertCircle className="h-3 w-3 text-orange-600" />
-                  </div>
-                  <span className="text-xs font-medium text-gray-600">Cancel Requests</span>
-                </div>
-                <span className="text-sm font-bold text-orange-600">{cancelRequestedEvents.length}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="w-6 h-6 bg-red-100 rounded flex items-center justify-center">
-                    <CheckCircle className="h-3 w-3 text-red-600" />
-                  </div>
-                  <span className="text-xs font-medium text-gray-600">Cancelled</span>
-                </div>
-                <span className="text-sm font-bold text-red-600">{cancelledEvents.length}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="w-6 h-6 bg-emerald-100 rounded flex items-center justify-center">
-                    <CheckCircle className="h-3 w-3 text-emerald-600" />
-                  </div>
-                  <span className="text-xs font-medium text-gray-600">Completed</span>
-                </div>
-                <span className="text-sm font-bold text-emerald-600">{completedEvents.length}</span>
-              </div>
-            </div>
-          </div>
+          {/* Event Status Legend */}
+          <EventStatusLegend events={allEventsWithBookingInfo} />
         </CardContent>
       </Card>
 
@@ -509,27 +435,14 @@ export const BookingsTab: React.FC<BookingsTabProps> = ({ bookings, musician, ev
         </CardContent>
       </Card>
 
-      <ApplicationDetailDialog
-        open={isEventDialogOpen}
-        onOpenChange={setIsEventDialogOpen}
-        selectedEvent={selectedEvent}
-        getEventApplications={(eventId) => selectedBooking ? [selectedBooking] : []}
-        onAcceptApplication={(bookingId) => {
-          // Handle accept - this is for dashboard view so might not need implementation
-          console.log('Accept application:', bookingId);
-        }}
-        onRejectApplication={(bookingId) => {
-          // Handle reject - this is for dashboard view so might not need implementation  
-          console.log('Reject application:', bookingId);
-        }}
-      />
-
-      <BookingDetailDialog
-        isOpen={isBookingDialogOpen}
-        onClose={() => setIsBookingDialogOpen(false)}
+      <EventDialog
+        isOpen={isEventDialogOpen || isBookingDialogOpen}
+        onClose={closeEventDialog}
+        event={selectedEvent}
         booking={selectedBooking}
         currentUser={{ musician: { id: musician.id } }}
-        onStatusUpdate={(updatedBooking) => {
+        userRole="musician"
+        onStatusUpdate={(updatedBooking: any) => {
           // Refresh the page to get updated data
           window.location.reload();
         }}
@@ -583,24 +496,8 @@ const BookingList: React.FC<{
                 </div>
               </div>
               <div className="text-right">
-                <Badge variant="default" className={
-                  item.eventStatus === 'completed' ? 'bg-emerald-100 text-emerald-800 hover:bg-emerald-200' :
-                  item.eventStatus === 'cancelled' ? 'bg-red-100 text-red-800 hover:bg-red-200' :
-                  item.eventStatus === 'cancel_requested' ? 'bg-orange-100 text-orange-800 hover:bg-orange-200' :
-                  item.eventStatus === 'confirmed' ? 'bg-green-100 text-green-800 hover:bg-green-200' :
-                  item.eventStatus === 'selected' ? 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200' :
-                  item.eventStatus === 'applied' ? 'bg-purple-100 text-purple-800 hover:bg-purple-200' :
-                  item.eventStatus === 'available' ? 'bg-blue-100 text-blue-800 hover:bg-blue-200' :
-                  'bg-gray-100 text-gray-800 hover:bg-gray-200'
-                }>
-                  {item.eventStatus === 'completed' ? 'Completed' :
-                   item.eventStatus === 'cancelled' ? 'Cancelled' :
-                   item.eventStatus === 'cancel_requested' ? 'Cancel Requested' :
-                   item.eventStatus === 'confirmed' ? 'Confirmed' :
-                   item.eventStatus === 'selected' ? 'Selected' :
-                   item.eventStatus === 'applied' ? 'Applied' :
-                   item.eventStatus === 'available' ? 'Available' :
-                   item.eventStatus}
+                <Badge variant="default" className={getStatusColorClasses(item.eventStatus, 'badge')}>
+                  {getStatusLabel(item.eventStatus)}
                 </Badge>
                 {item.hasAppliedBooking && (
                   <p className="text-xs text-purple-600 mt-1">Application submitted</p>

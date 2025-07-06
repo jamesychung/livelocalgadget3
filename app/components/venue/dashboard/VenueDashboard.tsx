@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../../../lib/auth";
+import { useSearchParams } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../ui/tabs";
 import { Button } from "../../ui/button";
 import { Badge } from "../../ui/badge";
@@ -22,7 +23,11 @@ import {
 
 export const VenueDashboard: React.FC = () => {
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState("overview");
+  const [searchParams] = useSearchParams();
+  const [activeTab, setActiveTab] = useState(() => {
+    // Initialize tab from URL parameter or default to "overview"
+    return searchParams.get('tab') || "overview";
+  });
   const [venue, setVenue] = useState<VenueProfile | null>(null);
   const [events, setEvents] = useState<Event[]>([]);
   const [bookings, setBookings] = useState<Booking[]>([]);
@@ -61,6 +66,14 @@ export const VenueDashboard: React.FC = () => {
       localStorage.setItem('venue-dashboard-stats', JSON.stringify(selectedStatIds));
     }
   }, [selectedStatIds]);
+
+  // Listen for URL parameter changes to switch tabs
+  useEffect(() => {
+    const tabParam = searchParams.get('tab');
+    if (tabParam && ['overview', 'events', 'bookings', 'profile'].includes(tabParam)) {
+      setActiveTab(tabParam);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     const loadDashboardData = async () => {
@@ -234,6 +247,7 @@ export const VenueDashboard: React.FC = () => {
         <TabsContent value="overview" className="mt-6">
           <OverviewTab 
             venue={venue}
+            user={user!}
             recentEvents={recentEvents}
             pendingBookings={pendingBookings}
             selectedBookings={selectedBookings}

@@ -2,7 +2,7 @@ import React from "react";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { Calendar, Clock, MapPin, Users } from "lucide-react";
-import { EventStatusBadge } from "./EventStatusBadge";
+import { StatusBadge } from "../venue/dashboard/StatusBadge";
 
 interface EventDetailCardProps {
   event: {
@@ -98,7 +98,7 @@ export const EventDetailCard: React.FC<EventDetailCardProps> = ({
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-1">
             <h4 className={`font-semibold ${styles.title}`}>{event.title}</h4>
-            <EventStatusBadge status={event.status} />
+                          <StatusBadge status={event.status} />
           </div>
           <div className="flex items-center gap-4 text-sm text-gray-600">
             <div className="flex items-center gap-1">

@@ -3,13 +3,16 @@ import { useVenueEvents } from "../../../hooks/useVenueEvents";
 import { Button } from "../../ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../../ui/card";
 import { Badge } from "../../ui/badge";
-import { Plus, Calendar, Users, AlertCircle, Eye, Edit } from "lucide-react";
+import { Plus, Calendar, Users, AlertCircle } from "lucide-react";
 import { Link } from "react-router-dom";
-import { EventStatusBadge } from "../../shared/EventStatusBadge";
-import { ApplicationDetailDialog } from "../../shared/ApplicationDetailDialog";
+import { StatusBadge } from "./StatusBadge";
+import { EventDialog } from "../../shared/EventDialog";
 import { VenueEventEditDialog } from "../../shared/VenueEventEditDialog";
 import { FilterPanel, FilterState } from "../../shared/FilterPanel";
 import { useFilters, filterFunctions } from "../../../hooks/useFilters";
+import { EventStatusLegend } from "../../shared/EventStatusLegend";
+import { deriveEventStatusFromBookings } from "../../../lib/utils";
+import { EventCard } from "../../shared/EventCard";
 
 interface MyEventsTabProps {
   user: any;
@@ -127,21 +130,30 @@ export const MyEventsTab: React.FC<MyEventsTabProps> = ({ user, venue, events, b
     return true;
   };
 
-  // Use the filter hook for all events
+  // Derive correct event status for all events based on bookings
+  const eventsWithDerivedStatus = useMemo(() => {
+    return allEvents.map(event => ({
+      ...event,
+      eventStatus: deriveEventStatusFromBookings(event, allBookings)
+    }));
+  }, [allEvents, allBookings]);
+
+  // Use the filter hook for events with derived status
   const { filteredData: filteredEvents } = useFilters({
-    data: allEvents,
+    data: eventsWithDerivedStatus,
     filters,
     filterFunction: eventFilterFunction
   });
 
-  // Filter events by status for different sections
+  // Filter events by status for different sections - exclude completed and cancelled
   const activeEvents = filteredEvents.filter(event => 
-    event.eventStatus === 'open' || event.eventStatus === 'confirmed'
+    event.eventStatus !== 'completed' && event.eventStatus !== 'cancelled'
   );
   
-  const completedEvents = filteredEvents.filter(event => 
+  // Completed events are automatically moved to /venue-history
+  const completedEventsCount = eventsWithDerivedStatus.filter(event => 
     event.eventStatus === 'completed'
-  );
+  ).length;
   
   const eventsWithPendingApplications = getEventsWithPendingApplications();
   
@@ -170,6 +182,8 @@ export const MyEventsTab: React.FC<MyEventsTabProps> = ({ user, venue, events, b
     const displayHour = hour % 12 || 12;
     return `${displayHour}:${minutes} ${ampm}`;
   };
+
+
 
   return (
     <div className="space-y-6">
@@ -238,7 +252,10 @@ export const MyEventsTab: React.FC<MyEventsTabProps> = ({ user, venue, events, b
       {/* Current Active Events Section with Filters */}
       <Card>
         <CardHeader>
-          <CardTitle>Current Active Events</CardTitle>
+          <CardTitle>Active Events</CardTitle>
+          <p className="text-sm text-muted-foreground">
+            Events that are currently active. Completed events are automatically moved to <Link to="/venue-history" className="text-blue-600 hover:text-blue-800 underline">Event History</Link>.
+          </p>
         </CardHeader>
         <CardContent>
           {/* Filter Panel */}
@@ -258,7 +275,7 @@ export const MyEventsTab: React.FC<MyEventsTabProps> = ({ user, venue, events, b
                   enabled: true,
                   label: "Event Status",
                   options: [
-                    { value: 'all', label: 'All Events' },
+                    { value: 'all', label: 'All Active Events' },
                     { value: 'open', label: 'Open Event' },
                     { value: 'invited', label: 'Invited Event' },
                     { value: 'application_received', label: 'Application Received' },
@@ -285,99 +302,30 @@ export const MyEventsTab: React.FC<MyEventsTabProps> = ({ user, venue, events, b
               initiallyExpanded={true}
             />
           </div>
+
+          {/* Event Status Legend */}
+          <EventStatusLegend events={activeEvents} hideCompletedStatuses={true} />
+
           {activeEvents.length > 0 ? (
             <div className="space-y-4">
               {activeEvents.map((event) => {
                 const applicationCount = getApplicationCount(event.id);
                 const pendingApplicationCount = getPendingApplicationCount(event.id);
-                const hasPendingApps = pendingApplicationCount > 0;
-                const borderColor = hasPendingApps 
-                  ? 'border-l-orange-500' 
-                  : event.eventStatus === 'confirmed' 
-                    ? 'border-l-green-500' 
-                    : 'border-l-blue-500';
                 
                 return (
-                  <Card key={event.id} className={`hover:shadow-lg transition-shadow duration-200 cursor-pointer border-l-4 ${borderColor}`}>
-                    <CardContent className="pt-6">
-                      <div
-                        className="flex flex-col gap-2"
-                        onClick={() => handleEventClick(event)}
-                        style={{ cursor: 'pointer' }}
-                      >
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <div className="flex items-start justify-between mb-3">
-                              <div>
-                                <h3 className="text-lg font-semibold text-gray-900 mb-1">
-                                  {event.title}
-                                </h3>
-                                <div className="flex items-center gap-4 text-sm text-gray-600">
-                                  <div className="flex items-center gap-1">
-                                    <Calendar className="h-4 w-4" />
-                                    <span>{formatDate(event.date)}</span>
-                                  </div>
-                                  <div className="flex items-center gap-1">
-                                    <span>
-                                      {formatTime(event.startTime)} - {formatTime(event.endTime)}
-                                    </span>
-                                  </div>
-                                </div>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <EventStatusBadge status={event.eventStatus} />
-                                {applicationCount > 0 && (
-                                  <Badge 
-                                    variant={hasPendingApps ? "destructive" : "secondary"} 
-                                    className={hasPendingApps ? "bg-orange-100 text-orange-800" : "bg-blue-100 text-blue-800"}
-                                  >
-                                    <Users className="h-3 w-3 mr-1" />
-                                    {hasPendingApps 
-                                      ? `${pendingApplicationCount} pending` 
-                                      : `${applicationCount} ${applicationCount === 1 ? 'application' : 'applications'}`
-                                    }
-                                    {hasPendingApps && ' - Review Needed'}
-                                  </Badge>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      {/* Action buttons outside clickable area */}
-                      <div className="flex items-center gap-2 mt-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={e => { e.stopPropagation(); handleEditEvent(event); }}
-                          className="flex items-center gap-1"
-                        >
-                          <Edit className="h-4 w-4" />
-                          Edit
-                        </Button>
-                        {applicationCount > 0 && (
-                          <Button
-                            variant={hasPendingApps ? "default" : "outline"}
-                            size="sm"
-                            onClick={e => { e.stopPropagation(); handleViewApplications(event); }}
-                            className={`flex items-center gap-1 ${hasPendingApps ? 'bg-orange-600 hover:bg-orange-700' : ''}`}
-                          >
-                            <Users className="h-4 w-4" />
-                            {hasPendingApps ? 'Review Applications' : 'View Applications'} ({hasPendingApps ? pendingApplicationCount : applicationCount})
-                          </Button>
-                        )}
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={e => { e.stopPropagation(); handleEventClick(event); }}
-                          className="flex items-center gap-1"
-                        >
-                          <Eye className="h-4 w-4" />
-                          View Details
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
+                  <EventCard
+                    key={event.id}
+                    event={event}
+                    onEventClick={() => handleEventClick(event)}
+                    showStatusBadge={true}
+                    showActions={true}
+                    clickText="Click for event details"
+                    className="hover:shadow-lg transition-shadow duration-200"
+                    onEdit={() => handleEditEvent(event)}
+                    onViewApplications={applicationCount > 0 ? () => handleViewApplications(event) : undefined}
+                    applicationCount={applicationCount}
+                    pendingApplicationCount={pendingApplicationCount}
+                  />
                 );
               })}
             </div>
@@ -399,90 +347,29 @@ export const MyEventsTab: React.FC<MyEventsTabProps> = ({ user, venue, events, b
         </CardContent>
       </Card>
 
-      {/* Completed Events Section */}
-      {completedEvents.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Completed Events</CardTitle>
-            <p className="text-sm text-muted-foreground">
-              Events that have been completed
-            </p>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {completedEvents.map((event) => {
-                const applicationCount = getApplicationCount(event.id);
-                
-                return (
-                  <Card key={event.id} className="hover:shadow-lg transition-shadow duration-200 cursor-pointer border-l-4 border-l-emerald-500">
-                    <CardContent className="pt-6">
-                      <div
-                        className="flex flex-col gap-2"
-                        onClick={() => handleEventClick(event)}
-                        style={{ cursor: 'pointer' }}
-                      >
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <div className="flex items-start justify-between mb-3">
-                              <div>
-                                <h3 className="text-lg font-semibold text-gray-900 mb-1">
-                                  {event.title}
-                                </h3>
-                                <div className="flex items-center gap-4 text-sm text-gray-600">
-                                  <div className="flex items-center gap-1">
-                                    <Calendar className="h-4 w-4" />
-                                    <span>{formatDate(event.date)}</span>
-                                  </div>
-                                  <div className="flex items-center gap-1">
-                                    <span>
-                                      {formatTime(event.startTime)} - {formatTime(event.endTime)}
-                                    </span>
-                                  </div>
-                                </div>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <EventStatusBadge status={event.eventStatus} />
-                                {applicationCount > 0 && (
-                                  <Badge 
-                                    variant="secondary" 
-                                    className="bg-emerald-100 text-emerald-800"
-                                  >
-                                    <Users className="h-3 w-3 mr-1" />
-                                    {applicationCount} {applicationCount === 1 ? 'application' : 'applications'}
-                                  </Badge>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      {/* Action buttons outside clickable area */}
-                      <div className="flex items-center gap-2 mt-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={e => { e.stopPropagation(); handleEventClick(event); }}
-                          className="flex items-center gap-1"
-                        >
-                          <Eye className="h-4 w-4" />
-                          View Details
-                        </Button>
-                        {applicationCount > 0 && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={e => { e.stopPropagation(); handleViewApplications(event); }}
-                            className="flex items-center gap-1"
-                          >
-                            <Users className="h-4 w-4" />
-                            View Applications ({applicationCount})
-                          </Button>
-                        )}
-                      </div>
-                    </CardContent>
-                  </Card>
-                );
-              })}
+      {/* Completed Events Notice */}
+      {completedEventsCount > 0 && (
+        <Card className="border-emerald-200 bg-emerald-50">
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center">
+                  <Calendar className="h-5 w-5 text-emerald-600" />
+                </div>
+                <div>
+                  <h3 className="font-medium text-emerald-900">
+                    {completedEventsCount} Completed Event{completedEventsCount === 1 ? '' : 's'}
+                  </h3>
+                  <p className="text-sm text-emerald-700">
+                    Your completed events have been moved to the history section
+                  </p>
+                </div>
+              </div>
+              <Button asChild variant="outline" className="border-emerald-300 text-emerald-700 hover:bg-emerald-100">
+                <Link to="/venue-history">
+                  View Event History
+                </Link>
+              </Button>
             </div>
           </CardContent>
         </Card>
@@ -499,23 +386,29 @@ export const MyEventsTab: React.FC<MyEventsTabProps> = ({ user, venue, events, b
       />
 
       {/* Applications Dialog */}
-      <ApplicationDetailDialog
-        open={applicationsDialogOpen}
-        onOpenChange={setApplicationsDialogOpen}
-        selectedEvent={selectedEventForApplications}
-        getEventApplications={(eventId) => allBookings.filter(b => b.event?.id === eventId)}
-        onAcceptApplication={(bookingId) => handleBookApplication(bookingId, selectedEventForApplications?.id || '')}
+      <EventDialog
+        isOpen={applicationsDialogOpen}
+        onClose={() => setApplicationsDialogOpen(false)}
+        event={selectedEventForApplications}
+        bookings={selectedEventForApplications ? allBookings.filter(b => b.event?.id === selectedEventForApplications.id) : []}
+        onAcceptApplication={(bookingId: string) => handleBookApplication(bookingId, selectedEventForApplications?.id || '')}
         onRejectApplication={handleRejectApplication}
+        currentUser={{ venue: { id: venue.id } }}
+        userRole="venue"
+        showApplicationsList={true}
       />
 
       {/* Event Detail Dialog */}
-      <ApplicationDetailDialog
-        open={isEventDetailDialogOpen}
-        onOpenChange={setIsEventDetailDialogOpen}
-        selectedEvent={selectedEvent}
-        getEventApplications={(eventId) => allBookings.filter(b => b.event?.id === eventId)}
-        onAcceptApplication={(bookingId) => handleBookApplication(bookingId, selectedEvent?.id || '')}
+      <EventDialog
+        isOpen={isEventDetailDialogOpen}
+        onClose={() => setIsEventDetailDialogOpen(false)}
+        event={selectedEvent}
+        bookings={selectedEvent ? allBookings.filter(b => b.event?.id === selectedEvent.id) : []}
+        onAcceptApplication={(bookingId: string) => handleBookApplication(bookingId, selectedEvent?.id || '')}
         onRejectApplication={handleRejectApplication}
+        currentUser={{ venue: { id: venue.id } }}
+        userRole="venue"
+        showApplicationsList={true}
       />
     </div>
   );

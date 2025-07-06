@@ -15,7 +15,7 @@ import { Badge } from "../components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
 import { Plus, Calendar, Users, Eye, Edit } from "lucide-react";
 import { Link } from "react-router-dom";
-import { EventStatusBadge } from "../components/shared/EventStatusBadge";
+import { StatusBadge } from "../components/venue/dashboard/StatusBadge";
 import { ApplicationDetailDialog } from "../components/shared/ApplicationDetailDialog";
 import { EventBookingDialog } from "../components/shared/EventBookingDialog";
 
@@ -208,7 +208,7 @@ export default function VenueEventsEventCentricPage() {
                                                                 </div>
                                                             </div>
                                                             <div className="flex items-center gap-2">
-                                                                <EventStatusBadge status={event.eventStatus} />
+                                                                <StatusBadge status={event.eventStatus} />
                                                                 {applicationCount > 0 && (
                                                                     <Badge variant="secondary" className="bg-blue-100 text-blue-800">
                                                                         <Users className="h-3 w-3 mr-1" />

@@ -10,6 +10,7 @@ import { Badge } from "../ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { Calendar, Clock, DollarSign, User, MapPin, Phone, Mail, MessageCircle, Users } from "lucide-react";
 import { BookingActionButtons } from "./BookingActionButtons";
+import { ActivityLog, generateBookingActivityItems, generateEventActivityItems } from "./ActivityLog";
 
 interface EventBookingDialogProps {
   isOpen: boolean;
@@ -37,22 +38,6 @@ export const EventBookingDialog: React.FC<EventBookingDialogProps> = ({
     return null; // This should be passed from parent component
   });
 
-  // Helper function to properly parse UTC timestamps from database
-  const parseUTCTimestamp = (timestamp: string | Date): Date => {
-    if (timestamp instanceof Date) {
-      return timestamp;
-    }
-    
-    // If the timestamp doesn't end with 'Z', it's likely a UTC timestamp without the timezone indicator
-    // Add 'Z' to ensure it's parsed as UTC
-    const timestampString = timestamp.toString();
-    if (timestampString && !timestampString.endsWith('Z') && !timestampString.includes('+') && !timestampString.includes('-', 10)) {
-      return new Date(timestampString + 'Z');
-    }
-    
-    return new Date(timestamp);
-  };
-
   const formatTime = (timeString?: string) => {
     if (!timeString) return '';
     const [hours, minutes] = timeString.split(':');
@@ -72,72 +57,19 @@ export const EventBookingDialog: React.FC<EventBookingDialogProps> = ({
     });
   };
 
-  // Generate activity log based on booking status and timestamps
-  const generateActivityLog = () => {
-    const activities = [];
-    
-    if (event?.created_at) {
-      activities.push({
-        timestamp: event.created_at,
-        action: 'Event Created',
-        description: 'Event was created and opened for applications'
-      });
+  // Generate activity items using the unified ActivityLog utility functions
+  const getActivityItems = () => {
+    if (booking) {
+      // If we have a specific booking, show its activity
+      return generateBookingActivityItems(booking);
+    } else {
+      // If viewing event without specific booking, show event activity
+      // For now, we'll just show event creation since we don't have all bookings
+      return generateEventActivityItems(event, []);
     }
-    
-    if (booking?.applied_at) {
-      activities.push({
-        timestamp: booking.applied_at,
-        action: 'Application Received',
-        description: `${booking.musician?.stage_name || 'Musician'} applied for this event`
-      });
-    }
-    
-    if (booking?.selected_at) {
-      activities.push({
-        timestamp: booking.selected_at,
-        action: 'Musician Selected',
-        description: `${booking.musician?.stage_name || 'Musician'} was selected for this event`
-      });
-    }
-    
-    if (booking?.confirmed_at) {
-      activities.push({
-        timestamp: booking.confirmed_at,
-        action: 'Booking Confirmed',
-        description: 'Booking was confirmed and finalized'
-      });
-    }
-    
-    if (booking?.cancel_requested_at) {
-      const requestedBy = booking.cancel_requested_by_role === 'venue' ? 'Venue' : 'Musician';
-      activities.push({
-        timestamp: booking.cancel_requested_at,
-        action: 'Cancellation Requested',
-        description: `${requestedBy} requested to cancel this booking${booking.cancellation_reason ? ` - ${booking.cancellation_reason}` : ''}`
-      });
-    }
-    
-    if (booking?.cancelled_at) {
-      const confirmedBy = booking.cancel_confirmed_by_role === 'venue' ? 'Venue' : 'Musician';
-      activities.push({
-        timestamp: booking.cancelled_at,
-        action: 'Booking Cancelled',
-        description: `${confirmedBy} confirmed the cancellation${booking.cancellation_reason ? ` - ${booking.cancellation_reason}` : ''}`
-      });
-    }
-    
-    if (booking?.completed_at) {
-      activities.push({
-        timestamp: booking.completed_at,
-        action: 'Event Completed',
-        description: 'Event was successfully completed'
-      });
-    }
-    
-    return activities.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
   };
 
-  const activityLog = generateActivityLog();
+  const activityItems = getActivityItems();
 
   if (!event) return null;
 
@@ -431,40 +363,7 @@ export const EventBookingDialog: React.FC<EventBookingDialogProps> = ({
             </TabsContent>
             
             <TabsContent value="activity" className="pt-4">
-              <div className="space-y-4">
-                <h3 className="font-semibold">Activity Timeline</h3>
-                <div className="space-y-3">
-                  {activityLog.length > 0 ? (
-                    activityLog.map((activity, index) => (
-                      <div key={index} className="flex gap-3 pb-3 border-b last:border-b-0">
-                        <div className="w-2 h-2 rounded-full bg-blue-500 mt-2 flex-shrink-0"></div>
-                        <div className="flex-1">
-                          <div className="flex items-center justify-between">
-                            <h5 className="font-medium text-sm">{activity.action}</h5>
-                            <span className="text-xs text-gray-500">
-                              {parseUTCTimestamp(activity.timestamp).toLocaleString('en-US', {
-                                month: 'short',
-                                day: 'numeric',
-                                year: 'numeric',
-                                hour: 'numeric',
-                                minute: '2-digit',
-                                hour12: true,
-                                timeZone: 'America/Los_Angeles'
-                              })}
-                            </span>
-                          </div>
-                          <p className="text-sm text-gray-600 mt-1">{activity.description}</p>
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="text-center py-8 text-gray-500">
-                      <Calendar className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-                      <p>No activity recorded yet.</p>
-                    </div>
-                  )}
-                </div>
-              </div>
+              <ActivityLog activities={activityItems} />
             </TabsContent>
           </Tabs>
         </div>

@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Badge } from "../ui/badge";
 import { Calendar, Users, Eye, ArrowLeft } from "lucide-react";
 import { Link } from "react-router-dom";
-import { EventStatusBadge } from "./EventStatusBadge";
+import { StatusBadge } from "../venue/dashboard/StatusBadge";
 import { ApplicationDetailDialog } from "./ApplicationDetailDialog";
 import { CANCELLATION_REASON_LABELS } from "../../lib/utils";
 import { FilterPanel, FilterState } from "./FilterPanel";
@@ -354,7 +354,7 @@ export function EventHistoryPage({
                                 )}
                               </div>
                               <div className="flex items-center gap-2">
-                                <EventStatusBadge status={event.eventStatus} />
+                                <StatusBadge status={event.eventStatus} />
                                 {applicationCount > 0 && (
                                   <Badge variant="secondary" className="bg-gray-100 text-gray-800">
                                     <Users className="h-3 w-3 mr-1" />

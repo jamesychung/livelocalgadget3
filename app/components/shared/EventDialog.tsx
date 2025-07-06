@@ -1,12 +1,13 @@
 import React from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "../ui/dialog";
 import { Button } from "../ui/button";
-import { Badge } from "../ui/badge";
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { Calendar, Clock, User, MapPin, DollarSign, MessageSquare, History, Music, Phone, Mail, Eye, Users, CheckCircle, XCircle } from "lucide-react";
 import { BookingActionButtons } from "./BookingActionButtons";
 import { ActivityLog, generateBookingActivityItems, generateEventActivityItems } from "./ActivityLog";
-import { EventStatusBadge } from "./EventStatusBadge";
+import { StatusDisplay } from "./StatusDisplay";
+import { getStatusColorClasses, getStatusLabel, deriveEventStatusFromBookings } from "../../lib/utils";
 import { Link } from "react-router-dom";
 
 interface EventDialogProps {
@@ -17,11 +18,23 @@ interface EventDialogProps {
   bookings?: any[]; // All bookings for this event (for venue view)
   currentUser: any;
   userRole: 'venue' | 'musician';
+  
+  // Action handlers
   onStatusUpdate?: (updatedBooking: any) => void;
   onAcceptApplication?: (bookingId: string) => void;
   onRejectApplication?: (bookingId: string) => void;
   onApply?: (event: any) => void;
   onMessageOtherParty?: (recipientId: string) => void;
+  
+  // Display options
+  showApplicationsList?: boolean; // Show applications list (from ApplicationDetailDialog)
+  showBookingActions?: boolean; // Show booking action buttons
+  
+  // Alternative prop names for compatibility
+  open?: boolean; // Alternative to isOpen for ApplicationDetailDialog compatibility
+  onOpenChange?: (open: boolean) => void; // Alternative to onClose
+  selectedEvent?: any; // Alternative to event
+  getEventApplications?: (eventId: string) => any[]; // Alternative to bookings
 }
 
 // Helper function to properly parse UTC timestamps from database
@@ -52,9 +65,25 @@ export const EventDialog: React.FC<EventDialogProps> = ({
   onAcceptApplication,
   onRejectApplication,
   onApply,
-  onMessageOtherParty
+  onMessageOtherParty,
+  showApplicationsList = false,
+  showBookingActions = true,
+  
+  // Alternative props for compatibility
+  open,
+  onOpenChange,
+  selectedEvent,
+  getEventApplications
 }) => {
-  if (!event) return null;
+  // Handle alternative prop names for compatibility
+  const dialogOpen = isOpen ?? open ?? false;
+  const dialogClose = onClose ?? ((open: boolean) => onOpenChange?.(open)) ?? (() => {});
+  const dialogEvent = event ?? selectedEvent;
+  const dialogBookings = bookings.length > 0 ? bookings : (getEventApplications && dialogEvent ? getEventApplications(dialogEvent.id) : []);
+  if (!dialogEvent) return null;
+
+  // Calculate the derived event status based on bookings
+  const derivedEventStatus = deriveEventStatusFromBookings(dialogEvent, dialogBookings);
 
   // Format date for display
   const formatDate = (dateString?: string) => {
@@ -86,7 +115,7 @@ export const EventDialog: React.FC<EventDialogProps> = ({
       return generateBookingActivityItems(booking);
     } else {
       // If viewing event without specific booking, show event + all applications
-      return generateEventActivityItems(event, bookings);
+      return generateEventActivityItems(dialogEvent, dialogBookings);
     }
   };
 
@@ -95,9 +124,9 @@ export const EventDialog: React.FC<EventDialogProps> = ({
   // Get the relevant person to display (venue for musician, musician for venue)
   const getOtherParty = () => {
     if (userRole === 'venue') {
-      return booking?.musician || (bookings.length === 1 ? bookings[0].musician : null);
+      return booking?.musician || (dialogBookings.length === 1 ? dialogBookings[0].musician : null);
     } else {
-      return event.venue || booking?.venue;
+      return dialogEvent.venue || booking?.venue;
     }
   };
 
@@ -108,13 +137,13 @@ export const EventDialog: React.FC<EventDialogProps> = ({
     if (userRole === 'venue') {
       if (booking?.musician) {
         return `Booking with ${booking.musician.stage_name}`;
-      } else if (bookings.length > 0) {
-        return `Applications for ${event.title}`;
+      } else if (dialogBookings.length > 0) {
+        return `Applications for ${dialogEvent.title}`;
       } else {
-        return event.title;
+        return dialogEvent.title;
       }
     } else {
-      return event.title;
+      return dialogEvent.title;
     }
   };
 
@@ -128,22 +157,22 @@ export const EventDialog: React.FC<EventDialogProps> = ({
           <div className="space-y-2 text-sm">
             <div className="flex items-center gap-2">
               <Calendar className="h-4 w-4 text-muted-foreground" />
-              <span className="font-medium">Date:</span> {formatDate(event.date)}
+              <span className="font-medium">Date:</span> {formatDate(dialogEvent.date)}
             </div>
             <div className="flex items-center gap-2">
               <Clock className="h-4 w-4 text-muted-foreground" />
-              <span className="font-medium">Time:</span> {formatTime(event.start_time)} - {formatTime(event.end_time)}
+              <span className="font-medium">Time:</span> {formatTime(dialogEvent.start_time)} - {formatTime(dialogEvent.end_time)}
             </div>
           </div>
           <div className="space-y-2 text-sm">
             <div className="flex items-center gap-2">
               <span className="font-medium">Status:</span>
-              <EventStatusBadge status={event.status || 'draft'} />
+              <StatusDisplay status={derivedEventStatus} variant="button" />
             </div>
-            {event.description && (
+            {dialogEvent.description && (
               <div>
                 <span className="font-medium">Description:</span>
-                <p className="text-muted-foreground mt-1">{event.description}</p>
+                <p className="text-muted-foreground mt-1">{dialogEvent.description}</p>
               </div>
             )}
           </div>
@@ -172,10 +201,6 @@ export const EventDialog: React.FC<EventDialogProps> = ({
                 <DollarSign className="h-4 w-4 text-muted-foreground" />
                 <span className="font-medium">Proposed Rate:</span> ${booking.proposed_rate || "N/A"}
               </div>
-              <div className="flex items-center gap-2">
-                <span className="font-medium">Status:</span>
-                <Badge>{booking.status?.charAt(0).toUpperCase() + booking.status?.slice(1)}</Badge>
-              </div>
             </div>
           </div>
           
@@ -191,11 +216,11 @@ export const EventDialog: React.FC<EventDialogProps> = ({
       )}
 
       {/* All Applications (if no specific booking) */}
-      {!booking && bookings.length > 0 && (
+      {!booking && dialogBookings.length > 0 && (
         <div>
-          <h3 className="font-semibold mb-3">Applications ({bookings.length})</h3>
+          <h3 className="font-semibold mb-3">Applications ({dialogBookings.length})</h3>
           <div className="space-y-3 max-h-60 overflow-y-auto">
-            {bookings.map((application) => (
+            {dialogBookings.map((application) => (
               <div key={application.id} className="border rounded-lg p-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
@@ -215,12 +240,7 @@ export const EventDialog: React.FC<EventDialogProps> = ({
                       <p className="text-sm text-muted-foreground">
                         ${application.proposed_rate} • {application.musician?.city}, {application.musician?.state}
                       </p>
-                      <Badge variant={
-                        application.status === 'confirmed' ? 'default' :
-                        application.status === 'selected' ? 'secondary' : 'outline'
-                      }>
-                        {application.status}
-                      </Badge>
+                      <StatusDisplay status={application.status} variant="badge" />
                     </div>
                   </div>
                   <div className="flex gap-2">
@@ -266,26 +286,26 @@ export const EventDialog: React.FC<EventDialogProps> = ({
           <div className="space-y-2 text-sm">
             <div className="flex items-center gap-2">
               <Calendar className="h-4 w-4 text-muted-foreground" />
-              <span className="font-medium">Date:</span> {formatDate(event.date)}
+              <span className="font-medium">Date:</span> {formatDate(dialogEvent.date)}
             </div>
             <div className="flex items-center gap-2">
               <Clock className="h-4 w-4 text-muted-foreground" />
-              <span className="font-medium">Time:</span> {formatTime(event.start_time)} - {formatTime(event.end_time)}
+              <span className="font-medium">Time:</span> {formatTime(dialogEvent.start_time)} - {formatTime(dialogEvent.end_time)}
             </div>
             <div className="flex items-center gap-2">
               <DollarSign className="h-4 w-4 text-muted-foreground" />
-              <span className="font-medium">Rate:</span> ${event.rate || booking?.proposed_rate || "TBD"}
+              <span className="font-medium">Rate:</span> ${dialogEvent.rate || booking?.proposed_rate || "TBD"}
             </div>
           </div>
           <div className="space-y-2 text-sm">
             <div className="flex items-center gap-2">
               <span className="font-medium">Status:</span>
-              <EventStatusBadge status={booking?.status || event.status || 'draft'} />
+              <StatusDisplay status={booking?.status || derivedEventStatus} variant="button" />
             </div>
-            {event.description && (
+            {dialogEvent.description && (
               <div>
                 <span className="font-medium">Description:</span>
-                <p className="text-muted-foreground mt-1">{event.description}</p>
+                <p className="text-muted-foreground mt-1">{dialogEvent.description}</p>
               </div>
             )}
           </div>
@@ -332,10 +352,6 @@ export const EventDialog: React.FC<EventDialogProps> = ({
         <div>
           <h3 className="font-semibold mb-3">Your Application</h3>
           <div className="bg-muted p-4 rounded-lg">
-            <div className="flex items-center justify-between mb-2">
-              <span className="font-medium">Status:</span>
-              <Badge>{booking.status?.charAt(0).toUpperCase() + booking.status?.slice(1)}</Badge>
-            </div>
             {booking.proposed_rate && (
               <div className="flex items-center justify-between mb-2">
                 <span className="font-medium">Your Rate:</span>
@@ -355,7 +371,7 @@ export const EventDialog: React.FC<EventDialogProps> = ({
   );
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={dialogOpen} onOpenChange={dialogClose}>
       <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
@@ -434,7 +450,7 @@ export const EventDialog: React.FC<EventDialogProps> = ({
               )}
               
               {!booking && onApply && (
-                <Button onClick={() => onApply(event)}>
+                <Button onClick={() => onApply(dialogEvent)}>
                   <CheckCircle className="h-4 w-4 mr-2" />
                   Apply for Event
                 </Button>

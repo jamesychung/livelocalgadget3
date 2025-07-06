@@ -126,6 +126,7 @@ export interface DashboardStatsProps {
 
 export interface OverviewTabProps {
   venue: VenueProfile;
+  user: User;
   recentEvents: Event[];
   pendingBookings: Booking[];
   selectedBookings: Booking[];
@@ -150,10 +151,7 @@ export interface ProfileTabProps {
   reviews: Review[];
 }
 
-export interface BookingCardProps {
-  booking: Booking;
-  onViewDetails: (booking: Booking) => void;
-}
+
 
 export interface EventCardProps {
   event: Event;

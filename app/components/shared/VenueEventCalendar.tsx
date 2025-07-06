@@ -9,7 +9,7 @@ import { Clock, Plus, X, Save, Settings, Calendar as CalendarIcon, ChevronLeft, 
 import { format } from "date-fns";
 import { cn } from "../../lib/utils";
 import { Link } from 'react-router-dom';
-import { EventStatusBadge } from "./EventStatusBadge";
+
 import { CalendarDayCell } from "./CalendarDayCell";
 
 interface Event {
