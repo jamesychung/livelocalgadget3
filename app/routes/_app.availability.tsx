@@ -108,16 +108,10 @@ export default function AvailabilityPage() {
                         <p className="text-muted-foreground mb-6">
                             It looks like you haven't created your musician profile yet. Create your profile to start managing your availability.
                         </p>
-                        <div className="flex gap-2 justify-center">
+                        <div className="flex justify-center">
                             <Button asChild>
                                 <Link to="/musician-profile/create">
                                     Create Musician Profile
-                                </Link>
-                            </Button>
-                            <Button variant="outline" asChild>
-                                <Link to="/musician-dashboard">
-                                    <ArrowLeft className="mr-2 h-4 w-4" />
-                                    Back to Dashboard
                                 </Link>
                             </Button>
                         </div>
@@ -150,21 +144,11 @@ export default function AvailabilityPage() {
     return (
         <div className="container mx-auto p-6 space-y-6">
             {/* Header */}
-            <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                    <Button variant="outline" asChild>
-                        <Link to="/musician-dashboard">
-                            <ArrowLeft className="mr-2 h-4 w-4" />
-                            Back to Dashboard
-                        </Link>
-                    </Button>
-                    <div>
-                        <h1 className="text-3xl font-bold">Availability Management</h1>
-                        <p className="text-muted-foreground">
-                            Manage your availability for {musicianProfile.stage_name || user?.first_name}
-                        </p>
-                    </div>
-                </div>
+            <div className="space-y-2">
+                <h1 className="text-2xl sm:text-3xl font-bold">Availability Management</h1>
+                <p className="text-muted-foreground">
+                    Manage your availability for {musicianProfile.stage_name || user?.first_name}
+                </p>
             </div>
 
             {/* Error Message */}

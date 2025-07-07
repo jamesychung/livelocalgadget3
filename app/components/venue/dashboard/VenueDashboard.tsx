@@ -6,7 +6,7 @@ import { Button } from "../../ui/button";
 import { Badge } from "../../ui/badge";
 import { DashboardHeader } from "./DashboardHeader";
 import { OverviewTab } from "./OverviewTab";
-import { BookingsTab } from "./BookingsTab";
+import { BookingCalendar } from "./BookingCalendar";
 import { MyEventsTab } from "./MyEventsTab";
 import { ProfileTab } from "./ProfileTab";
 import { VenueEventsSummaryDashboard } from "../../shared/VenueEventsSummaryDashboard";
@@ -234,7 +234,7 @@ export const VenueDashboard: React.FC = () => {
             value="bookings" 
             className="data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm font-medium"
           >
-            Bookings
+            Booking Calendar
           </TabsTrigger>
           <TabsTrigger 
             value="profile" 
@@ -267,7 +267,7 @@ export const VenueDashboard: React.FC = () => {
         </TabsContent>
         
         <TabsContent value="bookings" className="mt-6">
-          <BookingsTab 
+          <BookingCalendar 
             bookings={bookings}
             venue={venue}
             events={events}

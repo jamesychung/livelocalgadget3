@@ -1,5 +1,5 @@
 import React from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "../ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "../ui/dialog";
 import { Button } from "../ui/button";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
@@ -139,9 +139,12 @@ export const EventDialog: React.FC<EventDialogProps> = ({
   const getActivityItems = () => {
     if (booking) {
       // If we have a specific booking, show its activity
+      console.log('🔍 EventDialog booking data for ActivityLog:', booking);
       return generateBookingActivityItems(booking);
     } else {
       // If viewing event without specific booking, show event + all applications
+      console.log('🔍 EventDialog event data for ActivityLog:', dialogEvent);
+      console.log('🔍 EventDialog bookings data for ActivityLog:', dialogBookings);
       return generateEventActivityItems(dialogEvent, dialogBookings);
     }
   };
@@ -405,6 +408,9 @@ export const EventDialog: React.FC<EventDialogProps> = ({
             <Calendar className="h-5 w-5" />
             {getDialogTitle()}
           </DialogTitle>
+          <DialogDescription>
+            View event details and activity log
+          </DialogDescription>
         </DialogHeader>
         
         <Tabs defaultValue="details">

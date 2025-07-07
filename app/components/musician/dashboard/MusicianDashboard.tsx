@@ -5,8 +5,9 @@ import { Button } from "../../ui/button";
 import { Badge } from "../../ui/badge";
 import { DashboardHeader } from "./DashboardHeader";
 import { OverviewTab } from "./OverviewTab";
-import { BookingsTab } from "./BookingsTab";
+import { BookingCalendar } from "./BookingCalendar";
 import { ProfileTab } from "./ProfileTab";
+import { MyEventsTab } from "./MyEventsTab";
 import { MusicianEventsSummaryDashboard } from "../../shared/MusicianEventsSummaryDashboard";
 import { useMusicianEventsStats, createMusicianEventStats } from "../../../hooks/useMusicianEventsStats";
 import { supabase } from "../../../lib/supabase";
@@ -112,11 +113,14 @@ export const MusicianDashboard: React.FC = () => {
               start_time,
               end_time,
               description,
+              created_at,
               venue:venues(id, name, city, state)
             )
           `)
           .eq('musician_id', musicianData.id)
           .order('created_at', { ascending: false });
+
+        console.log('🔍 Musician bookings data:', bookingsData?.slice(0, 1)); // Debug first booking
 
         // Fetch all events for the musician's location (for the BookingsTab)
         const { data: eventsData, error: eventsError } = await supabase
@@ -235,7 +239,7 @@ export const MusicianDashboard: React.FC = () => {
       </div>
       
       <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-6">
-        <TabsList className="grid w-full grid-cols-3 bg-gray-100 p-1 rounded-lg">
+        <TabsList className="grid w-full grid-cols-4 bg-gray-100 p-1 rounded-lg">
           <TabsTrigger 
             value="overview" 
             className="data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm font-medium"
@@ -243,15 +247,21 @@ export const MusicianDashboard: React.FC = () => {
             Overview
           </TabsTrigger>
           <TabsTrigger 
-            value="bookings" 
+            value="events" 
             className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm font-medium"
           >
-            Bookings
+            My Events
             {(pendingBookings.length > 0 || selectedBookings.length > 0) && (
               <Badge variant="secondary" className="bg-blue-100 text-blue-800 border-blue-200">
                 {pendingBookings.length + selectedBookings.length}
               </Badge>
             )}
+          </TabsTrigger>
+          <TabsTrigger 
+            value="bookings" 
+            className="data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm font-medium"
+          >
+            Booking Calendar
           </TabsTrigger>
           <TabsTrigger 
             value="profile" 
@@ -265,11 +275,22 @@ export const MusicianDashboard: React.FC = () => {
           <OverviewTab 
             musician={musician}
             upcomingEvents={upcomingBookings}
+            allBookings={bookings}
+            allEvents={events}
+          />
+        </TabsContent>
+
+        <TabsContent value="events" className="mt-6">
+          <MyEventsTab 
+            user={user}
+            musician={musician}
+            bookings={bookings}
+            events={events}
           />
         </TabsContent>
 
         <TabsContent value="bookings" className="mt-6">
-          <BookingsTab 
+          <BookingCalendar 
             bookings={bookings} 
             musician={musician}
             events={events}

@@ -10,6 +10,7 @@ import { Calendar, Clock, MapPin, Phone, Mail, AlertCircle, Users } from "lucide
 import { EventDialog } from "../../shared/EventDialog";
 import { useVenueEvents } from "../../../hooks/useVenueEvents";
 import { BookingCard } from "../../shared/BookingCard";
+import { ImportantEventItem } from "../../shared/ImportantEventItem";
 
 
 export const OverviewTab: React.FC<OverviewTabProps> = ({ 
@@ -257,38 +258,7 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
   );
 };
 
-const ImportantEventItem: React.FC<{ 
-  booking: Booking; 
-  status: 'application_received' | 'confirmed' | 'cancel_requested';
-  timestamp: Date;
-  displayText: string;
-  onEventClick: () => void;
-}> = ({ booking, status, timestamp, displayText, onEventClick }) => {
-  const formatTimestamp = (date: Date) => {
-    return date.toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-      hour: 'numeric',
-      minute: '2-digit',
-      hour12: true
-    });
-  };
 
-  return (
-    <BookingCard
-      booking={booking}
-      onEventClick={onEventClick}
-      viewMode="venue"
-      variant={status === 'confirmed' ? 'confirmed' : status === 'cancel_requested' ? 'cancelled' : 'application'}
-      showStatusBadge={true}
-      showActions={false}
-      showPitch={false}
-      clickText={`${displayText} • ${formatTimestamp(timestamp)}`}
-      status={status}
-    />
-  );
-};
 
 
 

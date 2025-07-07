@@ -6,7 +6,8 @@ import { Checkbox } from "../ui/checkbox";
 import { Calendar } from "../ui/calendar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
-import { Save, Calendar as CalendarIcon, AlertTriangle } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "../ui/dialog";
+import { Save, Calendar as CalendarIcon, AlertTriangle, Plus } from "lucide-react";
 import { format } from "date-fns";
 import { DateRange } from "react-day-picker";
 import { Alert, AlertDescription } from "../ui/alert";
@@ -31,9 +32,10 @@ type DateSelectionMode = 'single' | 'range';
 export default function AvailabilityForm({
     onAddAvailability,
     currentAvailability = {},
-    title = "Add Availability",
-    description = "Select dates and times for your availability. Choose between single day or multiple days."
+    title = "Manage Availability",
+    description = "Click the button below to add your availability."
 }: AvailabilityFormProps) {
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [dateSelectionMode, setDateSelectionMode] = useState<DateSelectionMode>('single');
     const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
     const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
@@ -66,6 +68,14 @@ export default function AvailabilityForm({
 
     const getDayName = (date: Date) => {
         return date.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
+    };
+
+    // Handle "Add New Availability" button click
+    const handleAddNewClick = () => {
+        setSelectedDate(undefined);
+        setDateRange(undefined);
+        setIsRecurring(false);
+        setIsDialogOpen(true);
     };
 
     // Check for time conflicts
@@ -216,7 +226,7 @@ export default function AvailabilityForm({
                 setIsSaving(true);
                 await onAddAvailability(newSlots);
                 
-                // Reset form
+                // Reset form and close dialog
                 setSelectedDate(undefined);
                 setDateRange(undefined);
                 setStartTime("09:00");
@@ -225,6 +235,7 @@ export default function AvailabilityForm({
                 setRecurringEndDate(undefined);
                 setIsRecurring(false);
                 setConflicts([]);
+                setIsDialogOpen(false);
             } catch (error) {
                 console.error("Error adding availability:", error);
             } finally {
@@ -245,211 +256,216 @@ export default function AvailabilityForm({
         setDateRange(range);
     };
 
+
+
     return (
-        <Card>
-            <CardHeader>
-                <CardTitle>{title}</CardTitle>
-                <CardDescription>{description}</CardDescription>
+        <Card className="w-full">
+            <CardHeader className="px-3 py-3 sm:px-6 sm:py-6">
+                <CardTitle className="text-base sm:text-lg md:text-xl leading-tight break-words">{title}</CardTitle>
+                <CardDescription className="text-xs sm:text-sm text-muted-foreground mt-1 leading-relaxed break-words">{description}</CardDescription>
             </CardHeader>
-            <CardContent>
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    {/* Left Side - Calendar */}
-                    <div className="space-y-4">
-                        {/* Date Selection Mode Tabs */}
-                        <Tabs value={dateSelectionMode} onValueChange={(value) => setDateSelectionMode(value as DateSelectionMode)}>
-                            <TabsList className="grid w-full grid-cols-2">
-                                <TabsTrigger value="single">One Day</TabsTrigger>
-                                <TabsTrigger value="range">Multiple Days</TabsTrigger>
-                            </TabsList>
-                        </Tabs>
-
-                        {/* Calendar - Always Visible */}
-                        <div className="border rounded-lg p-4">
-                            {dateSelectionMode === 'single' ? (
-                                <Calendar
-                                    mode="single"
-                                    selected={selectedDate}
-                                    onSelect={handleSingleDateSelect}
-                                    numberOfMonths={2}
-                                    className="rounded-md"
-                                    disabled={(date) => date < new Date()}
-                                />
-                            ) : (
-                                <Calendar
-                                    mode="range"
-                                    selected={dateRange}
-                                    onSelect={handleRangeSelect}
-                                    numberOfMonths={2}
-                                    className="rounded-md"
-                                    disabled={(date) => date < new Date()}
-                                />
+            <CardContent className="px-3 pb-3 sm:px-6 sm:pb-6">
+                {/* Add New Availability Button */}
+                <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                    <DialogTrigger asChild>
+                        <Button onClick={handleAddNewClick} className="w-full">
+                            <Plus className="mr-2 h-4 w-4" />
+                            Add New Availability
+                        </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-md sm:max-w-lg max-h-[90vh] overflow-y-auto">
+                        <DialogHeader>
+                            <DialogTitle>Add Availability</DialogTitle>
+                        </DialogHeader>
+                        <div className="space-y-4">
+                            {/* Conflict Alert */}
+                            {conflicts.length > 0 && (
+                                <Alert variant="destructive">
+                                    <AlertTriangle className="h-4 w-4" />
+                                    <AlertDescription>
+                                        <div className="space-y-1">
+                                            <p className="font-medium">Conflicts detected:</p>
+                                            {conflicts.map((conflict, index) => (
+                                                <p key={index} className="text-sm">• {conflict}</p>
+                                            ))}
+                                        </div>
+                                    </AlertDescription>
+                                </Alert>
                             )}
-                        </div>
-                    </div>
 
-                    {/* Right Side - Form Controls */}
-                    <div className="space-y-6">
-                        {/* Conflict Alert */}
-                        {conflicts.length > 0 && (
-                            <Alert variant="destructive">
-                                <AlertTriangle className="h-4 w-4" />
-                                <AlertDescription>
-                                    <div className="space-y-1">
-                                        <p className="font-medium">Conflicts detected:</p>
-                                        {conflicts.map((conflict, index) => (
-                                            <p key={index} className="text-sm">• {conflict}</p>
-                                        ))}
-                                    </div>
-                                </AlertDescription>
-                            </Alert>
-                        )}
+                            {/* Date Selection Mode Tabs */}
+                            <Tabs value={dateSelectionMode} onValueChange={(value) => setDateSelectionMode(value as DateSelectionMode)}>
+                                <TabsList className="grid w-full grid-cols-2">
+                                    <TabsTrigger value="single">One Day</TabsTrigger>
+                                    <TabsTrigger value="range">Multiple Days</TabsTrigger>
+                                </TabsList>
+                            </Tabs>
 
-                        {/* Selected Date/Range Display */}
-                        <div className="space-y-2">
-                            <Label>Selected {dateSelectionMode === 'single' ? 'Date' : 'Date Range'}</Label>
-                            <div className="p-3 bg-gray-50 rounded-lg border">
+                            {/* Calendar for Date Selection */}
+                            <div className="border rounded-lg p-3">
                                 {dateSelectionMode === 'single' ? (
-                                    selectedDate ? (
-                                        <div className="flex items-center gap-2">
-                                            <CalendarIcon className="h-4 w-4 text-muted-foreground" />
-                                            <span className="font-medium">
-                                                {format(selectedDate, "EEEE, MMMM d, yyyy")}
-                                            </span>
-                                        </div>
-                                    ) : (
-                                        <span className="text-muted-foreground">No date selected</span>
-                                    )
+                                    <Calendar
+                                        mode="single"
+                                        selected={selectedDate}
+                                        onSelect={handleSingleDateSelect}
+                                        numberOfMonths={1}
+                                        className="rounded-md w-full"
+                                        disabled={(date) => date < new Date()}
+                                    />
                                 ) : (
-                                    dateRange?.from ? (
-                                        <div className="flex items-center gap-2">
-                                            <CalendarIcon className="h-4 w-4 text-muted-foreground" />
-                                            <span className="font-medium">
-                                                {format(dateRange.from, "MMM d, yyyy")}
-                                                {dateRange.to && ` - ${format(dateRange.to, "MMM d, yyyy")}`}
-                                            </span>
-                                        </div>
-                                    ) : (
-                                        <span className="text-muted-foreground">No date range selected</span>
-                                    )
+                                    <Calendar
+                                        mode="range"
+                                        selected={dateRange}
+                                        onSelect={handleRangeSelect}
+                                        numberOfMonths={1}
+                                        className="rounded-md w-full"
+                                        disabled={(date) => date < new Date()}
+                                    />
                                 )}
                             </div>
-                        </div>
 
-                        {/* Time Selection */}
-                        <div className="space-y-4">
-                            <Label>Time Range</Label>
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="space-y-2">
-                                    <Label className="text-sm">From</Label>
-                                    <Select value={startTime} onValueChange={setStartTime}>
-                                        <SelectTrigger>
-                                            <SelectValue />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {timeOptions.map((time) => (
-                                                <SelectItem key={time} value={time}>
-                                                    {time}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                                <div className="space-y-2">
-                                    <Label className="text-sm">To</Label>
-                                    <Select value={endTime} onValueChange={setEndTime}>
-                                        <SelectTrigger>
-                                            <SelectValue />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {timeOptions.map((time) => (
-                                                <SelectItem key={time} value={time}>
-                                                    {time}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Recurring Option */}
-                        <div className="space-y-4">
-                            <div className="flex items-center space-x-2">
-                                <Checkbox
-                                    id="recurring"
-                                    checked={isRecurring}
-                                    onCheckedChange={(checked) => setIsRecurring(checked as boolean)}
-                                />
-                                <Label htmlFor="recurring">Apply to recurring days</Label>
-                            </div>
-
-                            {/* Day Selection */}
-                            {isRecurring && (
-                                <div className="space-y-4">
-                                    <Label>Select Days</Label>
-                                    <div className="grid grid-cols-7 gap-2">
-                                        {[
-                                            { key: 'monday', label: 'M' },
-                                            { key: 'tuesday', label: 'T' },
-                                            { key: 'wednesday', label: 'W' },
-                                            { key: 'thursday', label: 'Th' },
-                                            { key: 'friday', label: 'F' },
-                                            { key: 'saturday', label: 'Sa' },
-                                            { key: 'sunday', label: 'Su' }
-                                        ].map((day) => (
-                                            <div key={day.key} className="flex items-center space-x-2">
-                                                <Checkbox
-                                                    id={day.key}
-                                                    checked={recurringDays.includes(day.key)}
-                                                    onCheckedChange={(checked) => {
-                                                        if (checked) {
-                                                            setRecurringDays([...recurringDays, day.key]);
-                                                        } else {
-                                                            setRecurringDays(recurringDays.filter(d => d !== day.key));
-                                                        }
-                                                    }}
-                                                />
-                                                <Label htmlFor={day.key} className="text-sm">
-                                                    {day.label}
-                                                </Label>
+                            {/* Selected Date Display */}
+                            {(selectedDate || dateRange?.from) && (
+                                <div className="p-2 bg-gray-50 rounded border text-sm">
+                                    {dateSelectionMode === 'single' ? (
+                                        selectedDate && (
+                                            <div className="flex items-center gap-2">
+                                                <CalendarIcon className="h-4 w-4 text-muted-foreground" />
+                                                <span className="font-medium">
+                                                    {format(selectedDate, "EEEE, MMMM d, yyyy")}
+                                                </span>
                                             </div>
-                                        ))}
-                                    </div>
-
-                                    {/* Recurring End Date */}
-                                    <div className="space-y-2">
-                                        <Label>End Date (Optional)</Label>
-                                        <Calendar
-                                            mode="single"
-                                            selected={recurringEndDate}
-                                            onSelect={setRecurringEndDate}
-                                            className="rounded-md border"
-                                            disabled={(date) => date < new Date()}
-                                        />
-                                    </div>
+                                        )
+                                    ) : (
+                                        dateRange?.from && (
+                                            <div className="flex items-center gap-2">
+                                                <CalendarIcon className="h-4 w-4 text-muted-foreground" />
+                                                <span className="font-medium">
+                                                    {format(dateRange.from, "MMM d, yyyy")}
+                                                    {dateRange.to && ` - ${format(dateRange.to, "MMM d, yyyy")}`}
+                                                </span>
+                                            </div>
+                                        )
+                                    )}
                                 </div>
                             )}
-                        </div>
 
-                        {/* Save Button */}
-                        <Button
-                            onClick={handleSave}
-                            className="w-full"
-                            disabled={
-                                isSaving ||
-                                !startTime || 
-                                !endTime || 
-                                conflicts.length > 0 ||
-                                (isRecurring && recurringDays.length === 0) ||
-                                (dateSelectionMode === 'single' && !selectedDate && !isRecurring) ||
-                                (dateSelectionMode === 'range' && (!dateRange?.from || !dateRange?.to) && !isRecurring)
-                            }
-                        >
-                            <Save className="mr-2 h-4 w-4" />
-                            {isSaving ? "Saving..." : "Save Availability"}
-                        </Button>
-                    </div>
-                </div>
+                            {/* Time Selection */}
+                            <div className="space-y-2">
+                                <Label>Time Range</Label>
+                                <div className="grid grid-cols-2 gap-3">
+                                    <div className="space-y-1">
+                                        <Label className="text-sm">From</Label>
+                                        <Select value={startTime} onValueChange={setStartTime}>
+                                            <SelectTrigger>
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {timeOptions.map((time) => (
+                                                    <SelectItem key={time} value={time}>
+                                                        {time}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                    <div className="space-y-1">
+                                        <Label className="text-sm">To</Label>
+                                        <Select value={endTime} onValueChange={setEndTime}>
+                                            <SelectTrigger>
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {timeOptions.map((time) => (
+                                                    <SelectItem key={time} value={time}>
+                                                        {time}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Recurring Option */}
+                            <div className="space-y-3">
+                                <div className="flex items-center space-x-2">
+                                    <Checkbox
+                                        id="recurring"
+                                        checked={isRecurring}
+                                        onCheckedChange={(checked) => setIsRecurring(checked as boolean)}
+                                    />
+                                    <Label htmlFor="recurring">Apply to recurring days</Label>
+                                </div>
+
+                                {/* Day Selection */}
+                                {isRecurring && (
+                                    <div className="space-y-3">
+                                        <Label>Select Days</Label>
+                                        <div className="grid grid-cols-7 gap-2">
+                                            {[
+                                                { key: 'monday', label: 'Mon' },
+                                                { key: 'tuesday', label: 'Tue' },
+                                                { key: 'wednesday', label: 'Wed' },
+                                                { key: 'thursday', label: 'Thu' },
+                                                { key: 'friday', label: 'Fri' },
+                                                { key: 'saturday', label: 'Sat' },
+                                                { key: 'sunday', label: 'Sun' }
+                                            ].map((day) => (
+                                                <div key={day.key} className="flex items-center space-x-1">
+                                                    <Checkbox
+                                                        id={day.key}
+                                                        checked={recurringDays.includes(day.key)}
+                                                        onCheckedChange={(checked) => {
+                                                            if (checked) {
+                                                                setRecurringDays([...recurringDays, day.key]);
+                                                            } else {
+                                                                setRecurringDays(recurringDays.filter(d => d !== day.key));
+                                                            }
+                                                        }}
+                                                    />
+                                                    <Label htmlFor={day.key} className="text-sm">
+                                                        {day.label}
+                                                    </Label>
+                                                </div>
+                                            ))}
+                                        </div>
+
+                                        {/* Recurring End Date */}
+                                        <div className="space-y-2">
+                                            <Label>End Date (Optional)</Label>
+                                            <Calendar
+                                                mode="single"
+                                                selected={recurringEndDate}
+                                                onSelect={setRecurringEndDate}
+                                                className="rounded-md border"
+                                                disabled={(date) => date < new Date()}
+                                            />
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Save Button */}
+                            <Button
+                                onClick={handleSave}
+                                className="w-full"
+                                disabled={
+                                    isSaving ||
+                                    !startTime || 
+                                    !endTime || 
+                                    conflicts.length > 0 ||
+                                    (isRecurring && recurringDays.length === 0) ||
+                                    (dateSelectionMode === 'single' && !selectedDate && !isRecurring) ||
+                                    (dateSelectionMode === 'range' && (!dateRange?.from || !dateRange?.to) && !isRecurring)
+                                }
+                            >
+                                <Save className="mr-2 h-4 w-4" />
+                                {isSaving ? "Saving..." : "Save Availability"}
+                            </Button>
+                        </div>
+                    </DialogContent>
+                </Dialog>
             </CardContent>
         </Card>
     );

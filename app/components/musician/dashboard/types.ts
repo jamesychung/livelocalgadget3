@@ -89,6 +89,8 @@ export interface DashboardStatsProps {
 export interface OverviewTabProps {
   musician: Musician;
   upcomingEvents: Booking[];
+  allBookings?: Booking[];
+  allEvents?: any[];
 }
 
 export interface BookingsTabProps {

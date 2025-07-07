@@ -4,29 +4,28 @@ import { Button } from "../../ui/button";
 import { Badge } from "../../ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../ui/select";
-import { Calendar, List, Filter, Phone, Mail, MapPin, Clock, User, DollarSign, CheckCircle, Users, X, Plus, ChevronLeft, ChevronRight, AlertCircle } from "lucide-react";
-import { Booking, Musician } from "./types";
+import { Calendar, Filter, Phone, Mail, MapPin, Clock, User, DollarSign, CheckCircle, Users, X, Plus, ChevronLeft, ChevronRight, AlertCircle } from "lucide-react";
+import { Booking, VenueProfile } from "./types";
 import { formatDate } from "./utils";
 import { Link } from "react-router-dom";
 import { EventDialog } from "../../shared/EventDialog";
 import { EventStatusLegend } from "../../shared/EventStatusLegend";
-import { getStatusColorClasses, getStatusLabel } from "../../../lib/utils";
+import { StatusDisplay } from "../../shared/StatusDisplay";
 import { format } from "date-fns";
+import { deriveEventStatusFromBookings, getStatusColorClasses } from "../../../lib/utils";
 
-interface BookingsTabProps {
+interface BookingCalendarProps {
   bookings: Booking[];
-  musician: Musician;
+  venue: VenueProfile;
   events?: any[]; // Add events prop for complete event pipeline
 }
 
-export const BookingsTab: React.FC<BookingsTabProps> = ({ bookings, musician, events = [] }) => {
-  const [viewMode, setViewMode] = useState<"calendar" | "list">("calendar");
+export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings, venue, events = [] }) => {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [isEventDialogOpen, setIsEventDialogOpen] = useState(false);
-  const [isBookingDialogOpen, setIsBookingDialogOpen] = useState(false);
 
   const handleEventClick = (event: any) => {
     // Find the corresponding booking for this event
@@ -34,25 +33,16 @@ export const BookingsTab: React.FC<BookingsTabProps> = ({ bookings, musician, ev
     
     setSelectedEvent(event);
     setSelectedBooking(eventBooking || null);
-    
-    // If there's any booking (applied, selected, confirmed), show BookingDetailDialog
-    // Only show ApplicationDetailDialog if there are no bookings at all
-    if (eventBooking) {
-      setSelectedBooking(eventBooking);
-      setIsBookingDialogOpen(true);
-    } else {
-      setIsEventDialogOpen(true);
-    }
+    setIsEventDialogOpen(true);
   };
 
   const closeEventDialog = () => {
     setIsEventDialogOpen(false);
-    setIsBookingDialogOpen(false);
     setSelectedEvent(null);
     setSelectedBooking(null);
   };
 
-  // Combine events and bookings for complete view - from musician's perspective
+  // Combine events and bookings for complete view
   const allEventsWithBookingInfo = events.map(event => {
     const eventBookings = bookings.filter(booking => booking.event?.id === event.id);
     const confirmedBookings = eventBookings.filter(booking => booking.status === 'confirmed');
@@ -62,21 +52,8 @@ export const BookingsTab: React.FC<BookingsTabProps> = ({ bookings, musician, ev
     const appliedBookings = eventBookings.filter(booking => booking.status === 'applied');
     const cancelRequestedBookings = eventBookings.filter(booking => booking.status === 'pending_cancel');
     
-    // Determine event status based on booking states (priority order) - from musician's perspective
-    let eventStatus = 'available'; // Default for events without bookings
-    if (completedBookings.length > 0) {
-      eventStatus = 'completed';
-    } else if (cancelledBookings.length > 0) {
-      eventStatus = 'cancelled';
-    } else if (cancelRequestedBookings.length > 0) {
-      eventStatus = 'cancel_requested';
-    } else if (confirmedBookings.length > 0) {
-      eventStatus = 'confirmed';
-    } else if (selectedBookings.length > 0) {
-      eventStatus = 'selected';
-    } else if (appliedBookings.length > 0) {
-      eventStatus = 'applied';
-    }
+    // Use shared utility function to determine event status
+    const eventStatus = deriveEventStatusFromBookings(event, bookings);
     
     const eventWithBookingInfo = {
       ...event,
@@ -88,6 +65,7 @@ export const BookingsTab: React.FC<BookingsTabProps> = ({ bookings, musician, ev
       selectedBookings: selectedBookings.length,
       appliedBookings: appliedBookings.length,
       cancelRequestedBookings: cancelRequestedBookings.length,
+      pendingApplications: appliedBookings.length + selectedBookings.length, // For backward compatibility
       hasConfirmedBooking: confirmedBookings.length > 0,
       hasCompletedBooking: completedBookings.length > 0,
       hasCancelledBooking: cancelledBookings.length > 0,
@@ -95,7 +73,7 @@ export const BookingsTab: React.FC<BookingsTabProps> = ({ bookings, musician, ev
       hasAppliedBooking: appliedBookings.length > 0,
       hasCancelRequestedBooking: cancelRequestedBookings.length > 0,
       eventStatus: eventStatus,
-      // Map field names to match expectations
+      // Map field names to match VenueEventCalendar expectations
       startTime: event.start_time,
       endTime: event.end_time
     };
@@ -106,8 +84,9 @@ export const BookingsTab: React.FC<BookingsTabProps> = ({ bookings, musician, ev
   // Filter based on status
   const filteredItems = allEventsWithBookingInfo.filter(item => {
     if (statusFilter === "all") return !item.hasCompletedBooking && item.eventStatus !== 'cancelled'; // Exclude completed and cancelled from "all"
-    if (statusFilter === "available") return item.eventStatus === 'available';
-    if (statusFilter === "applied") return item.eventStatus === 'applied';
+    if (statusFilter === "open") return item.eventStatus === 'open';
+    if (statusFilter === "invited") return item.eventStatus === 'invited';
+    if (statusFilter === "application_received") return item.eventStatus === 'application_received';
     if (statusFilter === "selected") return item.eventStatus === 'selected';
     if (statusFilter === "confirmed") return item.eventStatus === 'confirmed';
     if (statusFilter === "cancel_requested") return item.eventStatus === 'cancel_requested';
@@ -119,7 +98,7 @@ export const BookingsTab: React.FC<BookingsTabProps> = ({ bookings, musician, ev
   // For calendar view, use filtered items but show all events when filter is "all"
   const calendarItems = statusFilter === "all" ? allEventsWithBookingInfo : filteredItems;
 
-
+  // Event status stats are now handled by EventStatusLegend component
 
   // Calendar navigation functions
   const navigateMonth = (direction: 'prev' | 'next') => {
@@ -262,40 +241,30 @@ export const BookingsTab: React.FC<BookingsTabProps> = ({ bookings, musician, ev
                   }`}>
                     {date.getDate()}
                   </div>
-                  <div className="space-y-1">
-                    {dayEvents.slice(0, 3).map((event, eventIndex) => (
+                  <div className="space-y-1 max-h-[100px] overflow-y-auto">
+                    {dayEvents.map((event, eventIndex) => (
                       <div
                         key={eventIndex}
                         onClick={() => handleEventClick(event)}
-                        className={`text-xs p-2 rounded cursor-pointer transition-colors ${
-                          event.eventStatus === 'completed'
-                            ? 'bg-emerald-100 text-emerald-800 hover:bg-emerald-200 border border-emerald-200' 
-                            : event.eventStatus === 'cancelled'
-                              ? 'bg-red-100 text-red-800 hover:bg-red-200 border border-red-200'
-                              : event.eventStatus === 'cancel_requested'
-                                ? 'bg-orange-100 text-orange-800 hover:bg-orange-200 border border-orange-200'
-                                : event.eventStatus === 'confirmed' 
-                                  ? 'bg-green-100 text-green-800 hover:bg-green-200 border border-green-200'
-                                  : event.eventStatus === 'selected'
-                                    ? 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200 border border-yellow-200'
-                                    : event.eventStatus === 'applied'
-                                      ? 'bg-purple-100 text-purple-800 hover:bg-purple-200 border border-purple-200'
-                                      : event.eventStatus === 'available'
-                                        ? 'bg-blue-100 text-blue-800 hover:bg-blue-200 border border-blue-200'
-                                        : 'bg-gray-100 text-gray-800 hover:bg-gray-200 border border-gray-200'
-                        }`}
+                        className={`text-xs p-2 rounded cursor-pointer transition-colors ${getStatusColorClasses(event.eventStatus, 'calendar')}`}
                         title={formatEventDisplay(event)} // Full text on hover
                       >
-                        <div className="font-medium leading-tight">
-                          {formatEventDisplay(event)}
+                        <div className="space-y-1">
+                          {/* Line 1: Time */}
+                          <div className="font-medium leading-tight">
+                            {formatTime(event.startTime || event.start_time)} - {formatTime(event.endTime || event.end_time)}
+                          </div>
+                          {/* Line 2: Event Title */}
+                          <div className="leading-tight break-words">
+                            {event.title}
+                          </div>
+                          {/* Line 3: Status with icon and label */}
+                          <div className="leading-tight">
+                            <StatusDisplay status={event.eventStatus} variant="compact" />
+                          </div>
                         </div>
                       </div>
                     ))}
-                    {dayEvents.length > 3 && (
-                      <div className="text-xs text-gray-500 px-2 py-1">
-                        +{dayEvents.length - 3} more
-                      </div>
-                    )}
                   </div>
                 </div>
               );
@@ -314,8 +283,8 @@ export const BookingsTab: React.FC<BookingsTabProps> = ({ bookings, musician, ev
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
             {/* Title and Description */}
             <div>
-              <h2 className="text-2xl font-bold">My Bookings</h2>
-              <p className="text-gray-600">Track your event applications and confirmed gigs</p>
+              <h2 className="text-2xl font-bold">Booking Management</h2>
+              <p className="text-gray-600">Manage your confirmed bookings and calendar</p>
             </div>
             
             {/* Controls */}
@@ -335,20 +304,28 @@ export const BookingsTab: React.FC<BookingsTabProps> = ({ bookings, musician, ev
                       <span>All Events</span>
                     </div>
                   </SelectItem>
-                  <SelectItem value="available">
+                  <SelectItem value="open">
                     <div className="flex items-center gap-2">
                       <div className="w-4 h-4 bg-blue-100 rounded flex items-center justify-center">
                         <Calendar className="h-2.5 w-2.5 text-blue-600" />
                       </div>
-                      <span>Available to Apply</span>
+                      <span>Open Events</span>
                     </div>
                   </SelectItem>
-                  <SelectItem value="applied">
+                  <SelectItem value="invited">
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 bg-indigo-100 rounded flex items-center justify-center">
+                        <Mail className="h-2.5 w-2.5 text-indigo-600" />
+                      </div>
+                      <span>Invited Events</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="application_received">
                     <div className="flex items-center gap-2">
                       <div className="w-4 h-4 bg-purple-100 rounded flex items-center justify-center">
                         <Users className="h-2.5 w-2.5 text-purple-600" />
                       </div>
-                      <span>Applied</span>
+                      <span>Application Received</span>
                     </div>
                   </SelectItem>
                   <SelectItem value="selected">
@@ -356,7 +333,7 @@ export const BookingsTab: React.FC<BookingsTabProps> = ({ bookings, musician, ev
                       <div className="w-4 h-4 bg-yellow-100 rounded flex items-center justify-center">
                         <CheckCircle className="h-2.5 w-2.5 text-yellow-600" />
                       </div>
-                      <span>Selected by Venue</span>
+                      <span>Musician Selected</span>
                     </div>
                   </SelectItem>
                   <SelectItem value="confirmed">
@@ -394,25 +371,11 @@ export const BookingsTab: React.FC<BookingsTabProps> = ({ bookings, musician, ev
                 </SelectContent>
               </Select>
 
-              {/* View Mode Toggle */}
-              <Tabs value={viewMode} onValueChange={(value) => setViewMode(value as "calendar" | "list")}>
-                <TabsList>
-                  <TabsTrigger value="calendar" className="flex items-center gap-2">
-                    <Calendar className="h-4 w-4" />
-                    Calendar
-                  </TabsTrigger>
-                  <TabsTrigger value="list" className="flex items-center gap-2">
-                    <List className="h-4 w-4" />
-                    List
-                  </TabsTrigger>
-                </TabsList>
-              </Tabs>
-
-              {/* Find Events Button */}
+              {/* Create Event Button */}
               <Button asChild>
-                <Link to="/musician-availEvents">
+                <Link to="/create-event">
                   <Plus className="mr-2 h-4 w-4" />
-                  Find Events
+                  Create Event
                 </Link>
               </Button>
             </div>
@@ -426,96 +389,34 @@ export const BookingsTab: React.FC<BookingsTabProps> = ({ bookings, musician, ev
       {/* Main Content */}
       <Card>
         <CardContent className="p-6">
-          {viewMode === "calendar" ? renderCalendarView() : (
-            <BookingList 
-              items={filteredItems} 
-              onBookingSelect={handleEventClick}
-            />
-          )}
+          {renderCalendarView()}
         </CardContent>
       </Card>
 
       <EventDialog
-        isOpen={isEventDialogOpen || isBookingDialogOpen}
+        isOpen={isEventDialogOpen}
         onClose={closeEventDialog}
         event={selectedEvent}
         booking={selectedBooking}
-        currentUser={{ musician: { id: musician.id } }}
-        userRole="musician"
+        bookings={selectedEvent ? bookings.filter(booking => booking.event?.id === selectedEvent.id) : []}
+        currentUser={{ venue: { id: venue.id } }}
+        userRole="venue"
         onStatusUpdate={(updatedBooking: any) => {
           // Refresh the page to get updated data
           window.location.reload();
         }}
+        onAcceptApplication={(bookingId: string) => {
+          // Handle accept - this is for dashboard view so might not need implementation
+          console.log('Accept application:', bookingId);
+        }}
+        onRejectApplication={(bookingId: string) => {
+          // Handle reject - this is for dashboard view so might not need implementation  
+          console.log('Reject application:', bookingId);
+        }}
+        onMessageOtherParty={(recipientId: string) => {
+          window.open(`/messages?recipient=${recipientId}`, '_blank');
+        }}
       />
-    </div>
-  );
-};
-
-const BookingList: React.FC<{
-  items: any[];
-  onBookingSelect: (event: any) => void;
-}> = ({ items, onBookingSelect }) => {
-  return (
-    <div className="space-y-4">
-      {items.map(item => {
-        // For musician's view, show venue information
-        const venue = item.venue;
-        
-        return (
-          <div
-            key={item.id}
-            className="p-4 border rounded-lg hover:bg-gray-50 cursor-pointer"
-            onClick={() => onBookingSelect(item)}
-          >
-            <div className="flex justify-between items-start">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
-                  {venue?.profile_picture ? (
-                    <img 
-                      src={venue.profile_picture} 
-                      alt={venue.name} 
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <span className="text-gray-500 text-sm">
-                      {venue?.name?.charAt(0) || item.title?.charAt(0) || "E"}
-                    </span>
-                  )}
-                </div>
-                <div>
-                  <h4 className="font-medium">{item.title}</h4>
-                  <p className="text-sm text-gray-600">
-                    {venue ? `at ${venue.name}` : 
-                     item.eventStatus === 'available' ? 'Available to apply' :
-                     item.eventStatus === 'applied' ? 'Application submitted' :
-                     item.eventStatus === 'selected' ? 'You were selected!' :
-                     item.eventStatus === 'confirmed' ? 'Confirmed booking' :
-                     item.eventStatus}
-                  </p>
-                  <p className="text-xs text-gray-500">{formatDate(item.date)}</p>
-                </div>
-              </div>
-              <div className="text-right">
-                <Badge variant="default" className={getStatusColorClasses(item.eventStatus, 'badge')}>
-                  {getStatusLabel(item.eventStatus)}
-                </Badge>
-                {item.hasAppliedBooking && (
-                  <p className="text-xs text-purple-600 mt-1">Application submitted</p>
-                )}
-                {item.hasConfirmedBooking && !item.hasCompletedBooking && item.eventStatus !== 'cancelled' && (
-                  <p className="text-xs text-green-600 mt-1">Confirmed gig</p>
-                )}
-                {item.hasCompletedBooking && (
-                  <p className="text-xs text-emerald-600 mt-1">Completed</p>
-                )}
-                {item.hasCancelledBooking && (
-                  <p className="text-xs text-red-600 mt-1">Cancelled</p>
-                )}
-              </div>
-            </div>
-          </div>
-        );
-      })}
     </div>
   );
 }; 

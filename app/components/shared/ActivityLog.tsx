@@ -82,26 +82,29 @@ export function ActivityLog({ activities }: ActivityLogProps) {
 export function generateBookingActivityItems(booking: any): ActivityItem[] {
   const activities: ActivityItem[] = [];
 
-  // Event creation
-  if (booking.event?.created_at) {
+  // Event creation - check multiple possible locations for created_at
+  const eventCreatedAt = booking.event?.created_at || booking.event?.createdAt;
+  if (eventCreatedAt) {
     activities.push({
-      timestamp: parseUTCTimestamp(booking.event.created_at),
+      timestamp: parseUTCTimestamp(eventCreatedAt),
       action: "Event Created",
       actor: "Venue",
-      details: `Event "${booking.event.title}" was created`
+      details: `Event "${booking.event.title || booking.event?.name || 'Untitled Event'}" was created`
     });
   }
 
   // Application submitted
   if (booking.applied_at || booking.status === 'applied') {
     // Use applied_at if available, otherwise fall back to created_at for applied bookings
-    const timestamp = booking.applied_at ? parseUTCTimestamp(booking.applied_at) : parseUTCTimestamp(booking.created_at);
-    activities.push({
-      timestamp,
-      action: "Application Submitted",
-      actor: "Musician",
-      details: booking.musician_pitch ? `Pitch: ${booking.musician_pitch}` : undefined
-    });
+    const appliedTimestamp = booking.applied_at || booking.appliedAt || booking.created_at || booking.createdAt;
+    if (appliedTimestamp) {
+      activities.push({
+        timestamp: parseUTCTimestamp(appliedTimestamp),
+        action: "Application Submitted",
+        actor: "Musician",
+        details: booking.musician_pitch ? `Pitch: ${booking.musician_pitch}` : undefined
+      });
+    }
   }
 
   // Musician selected
@@ -170,13 +173,15 @@ export function generateApplicationsActivityItems(applications: any[]): Activity
     // Application submitted
     if (booking.applied_at || booking.status === 'applied') {
       // Use applied_at if available, otherwise fall back to created_at for applied bookings
-      const timestamp = booking.applied_at ? parseUTCTimestamp(booking.applied_at) : parseUTCTimestamp(booking.created_at);
-      activities.push({
-        timestamp,
-        action: "Application Submitted",
-        actor: "Musician",
-        details: musicianStageName ? `${musicianStageName}${booking.musician_pitch ? ` - Pitch: ${booking.musician_pitch}` : ''}` : (booking.musician_pitch ? `Pitch: ${booking.musician_pitch}` : undefined)
-      });
+      const appliedTimestamp = booking.applied_at || booking.appliedAt || booking.created_at || booking.createdAt;
+      if (appliedTimestamp) {
+        activities.push({
+          timestamp: parseUTCTimestamp(appliedTimestamp),
+          action: "Application Submitted",
+          actor: "Musician",
+          details: musicianStageName ? `${musicianStageName}${booking.musician_pitch ? ` - Pitch: ${booking.musician_pitch}` : ''}` : (booking.musician_pitch ? `Pitch: ${booking.musician_pitch}` : undefined)
+        });
+      }
     }
 
     // Musician selected
@@ -244,13 +249,14 @@ export function generateApplicationsActivityItems(applications: any[]): Activity
 export function generateEventActivityItems(event: any, applications: any[]): ActivityItem[] {
   const activities: ActivityItem[] = [];
 
-  // Event creation
-  if (event.created_at) {
+  // Event creation - check multiple possible locations for created_at
+  const eventCreatedAt = event.created_at || event.createdAt;
+  if (eventCreatedAt) {
     activities.push({
-      timestamp: parseUTCTimestamp(event.created_at),
+      timestamp: parseUTCTimestamp(eventCreatedAt),
       action: "Event Created",
       actor: "Venue",
-      details: `Event "${event.title}" was created`
+      details: `Event "${event.title || event.name || 'Untitled Event'}" was created`
     });
   }
 

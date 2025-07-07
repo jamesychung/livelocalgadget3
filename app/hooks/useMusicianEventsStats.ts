@@ -6,7 +6,7 @@ interface Booking {
   proposed_rate?: number;
   created_at: string;
   event?: {
-    date: string;
+    date?: string;
     title: string;
   };
 }
