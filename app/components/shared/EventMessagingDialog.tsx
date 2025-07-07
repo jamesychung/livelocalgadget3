@@ -62,6 +62,20 @@ export function EventMessagingDialog({
   const foundEvent = currentEvent ? events.find(e => e.id === currentEvent.id) : null;
   const contextEvent = foundEvent || currentEvent;
   
+  // Debug venue data availability
+  console.log('🏢 EventMessagingDialog venue data check:', {
+    hasContextEvent: !!contextEvent,
+    contextEventId: contextEvent?.id,
+    hasVenue: !!contextEvent?.venue,
+    venueData: contextEvent?.venue,
+    hasOwnerId: !!(contextEvent?.venue as any)?.owner_id,
+    ownerId: (contextEvent?.venue as any)?.owner_id,
+    currentUserIsMusician: !!musician?.user_id,
+    currentUserIsVenue: !!venue?.owner_id,
+    musicianUserId: musician?.user_id,
+    venueOwnerId: venue?.owner_id
+  });
+  
   // State management
   const [newMessage, setNewMessage] = useState("");
   const [messageCategory, setMessageCategory] = useState("general");
@@ -97,16 +111,23 @@ export function EventMessagingDialog({
     }
   }, [contextEvent, currentBooking, recipientId, venue, musician, isEventContext, isBookingContext, isDirectContext]);
 
-  // Mark messages as read when dialog opens
-  React.useEffect(() => {
-    if (open && contextEvent && contextEvent.messages) {
-      const unreadMessages = contextEvent.messages.filter((msg: any) => !msg.read_status);
-      if (unreadMessages.length > 0) {
-        const messageIds = unreadMessages.map((msg: any) => msg.id);
-        markMessagesAsRead(messageIds).catch(console.error);
-      }
-    }
-  }, [open, contextEvent, markMessagesAsRead]);
+  // Mark messages as read when dialog opens - only mark messages where current user is recipient
+  // DISABLED: This was too aggressive and was immediately marking all messages as read
+  // TODO: Implement more selective read marking (e.g., when user scrolls to view messages)
+  // React.useEffect(() => {
+  //   if (open && contextEvent && contextEvent.messages) {
+  //     const currentUserId = venue?.owner_id || musician?.user_id;
+  //     const unreadMessagesForCurrentUser = contextEvent.messages.filter((msg: any) => 
+  //       !msg.read_status && msg.recipient_id === currentUserId
+  //     );
+  //     
+  //     if (unreadMessagesForCurrentUser.length > 0) {
+  //       const messageIds = unreadMessagesForCurrentUser.map((msg: any) => msg.id);
+  //       console.log('📖 Marking messages as read:', messageIds.length, 'messages for user', currentUserId);
+  //       markMessagesAsRead(messageIds).catch(console.error);
+  //     }
+  //   }
+  // }, [open, contextEvent, markMessagesAsRead, venue?.owner_id, musician?.user_id]);
 
   // Don't render if no valid context
   if (!isEventContext && !isBookingContext && !isDirectContext) {
@@ -133,6 +154,8 @@ export function EventMessagingDialog({
   const handleSendMessage = async () => {
     if (!newMessage.trim() || isSending) return;
     
+
+    
     setIsSending(true);
     try {
       if (isEventContext && contextEvent) {
@@ -150,24 +173,25 @@ export function EventMessagingDialog({
           }
         } else if (selectedRecipient !== "all") {
           // Send to specific recipient
-          let recipientId;
+          let messageRecipientId;
           
           if (musician?.user_id) {
             // If current user is a musician, send to venue owner
-            recipientId = contextEvent.venue?.owner_id;
-          } else {
+            const venueData = Array.isArray(contextEvent.venue) ? contextEvent.venue[0] : contextEvent.venue;
+            messageRecipientId = venueData?.owner_id;
+          } else if (venue?.owner_id) {
             // If current user is venue, send to selected musician
-            recipientId = contextEvent.musician?.user_id || selectedRecipient;
+            messageRecipientId = contextEvent.musician?.user_id || selectedRecipient;
           }
           
-          if (!recipientId) {
+          if (!messageRecipientId) {
             console.error('No recipient ID found for message');
             return;
           }
           
           await sendMessage({
             event_id: contextEvent.id,
-            recipient_id: recipientId,
+            recipient_id: messageRecipientId,
             content: newMessage,
             message_category: messageCategory,
             attachments: attachments.map(file => ({ name: file.name, size: file.size, type: file.type }))

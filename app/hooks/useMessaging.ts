@@ -41,6 +41,7 @@ export interface EventWithMessaging {
   venue?: {
     id: string;
     name: string;
+    owner_id: string;
   };
   musician?: {
     id: string;
@@ -69,6 +70,8 @@ export interface EventWithMessaging {
 }
 
 export function useMessaging(user: any) {
+  console.log('🎣 useMessaging hook called with user:', user?.email || 'No user');
+  
   const [events, setEvents] = useState<EventWithMessaging[]>([]);
   const [messages, setMessages] = useState<MessageData[]>([]);
   const [venue, setVenue] = useState<any>(null);
@@ -95,7 +98,14 @@ export function useMessaging(user: any) {
           .eq('owner_id', authUser.id)
           .single();
 
+        console.log('🏢 Venue profile fetch:', {
+          authUserId: authUser.id,
+          venueData,
+          venueError: venueError?.message
+        });
+
         if (!venueError && venueData) {
+          console.log('✅ Venue profile loaded successfully:', venueData);
           setVenue(venueData);
           setMusician(null);
           return;
@@ -142,6 +152,8 @@ export function useMessaging(user: any) {
     let lastMessageCheck = Date.now();
 
     // Set up real-time subscription
+    console.log('🔌 Setting up real-time subscription for user:', currentUserId);
+    
     const channel = supabase
       .channel('messages-' + currentUserId)
       .on(
@@ -152,21 +164,46 @@ export function useMessaging(user: any) {
           table: 'messages'
         },
         (payload) => {
+          console.log('🔔 Real-time payload received:', payload);
           realTimeWorking = true;
           lastMessageCheck = Date.now();
           
           if (payload.eventType === 'INSERT') {
             const newMessage = payload.new as MessageData;
             
+            console.log('📨 Real-time message received:', {
+              messageId: newMessage.id,
+              senderId: newMessage.sender_id,
+              recipientId: newMessage.recipient_id,
+              currentUserId,
+              senderRole: newMessage.sender_role,
+              recipientRole: newMessage.recipient_role
+            });
+            
             // Check if this message is relevant to the current user
             const isRelevant = currentUserId === newMessage.recipient_id || 
                               currentUserId === newMessage.sender_id;
+            
+            console.log('🎯 Message relevance check:', {
+              isRelevant,
+              currentUserId,
+              isRecipient: currentUserId === newMessage.recipient_id,
+              isSender: currentUserId === newMessage.sender_id
+            });
             
             if (isRelevant) {
               // Add new message to messages array
               setMessages(prev => {
                 // Avoid duplicates
-                if (prev.find(m => m.id === newMessage.id)) return prev;
+                if (prev.find(m => m.id === newMessage.id)) {
+                  console.log('🔄 Real-time: Message already exists, skipping:', newMessage.id);
+                  return prev;
+                }
+                console.log('✅ Real-time: Adding message to state:', {
+                  messageId: newMessage.id,
+                  isRecipient: currentUserId === newMessage.recipient_id,
+                  isSender: currentUserId === newMessage.sender_id
+                });
                 return [...prev, newMessage];
               });
               
@@ -210,15 +247,24 @@ export function useMessaging(user: any) {
           }
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        console.log('📡 Real-time subscription status:', status);
+      });
 
     // Robust polling fallback system
     const pollForNewMessages = async () => {
+      console.log('🔄 Polling for new messages...', {
+        currentUserId,
+        isVenue: !!venue?.owner_id,
+        isMusician: !!musician?.user_id,
+        messagesCount: messages.length
+      });
       try {
         // Check if real-time is working (if we received a message in last 30 seconds, assume it's working)
         const realtimeRecentlyWorked = Date.now() - lastMessageCheck < 30000;
         
         if (realtimeRecentlyWorked && realTimeWorking) {
+          console.log('⚡ Real-time working, skipping poll');
           return;
         }
         
@@ -227,12 +273,19 @@ export function useMessaging(user: any) {
           ? Math.max(...messages.map(m => new Date(m.sent_date_time).getTime()))
           : Date.now() - 60000; // Last minute if no messages
 
-        // Fetch new messages since our latest
+        console.log('🔍 Polling query params:', {
+          currentUserId,
+          latestMessageTime: new Date(latestMessageTime).toISOString(),
+          queryFilter: `or(sender_id.eq.${currentUserId},recipient_id.eq.${currentUserId})`
+        });
+
+        // Fetch new messages since our latest - messages where user is sender OR recipient
         const { data: newMessages, error } = await supabase
           .from('messages')
           .select('*')
           .gte('sent_date_time', new Date(latestMessageTime).toISOString())
           .eq('is_active', true)
+          .or(`sender_id.eq.${currentUserId},recipient_id.eq.${currentUserId}`)
           .order('sent_date_time', { ascending: true });
 
         if (error) {
@@ -241,37 +294,51 @@ export function useMessaging(user: any) {
         }
 
         if (newMessages && newMessages.length > 0) {
+          console.log('📬 Found new messages via polling:', newMessages.length);
           newMessages.forEach(newMessage => {
+            // Message is relevant if user is sender OR recipient
             const isRelevant = currentUserId === newMessage.recipient_id || 
                               currentUserId === newMessage.sender_id;
+            
+            console.log('🔍 Processing polled message:', {
+              messageId: newMessage.id,
+              senderId: newMessage.sender_id,
+              recipientId: newMessage.recipient_id,
+              currentUserId,
+              isRelevant,
+              readStatus: newMessage.read_status,
+              isRecipient: currentUserId === newMessage.recipient_id,
+              isSender: currentUserId === newMessage.sender_id,
+              eventId: newMessage.event_id
+            });
             
             if (isRelevant) {
               
               // Add to messages array (avoid duplicates)
               setMessages(prev => {
-                if (prev.find(m => m.id === newMessage.id)) return prev;
+                if (prev.find(m => m.id === newMessage.id)) {
+                  console.log('⚠️ Polling: Message already exists, skipping:', newMessage.id);
+                  return prev;
+                }
+                console.log('✅ Polling: Adding new message to state:', {
+                  messageId: newMessage.id,
+                  isRecipient: currentUserId === newMessage.recipient_id,
+                  isSender: currentUserId === newMessage.sender_id,
+                  readStatus: newMessage.read_status
+                });
                 return [...prev, newMessage];
               });
               
               // Update events
               setEvents(prev => {
-                console.log('🔍 Looking for event', newMessage.event_id, 'in', prev.length, 'events');
-                const eventFound = prev.find(e => e.id === newMessage.event_id);
-                console.log('🔍 Event found:', eventFound ? 'YES' : 'NO');
-                
                 let wasUpdated = false;
                 const newEvents = prev.map(event => {
                   if (event.id === newMessage.event_id) {
                     const updatedMessages = [...(event.messages || [])];
-                    console.log('🔍 Current messages in event:', updatedMessages.length);
-                    console.log('🔍 Message IDs in event:', updatedMessages.map(m => m.id));
                     
                     if (!updatedMessages.find(m => m.id === newMessage.id)) {
                       updatedMessages.push(newMessage);
                       wasUpdated = true;
-                      console.log('✅ Added polled message to event', newMessage.event_id, 'New count:', updatedMessages.length);
-                    } else {
-                      console.log('⚠️ Message already exists in event messages');
                     }
                     
                     const isForCurrentUser = newMessage.recipient_id === currentUserId;
@@ -302,6 +369,7 @@ export function useMessaging(user: any) {
     };
 
     // Poll every 3 seconds initially, then reduce frequency if real-time is working
+    console.log('⏰ Starting polling every 3 seconds...');
     let pollInterval = setInterval(pollForNewMessages, 3000);
 
     // After 30 seconds, if real-time is working, reduce polling frequency
@@ -391,13 +459,23 @@ export function useMessaging(user: any) {
           }
 
           // Transform bookings to events format
-          eventsData = bookingsData?.map(booking => ({
-            ...booking.event,
-            booking_id: booking.id,
-            booking_status: booking.status,
-            booking_rate: booking.proposed_rate,
-            booking_pitch: booking.musician_pitch
-          })) || [];
+          eventsData = bookingsData?.map(booking => {
+            console.log('🔍 Raw booking data:', {
+              bookingId: booking.id,
+              eventId: (booking.event as any)?.id,
+              eventTitle: (booking.event as any)?.title,
+              venueData: (booking.event as any)?.venue,
+              fullEvent: booking.event
+            });
+            
+            return {
+              ...booking.event,
+              booking_id: booking.id,
+              booking_status: booking.status,
+              booking_rate: booking.proposed_rate,
+              booking_pitch: booking.musician_pitch
+            };
+          }) || [];
           
           eventIds = eventsData.map(event => event.id);
         }
@@ -469,6 +547,14 @@ export function useMessaging(user: any) {
         }
 
         // Combine events with their bookings and messages
+        console.log('🔍 Processing events data:', {
+          totalEvents: eventsData?.length || 0,
+          isMusician: !!musician?.user_id,
+          isVenue: !!venue?.owner_id,
+          musicianId: musician?.user_id,
+          venueOwnerId: venue?.owner_id
+        });
+        
         const eventsWithData = eventsData?.map(event => {
           const eventBookings = bookingsData.filter(booking => booking.event_id === event.id);
           const eventMessages = messagesData.filter(message => message.event_id === event.id);
@@ -478,9 +564,9 @@ export function useMessaging(user: any) {
           // Count unread messages based on user type
           let unreadCount = 0;
           if (venue?.owner_id) {
-            // For venues: count messages where venue is recipient
+            // For venues: count messages where venue owner is recipient
             unreadCount = eventMessages.filter(msg => 
-              msg.recipient_role === 'venue' && !msg.read_status
+              msg.recipient_id === venue.owner_id && !msg.read_status
             ).length;
           } else if (musician?.user_id) {
             // For musicians: count messages where musician is recipient
@@ -519,7 +605,7 @@ export function useMessaging(user: any) {
             .filter(booking => booking.musician)
             .map(booking => booking.musician);
 
-          return {
+          const finalEvent = {
             ...event,
             applications,
             musician: confirmedBooking?.musician || null,
@@ -529,6 +615,32 @@ export function useMessaging(user: any) {
             status: event.event_status || event.booking_status, // Map to expected field name
             venue: Array.isArray(event.venue) ? event.venue[0] : event.venue
           } as EventWithMessaging;
+          
+          // Debug venue data for musicians
+          if (musician?.user_id) {
+            console.log('🎵 Event processing for musician:', {
+              eventId: finalEvent.id,
+              eventTitle: finalEvent.title,
+              hasVenue: !!finalEvent.venue,
+              venueData: finalEvent.venue,
+              rawEventVenue: event.venue
+            });
+          }
+          
+          if (musician?.user_id && finalEvent.venue) {
+            console.log('🎵 Event venue data for musician:', {
+              eventId: finalEvent.id,
+              eventTitle: finalEvent.title,
+              venueId: finalEvent.venue.id,
+              venueOwnerId: (finalEvent.venue as any).owner_id,
+              venueName: finalEvent.venue.name,
+              musicianUserId: musician.user_id,
+              fullVenueData: finalEvent.venue,
+              isOwnerIdSameAsMusician: (finalEvent.venue as any).owner_id === musician.user_id
+            });
+          }
+          
+          return finalEvent;
         }) || [];
 
         setEvents(eventsWithData);
@@ -560,21 +672,72 @@ export function useMessaging(user: any) {
       const senderId = venue?.owner_id || musician?.user_id;
       const senderRole = venue?.owner_id ? 'venue' : 'musician';
       const recipientRole = venue?.owner_id ? 'musician' : 'venue';
+      
+      // CRITICAL FIX: Validate and correct recipient_id
+      let finalRecipientId = messageData.recipient_id;
+      
+      // If recipient_id equals sender_id, this is a self-message bug - fix it
+      if (finalRecipientId === senderId) {
+        console.log('🚨 DETECTED SELF-MESSAGE BUG - FIXING:', {
+          originalRecipientId: finalRecipientId,
+          senderId,
+          senderRole
+        });
+        
+                 // Find the correct recipient based on the event
+         const event = events.find(e => e.id === messageData.event_id);
+         if (event?.venue?.owner_id && senderRole === 'musician') {
+           // Musician sending to venue
+           finalRecipientId = event.venue.owner_id;
+           console.log('✅ Fixed recipient for musician->venue:', finalRecipientId);
+         } else if (senderRole === 'venue') {
+           // Venue sending to musician - need to find musician's user_id from applications or allPastMusicians
+           const musicianUserId = event?.allPastMusicians?.find(m => m.user_id)?.user_id ||
+                                 event?.applications?.find(app => app.musician)?.musician?.id;
+           if (musicianUserId) {
+             finalRecipientId = musicianUserId;
+             console.log('✅ Fixed recipient for venue->musician:', finalRecipientId);
+           } else {
+             console.error('❌ Could not find musician user_id for venue message');
+             throw new Error('Cannot determine musician recipient');
+           }
+         } else {
+           console.error('❌ Could not determine correct recipient');
+           throw new Error('Cannot determine message recipient');
+         }
+      }
+
+      console.log('📤 Sending message:', {
+        event_id: messageData.event_id,
+        sender_id: senderId,
+        recipient_id: finalRecipientId,
+        original_recipient_id: messageData.recipient_id,
+        sender_role: senderRole,
+        recipient_role: recipientRole,
+        content: messageData.content.substring(0, 50),
+        venueOwnerId: venue?.owner_id,
+        musicianUserId: musician?.user_id,
+        wasFixed: finalRecipientId !== messageData.recipient_id
+      });
+
+      const messageToInsert = {
+        event_id: messageData.event_id,
+        sender_id: senderId,
+        recipient_id: finalRecipientId,
+        sender_role: senderRole,
+        recipient_role: recipientRole,
+        message_category: messageData.message_category,
+        content: messageData.content,
+        attachments: messageData.attachments || [],
+        read_status: false,
+        sent_date_time: new Date().toISOString()
+      };
+      
+      console.log('💾 Inserting message into database:', messageToInsert);
 
       const { data, error } = await supabase
         .from('messages')
-        .insert({
-          event_id: messageData.event_id,
-          sender_id: senderId,
-          recipient_id: messageData.recipient_id,
-          sender_role: senderRole,
-          recipient_role: recipientRole,
-          message_category: messageData.message_category,
-          content: messageData.content,
-          attachments: messageData.attachments || [],
-          read_status: false,
-          sent_date_time: new Date().toISOString()
-        })
+        .insert(messageToInsert)
         .select()
         .single();
 
@@ -582,12 +745,29 @@ export function useMessaging(user: any) {
         throw error;
       }
 
-      // Immediately update local state with the new message
+      console.log('✅ Message inserted successfully:', {
+        messageId: data.id,
+        sender_id: data.sender_id,
+        recipient_id: data.recipient_id,
+        sender_role: data.sender_role,
+        recipient_role: data.recipient_role
+      });
+
+      // Add sent message to local state immediately for instant display
       const newMessage = {
         ...data,
         sender_role: senderRole,
         recipient_role: recipientRole
       } as MessageData;
+
+      console.log('📨 Adding sent message to sender state:', {
+        messageId: newMessage.id,
+        senderId: newMessage.sender_id,
+        recipientId: newMessage.recipient_id,
+        readStatus: newMessage.read_status,
+        currentUserId: senderId,
+        shouldCountAsUnread: newMessage.recipient_id === senderId
+      });
 
       // Update messages array
       setMessages(prev => [...prev, newMessage]);
@@ -683,9 +863,44 @@ export function useMessaging(user: any) {
 
   // Get total unread count
   const getTotalUnreadCount = () => {
-    return messages.filter(msg => 
-      (msg.recipient_id === venue?.owner_id || msg.recipient_id === musician?.user_id) && !msg.read_status
-    ).length;
+    const currentUserId = venue?.owner_id || musician?.user_id;
+    const unreadMessages = messages.filter(msg => 
+      msg.recipient_id === currentUserId && !msg.read_status
+    );
+    
+    // Find any messages that might be incorrectly counted
+    const suspiciousMessages = messages.filter(msg => 
+      msg.sender_id === currentUserId && !msg.read_status
+    );
+    
+    console.log('📊 getTotalUnreadCount called:', {
+      currentUserId,
+      userType: venue?.owner_id ? 'venue' : 'musician',
+      venueOwnerId: venue?.owner_id,
+      musicianUserId: musician?.user_id,
+      totalMessages: messages.length,
+      unreadMessages: unreadMessages.length,
+      messagesForUser: messages.filter(m => m.recipient_id === currentUserId).length,
+      messagesSentByUser: messages.filter(m => m.sender_id === currentUserId).length,
+      suspiciousMessages: suspiciousMessages.length,
+      suspiciousMessagesDebug: suspiciousMessages.map(m => ({
+        id: m.id.substring(0, 8),
+        senderId: m.sender_id,
+        recipientId: m.recipient_id,
+        read: m.read_status
+      })),
+      allMessagesDebug: messages.map(m => ({
+        id: m.id.substring(0, 8),
+        senderId: m.sender_id,
+        recipientId: m.recipient_id,
+        read: m.read_status,
+        isForCurrentUser: m.recipient_id === currentUserId,
+        isSentByCurrentUser: m.sender_id === currentUserId,
+        category: m.message_category || 'unknown'
+      }))
+    });
+    
+    return unreadMessages.length;
   };
 
   return {
