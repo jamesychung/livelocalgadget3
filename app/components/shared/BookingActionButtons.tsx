@@ -54,9 +54,27 @@ export const BookingActionButtons: React.FC<BookingActionButtonsProps> = ({
   const nextPossibleStatuses = getNextPossibleStatuses(currentStatus);
   
   // Determine user role
-  const isVenue = currentUser?.venue?.id === booking.venue_id;
-  const isMusician = currentUser?.musician?.id === booking.musician_id;
+  const isVenue = currentUser?.venue?.id === booking.event?.venue?.id;
+  const isMusician = currentUser?.musician?.id === booking.musician?.id;
   const userRole = isVenue ? 'venue' : isMusician ? 'musician' : null;
+  
+  // Debug information
+  console.log('🎬 BookingActionButtons Debug:', {
+    currentStatus,
+    isVenue,
+    isMusician,
+    userRole,
+    currentUserVenueId: currentUser?.venue?.id,
+    currentUserMusicianId: currentUser?.musician?.id,
+    bookingVenueId: booking.event?.venue?.id,
+    bookingMusicianId: booking.musician?.id,
+    bookingId: booking.id,
+    venueIdMatch: currentUser?.venue?.id === booking.event?.venue?.id,
+    musicianIdMatch: currentUser?.musician?.id === booking.musician?.id
+  });
+  
+  console.log('🎬 Full Current User:', currentUser);
+  console.log('🎬 Full Booking:', booking);
 
   // Filter actions based on user role and current status
   const getAvailableActions = () => {

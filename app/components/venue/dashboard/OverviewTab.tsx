@@ -28,6 +28,8 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [applicationsDialogOpen, setApplicationsDialogOpen] = useState(false);
   const [selectedEventForApplications, setSelectedEventForApplications] = useState<any>(null);
+  
+
 
   // Use venue events hook to get pending applications data
   const {
@@ -237,9 +239,7 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
           // Handle reject - this is for dashboard view so might not need implementation  
           console.log('Reject application:', bookingId);
         }}
-        onMessageOtherParty={(recipientId: string) => {
-          window.open(`/messages?recipient=${recipientId}`, '_blank');
-        }}
+
       />
 
       {/* Applications Dialog */}
@@ -254,6 +254,7 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
         userRole="venue"
         showApplicationsList={true}
       />
+
     </div>
   );
 };

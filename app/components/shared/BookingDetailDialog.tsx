@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "../ui/dialog";
 import { Button } from "../ui/button";
 import { Badge } from "../ui/badge";
@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { Calendar, Clock, User, MapPin, DollarSign, MessageSquare, History } from "lucide-react";
 import { BookingActionButtons } from "./BookingActionButtons";
 import { ActivityLog, generateBookingActivityItems } from "./ActivityLog";
+import { EventMessagingDialog } from "./EventMessagingDialog";
 
 interface BookingDetailDialogProps {
   isOpen: boolean;
@@ -38,6 +39,8 @@ export const BookingDetailDialog: React.FC<BookingDetailDialogProps> = ({
   currentUser,
   onStatusUpdate
 }) => {
+  const [isMessagingDialogOpen, setIsMessagingDialogOpen] = useState(false);
+  
   if (!booking) return null;
 
   // Format date for display
@@ -147,13 +150,21 @@ export const BookingDetailDialog: React.FC<BookingDetailDialogProps> = ({
           </Button>
           <Button 
             variant="outline"
-            onClick={() => window.open(`/messages?recipient=${booking.musician?.id}`, '_blank')}
+            onClick={() => setIsMessagingDialogOpen(true)}
           >
             <MessageSquare className="h-4 w-4 mr-2" />
             Message Musician
           </Button>
         </DialogFooter>
       </DialogContent>
+      
+      {/* Messaging Dialog */}
+      <EventMessagingDialog
+        open={isMessagingDialogOpen}
+        onOpenChange={setIsMessagingDialogOpen}
+        booking={booking}
+        onClose={() => setIsMessagingDialogOpen(false)}
+      />
     </Dialog>
   );
 }; 

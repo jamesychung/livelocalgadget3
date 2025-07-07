@@ -9,6 +9,7 @@ import { Booking, Musician } from "./types";
 import { formatDate } from "./utils";
 import { Link } from "react-router-dom";
 import { EventDialog } from "../../shared/EventDialog";
+import { EventMessagingDialog } from "../../shared/EventMessagingDialog";
 import { EventStatusLegend } from "../../shared/EventStatusLegend";
 import { getStatusColorClasses, getStatusLabel } from "../../../lib/utils";
 import { format } from "date-fns";
@@ -26,6 +27,7 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings, musi
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [isEventDialogOpen, setIsEventDialogOpen] = useState(false);
   const [isBookingDialogOpen, setIsBookingDialogOpen] = useState(false);
+  const [isMessagingDialogOpen, setIsMessagingDialogOpen] = useState(false);
 
   const handleEventClick = (event: any) => {
     // Find the corresponding booking for this event
@@ -424,8 +426,18 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings, musi
           console.log('Reject application:', bookingId);
         }}
         onMessageOtherParty={(recipientId: string) => {
-          window.open(`/messages?recipient=${recipientId}`, '_blank');
+          // Open the messaging dialog instead of redirecting
+          setIsMessagingDialogOpen(true);
         }}
+      />
+      
+      {/* Messaging Dialog */}
+      <EventMessagingDialog
+        open={isMessagingDialogOpen}
+        onOpenChange={setIsMessagingDialogOpen}
+        event={selectedEvent}
+        booking={selectedBooking}
+        onClose={() => setIsMessagingDialogOpen(false)}
       />
     </div>
   );

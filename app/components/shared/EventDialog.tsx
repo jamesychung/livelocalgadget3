@@ -1,7 +1,6 @@
 import React from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "../ui/dialog";
 import { Button } from "../ui/button";
-
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { Calendar, Clock, User, MapPin, DollarSign, MessageSquare, History, Music, Phone, Mail, Eye, Users, CheckCircle, XCircle } from "lucide-react";
 import { BookingActionButtons } from "./BookingActionButtons";
@@ -9,6 +8,8 @@ import { ActivityLog, generateBookingActivityItems, generateEventActivityItems }
 import { StatusDisplay } from "./StatusDisplay";
 import { getStatusColorClasses, getStatusLabel, deriveEventStatusFromBookings } from "../../lib/utils";
 import { Link } from "react-router-dom";
+import { EventMessagingDialog } from "./EventMessagingDialog";
+import { Badge } from "../ui/badge";
 
 // Helper function to get status border colors for dialog
 const getStatusBorderColor = (status: string): string => {
@@ -48,7 +49,7 @@ interface EventDialogProps {
   onAcceptApplication?: (bookingId: string) => void;
   onRejectApplication?: (bookingId: string) => void;
   onApply?: (event: any) => void;
-  onMessageOtherParty?: (recipientId: string) => void;
+  onMessageOtherParty?: (recipientId: string) => void; // Legacy - now handled internally
   
   // Display options
   showApplicationsList?: boolean; // Show applications list (from ApplicationDetailDialog)
@@ -89,7 +90,7 @@ export const EventDialog: React.FC<EventDialogProps> = ({
   onAcceptApplication,
   onRejectApplication,
   onApply,
-  onMessageOtherParty,
+  onMessageOtherParty, // Legacy prop - now handled internally
   showApplicationsList = false,
   showBookingActions = true,
   
@@ -99,6 +100,21 @@ export const EventDialog: React.FC<EventDialogProps> = ({
   selectedEvent,
   getEventApplications
 }) => {
+  // Internal state for messaging dialog
+  const [isMessagingDialogOpen, setIsMessagingDialogOpen] = React.useState(false);
+  
+  // Internal status update handler - if no onStatusUpdate is provided, we'll handle it internally
+  const handleStatusUpdate = React.useCallback((updatedBooking: any) => {
+    if (onStatusUpdate) {
+      // Use the provided handler
+      onStatusUpdate(updatedBooking);
+    } else {
+      // Handle internally - refresh the page to show updated data
+      console.log('Booking status updated:', updatedBooking);
+      window.location.reload();
+    }
+  }, [onStatusUpdate]);
+
   // Handle alternative prop names for compatibility
   const dialogOpen = isOpen ?? open ?? false;
   const dialogClose = onClose ?? ((open: boolean) => onOpenChange?.(open)) ?? (() => {});
@@ -135,45 +151,66 @@ export const EventDialog: React.FC<EventDialogProps> = ({
     return `${displayHour}:${minutes} ${ampm}`;
   };
 
-  // Generate activity log based on context
+  // Generate activity items for the ActivityLog
   const getActivityItems = () => {
     if (booking) {
       // If we have a specific booking, show its activity
-      console.log('🔍 EventDialog booking data for ActivityLog:', booking);
       return generateBookingActivityItems(booking);
     } else {
-      // If viewing event without specific booking, show event + all applications
-      console.log('🔍 EventDialog event data for ActivityLog:', dialogEvent);
-      console.log('🔍 EventDialog bookings data for ActivityLog:', dialogBookings);
+      // Otherwise, show event activity with all bookings
       return generateEventActivityItems(dialogEvent, dialogBookings);
     }
   };
 
   const activityItems = getActivityItems();
 
-  // Get the relevant person to display (venue for musician, musician for venue)
+  // Get the other party (venue or musician) for profile links and messaging
   const getOtherParty = () => {
     if (userRole === 'venue') {
-      return booking?.musician || (dialogBookings.length === 1 ? dialogBookings[0].musician : null);
-    } else {
-      return dialogEvent.venue || booking?.venue;
+      // For venues, try to get musician from specific booking first
+      if (booking?.musician) {
+        return booking.musician;
+      }
+      // If no specific booking, get musician from the first booking with a musician
+      const bookingWithMusician = dialogBookings.find(b => b.musician);
+      if (bookingWithMusician?.musician) {
+        return bookingWithMusician.musician;
+      }
+    } else if (userRole === 'musician' && dialogEvent?.venue) {
+      return dialogEvent.venue;
     }
+    return null;
   };
 
   const otherParty = getOtherParty();
+  
+  // Debug information
+  console.log('🎭 EventDialog Debug:', {
+    userRole,
+    hasBooking: !!booking,
+    bookingsCount: dialogBookings.length,
+    hasOtherParty: !!otherParty,
+    eventTitle: dialogEvent?.title,
+    bookingStatuses: dialogBookings.map(b => b.status)
+  });
 
-  // Get dialog title based on context
   const getDialogTitle = () => {
-    if (userRole === 'venue') {
-      if (booking?.musician) {
-        return `Booking with ${booking.musician.stage_name}`;
-      } else if (dialogBookings.length > 0) {
-        return `Applications for ${dialogEvent.title}`;
-      } else {
-        return dialogEvent.title;
-      }
-    } else {
-      return dialogEvent.title;
+    if (showApplicationsList) {
+      return `Applications for ${dialogEvent.title}`;
+    }
+    if (booking) {
+      return `Booking Details - ${dialogEvent.title}`;
+    }
+    return dialogEvent.title;
+  };
+
+  // Internal message handler - opens the integrated messaging dialog
+  const handleOpenMessaging = () => {
+    setIsMessagingDialogOpen(true);
+    
+    // Call legacy onMessageOtherParty if provided (for backward compatibility)
+    if (onMessageOtherParty && otherParty) {
+      onMessageOtherParty(otherParty.id);
     }
   };
 
@@ -193,6 +230,10 @@ export const EventDialog: React.FC<EventDialogProps> = ({
               <Clock className="h-4 w-4 text-muted-foreground" />
               <span className="font-medium">Time:</span> {formatTime(dialogEvent.start_time)} - {formatTime(dialogEvent.end_time)}
             </div>
+            <div className="flex items-center gap-2">
+              <DollarSign className="h-4 w-4 text-muted-foreground" />
+              <span className="font-medium">Rate:</span> ${dialogEvent.rate || "TBD"}
+            </div>
           </div>
           <div className="space-y-2 text-sm">
             <div className="flex items-center gap-2">
@@ -209,92 +250,75 @@ export const EventDialog: React.FC<EventDialogProps> = ({
         </div>
       </div>
 
-      {/* Musician Information (if specific booking) */}
-      {booking?.musician && (
-        <div>
-          <h3 className="font-semibold mb-3">Musician Information</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2 text-sm">
-              <div className="flex items-center gap-2">
-                <User className="h-4 w-4 text-muted-foreground" />
-                <span className="font-medium">Name:</span> {booking.musician.stage_name}
-              </div>
-              <div className="flex items-center gap-2">
-                <MapPin className="h-4 w-4 text-muted-foreground" />
-                <span className="font-medium">Location:</span> 
-                {booking.musician.city && booking.musician.state ? 
-                  `${booking.musician.city}, ${booking.musician.state}` : "N/A"}
-              </div>
-            </div>
-            <div className="space-y-2 text-sm">
-              <div className="flex items-center gap-2">
-                <DollarSign className="h-4 w-4 text-muted-foreground" />
-                <span className="font-medium">Proposed Rate:</span> ${booking.proposed_rate || "N/A"}
-              </div>
-            </div>
-          </div>
-          
-          {booking.musician_pitch && (
-            <div className="mt-4">
-              <h4 className="font-medium mb-2">Musician's Message</h4>
-              <div className="bg-muted p-3 rounded-lg text-sm">
-                {booking.musician_pitch}
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* All Applications (if no specific booking) */}
-      {!booking && dialogBookings.length > 0 && (
+      {/* Applications List */}
+      {showApplicationsList && dialogBookings.length > 0 && (
         <div>
           <h3 className="font-semibold mb-3">Applications ({dialogBookings.length})</h3>
-          <div className="space-y-3 max-h-60 overflow-y-auto">
-            {dialogBookings.map((application) => (
-              <div key={application.id} className="border rounded-lg p-3">
-                <div className="flex items-center justify-between">
+          <div className="space-y-4">
+            {dialogBookings.map((application, index) => (
+              <div key={application.id || index} className="border rounded-lg p-4">
+                <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
                       {application.musician?.profile_picture ? (
                         <img 
                           src={application.musician.profile_picture} 
-                          alt={application.musician.stage_name}
+                          alt={application.musician.stage_name} 
                           className="w-full h-full object-cover"
                         />
                       ) : (
-                        <Music className="h-5 w-5 text-gray-400" />
+                        <User className="h-5 w-5 text-gray-500" />
                       )}
                     </div>
                     <div>
-                      <h4 className="font-medium">{application.musician?.stage_name}</h4>
+                      <h4 className="font-medium">{application.musician?.stage_name || "Unknown Musician"}</h4>
                       <p className="text-sm text-muted-foreground">
-                        ${application.proposed_rate} • {application.musician?.city}, {application.musician?.state}
+                        Applied {application.applied_at ? formatDate(application.applied_at) : "Recently"}
                       </p>
-                      <StatusDisplay status={application.status} variant="badge" />
                     </div>
                   </div>
-                  <div className="flex gap-2">
-                    {application.status === 'applied' && onAcceptApplication && (
-                      <Button size="sm" onClick={() => onAcceptApplication(application.id)}>
-                        <CheckCircle className="h-4 w-4 mr-1" />
-                        Select
-                      </Button>
+                  <div className="flex items-center gap-2">
+                    <StatusDisplay status={application.status} variant="button" />
+                    {application.proposed_rate && (
+                      <Badge variant="outline">${application.proposed_rate}</Badge>
                     )}
-                    {application.status === 'applied' && onRejectApplication && (
-                      <Button size="sm" variant="outline" onClick={() => onRejectApplication(application.id)}>
-                        <XCircle className="h-4 w-4 mr-1" />
-                        Reject
-                      </Button>
-                    )}
-                    <Button size="sm" variant="outline" asChild>
-                      <Link to={`/musician/${application.musician?.id}`}>
-                        <Eye className="h-4 w-4" />
-                      </Link>
-                    </Button>
                   </div>
                 </div>
+                
+                {/* Action Buttons */}
+                <div className="flex gap-2 mb-3">
+                  {application.status === 'applied' && (
+                    <>
+                      <Button 
+                        size="sm" 
+                        onClick={() => onAcceptApplication?.(application.id)}
+                        className="bg-green-600 hover:bg-green-700"
+                      >
+                        <CheckCircle className="h-3 w-3 mr-1" />
+                        Accept
+                      </Button>
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        onClick={() => onRejectApplication?.(application.id)}
+                        className="border-red-300 text-red-600 hover:bg-red-50"
+                      >
+                        <XCircle className="h-3 w-3 mr-1" />
+                        Reject
+                      </Button>
+                    </>
+                  )}
+                  <Button variant="outline" size="sm" asChild>
+                    <Link to={`/musician/${application.musician?.id}`}>
+                      <Eye className="h-3 w-3 mr-1" />
+                      View Profile
+                    </Link>
+                  </Button>
+                </div>
+                
                 {application.musician_pitch && (
-                  <div className="mt-2 p-2 bg-muted rounded text-sm">
+                  <div className="bg-gray-50 p-3 rounded text-sm">
+                    <span className="font-medium">Pitch:</span>
                     {application.musician_pitch}
                   </div>
                 )}
@@ -401,97 +425,122 @@ export const EventDialog: React.FC<EventDialogProps> = ({
   );
 
   return (
-    <Dialog open={dialogOpen} onOpenChange={dialogClose}>
-      <DialogContent className={`max-w-4xl max-h-[80vh] overflow-y-auto ${statusBorderColor} border-l-4 border-r-4`}>
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Calendar className="h-5 w-5" />
-            {getDialogTitle()}
-          </DialogTitle>
-          <DialogDescription>
-            View event details and activity log
-          </DialogDescription>
-        </DialogHeader>
-        
-        <Tabs defaultValue="details">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="details">Details</TabsTrigger>
-            <TabsTrigger value="activity">Activity Log</TabsTrigger>
-          </TabsList>
+    <>
+      <Dialog open={dialogOpen} onOpenChange={dialogClose}>
+        <DialogContent className={`max-w-4xl max-h-[80vh] overflow-y-auto ${statusBorderColor} border-l-4 border-r-4`}>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Calendar className="h-5 w-5" />
+              {getDialogTitle()}
+            </DialogTitle>
+            <DialogDescription>
+              View event details and activity log
+            </DialogDescription>
+          </DialogHeader>
           
-          <TabsContent value="details" className="space-y-6 pt-4">
-            {userRole === 'venue' ? renderVenueView() : renderMusicianView()}
+          <Tabs defaultValue="details">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="details">Details</TabsTrigger>
+              <TabsTrigger value="activity">Activity Log</TabsTrigger>
+            </TabsList>
             
-            {/* Action Buttons */}
-            {booking && onStatusUpdate && (
-              <BookingActionButtons
-                booking={booking}
-                currentUser={currentUser}
-                onStatusUpdate={onStatusUpdate}
-                className="mt-4"
-              />
-            )}
-          </TabsContent>
-          
-          <TabsContent value="activity" className="pt-4">
-            <ActivityLog activities={activityItems} />
-          </TabsContent>
-        </Tabs>
-        
-        <DialogFooter>
-          <Button variant="outline" onClick={onClose}>
-            Close
-          </Button>
-          
-          {/* Role-specific action buttons */}
-          {userRole === 'venue' && otherParty && (
-            <>
-              <Button variant="outline" asChild>
-                <Link to={`/musician/${otherParty.id}`}>
-                  <User className="h-4 w-4 mr-2" />
-                  View Musician Profile
-                </Link>
-              </Button>
-              <Button 
-                variant="outline"
-                onClick={() => onMessageOtherParty?.(otherParty.id)}
-              >
-                <MessageSquare className="h-4 w-4 mr-2" />
-                Message Musician
-              </Button>
-            </>
-          )}
-          
-          {userRole === 'musician' && (
-            <>
-              {otherParty && (
-                <>
-                  <Button variant="outline" asChild>
-                    <Link to={`/venue/${otherParty.id}`}>
-                      <MapPin className="h-4 w-4 mr-2" />
-                      View Venue Profile
-                    </Link>
-                  </Button>
-                  <Button 
-                    variant="outline"
-                    onClick={() => onMessageOtherParty?.(otherParty.id)}
-                  >
-                    <MessageSquare className="h-4 w-4 mr-2" />
-                    Message Venue
-                  </Button>
-                </>
-              )}
+            <TabsContent value="details" className="space-y-6 pt-4">
+              {userRole === 'venue' ? renderVenueView() : renderMusicianView()}
               
-              {!booking && onApply && (
-                <Button onClick={() => onApply(dialogEvent)}>
-                  <CheckCircle className="h-4 w-4 mr-2" />
-                  Apply for Event
+              {/* Action Buttons */}
+              {(() => {
+                // Determine which booking to show action buttons for
+                let targetBooking = booking;
+                
+                if (!targetBooking && dialogBookings.length > 0 && userRole === 'venue') {
+                  // For venues, prioritize bookings that need action
+                  targetBooking = dialogBookings.find(b => 
+                    b.status === 'confirmed' || 
+                    b.status === 'selected' || 
+                    b.status === 'pending_cancel'
+                  ) || dialogBookings.find(b => b.musician) || dialogBookings[0];
+                }
+                
+                return targetBooking ? (
+                  <BookingActionButtons
+                    booking={targetBooking}
+                    currentUser={currentUser}
+                    onStatusUpdate={handleStatusUpdate}
+                    className="mt-4"
+                  />
+                ) : null;
+              })()}
+            </TabsContent>
+            
+            <TabsContent value="activity" className="pt-4">
+              <ActivityLog activities={activityItems} />
+            </TabsContent>
+          </Tabs>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={dialogClose}>
+              Close
+            </Button>
+            
+            {/* Role-specific action buttons */}
+            {userRole === 'venue' && otherParty && (
+              <>
+                <Button variant="outline" asChild>
+                  <Link to={`/musician/${otherParty.id}`}>
+                    <User className="h-4 w-4 mr-2" />
+                    View Musician Profile
+                  </Link>
                 </Button>
-              )}
-            </>
-          )}
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+                <Button 
+                  variant="outline"
+                  onClick={handleOpenMessaging}
+                >
+                  <MessageSquare className="h-4 w-4 mr-2" />
+                  Message Musician
+                </Button>
+              </>
+            )}
+            
+            {userRole === 'musician' && (
+              <>
+                {otherParty && (
+                  <>
+                    <Button variant="outline" asChild>
+                      <Link to={`/venue/${otherParty.id}`}>
+                        <MapPin className="h-4 w-4 mr-2" />
+                        View Venue Profile
+                      </Link>
+                    </Button>
+                    <Button 
+                      variant="outline"
+                      onClick={handleOpenMessaging}
+                    >
+                      <MessageSquare className="h-4 w-4 mr-2" />
+                      Message Venue
+                    </Button>
+                  </>
+                )}
+                
+                {!booking && onApply && (
+                  <Button onClick={() => onApply(dialogEvent)}>
+                    <CheckCircle className="h-4 w-4 mr-2" />
+                    Apply for Event
+                  </Button>
+                )}
+              </>
+            )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Integrated Messaging Dialog */}
+      <EventMessagingDialog
+        open={isMessagingDialogOpen}
+        onOpenChange={setIsMessagingDialogOpen}
+        event={dialogEvent}
+        booking={booking}
+        onClose={() => setIsMessagingDialogOpen(false)}
+      />
+    </>
   );
 }; 

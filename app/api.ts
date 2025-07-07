@@ -145,6 +145,126 @@ export const api = {
       if (error) throw error;
       return data;
     }
+  },
+  message: {
+    findMany: async (options: any = {}) => {
+      let query = supabase.from('messages').select('*');
+      
+      if (options.filter) {
+        const filters = options.filter;
+        if (filters.booking?.id?.equals) {
+          // For booking-based messages, we need to find messages for the event associated with the booking
+          const { data: booking, error: bookingError } = await supabase
+            .from('bookings')
+            .select('event_id')
+            .eq('id', filters.booking.id.equals)
+            .single();
+          
+          if (bookingError) throw bookingError;
+          if (booking?.event_id) {
+            query = query.eq('event_id', booking.event_id);
+          }
+        }
+        if (filters.isActive?.equals !== undefined) {
+          query = query.eq('is_active', filters.isActive.equals);
+        }
+      }
+      
+      if (options.sort) {
+        const sortField = options.sort.createdAt || options.sort.sent_date_time;
+        if (sortField) {
+          const ascending = sortField === "Ascending";
+          query = query.order('sent_date_time', { ascending });
+        }
+      }
+      
+      const { data, error } = await query;
+      if (error) throw error;
+      return data;
+    },
+    create: async (data: any) => {
+      // Get current user
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      if (userError || !user) throw new Error('User not authenticated');
+      
+      // Determine recipient ID from the booking data
+      let recipientId = null;
+      if (data.recipient?.connect?.id) {
+        recipientId = data.recipient.connect.id;
+      }
+      
+      // Get booking details to determine event and roles
+      let eventId = null;
+      let senderRole = null;
+      let recipientRole = null;
+      
+      if (data.booking?.connect?.id) {
+        const { data: booking, error: bookingError } = await supabase
+          .from('bookings')
+          .select(`
+            event_id,
+            event:events(
+              venue:venues(owner_id)
+            ),
+            musician:musicians(user_id)
+          `)
+          .eq('id', data.booking.connect.id)
+          .single();
+        
+        if (bookingError) throw bookingError;
+        
+        eventId = booking.event_id;
+        
+        // Handle the nested data structure properly
+        const eventData = booking.event as any;
+        const venueData = eventData?.venue as any;
+        const musicianData = booking.musician as any;
+        
+        // Determine roles based on current user
+        const isVenue = user.id === venueData?.owner_id;
+        const isMusician = user.id === musicianData?.user_id;
+        
+        if (isVenue) {
+          senderRole = 'venue';
+          recipientRole = 'musician';
+          recipientId = musicianData?.user_id;
+        } else if (isMusician) {
+          senderRole = 'musician';
+          recipientRole = 'venue';
+          recipientId = venueData?.owner_id;
+        } else {
+          throw new Error('User is not authorized for this booking');
+        }
+      }
+      
+      if (!eventId || !recipientId) {
+        throw new Error('Could not determine event or recipient');
+      }
+      
+      // Create the message
+      const messageData = {
+        event_id: eventId,
+        sender_id: user.id,
+        recipient_id: recipientId,
+        sender_role: senderRole,
+        recipient_role: recipientRole,
+        message_category: data.messageCategory || 'general',
+        content: data.content,
+        attachments: data.attachments || [],
+        read_status: false,
+        sent_date_time: new Date().toISOString(),
+        is_active: true
+      };
+      
+      const { data: message, error } = await supabase
+        .from('messages')
+        .insert(messageData)
+        .select()
+        .single();
+      
+      if (error) throw error;
+      return message;
+    }
   }
 };
 

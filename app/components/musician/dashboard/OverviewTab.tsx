@@ -21,6 +21,8 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
   const [isEventDialogOpen, setIsEventDialogOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
   const [selectedBooking, setSelectedBooking] = useState<any>(null);
+  
+
 
   // Calculate key metrics for highlighting
   const pendingApplications = upcomingEvents.filter(booking => booking.status === 'applied').length;
@@ -354,9 +356,6 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
         onRejectApplication={(bookingId: string) => {
           // Handle reject - this is for dashboard view so might not need implementation  
           console.log('Reject application:', bookingId);
-        }}
-        onMessageOtherParty={(recipientId: string) => {
-          window.open(`/messages?recipient=${recipientId}`, '_blank');
         }}
       />
     </div>
